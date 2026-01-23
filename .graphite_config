@@ -1,0 +1,6 @@
+[branch_naming]
+pattern = "{{type}}/{{title}}"
+
+[labels]
+"packages/core/src/identity/**/*" = ["context:identity"]
+"packages/core/src/discovery/**/*" = ["context:discovery"]

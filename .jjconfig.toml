@@ -1,0 +1,10 @@
+[user]
+name = "StyleSwipe Arch"
+email = "arch@styleswipe.app"
+
+[ui]
+default-command = "log"
+
+[aliases]
+jj-sync = ["rebase", "-d", "trunk()"]
+jj-feature = ["new", "trunk()"]
