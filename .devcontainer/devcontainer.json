@@ -11,5 +11,6 @@
                 "arcanis.vscode-zipfs"
             ]
         }
-    }
+    },
+    "postCreateCommand": "bun install"
 }
