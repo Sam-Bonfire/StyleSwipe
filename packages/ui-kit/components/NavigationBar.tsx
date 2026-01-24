@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, XStack, YStack, Text } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text, TamaguiElement } from 'tamagui';
 
 const NavBarFrame = styled(XStack, {
     name: 'NavigationBar',
@@ -21,7 +21,7 @@ const NavBarFrame = styled(XStack, {
     variants: {
         elevated: {
             true: {
-                elevation: 8,
+
                 shadowColor: '$shadowColor',
                 shadowOffset: { width: 0, height: -2 },
                 shadowOpacity: 0.1,
@@ -120,7 +120,7 @@ export type NavigationBarProps = GetProps<typeof NavBarFrame> & {
     onItemPress: (key: string) => void;
 };
 
-export const NavigationBar = React.forwardRef<typeof NavBarFrame, NavigationBarProps>(
+export const NavigationBar = React.forwardRef<TamaguiElement, NavigationBarProps>(
     ({ items, activeKey, onItemPress, ...props }, ref) => {
         return (
             <NavBarFrame ref={ref} {...props}>
