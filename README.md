@@ -6,9 +6,9 @@ StyleSwipe is a modern monorepo built with **Bun** and **Turborepo**, designed f
 
 ```mermaid
 graph TD
-    User-->|Mobile/Web| ConsumerApp[Consumer App @app/consumer-app]
-    ConsumerApp-->|Uses| UIKit[@app/ui-kit]
-    ConsumerApp-->|Uses| Core[@app/core]
+    User-->|Mobile/Web| ConsumerApp["Consumer App @app/consumer-app"]
+    ConsumerApp-->|Uses| UIKit["@app/ui-kit"]
+    ConsumerApp-->|Uses| Core["@app/core"]
     ConsumerApp-->|API| Convex[Convex Backend]
     
     Scraper[Scraper Service]-->|Updates| Convex
@@ -33,9 +33,17 @@ graph TD
 ## 🚀 Getting Started
 
 ### Prerequisites
-*   **Bun** (v1.2.23+ required)
+*   **Mise** (Recommended)
+    *   This project uses `mise` to ensure all developers use the exact same versions of **Bun**, **Node**, **Jujutsu**, and **Graphite**.
+    *   [Install Mise](https://mise.jdx.dev/getting-started.html)
 
-### Installation
+### Environment Setup
+```bash
+# Install all required binaries (bun, jj, graphite, node)
+mise install
+```
+
+### Application Installation
 ```bash
 bun install
 ```
