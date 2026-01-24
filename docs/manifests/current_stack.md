@@ -9,3 +9,4 @@
 | PRD-28  | Agent 1     | trunk          | None                |
 | PRD-99  | Agent 2     | PRD-28         | User Entity         |
 | DOCS-001| Antigravity | trunk          | Documentation       |
+| LEGAL-001| Antigravity | trunk          | Proprietary License |

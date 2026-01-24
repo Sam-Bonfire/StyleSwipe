@@ -2,6 +2,8 @@
     "name": "scraper-service",
     "module": "src/index.ts",
     "type": "module",
+    "license": "UNLICENSED",
+    "private": true,
     "dependencies": {
         "playwright": "^1.40.0"
     },

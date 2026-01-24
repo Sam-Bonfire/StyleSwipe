@@ -1,6 +1,8 @@
 {
     "name": "@app/ui-kit",
     "version": "0.0.1",
+    "private": true,
+    "license": "UNLICENSED",
     "main": "./index.ts",
     "types": "./index.ts",
     "exports": {
