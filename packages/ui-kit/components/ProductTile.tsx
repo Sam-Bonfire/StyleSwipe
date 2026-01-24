@@ -52,10 +52,16 @@ const ImageContainer = styled(Stack, {
     position: 'relative',
     aspectRatio: 0.75,
     backgroundColor: '$neutral100',
+    overflow: 'hidden', // Ensure image stays within bounds
 });
 
 const ProductImage = styled(Image, {
     name: 'ProductTileImage',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
     height: '100%',
 });
@@ -246,6 +252,8 @@ export const ProductTile = React.forwardRef<typeof TileFrame, ProductTileProps>(
                 <ImageContainer>
                     <ProductImage
                         source={{ uri: imageUrl }}
+                        // @ts-ignore
+                        src={imageUrl}
                         resizeMode="cover"
                     />
 

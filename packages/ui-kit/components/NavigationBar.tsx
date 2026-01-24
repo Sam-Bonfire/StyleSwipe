@@ -53,7 +53,7 @@ const NavItemFrame = styled(YStack, {
     variants: {
         active: {
             true: {
-                backgroundColor: '$primaryLight',
+                backgroundColor: '$transparent',
             },
         },
     } as const,

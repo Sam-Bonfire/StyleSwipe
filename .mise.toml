@@ -1,0 +1,6 @@
+[tools]
+bun = "1.2.23"
+node = "lts"
+# Use the official mise-ready shorthand for jujutsu
+"jj" = "latest" 
+"npm:@withgraphite/graphite-cli" = "latest"
