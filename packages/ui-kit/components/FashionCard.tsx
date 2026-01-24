@@ -129,9 +129,7 @@ const DiscountText = styled(Text, {
 
 const ActionButton = styled(Stack, {
     name: 'FashionCardActionButton',
-    position: 'absolute',
-    bottom: '$3',
-    right: '$3',
+    // Removed absolute positioning
     backgroundColor: '$primary',
     paddingHorizontal: '$2',
     paddingVertical: '$1',
@@ -196,6 +194,8 @@ export const FashionCard = React.forwardRef<typeof CardFrame, FashionCardProps>(
             <CardFrame ref={ref} onPress={onPress} {...props}>
                 <CardImage
                     source={{ uri: imageUrl }}
+                    // @ts-ignore
+                    src={imageUrl}
                     resizeMode="cover"
                 />
 
@@ -208,36 +208,41 @@ export const FashionCard = React.forwardRef<typeof CardFrame, FashionCardProps>(
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: '50%',
+                        height: '60%', // Increased gradient height slightly for better readability
                     }}
                 />
 
                 <CardOverlay>
                     <BrandText>{brand}</BrandText>
-                    <TitleText>{title}</TitleText>
+                    <TitleText marginBottom="$2">{title}</TitleText>
 
-                    <PriceContainer>
-                        <PriceText>{formatPrice(price)}</PriceText>
+                    <XStack alignItems="center" justifyContent="space-between" gap="$2">
+                        <PriceContainer flex={1} flexWrap="wrap">
+                            <PriceText>{formatPrice(price)}</PriceText>
 
-                        {originalPrice && originalPrice > price && (
-                            <OriginalPriceText>
-                                {formatPrice(originalPrice)}
-                            </OriginalPriceText>
+                            {originalPrice && originalPrice > price && (
+                                <OriginalPriceText>
+                                    {formatPrice(originalPrice)}
+                                </OriginalPriceText>
+                            )}
+
+                            {discountPercentage && discountPercentage > 0 && (
+                                <DiscountBadge>
+                                    <DiscountText>{discountPercentage}% OFF</DiscountText>
+                                </DiscountBadge>
+                            )}
+                        </PriceContainer>
+
+                        {onAddToCart && (
+                            <ActionButton onPress={(e) => {
+                                e.stopPropagation();
+                                onAddToCart();
+                            }}>
+                                <ActionButtonText>Add</ActionButtonText>
+                            </ActionButton>
                         )}
-
-                        {discountPercentage && discountPercentage > 0 && (
-                            <DiscountBadge>
-                                <DiscountText>{discountPercentage}% OFF</DiscountText>
-                            </DiscountBadge>
-                        )}
-                    </PriceContainer>
+                    </XStack>
                 </CardOverlay>
-
-                {onAddToCart && (
-                    <ActionButton onPress={onAddToCart}>
-                        <ActionButtonText>Add to Cart</ActionButtonText>
-                    </ActionButton>
-                )}
             </CardFrame>
         );
     }

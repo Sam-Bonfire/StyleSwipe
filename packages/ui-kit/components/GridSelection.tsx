@@ -193,6 +193,8 @@ export const GridSelection = React.forwardRef<typeof GridFrame, GridSelectionPro
                         >
                             <ItemImage
                                 source={{ uri: item.imageUrl }}
+                                // @ts-ignore
+                                src={item.imageUrl}
                                 resizeMode="cover"
                             />
 

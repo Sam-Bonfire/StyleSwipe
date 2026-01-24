@@ -15,11 +15,13 @@
         "@tamagui/themes": "^1.0.0",
         "@tamagui/lucide-icons": "^1.0.0",
         "@tamagui/linear-gradient": "^1.0.0",
-        "react": "^18.0.0",
-        "react-native": "^0.72.0"
+        "react": "18.3.1",
+        "react-native": "^0.72.0",
+        "react-native-reanimated": ">=3.0.0"
     },
     "peerDependencies": {
         "react": ">=18.0.0",
-        "react-native": ">=0.72.0"
+        "react-native": ">=0.72.0",
+        "react-native-reanimated": ">=3.0.0"
     }
 }

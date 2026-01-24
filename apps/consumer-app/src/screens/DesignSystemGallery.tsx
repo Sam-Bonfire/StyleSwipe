@@ -20,7 +20,8 @@ import {
     Separator,
 } from 'tamagui';
 
-import config, {
+import {
+    config,
     tokens,
     Button,
     FashionCard,
@@ -239,6 +240,7 @@ export function DesignSystemGallery() {
                                         brand="H&M"
                                         title="Slim Fit Chinos"
                                         price={1499}
+                                        onAddToCart={() => console.log('Add compact')}
                                     />
                                 </XStack>
                             </Section>
@@ -277,6 +279,7 @@ export function DesignSystemGallery() {
                                     selectedIds={gridSelection}
                                     onSelectionChange={setGridSelection}
                                     maxSelections={3}
+                                    itemSize="large"
                                 />
                                 <Text fontSize="$3" color="$textSecondary">
                                     Selected: {gridSelection.length}/3
