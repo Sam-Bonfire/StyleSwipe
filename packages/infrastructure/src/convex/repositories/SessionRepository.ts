@@ -1,0 +1,78 @@
+// =============================================================================
+// CONVEX SESSION REPOSITORY ADAPTER
+// Implements SessionRepository port for device session management
+// =============================================================================
+
+import { ConvexClient } from "convex/browser";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
+import type { SessionRepository } from "@app/core";
+import type { Session } from "@app/core";
+
+/**
+ * Convex implementation of SessionRepository port
+ */
+export class ConvexSessionRepository implements SessionRepository {
+    constructor(private client: ConvexClient) { }
+
+    async findById(id: string): Promise<Session | null> {
+        const doc = await this.client.query(api.sessions.getById, {
+            id: id as Id<"sessions">,
+        });
+        return doc ? this.mapToEntity(doc) : null;
+    }
+
+    async findByToken(token: string): Promise<Session | null> {
+        const doc = await this.client.query(api.sessions.getByToken, { token });
+        return doc ? this.mapToEntity(doc) : null;
+    }
+
+    async findByUserId(userId: string): Promise<Session[]> {
+        const docs = await this.client.query(api.sessions.getByUserId, {
+            userId: userId as Id<"users">,
+        });
+        return docs.map((doc) => this.mapToEntity(doc));
+    }
+
+    async create(session: Omit<Session, "id">): Promise<Session> {
+        const id = await this.client.mutation(api.sessions.create, {
+            userId: session.userId as Id<"users">,
+            token: session.token,
+            expiresAt: session.expiresAt,
+            userAgent: session.userAgent,
+            ipAddress: session.ipAddress,
+            createdAt: session.createdAt,
+        });
+        return { ...session, id: id as string };
+    }
+
+    async delete(id: string): Promise<void> {
+        await this.client.mutation(api.sessions.remove, {
+            id: id as Id<"sessions">,
+        });
+    }
+
+    async deleteByUserId(userId: string): Promise<void> {
+        await this.client.mutation(api.sessions.removeByUserId, {
+            userId: userId as Id<"users">,
+        });
+    }
+
+    async deleteExpired(): Promise<number> {
+        return await this.client.mutation(api.sessions.deleteExpired, {
+            now: Date.now(),
+        });
+    }
+
+    private mapToEntity(doc: Record<string, unknown>): Session {
+        return {
+            id: (doc._id as string) || "",
+            userId: (doc.userId as string) || "",
+            token: (doc.token as string) || "",
+            expiresAt: (doc.expiresAt as number) || 0,
+            userAgent: doc.userAgent as string | undefined,
+            ipAddress: doc.ipAddress as string | undefined,
+            createdAt: (doc.createdAt as number) || 0,
+        };
+    }
+}

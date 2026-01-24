@@ -1,0 +1,20 @@
+[install]
+# Skip macOS-only fsevents on Linux
+optional = false
+
+# Ensures that even on Windows, we attempt to use hardlinks
+# This saves disk space and mimics the Linux production environment.
+indexing = "hardlink"
+
+# This prevents the "it works on my machine" syndrome by 
+# ensuring the lockfile is strictly respected.
+frozenLockfile = false
+
+[run]
+# Automatically load .env files so you don't need to 
+# import 'dotenv/config' in every entry point.
+env = ".env"
+
+[install.scopes]
+# Workaround for fsevents loop on Linux containers
+"@fsevents" = { optional = true }

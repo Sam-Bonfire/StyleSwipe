@@ -41,7 +41,7 @@ The system is divided into logical boundaries to ensure ubiquitous language and 
 /packages
   /core              # Business Logic (Catalog, Discovery, Identity, Commerce)
   /infrastructure    # Technology Adapters (Convex, Auth, Sentry)
-  /ui-kit            # Tamagui Design System & Shared Components
+  /ui-kit            # Tamagui  & Shared Components
 /convex              # Global Schema and Backend Functions
 /docs                # PRD, Architecture, and Agent Manifests
 
@@ -56,3 +56,15 @@ The system is divided into logical boundaries to ensure ubiquitous language and 
 * **Graphite (gt) Stacking**: Agents must use `gt create` to submit their change as a reviewable PR that depends on the previous PR in the stack.
 * **Dependency Awareness**: If Agent B builds on Agent A's work, it must `jj rebase` its change on top of Agent A's latest commit to maintain the "Single Source of Truth."
 * **Artifact Sharing**: Agents must check the `docs/manifests/` folder for current PR IDs and shared types before starting a task.
+
+
+## 8. Converged Path & Shared Component Governance
+* [cite_start]**Shared Logic**: Converged paths (e.g., ProductDetailScreen, CartScreen) must reside in a 'shared' directory within the respective app folder[cite: 148, 198, 208].
+* [cite_start]**Feature Flags for Overlaps**: If two agents are modifying the same shared screen, they must use Feature Flags to isolate their changes during development[cite: 195].
+* **Atomic Locking**: Agents must signal in the 'current_stack.md' manifest when they are performing breaking changes to core ports or the shared UI-kit.
+
+## 9. Design System Governance (@app/ui-kit)
+* **Framework**: Tamagui (for optimized cross-platform performance).
+* **Styling Strategy**: Utility-first with a defined Token System (Colors, Spacing, Radius, Z-Index).
+* **Component Policy**: Atomic design. Every component must be generic and themeable.
+* **Visual Direction**: Modern Indian e-commerce aesthetic (Clean, Vibrant, Mobile-First).
