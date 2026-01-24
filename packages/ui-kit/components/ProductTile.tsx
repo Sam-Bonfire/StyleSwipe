@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, Text, Image, YStack, XStack } from 'tamagui';
+import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
 import { Star, Heart } from '@tamagui/lucide-icons';
 
 const TileFrame = styled(Stack, {
@@ -17,7 +17,7 @@ const TileFrame = styled(Stack, {
     cursor: 'pointer',
 
     hoverStyle: {
-        elevation: 4,
+
         shadowColor: '$shadowColor',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -77,7 +77,7 @@ const WishlistButton = styled(Stack, {
     backgroundColor: '$surface',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
+
 
     hoverStyle: {
         scale: 1.1,
@@ -214,7 +214,7 @@ export type ProductTileProps = GetProps<typeof TileFrame> & {
     onWishlistToggle?: () => void;
 };
 
-export const ProductTile = React.forwardRef<typeof TileFrame, ProductTileProps>(
+export const ProductTile = React.forwardRef<TamaguiElement, ProductTileProps>(
     ({
         imageUrl,
         brand,

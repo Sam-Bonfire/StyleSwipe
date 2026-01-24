@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, XStack, Image, Text } from 'tamagui';
+import { styled, GetProps, Stack, Image, Text, TamaguiElement } from 'tamagui';
 import { Check } from '@tamagui/lucide-icons';
 
 const GridFrame = styled(Stack, {
@@ -41,7 +41,7 @@ const GridItemFrame = styled(Stack, {
     borderStyle: 'solid',
     borderColor: 'transparent',
 
-    animation: 'quick',
+
 
     hoverStyle: {
         scale: 1.02,
@@ -115,7 +115,7 @@ const CheckmarkCircle = styled(Stack, {
     backgroundColor: '$primary',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
+
 });
 
 const ItemLabel = styled(Stack, {
@@ -152,7 +152,7 @@ export type GridSelectionProps = Omit<GetProps<typeof GridFrame>, 'children'> & 
     itemSize?: 'small' | 'medium' | 'large' | 'flexible';
 };
 
-export const GridSelection = React.forwardRef<typeof GridFrame, GridSelectionProps>(
+export const GridSelection = React.forwardRef<TamaguiElement, GridSelectionProps>(
     ({
         items,
         selectedIds,

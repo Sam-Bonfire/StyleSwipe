@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, YStack, XStack, Text, Stack } from 'tamagui';
+import { styled, GetProps, YStack, XStack, Text, Stack, TamaguiElement } from 'tamagui';
 import { User, Users } from '@tamagui/lucide-icons';
 
 const SliderFrame = styled(YStack, {
@@ -70,7 +70,7 @@ const Thumb = styled(Stack, {
     backgroundColor: '$surface',
     borderWidth: 3,
     borderColor: '$primary',
-    elevation: 4,
+
     shadowColor: '$shadowColor',
     cursor: 'grab',
 
@@ -109,7 +109,7 @@ export type BlendSliderProps = GetProps<typeof SliderFrame> & {
     disabled?: boolean;
 };
 
-export const BlendSlider = React.forwardRef<typeof SliderFrame, BlendSliderProps>(
+export const BlendSlider = React.forwardRef<TamaguiElement, BlendSliderProps>(
     ({
         value,
         onChange,

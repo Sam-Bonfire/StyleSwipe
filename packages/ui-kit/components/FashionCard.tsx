@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, Text, Image, YStack, XStack } from 'tamagui';
+import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 
 const CardFrame = styled(Stack, {
@@ -16,7 +16,7 @@ const CardFrame = styled(Stack, {
     borderRadius: '$4',
     overflow: 'hidden',
     backgroundColor: '$surface',
-    elevation: 4,
+
     shadowColor: '$shadowColor',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -168,7 +168,7 @@ export type FashionCardProps = GetProps<typeof CardFrame> & {
     onPress?: () => void;
 };
 
-export const FashionCard = React.forwardRef<typeof CardFrame, FashionCardProps>(
+export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
     ({
         imageUrl,
         brand,

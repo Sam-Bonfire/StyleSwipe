@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, XStack, Stack, Text, Image } from 'tamagui';
+import { styled, GetProps, XStack, Stack, Text, Image, TamaguiElement } from 'tamagui';
 
 const GroupFrame = styled(XStack, {
     name: 'AvatarGroup',
@@ -121,7 +121,7 @@ const getInitials = (name?: string) => {
 
 const OVERLAP_MAP = { small: -8, medium: -12, large: -16 };
 
-export const AvatarGroup = React.forwardRef<typeof GroupFrame, AvatarGroupProps>(
+export const AvatarGroup = React.forwardRef<TamaguiElement, AvatarGroupProps>(
     ({
         avatars,
         max = 4,
