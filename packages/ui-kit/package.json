@@ -1,27 +1,14 @@
 {
     "name": "@app/ui-kit",
-    "version": "0.0.1",
-    "main": "./index.ts",
-    "types": "./index.ts",
-    "exports": {
-        ".": "./index.ts",
-        "./theme": "./theme.ts",
-        "./components": "./components/index.ts"
-    },
+    "version": "0.0.0",
+    "main": "./theme.ts",
+    "types": "./theme.ts",
     "dependencies": {
         "tamagui": "^1.0.0",
-        "@tamagui/core": "^1.0.0",
+        "@tamagui/font-inter": "^1.0.0",
         "@tamagui/shorthands": "^1.0.0",
         "@tamagui/themes": "^1.0.0",
-        "@tamagui/lucide-icons": "^1.0.0",
-        "@tamagui/linear-gradient": "^1.0.0",
-        "react": "18.3.1",
-        "react-native": "^0.72.0",
-        "react-native-reanimated": ">=3.0.0"
-    },
-    "peerDependencies": {
-        "react": ">=18.0.0",
-        "react-native": ">=0.72.0",
-        "react-native-reanimated": ">=3.0.0"
+        "react": "^18.0.0",
+        "react-native": "^0.72.0"
     }
 }

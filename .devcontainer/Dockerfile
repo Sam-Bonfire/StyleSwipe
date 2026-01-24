@@ -1,5 +1,4 @@
-# Pin to Bun 1.2.0 to avoid fsevents infinite loop bug in 1.3.x
-FROM oven/bun:1.2.0
+FROM oven/bun:1
 
 # Install Git and other dependencies
 RUN apt-get update && apt-get install -y \
