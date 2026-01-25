@@ -10,11 +10,6 @@ indexing = "hardlink"
 # ensuring the lockfile is strictly respected.
 frozenLockfile = false
 
-[run]
-# Automatically load .env files so you don't need to 
-# import 'dotenv/config' in every entry point.
-env = ".env"
-
 [install.scopes]
 # Workaround for fsevents loop on Linux containers
 "@fsevents" = { optional = true }
