@@ -8,6 +8,7 @@ import { SignInScreen } from './screens/auth/SignInScreen';
 import { OTPScreen } from './screens/auth/OTPScreen';
 import { DesignSystemGallery } from './screens/DesignSystemGallery';
 import { DiscoveryScreen } from './screens/DiscoveryScreen';
+import { ShopScreen } from './screens/ShopScreen';
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 
 const Stack = createStackNavigator();
@@ -19,8 +20,9 @@ export default function App() {
             <TamaguiProvider config={config}>
                 <Theme name="BrandIdentityLight">
                     <NavigationContainer>
-                        <Stack.Navigator initialRouteName="Discovery" screenOptions={{ headerShown: false }}>
+                        <Stack.Navigator initialRouteName="Shop" screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="Discovery" component={DiscoveryScreen} />
+                            <Stack.Screen name="Shop" component={ShopScreen} />
                             <Stack.Screen name="SignIn" component={SignInScreen} />
                             <Stack.Screen name="OTP" component={OTPScreen} />
                             <Stack.Screen name="Home" component={DesignSystemGallery} />

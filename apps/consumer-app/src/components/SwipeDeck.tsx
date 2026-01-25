@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { useQuery, useMutation, useAction } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { YStack, Button } from 'tamagui';

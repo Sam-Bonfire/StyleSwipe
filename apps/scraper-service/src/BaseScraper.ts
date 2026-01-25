@@ -13,12 +13,21 @@ export abstract class BaseScraper implements Scraper {
 
         try {
             this.browser = await chromium.launch({
-                headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                headless: true, // Try setting to false if headless is detected
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-http2',
+                    '--hide-scrollbars',
+                    '--mute-audio'
+                ]
             });
 
             const context = await this.browser.newContext({
-                userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport: { width: 1280, height: 720 },
+                deviceScaleFactor: 1,
             });
 
             const page = await context.newPage();
