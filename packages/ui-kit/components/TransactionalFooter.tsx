@@ -1,4 +1,3 @@
-import React from 'react';
 import { styled, XStack, YStack, Text, Button, GetProps } from 'tamagui';
 import { ShoppingBag } from '@tamagui/lucide-icons';
 
@@ -46,10 +45,10 @@ const ActionButton = styled(Button, {
     elevation: 2,
 
     hoverStyle: {
-        backgroundColor: '$primaryHover',
+        backgroundColor: '$primaryDark',
     },
     pressStyle: {
-        backgroundColor: '$primaryPress',
+        backgroundColor: '$primaryDark',
     },
 });
 

@@ -16,5 +16,7 @@
 | ID-003  | Antigravity | ID-002         | Identity            |
 | ID-004  | Antigravity | ID-003         | Identity            |
 | COM-001 | Antigravity | ID-004         | Cart                |
+| COM-002 | Antigravity | COM-001        | PDP                 |
+| COM-003 | Antigravity | COM-002        | Checkout            |
 | DIS-001 | Antigravity | ID-004         | Identity, Discovery |
 | DIS-002 | Antigravity | DIS-001        | Discovery           |

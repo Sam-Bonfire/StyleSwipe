@@ -56,6 +56,9 @@ export type { TransactionalFooterProps } from './TransactionalFooter';
 export { CouponInput } from './CouponInput';
 export type { CouponInputProps, CouponStatus } from './CouponInput';
 
+export { AddressForm } from './AddressForm';
+export type { AddressFormProps } from './AddressForm';
+
 // Feedback Components
 export { Toast } from './Toast';
 export type { ToastProps, ToastVariant } from './Toast';
