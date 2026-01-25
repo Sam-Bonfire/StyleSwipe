@@ -211,6 +211,18 @@ const products = defineTable({
         filterFields: ["category", "brand"],
     });
 
+// PRD Ref: [cite: 18] - Hierarchical Categories
+const categories = defineTable({
+    name: v.string(),
+    slug: v.string(), // URL-safe identifier
+    description: v.optional(v.string()),
+    parentId: v.optional(v.id("categories")), // Self-referential for hierarchy
+    level: v.number(), // 0 = Root, 1 = Sub-category
+    image: v.optional(v.string()),
+})
+    .index("by_slug", ["slug"])
+    .index("by_parent", ["parentId"]);
+
 // -----------------------------------------------------------------------------
 // DISCOVERY CONTEXT - Collaborative Shopping
 // -----------------------------------------------------------------------------
