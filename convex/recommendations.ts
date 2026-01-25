@@ -37,9 +37,17 @@ export const getVectorFeed = action({
         });
 
         // 3. Vector Search
+        // Construct filter based on user gender if specific
+        let filter;
+        if (user.styleProfile?.gender && user.styleProfile.gender !== "both") {
+            const gender = user.styleProfile.gender;
+            filter = (q: any) => q.eq("gender", gender);
+        }
+
         const results = await ctx.vectorSearch("products", "by_embedding", {
             vector: preferenceVector,
-            limit: (args.limit || 10) + swipedIds.length, // Fetch extra to account for filtering
+            limit: (args.limit || 10) + swipedIds.length,
+            filter,
         });
 
         // 4. Filter & Hydrate

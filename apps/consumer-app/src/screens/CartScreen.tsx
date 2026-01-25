@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { YStack, ScrollView, Text, View } from 'tamagui';
+import { YStack, ScrollView, Text } from 'tamagui';
 import { useConvex } from 'convex/react';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
-import { Cart, ManageCart } from '@app/core';
+import { Cart, ManageCart, PriceEstimator } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { ConvexClient } from 'convex/browser';
 
 export const CartScreen = () => {
     const convex = useConvex();
@@ -13,12 +14,13 @@ export const CartScreen = () => {
 
     // Initialize dependencies
     const manageCart = useMemo(() => {
-        const repo = new ConvexCartRepository(convex);
+        // Cast to unknown first to avoid incompatibility between ConvexReactClient and ConvexClient types
+        const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
         return new ManageCart(repo);
     }, [convex]);
 
     // TODO: Integrate with Auth Provider
-    const userId = "user-1";
+    const userId = "user-1"; 
 
     const loadCart = async () => {
         setIsLoading(true);
@@ -71,17 +73,19 @@ export const CartScreen = () => {
         );
     }
 
+    const priceBreakdown = PriceEstimator.estimate(cart);
+
     return (
         <ScrollView backgroundColor="$background">
             <YStack padding="$4" gap="$4" paddingBottom="$10">
                 <Text fontSize="$6" fontWeight="bold" marginBottom="$2">Shopping Bag ({cart.items.length})</Text>
-
+                
                 <YStack gap="$3">
                     {cart.items.map(item => (
                         <CartItemComponent
                             key={item.productId}
                             imageUrl="https://placehold.co/100x120" // Placeholder, in real app get from Catalog lookup
-                            brand={item.attributes['brand'] || 'Brand'}
+                            brand={item.attributes['brand'] || 'Brand'} 
                             title={`Product ${item.productId}`} // Placeholder
                             price={item.price}
                             quantity={item.quantity}
@@ -93,9 +97,10 @@ export const CartScreen = () => {
                     ))}
                 </YStack>
 
-                <PriceSummary
-                    subtotal={cart.total}
-                    shipping={100} // Simple rule for now
+                <PriceSummary 
+                    subtotal={priceBreakdown.subtotal} 
+                    shipping={priceBreakdown.shipping} 
+                    tax={priceBreakdown.tax}
                     freeShippingThreshold={1000}
                     currency="INR"
                 />

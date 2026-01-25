@@ -193,6 +193,11 @@ const products = defineTable({
             occasion: v.optional(v.array(v.string())),
         })
     ),
+    // Discovery Attributes for Filtering
+    gender: v.optional(v.union(v.literal("men"), v.literal("women"), v.literal("unisex"))),
+    priceTier: v.optional(v.union(v.literal("budget"), v.literal("mid"), v.literal("premium"), v.literal("luxury"))),
+    onSale: v.optional(v.boolean()),
+
     // PRD Ref: [cite: 201-203] - 512-dim vector for Discovery Mode similarity search
     embedding: v.optional(v.array(v.float64())),
     meta: v.optional(v.any()), // Flexible field for scraper extra data
@@ -204,12 +209,12 @@ const products = defineTable({
     .index("by_brand", ["brand"])
     .searchIndex("search_title", {
         searchField: "title",
-        filterFields: ["brand", "category"],
+        filterFields: ["brand", "category", "gender"],
     })
     .vectorIndex("by_embedding", {
         vectorField: "embedding",
         dimensions: 512,
-        filterFields: ["category", "brand"],
+        filterFields: ["category", "brand", "gender", "priceTier"],
     });
 
 // PRD Ref: [cite: 18] - Hierarchical Categories

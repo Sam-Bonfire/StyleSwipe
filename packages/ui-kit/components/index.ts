@@ -50,6 +50,9 @@ export type { CartItemProps } from './CartItem';
 export { PriceSummary } from './PriceSummary';
 export type { PriceSummaryProps } from './PriceSummary';
 
+export { TransactionalFooter } from './TransactionalFooter';
+export type { TransactionalFooterProps } from './TransactionalFooter';
+
 export { CouponInput } from './CouponInput';
 export type { CouponInputProps, CouponStatus } from './CouponInput';
 

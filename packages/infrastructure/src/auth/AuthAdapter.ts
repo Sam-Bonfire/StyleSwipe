@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+ 
 import { createAuthClient } from "better-auth/client";
 
 export class AuthAdapter {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     private client: any;
 
     constructor(baseURL: string) {
