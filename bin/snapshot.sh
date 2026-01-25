@@ -16,6 +16,6 @@ For: $TICKET"
 jj describe -m "$MSG"
 
 # Sync to remote backup
-jj git push
+jj git push --allow-new
 
 echo "✅ Snapshot updated and synced to remote backup."

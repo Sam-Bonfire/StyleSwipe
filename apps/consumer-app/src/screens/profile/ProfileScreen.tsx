@@ -35,7 +35,8 @@ export function ProfileScreen() {
                     <Button variant="outlined">Payment Methods</Button>
                     <Button variant="outlined">Addresses</Button>
                     <Button variant="outlined">Order History</Button>
-                    <Button backgroundColor="$red10" color="white" onPress={handleLogout}>Sign Out</Button>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <Button backgroundColor={"$red10" as any} color="white" onPress={handleLogout}>Sign Out</Button>
                 </YStack>
             </YStack>
         </SafeAreaView>
