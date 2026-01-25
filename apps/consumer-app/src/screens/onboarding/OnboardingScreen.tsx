@@ -48,7 +48,8 @@ export function OnboardingScreen() {
                 <YStack space="$2">
                     <H1 textAlign="center">Personalize Your Style</H1>
                     <Progress value={progress} size="$2">
-                        <Progress.Indicator animation="quick" />
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        <Progress.Indicator animation={"quick" as any} />
                     </Progress>
                     <Text textAlign="center" color="$textSecondary">
                         Question {step + 1} of {questions.length}
