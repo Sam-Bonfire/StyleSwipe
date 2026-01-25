@@ -1,8 +1,10 @@
 import { ManageCart, CartItem } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { TopBarIconButton } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex } from 'convex/react';
 import React, { useState, useMemo } from 'react';
@@ -75,6 +77,20 @@ export function ProductDetailScreen() {
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
                 {/* Image Gallery */}
                 <ImageGallery images={product.images} />
+
+                {/* Back Button Overlay */}
+                <YStack position="absolute" top="$2" left="$2" zIndex={100}>
+                    <TopBarIconButton
+                        onPress={() => navigation.goBack()}
+                        backgroundColor="$background"
+                        elevation="$2"
+                        shadowColor="$shadowColor"
+                        shadowRadius={4}
+                        shadowOpacity={0.1}
+                    >
+                        <ChevronLeft size={24} color="$textPrimary" />
+                    </TopBarIconButton>
+                </YStack>
 
                 <YStack padding="$4" gap="$2">
                     {/* Brand & Title */}
