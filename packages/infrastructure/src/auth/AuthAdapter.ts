@@ -8,7 +8,7 @@ export class AuthAdapter {
 
     constructor(baseURL: string) {
         this.client = createAuthClient({
-            baseURL: `${baseURL}/http/api/auth`,
+            baseURL: baseURL,
             plugins: [
                 convexClient()
             ]

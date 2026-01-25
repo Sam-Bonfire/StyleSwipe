@@ -1,5 +1,8 @@
 {
     "$schema": "https://turbo.build/schema.json",
+    "globalEnv": [
+        "EXPO_PUBLIC_*"
+    ],
     "pipeline": {
         "build": {
             "dependsOn": [

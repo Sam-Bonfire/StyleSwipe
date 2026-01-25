@@ -20,12 +20,7 @@ import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
 
 const Stack = createStackNavigator();
 
-// Determine Convex URL dynamically based on platform
-const DEFAULT_CONVEX_URL = Platform.OS === 'web'
-    ? "http://127.0.0.1:3210"
-    : "http://172.29.36.5:3210";
-
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL || DEFAULT_CONVEX_URL);
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL);
 
 function NavigationGuard() {
     const user = useQuery(api.users.currentUser);
