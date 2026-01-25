@@ -6,9 +6,9 @@
  * States: Selected, Unselected, Disabled
  */
 
+import { X } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, Stack, Text, XStack } from 'tamagui';
-import { X } from '@tamagui/lucide-icons';
 
 const ChipFrame = styled(XStack, {
     name: 'CategoryChip',
@@ -22,7 +22,7 @@ const ChipFrame = styled(XStack, {
     borderStyle: 'solid',
     cursor: 'pointer',
 
-    animation: 'quick',
+    animation: 'quick' as any,
 
     variants: {
         variant: {
@@ -153,17 +153,19 @@ export type CategoryChipProps = GetProps<typeof ChipFrame> & {
 };
 
 export const CategoryChip = React.forwardRef<typeof ChipFrame, CategoryChipProps>(
-    ({
-        label,
-        icon,
-        selected = false,
-        variant = 'selectable',
-        size = 'medium',
-        onRemove,
-        onToggle,
-        onPress,
-        ...props
-    }, ref) => {
+    (props: CategoryChipProps, ref) => {
+        const {
+            label,
+            icon,
+            selected = false,
+            variant = 'selectable',
+            size = 'medium',
+            onRemove,
+            onToggle,
+            onPress,
+            ...rest
+        } = props as any;
+
         const handlePress = (e: any) => {
             if (onToggle) {
                 onToggle(!selected);
@@ -184,26 +186,32 @@ export const CategoryChip = React.forwardRef<typeof ChipFrame, CategoryChipProps
 
         return (
             <ChipFrame
-                ref={ref}
-                variant={variant}
-                selected={selected}
-                size={size}
-                onPress={handlePress}
-                {...props}
+                ref={ref as any}
+                variant={variant as any}
+                selected={selected as any}
+                size={size as any}
+                onPress={handlePress as any}
+                {...rest}
             >
-                {icon}
-                <ChipText selected={selected} size={size}>
-                    {label}
-                </ChipText>
+                {
+                    (
+                        <>
+                            {icon}
+                            <ChipText selected={selected as any} size={size as any}>
+                                {label}
+                            </ChipText>
 
-                {variant === 'filter' && onRemove && (
-                    <CloseButton onPress={handleRemove}>
-                        <X
-                            size={iconSize}
-                            color={selected ? '$textInverse' : '$textSecondary'}
-                        />
-                    </CloseButton>
-                )}
+                            {variant === 'filter' && onRemove && (
+                                <CloseButton onPress={handleRemove as any}>
+                                    <X
+                                        size={iconSize as any}
+                                        color={(selected ? '$textInverse' : '$textSecondary') as any}
+                                    />
+                                </CloseButton>
+                            )}
+                        </>
+                    ) as any
+                }
             </ChipFrame>
         );
     }

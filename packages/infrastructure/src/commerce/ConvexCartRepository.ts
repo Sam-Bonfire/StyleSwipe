@@ -1,6 +1,6 @@
 import { Cart, CartItem, CartRepository } from "@app/core";
-import { ConvexClient } from "convex/browser";
 import { api } from "@convex-api";
+import { ConvexClient } from "convex/browser";
 
 export class ConvexCartRepository implements CartRepository {
     constructor(private client: ConvexClient) { }

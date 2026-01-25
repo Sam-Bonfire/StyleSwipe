@@ -14,7 +14,7 @@ export const authComponent = createClient(components.auth);
 export const getAuth = (ctx: any) => betterAuth({
     database: authComponent.adapter(ctx),
     baseURL: process.env.CONVEX_SITE_URL || "http://localhost:3210/http/api/auth",
-    secret: process.env.BETTER_AUTH_SECRET || "style-swipe-development-secret-key-12345",
+    secret: process.env.BETTER_AUTH_SECRET,
     trustedOrigins: [
         "http://localhost:8081",
         "http://127.0.0.1:8081",

@@ -6,7 +6,7 @@ export const getProductsByIds = query({
         ids: v.array(v.id("products")),
     },
     handler: async (ctx, args) => {
-        const products = [];
+        const products: any[] = [];
         for (const id of args.ids) {
             const product = await ctx.db.get(id);
             if (product) products.push(product);

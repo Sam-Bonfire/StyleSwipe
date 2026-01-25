@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'bun:test';
+
 import { Cart, CartItem } from './Cart';
 
 describe('Cart', () => {

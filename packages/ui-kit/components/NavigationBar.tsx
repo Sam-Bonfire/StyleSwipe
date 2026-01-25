@@ -121,30 +121,33 @@ export type NavigationBarProps = GetProps<typeof NavBarFrame> & {
 };
 
 export const NavigationBar = React.forwardRef<TamaguiElement, NavigationBarProps>(
-    ({ items, activeKey, onItemPress, ...props }, ref) => {
+    (props: NavigationBarProps, ref) => {
+        const { items, activeKey, onItemPress, ...rest } = props as any;
         return (
-            <NavBarFrame ref={ref} {...props}>
-                {items.map((item) => {
-                    const isActive = item.key === activeKey;
+            <NavBarFrame ref={ref as any} {...rest}>
+                {
+                    (items as NavigationItem[]).map((item) => {
+                        const isActive = item.key === activeKey;
 
-                    return (
-                        <NavItemFrame
-                            key={item.key}
-                            active={isActive}
-                            onPress={() => onItemPress(item.key)}
-                        >
-                            {isActive && <ActiveIndicator />}
+                        return (
+                            <NavItemFrame
+                                key={item.key}
+                                active={isActive as any}
+                                onPress={() => onItemPress(item.key)}
+                            >
+                                {isActive && <ActiveIndicator />}
 
-                            <NavItemIcon active={isActive}>
-                                {isActive && item.activeIcon ? item.activeIcon : item.icon}
-                            </NavItemIcon>
+                                <NavItemIcon active={isActive as any}>
+                                    {isActive && item.activeIcon ? item.activeIcon : item.icon}
+                                </NavItemIcon>
 
-                            <NavItemLabel active={isActive}>
-                                {item.label}
-                            </NavItemLabel>
-                        </NavItemFrame>
-                    );
-                })}
+                                <NavItemLabel active={isActive as any}>
+                                    {item.label}
+                                </NavItemLabel>
+                            </NavItemFrame>
+                        );
+                    }) as any
+                }
             </NavBarFrame>
         );
     }

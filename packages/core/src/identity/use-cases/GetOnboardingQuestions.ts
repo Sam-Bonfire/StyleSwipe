@@ -6,7 +6,7 @@ export interface OnboardingQuestion {
     options: string[];
 }
 
-export const getOnboardingQuestions = (): Effect.Effect<never, never, OnboardingQuestion[]> => {
+export const getOnboardingQuestions = (): Effect.Effect<OnboardingQuestion[], never, never> => {
     return Effect.succeed([
         { id: "gender", question: "Which collection should we show you?", options: ["Men", "Women", "Both"] },
         { id: "vibe", question: "What's your Saturday night vibe?", options: ["Party", "Chill", "Dinner", "Adventure"] },

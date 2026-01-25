@@ -169,80 +169,88 @@ export type FashionCardProps = GetProps<typeof CardFrame> & {
 };
 
 export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
-    ({
-        imageUrl,
-        brand,
-        title,
-        price,
-        originalPrice,
-        discountPercentage,
-        currency = 'INR',
-        onAddToCart,
-        onPress,
-        ...props
-    }, ref) => {
+    (props: FashionCardProps, ref) => {
+        const {
+            imageUrl,
+            brand,
+            title,
+            price,
+            originalPrice,
+            discountPercentage,
+            currency = 'INR',
+            onAddToCart,
+            onPress,
+            ...rest
+        } = props as any;
+
         const formatPrice = (amount: number) => {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
-                currency,
+                currency: currency as string,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             }).format(amount);
         };
 
         return (
-            <CardFrame ref={ref} onPress={onPress} {...props}>
-                <CardImage
-                    source={{ uri: imageUrl }}
-                    // @ts-ignore
-                    src={imageUrl}
-                    resizeMode="cover"
-                />
+            <CardFrame ref={ref as any} onPress={onPress} {...rest}>
+                {
+                    (
+                        <>
+                            <CardImage
+                                source={{ uri: imageUrl }}
+                                // @ts-ignore
+                                src={imageUrl}
+                                resizeMode="cover"
+                            />
 
-                <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.8)']}
-                    start={[0, 0]}
-                    end={[0, 1]}
-                    style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: '60%', // Increased gradient height slightly for better readability
-                    }}
-                />
+                            <LinearGradient
+                                colors={['transparent', 'rgba(0,0,0,0.8)'] as any}
+                                start={[0, 0] as any}
+                                end={[0, 1] as any}
+                                style={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '60%',
+                                } as any}
+                            />
 
-                <CardOverlay>
-                    <BrandText>{brand}</BrandText>
-                    <TitleText marginBottom="$2">{title}</TitleText>
+                            <CardOverlay>
+                                <BrandText>{brand}</BrandText>
+                                <TitleText marginBottom="$2">{title}</TitleText>
 
-                    <XStack alignItems="center" justifyContent="space-between" gap="$2">
-                        <PriceContainer flex={1} flexWrap="wrap">
-                            <PriceText>{formatPrice(price)}</PriceText>
+                                <XStack alignItems="center" justifyContent="space-between" gap="$2">
+                                    <PriceContainer flex={1} flexWrap="wrap">
+                                        <PriceText>{formatPrice(price as number)}</PriceText>
 
-                            {originalPrice && originalPrice > price && (
-                                <OriginalPriceText>
-                                    {formatPrice(originalPrice)}
-                                </OriginalPriceText>
-                            )}
+                                        {originalPrice && (originalPrice as number) > (price as number) && (
+                                            <OriginalPriceText>
+                                                {formatPrice(originalPrice as number)}
+                                            </OriginalPriceText>
+                                        )}
 
-                            {discountPercentage && discountPercentage > 0 && (
-                                <DiscountBadge>
-                                    <DiscountText>{discountPercentage}% OFF</DiscountText>
-                                </DiscountBadge>
-                            )}
-                        </PriceContainer>
+                                        {(discountPercentage as number) && (discountPercentage as number) > 0 && (
+                                            <DiscountBadge>
+                                                <DiscountText>{discountPercentage}% OFF</DiscountText>
+                                            </DiscountBadge>
+                                        )}
+                                    </PriceContainer>
 
-                        {onAddToCart && (
-                            <ActionButton onPress={(e) => {
-                                e.stopPropagation();
-                                onAddToCart();
-                            }}>
-                                <ActionButtonText>Add</ActionButtonText>
-                            </ActionButton>
-                        )}
-                    </XStack>
-                </CardOverlay>
+                                    {onAddToCart && (
+                                        <ActionButton onPress={(e: any) => {
+                                            e.stopPropagation();
+                                            onAddToCart();
+                                        }}>
+                                            <ActionButtonText>Add</ActionButtonText>
+                                        </ActionButton>
+                                    )}
+                                </XStack>
+                            </CardOverlay>
+                        </>
+                    ) as any
+                }
             </CardFrame>
         );
     }

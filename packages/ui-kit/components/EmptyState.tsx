@@ -5,9 +5,10 @@
  * Features: Icon, title, description, action button
  */
 
+import { ShoppingCart, Search, Heart, Package } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, YStack, Text, Stack } from 'tamagui';
-import { ShoppingCart, Search, Heart, Package } from '@tamagui/lucide-icons';
+
 import { Button } from './Button';
 
 const EmptyFrame = styled(YStack, {
@@ -67,37 +68,45 @@ export type EmptyStateProps = GetProps<typeof EmptyFrame> & {
 };
 
 export const EmptyState = React.forwardRef<typeof EmptyFrame, EmptyStateProps>(
-    ({
-        type = 'custom',
-        icon,
-        title,
-        description,
-        actionLabel,
-        onAction,
-        ...props
-    }, ref) => {
-        const IconComponent = type !== 'custom' ? IconMap[type] : null;
+    (props: EmptyStateProps, ref) => {
+        const {
+            type = 'custom',
+            icon,
+            title,
+            description,
+            actionLabel,
+            onAction,
+            ...rest
+        } = props as any;
+
+        const IconComponent = type !== 'custom' ? IconMap[type as keyof typeof IconMap] : null;
 
         return (
-            <EmptyFrame ref={ref} {...props}>
-                <IconContainer>
-                    {icon || (IconComponent && <IconComponent size={36} color="$textSecondary" />)}
-                </IconContainer>
+            <EmptyFrame ref={ref as any} {...rest}>
+                {
+                    (
+                        <>
+                            <IconContainer>
+                                {icon || (IconComponent && <IconComponent size={36} color="$textSecondary" />)}
+                            </IconContainer>
 
-                <TitleText>{title}</TitleText>
+                            <TitleText>{title}</TitleText>
 
-                {description && <DescriptionText>{description}</DescriptionText>}
+                            {description && <DescriptionText>{description}</DescriptionText>}
 
-                {actionLabel && onAction && (
-                    <Button
-                        variant="primary"
-                        size="large"
-                        onPress={onAction}
-                        marginTop="$2"
-                    >
-                        {actionLabel}
-                    </Button>
-                )}
+                            {actionLabel && onAction && (
+                                <Button
+                                    variant="primary"
+                                    size="large"
+                                    onPress={onAction}
+                                    marginTop="$2"
+                                >
+                                    {actionLabel}
+                                </Button>
+                            )}
+                        </>
+                    ) as any
+                }
             </EmptyFrame>
         );
     }

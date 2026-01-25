@@ -5,9 +5,9 @@
  * Features: Input field, apply button, validation feedback
  */
 
+import { Tag, Check, X, Loader } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { styled, GetProps, XStack, YStack, Text, Input } from 'tamagui';
-import { Tag, Check, X, Loader } from '@tamagui/lucide-icons';
 
 const InputFrame = styled(YStack, {
     name: 'CouponInput',
@@ -144,7 +144,7 @@ const RemoveButton = styled(XStack, {
 
 export type CouponStatus = 'idle' | 'loading' | 'valid' | 'invalid';
 
-export type CouponInputProps = Omit<GetProps<typeof InputFrame>, 'children'> & {
+export type CouponInputProps = Omit<GetProps<typeof InputFrame>, 'onApply' | 'onRemove' | 'appliedCode' | 'discountAmount' | 'placeholder' | 'currency' | 'validMessage' | 'invalidMessage'> & {
     onApply: (code: string) => Promise<boolean>;
     onRemove?: () => void;
     appliedCode?: string;
@@ -156,17 +156,18 @@ export type CouponInputProps = Omit<GetProps<typeof InputFrame>, 'children'> & {
 };
 
 export const CouponInput = React.forwardRef<typeof InputFrame, CouponInputProps>(
-    ({
-        onApply,
-        onRemove,
-        appliedCode,
-        discountAmount,
-        placeholder = 'Enter coupon code',
-        currency = 'INR',
-        validMessage,
-        invalidMessage = 'Invalid or expired coupon code',
-        ...props
-    }, ref) => {
+    (props: CouponInputProps, ref) => {
+        const {
+            onApply,
+            onRemove,
+            appliedCode,
+            discountAmount,
+            placeholder = 'Enter coupon code',
+            currency = 'INR',
+            validMessage,
+            invalidMessage = 'Invalid or expired coupon code',
+            ...rest
+        } = props as any;
         const [code, setCode] = useState('');
         const [status, setStatus] = useState<CouponStatus>('idle');
         const [feedback, setFeedback] = useState('');
@@ -174,7 +175,7 @@ export const CouponInput = React.forwardRef<typeof InputFrame, CouponInputProps>
         const formatPrice = (amount: number) => {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
-                currency,
+                currency: currency as string,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             }).format(amount);
@@ -187,17 +188,17 @@ export const CouponInput = React.forwardRef<typeof InputFrame, CouponInputProps>
             setFeedback('');
 
             try {
-                const isValid = await onApply(code.trim().toUpperCase());
+                const isValid = await (onApply as any)(code.trim().toUpperCase());
 
                 if (isValid) {
                     setStatus('valid');
-                    setFeedback(validMessage || `Coupon applied! You save ${discountAmount ? formatPrice(discountAmount) : ''}`);
+                    setFeedback(validMessage || `Coupon applied! You save ${discountAmount ? formatPrice(discountAmount as number) : ''}`);
                     setCode('');
                 } else {
                     setStatus('invalid');
-                    setFeedback(invalidMessage);
+                    setFeedback(invalidMessage as string);
                 }
-            } catch (error) {
+            } catch {
                 setStatus('invalid');
                 setFeedback('Something went wrong. Please try again.');
             }
@@ -214,65 +215,75 @@ export const CouponInput = React.forwardRef<typeof InputFrame, CouponInputProps>
         // If coupon is already applied
         if (appliedCode) {
             return (
-                <InputFrame ref={ref} {...props}>
-                    <AppliedCoupon>
-                        <XStack alignItems="center" gap="$1.5">
-                            <Check size={18} color="$success" />
-                            <AppliedText>{appliedCode}</AppliedText>
-                            {discountAmount && (
-                                <Text fontSize="$3" color="$textSecondary">
-                                    (-{formatPrice(discountAmount)})
-                                </Text>
-                            )}
-                        </XStack>
+                <InputFrame ref={ref as any} {...rest}>
+                    {
+                        (
+                            <AppliedCoupon>
+                                <XStack alignItems="center" gap="$1.5">
+                                    <Check size={18} color="$success" />
+                                    <AppliedText>{appliedCode}</AppliedText>
+                                    {discountAmount && (
+                                        <Text fontSize="$3" color="$textSecondary">
+                                            (-{formatPrice(discountAmount as number)})
+                                        </Text>
+                                    )}
+                                </XStack>
 
-                        <RemoveButton onPress={handleRemove}>
-                            <X size={18} color="$textSecondary" />
-                        </RemoveButton>
-                    </AppliedCoupon>
+                                <RemoveButton onPress={handleRemove}>
+                                    <X size={18} color="$textSecondary" />
+                                </RemoveButton>
+                            </AppliedCoupon>
+                        ) as any
+                    }
                 </InputFrame>
             );
         }
 
         return (
-            <InputFrame ref={ref} {...props}>
-                <InputRow>
-                    <XStack flex={1} position="relative">
-                        <IconContainer>
-                            <Tag size={18} color="$textSecondary" />
-                        </IconContainer>
+            <InputFrame ref={ref as any} {...rest}>
+                {
+                    (
+                        <>
+                            <InputRow>
+                                <XStack flex={1} position="relative">
+                                    <IconContainer>
+                                        <Tag size={18} color="$textSecondary" />
+                                    </IconContainer>
 
-                        <StyledInput
-                            value={code}
-                            onChangeText={(text) => {
-                                setCode(text);
-                                if (status !== 'idle') setStatus('idle');
-                                if (feedback) setFeedback('');
-                            }}
-                            placeholder={placeholder}
-                            placeholderTextColor="$textTertiary"
-                            status={status === 'loading' ? 'idle' : status}
-                            autoCapitalize="characters"
-                        />
-                    </XStack>
+                                    <StyledInput
+                                        value={code}
+                                        onChangeText={(text) => {
+                                            setCode(text);
+                                            if (status !== 'idle') setStatus('idle');
+                                            if (feedback) setFeedback('');
+                                        }}
+                                        placeholder={placeholder as string}
+                                        placeholderTextColor="$textTertiary"
+                                        status={(status === 'loading' ? 'idle' : status) as any}
+                                        autoCapitalize="characters"
+                                    />
+                                </XStack>
 
-                    <ApplyButton
-                        onPress={handleApply}
-                        disabled={!code.trim() || status === 'loading'}
-                    >
-                        {status === 'loading' ? (
-                            <Loader size={18} color="$textInverse" />
-                        ) : (
-                            <ApplyButtonText>Apply</ApplyButtonText>
-                        )}
-                    </ApplyButton>
-                </InputRow>
+                                <ApplyButton
+                                    onPress={handleApply}
+                                    disabled={!code.trim() || status === 'loading'}
+                                >
+                                    {status === 'loading' ? (
+                                        <Loader size={18} color="$textInverse" />
+                                    ) : (
+                                        <ApplyButtonText>Apply</ApplyButtonText>
+                                    )}
+                                </ApplyButton>
+                            </InputRow>
 
-                {feedback && (
-                    <FeedbackText status={status === 'loading' ? 'idle' : status}>
-                        {feedback}
-                    </FeedbackText>
-                )}
+                            {feedback && (
+                                <FeedbackText status={(status === 'loading' ? 'idle' : status) as any}>
+                                    {feedback}
+                                </FeedbackText>
+                            )}
+                        </>
+                    ) as any
+                }
             </InputFrame>
         );
     }
