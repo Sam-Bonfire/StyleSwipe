@@ -5,12 +5,10 @@
 
 import type { UserRepository } from "@app/core";
 import type { User, StyleProfile } from "@app/core";
-
-import { ConvexClient } from "convex/browser";
-
 import type { Id } from "@convex-dataModel";
 
 import { api } from "@convex-api";
+import { ConvexClient } from "convex/browser";
 
 /**
  * Convex implementation of UserRepository port

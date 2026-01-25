@@ -1,25 +1,22 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import { config } from '@app/ui-kit';
+import { api } from "@convex-api";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { ConvexReactClient, useQuery } from "convex/react";
+import React from 'react';
+import { Platform } from 'react-native';
 import { TamaguiProvider, Theme } from 'tamagui';
-import { config } from '@app/ui-kit';
+import { YStack, Spinner } from 'tamagui';
+
 import { AuthSelectionScreen } from './screens/auth/AuthSelectionScreen';
-import { PhoneAuthScreen } from './screens/auth/PhoneAuthScreen';
 import { EmailAuthScreen } from './screens/auth/EmailAuthScreen';
 import { OTPScreen } from './screens/auth/OTPScreen';
-import { DesignSystemGallery } from './screens/system/DesignSystemGallery';
-import { DiscoveryScreen } from './screens/discovery/DiscoveryScreen';
-import { ProductDetailScreen } from './screens/discovery/ProductDetailScreen';
-import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
-import { CartScreen } from './screens/commerce/CartScreen';
+import { PhoneAuthScreen } from './screens/auth/PhoneAuthScreen';
 import { CheckoutScreen } from './screens/commerce/CheckoutScreen';
+import { ProductDetailScreen } from './screens/discovery/ProductDetailScreen';
 import { MainScreen } from './screens/main/MainScreen';
-import { ConvexProvider, ConvexReactClient, useQuery } from "convex/react";
-import { YStack, Spinner } from 'tamagui';
-import { api } from "@convex-api";
-
-import { Platform } from 'react-native';
+import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
 
 const Stack = createStackNavigator();
 
@@ -70,6 +67,7 @@ function NavigationGuard() {
 }
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+
 import { authAdapter } from './lib/auth';
 
 export default function App() {

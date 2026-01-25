@@ -1,7 +1,7 @@
-import React from 'react';
-import { YStack, H2, Text, Input } from 'tamagui';
-import { SafeAreaView } from 'react-native';
 import { Search } from '@tamagui/lucide-icons';
+import React from 'react';
+import { SafeAreaView } from 'react-native';
+import { YStack, H2, Text, Input } from 'tamagui';
 
 export function SearchScreen() {
     return (

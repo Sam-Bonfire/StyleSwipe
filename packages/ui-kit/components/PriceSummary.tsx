@@ -93,83 +93,85 @@ export type PriceSummaryProps = GetProps<typeof SummaryFrame> & {
 };
 
 export const PriceSummary = React.forwardRef<typeof SummaryFrame, PriceSummaryProps>(
-    ({
-        subtotal,
-        shipping = 0,
-        freeShippingThreshold,
-        tax = 0,
-        discount = 0,
-        discountCode,
-        currency = 'INR',
-        showSavings = true,
-        ...props
-    }, ref) => {
+    (props: PriceSummaryProps, ref) => {
+        const {
+            subtotal,
+            shipping = 0,
+            freeShippingThreshold,
+            tax = 0,
+            discount = 0,
+            discountCode,
+            currency = 'INR',
+            showSavings = true,
+            ...rest
+        } = props as any;
+
         const formatPrice = (amount: number) => {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
-                currency,
+                currency: currency as string,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             }).format(amount);
         };
 
-        const isFreeShipping = freeShippingThreshold && subtotal >= freeShippingThreshold;
+        const isFreeShipping = freeShippingThreshold && (subtotal as number) >= (freeShippingThreshold as number);
         const effectiveShipping = isFreeShipping ? 0 : shipping;
-        const total = subtotal + effectiveShipping + tax - discount;
-        const totalSavings = discount + (isFreeShipping ? shipping : 0);
+        const total = (subtotal as number) + (effectiveShipping as number) + (tax as number) - (discount as number);
+        const totalSavings = (discount as number) + (isFreeShipping ? (shipping as number) : 0);
 
         return (
-            <SummaryFrame ref={ref} {...props}>
-                {/* Subtotal */}
-                <SummaryRow>
-                    <LabelText>Subtotal</LabelText>
-                    <ValueText>{formatPrice(subtotal)}</ValueText>
-                </SummaryRow>
+            <SummaryFrame ref={ref as any} {...rest}>
+                {
+                    (
+                        <>
+                            <SummaryRow>
+                                <LabelText>Subtotal</LabelText>
+                                <ValueText>{formatPrice(subtotal as number)}</ValueText>
+                            </SummaryRow>
 
-                {/* Shipping */}
-                <SummaryRow>
-                    <LabelText>Shipping</LabelText>
-                    {isFreeShipping ? (
-                        <FreeText>FREE</FreeText>
-                    ) : shipping > 0 ? (
-                        <ValueText>{formatPrice(shipping)}</ValueText>
-                    ) : (
-                        <ValueText>Calculated at checkout</ValueText>
-                    )}
-                </SummaryRow>
+                            <SummaryRow>
+                                <LabelText>Shipping</LabelText>
+                                {isFreeShipping ? (
+                                    <FreeText>FREE</FreeText>
+                                ) : (shipping as number) > 0 ? (
+                                    <ValueText>{formatPrice(shipping as number)}</ValueText>
+                                ) : (
+                                    <ValueText>Calculated at checkout</ValueText>
+                                )}
+                            </SummaryRow>
 
-                {/* Tax */}
-                {tax > 0 && (
-                    <SummaryRow>
-                        <LabelText>Tax</LabelText>
-                        <ValueText>{formatPrice(tax)}</ValueText>
-                    </SummaryRow>
-                )}
+                            {(tax as number) > 0 && (
+                                <SummaryRow>
+                                    <LabelText>Tax</LabelText>
+                                    <ValueText>{formatPrice(tax as number)}</ValueText>
+                                </SummaryRow>
+                            )}
 
-                {/* Discount */}
-                {discount > 0 && (
-                    <SummaryRow>
-                        <LabelText>
-                            Discount {discountCode && `(${discountCode})`}
-                        </LabelText>
-                        <DiscountValue>-{formatPrice(discount)}</DiscountValue>
-                    </SummaryRow>
-                )}
+                            {(discount as number) > 0 && (
+                                <SummaryRow>
+                                    <LabelText>
+                                        Discount {discountCode && `(${discountCode})`}
+                                    </LabelText>
+                                    <DiscountValue>-{formatPrice(discount as number)}</DiscountValue>
+                                </SummaryRow>
+                            )}
 
-                <Separator borderColor="$borderColor" marginVertical="$1" />
+                            <Separator borderColor="$borderColor" marginVertical="$1" />
 
-                {/* Total */}
-                <SummaryRow>
-                    <TotalLabel>Total</TotalLabel>
-                    <TotalValue>{formatPrice(total)}</TotalValue>
-                </SummaryRow>
+                            <SummaryRow>
+                                <TotalLabel>Total</TotalLabel>
+                                <TotalValue>{formatPrice(total)}</TotalValue>
+                            </SummaryRow>
 
-                {/* Savings */}
-                {showSavings && totalSavings > 0 && (
-                    <SavingsText>
-                        You save {formatPrice(totalSavings)} on this order!
-                    </SavingsText>
-                )}
+                            {showSavings && (totalSavings as number) > 0 && (
+                                <SavingsText>
+                                    You save {formatPrice(totalSavings)} on this order!
+                                </SavingsText>
+                            )}
+                        </>
+                    ) as any
+                }
             </SummaryFrame>
         );
     }
