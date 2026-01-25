@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ConvexReactClient, useQuery } from "convex/react";
 import React from 'react';
-import { Platform } from 'react-native';
 import { TamaguiProvider, Theme } from 'tamagui';
 import { YStack, Spinner } from 'tamagui';
 

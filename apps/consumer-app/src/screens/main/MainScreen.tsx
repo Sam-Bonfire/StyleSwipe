@@ -1,8 +1,10 @@
 import { NavigationBar } from '@app/ui-kit';
 import { Home, Search, Layers, User, ShoppingCart } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native';
 import { YStack } from 'tamagui';
 
+import { HomeHeader } from '../../components/HomeHeader';
 import { CartScreen } from '../commerce/CartScreen';
 import { DiscoveryScreen } from '../discovery/DiscoveryScreen';
 import { HomeScreen } from '../home/HomeScreen';
@@ -64,6 +66,9 @@ export function MainScreen() {
 
     return (
         <YStack flex={1} backgroundColor="$background">
+            <SafeAreaView style={{ backgroundColor: 'white' }}>
+                <HomeHeader />
+            </SafeAreaView>
             <YStack flex={1}>
                 {renderContent()}
             </YStack>

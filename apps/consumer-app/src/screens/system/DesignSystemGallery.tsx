@@ -55,7 +55,8 @@ const ColorSwatch = ({ name, color }: { name: string; color: string }) => (
             width={48}
             height={48}
             borderRadius="$2"
-            backgroundColor={color}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            backgroundColor={color as any}
             borderWidth={1}
             borderColor="$borderColor"
         />
