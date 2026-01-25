@@ -5,15 +5,25 @@ import { api } from '../../../../convex/_generated/api';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { YStack, Button } from 'tamagui';
+import { Id } from '../../convex/_generated/dataModel';
 
-export function SwipeDeck() {
+interface SwipeDeckProps {
+    partnerId?: Id<"users">;
+    influenceRatio?: number;
+}
+
+export function SwipeDeck({ partnerId, influenceRatio }: SwipeDeckProps) {
     const [products, setProducts] = useState<any[] | null>(null);
     const getVectorFeed = useAction(api.recommendations.getVectorFeed);
     const swipeMutation = useMutation(api.discovery.processSwipe);
 
     useEffect(() => {
-        getVectorFeed({ limit: 10 }).then(setProducts).catch(console.error);
-    }, [getVectorFeed]);
+        getVectorFeed({
+            limit: 10,
+            partnerId,
+            influenceRatio
+        }).then(setProducts).catch(console.error);
+    }, [getVectorFeed, partnerId, influenceRatio]);
 
     if (products === null) {
         return (
