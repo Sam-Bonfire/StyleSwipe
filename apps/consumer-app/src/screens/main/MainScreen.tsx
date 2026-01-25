@@ -1,7 +1,6 @@
 import { NavigationBar } from '@app/ui-kit';
 import { Home, Search, Layers, User, ShoppingCart } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native';
 import { YStack } from 'tamagui';
 
 import { HomeHeader } from '../../components/HomeHeader';
@@ -65,13 +64,21 @@ export function MainScreen() {
     };
 
     return (
-        <YStack flex={1} backgroundColor="$background">
-            <SafeAreaView style={{ backgroundColor: 'white' }}>
-                <HomeHeader />
-            </SafeAreaView>
-            <YStack flex={1}>
+        <YStack
+            backgroundColor="$background"
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            overflow="hidden"
+        >
+            <HomeHeader />
+
+            <YStack flex={1} overflow="hidden">
                 {renderContent()}
             </YStack>
+
             <NavigationBar
                 items={navItems}
                 activeKey={activeTab}
