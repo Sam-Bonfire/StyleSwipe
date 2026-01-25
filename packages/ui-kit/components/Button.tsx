@@ -151,9 +151,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         return (
             <ButtonFrame
                 ref={ref}
-                variant={variant}
-                size={size}
-                disabled={isDisabled}
+                variant={variant as any}
+                size={size as any}
+                disabled={isDisabled as any}
                 {...props}
             >
                 {loading ? (
@@ -164,7 +164,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ) : (
                     <>
                         {icon}
-                        <ButtonText variant={variant} size={size}>
+                        <ButtonText variant={variant as any} size={size as any}>
                             {children}
                         </ButtonText>
                         {iconAfter}

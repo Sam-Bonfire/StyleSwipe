@@ -1,6 +1,6 @@
 import React from 'react';
-import { YStack, H2, Text } from 'tamagui';
 import { SafeAreaView } from 'react-native';
+import { YStack, H2, Text } from 'tamagui';
 
 export function HomeScreen() {
     return (

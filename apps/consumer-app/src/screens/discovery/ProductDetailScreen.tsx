@@ -1,13 +1,18 @@
-import React, { useState, useMemo } from 'react';
-import { YStack, ScrollView, Text, XStack, Separator, Spacer } from 'tamagui';
-import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
-import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { useConvex } from 'convex/react';
 import { ManageCart, CartItem } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
+import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { ConvexClient } from 'convex/browser';
+import { useConvex } from 'convex/react';
+import React, { useState, useMemo } from 'react';
+import { YStack, ScrollView, Text, XStack, Separator, Spacer } from 'tamagui';
 
-export const ProductDetailScreen = ({ route, navigation }: any) => {
+export function ProductDetailScreen() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const route = useRoute<any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const navigation = useNavigation<any>();
     const { productId } = route?.params || { productId: 'prod-1' }; // Mock param
     const convex = useConvex();
     const [isAdded, setIsAdded] = useState(false);

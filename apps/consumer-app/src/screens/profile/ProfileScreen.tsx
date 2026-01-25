@@ -1,9 +1,10 @@
-import React from 'react';
-import { YStack, H2, Text, Button, Avatar, XStack } from 'tamagui';
-import { SafeAreaView } from 'react-native';
-import { authAdapter } from '../../lib/auth';
-import { useQuery } from 'convex/react';
 import { api } from '@convex-api';
+import { useQuery } from 'convex/react';
+import React from 'react';
+import { SafeAreaView } from 'react-native';
+import { YStack, H2, Text, Button, Avatar, XStack } from 'tamagui';
+
+import { authAdapter } from '../../lib/auth';
 
 export function ProfileScreen() {
     const user = useQuery(api.users.currentUser);

@@ -9,7 +9,6 @@ import type {
     Session,
     Account,
     Verification,
-    VerificationType,
     Organization,
     Member,
     MemberRole,

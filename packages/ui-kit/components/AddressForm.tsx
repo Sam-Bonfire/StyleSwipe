@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { styled, YStack, XStack, Input, Text, Button, Label } from 'tamagui';
-import { Address } from '@app/core';
+
+export interface Address {
+    fullName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    phone: string;
+}
 
 const FormContainer = styled(YStack, {
     name: 'AddressFormContainer',

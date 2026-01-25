@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { YStack, Input, Text, H2 } from 'tamagui';
 import { Button } from '@app/ui-kit';
-import { authAdapter } from '../../lib/auth';
 import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
 import { Alert } from 'react-native';
+import { YStack, Input, Text, H2 } from 'tamagui';
+
+import { authAdapter } from '../../lib/auth';
 
 export function PhoneAuthScreen() {
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const navigation = useNavigation<any>();
 
     const handleSendCode = async () => {
