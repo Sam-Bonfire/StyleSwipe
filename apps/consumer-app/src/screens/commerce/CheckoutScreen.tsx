@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { YStack, ScrollView, Text, Button, XStack, Spacer } from 'tamagui';
-import { useConvex } from 'convex/react';
-import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { ManageCart, CheckoutService, Address, Order } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
-import { ConvexClient } from 'convex/browser';
+import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
+import { ConvexClient } from 'convex/browser';
+import { useConvex } from 'convex/react';
+import React, { useState, useMemo } from 'react';
+import { YStack, Text, XStack, Button, ScrollView } from 'tamagui';
 
 // Mock Order Repository (In-memory for prototype)
 // TODO: Replace with ConvexOrderRepository
@@ -14,6 +14,7 @@ const mockOrderRepo = {
     findById: async () => null
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CheckoutScreen = ({ navigation }: any) => {
     const convex = useConvex();
     const [step, setStep] = useState<'ADDRESS' | 'PAYMENT' | 'CONFIRMATION'>('ADDRESS');

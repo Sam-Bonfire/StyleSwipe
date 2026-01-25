@@ -5,9 +5,9 @@
  * Features: 2x3 or 3x3 grid of image cards, multi-select with checkmark overlay
  */
 
+import { Check } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, Stack, Image, Text, TamaguiElement } from 'tamagui';
-import { Check } from '@tamagui/lucide-icons';
 
 const GridFrame = styled(Stack, {
     name: 'GridSelection',
@@ -153,26 +153,26 @@ export type GridSelectionProps = Omit<GetProps<typeof GridFrame>, 'children'> & 
 };
 
 export const GridSelection = React.forwardRef<TamaguiElement, GridSelectionProps>(
-    ({
-        items,
-        selectedIds,
-        onSelectionChange,
-        maxSelections,
-        minSelections = 0,
-        itemSize = 'flexible',
-        columns = 3,
-        ...props
-    }, ref) => {
+    (props: GridSelectionProps, ref) => {
+        const {
+            items,
+            selectedIds,
+            onSelectionChange,
+            maxSelections,
+            minSelections = 0,
+            itemSize = 'flexible',
+            columns = 3,
+            ...rest
+        } = props as any;
+
         const handleItemPress = (itemId: string) => {
-            const isSelected = selectedIds.includes(itemId);
+            const isSelected = (selectedIds as string[]).includes(itemId);
 
             if (isSelected) {
-                // Deselect - check minimum
                 if (selectedIds.length > minSelections) {
-                    onSelectionChange(selectedIds.filter(id => id !== itemId));
+                    onSelectionChange(selectedIds.filter((id: string) => id !== itemId));
                 }
             } else {
-                // Select - check maximum
                 if (!maxSelections || selectedIds.length < maxSelections) {
                     onSelectionChange([...selectedIds, itemId]);
                 }
@@ -180,40 +180,48 @@ export const GridSelection = React.forwardRef<TamaguiElement, GridSelectionProps
         };
 
         return (
-            <GridFrame ref={ref} columns={columns} {...props}>
-                {items.map((item) => {
-                    const isSelected = selectedIds.includes(item.id);
+            <GridFrame ref={ref as any} columns={columns as any} {...rest}>
+                {
+                    (items as any[]).map((item) => {
+                        const isSelected = (selectedIds as string[]).includes(item.id);
 
-                    return (
-                        <GridItemFrame
-                            key={item.id}
-                            selected={isSelected}
-                            size={itemSize}
-                            onPress={() => handleItemPress(item.id)}
-                        >
-                            <ItemImage
-                                source={{ uri: item.imageUrl }}
-                                // @ts-ignore
-                                src={item.imageUrl}
-                                resizeMode="cover"
-                            />
+                        return (
+                            <GridItemFrame
+                                key={item.id}
+                                selected={isSelected}
+                                size={itemSize}
+                                onPress={() => handleItemPress(item.id)}
+                            >
+                                {
+                                    (
+                                        <>
+                                            <ItemImage
+                                                source={{ uri: item.imageUrl }}
+                                                // @ts-ignore
+                                                src={item.imageUrl}
+                                                resizeMode="cover"
+                                            />
 
-                            {isSelected && (
-                                <SelectionOverlay>
-                                    <CheckmarkCircle>
-                                        <Check size={20} color="$textInverse" />
-                                    </CheckmarkCircle>
-                                </SelectionOverlay>
-                            )}
+                                            {isSelected && (
+                                                <SelectionOverlay>
+                                                    <CheckmarkCircle>
+                                                        <Check size={20} color="$textInverse" />
+                                                    </CheckmarkCircle>
+                                                </SelectionOverlay>
+                                            )}
 
-                            {item.label && (
-                                <ItemLabel>
-                                    <LabelText>{item.label}</LabelText>
-                                </ItemLabel>
-                            )}
-                        </GridItemFrame>
-                    );
-                })}
+                                            {item.label && (
+                                                <ItemLabel>
+                                                    <LabelText>{item.label}</LabelText>
+                                                </ItemLabel>
+                                            )}
+                                        </>
+                                    ) as any
+                                }
+                            </GridItemFrame>
+                        );
+                    }) as any
+                }
             </GridFrame>
         );
     }

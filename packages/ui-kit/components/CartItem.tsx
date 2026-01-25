@@ -5,9 +5,9 @@
  * Features: Image, quantity +/- controls, price, remove action
  */
 
+import { Minus, Plus, Trash2 } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, Stack, XStack, YStack, Text, Image } from 'tamagui';
-import { Minus, Plus, Trash2 } from '@tamagui/lucide-icons';
 
 const ItemFrame = styled(XStack, {
     name: 'CartItem',
@@ -194,72 +194,84 @@ export const CartItem = React.forwardRef<typeof ItemFrame, CartItemProps>(
         const formatPrice = (amount: number) => {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
-                currency,
+                currency: currency as string,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             }).format(amount);
         };
 
         const handleDecrease = () => {
-            if (quantity > 1) {
-                onQuantityChange(quantity - 1);
+            if ((quantity as number) > 1) {
+                (onQuantityChange as any)((quantity as number) - 1);
             }
         };
 
         const handleIncrease = () => {
-            if (quantity < maxQuantity) {
-                onQuantityChange(quantity + 1);
+            if ((quantity as number) < (maxQuantity as number)) {
+                (onQuantityChange as any)((quantity as number) + 1);
             }
         };
 
         return (
-            <ItemFrame ref={ref} {...props}>
-                <ItemImage source={{ uri: imageUrl }} resizeMode="cover" />
+            <ItemFrame ref={ref as any} {...props}>
+                {
+                    (
+                        <ItemImage source={{ uri: imageUrl }} resizeMode="cover" />
+                    ) as any
+                }
 
-                <ContentContainer>
-                    <YStack>
-                        <BrandText>{brand}</BrandText>
-                        <TitleText>{title}</TitleText>
+                {
+                    (
+                        <ContentContainer>
+                            <YStack>
+                                <BrandText>{brand}</BrandText>
+                                <TitleText>{title}</TitleText>
 
-                        <DetailsRow>
-                            {size && <DetailText>Size: {size}</DetailText>}
-                            {color && <DetailText>Color: {color}</DetailText>}
-                        </DetailsRow>
-                    </YStack>
+                                <DetailsRow>
+                                    {size && <DetailText>Size: {size}</DetailText>}
+                                    {color && <DetailText>Color: {color}</DetailText>}
+                                </DetailsRow>
+                            </YStack>
 
-                    <PriceRow>
-                        <XStack alignItems="baseline">
-                            <PriceText>{formatPrice(price * quantity)}</PriceText>
-                            {originalPrice && originalPrice > price && (
-                                <OriginalPriceText>
-                                    {formatPrice(originalPrice * quantity)}
-                                </OriginalPriceText>
-                            )}
-                        </XStack>
+                            <PriceRow>
+                                <XStack alignItems="baseline">
+                                    <PriceText>{formatPrice((price as number) * (quantity as number))}</PriceText>
+                                    {(originalPrice as number) && (originalPrice as number) > (price as number) && (
+                                        <OriginalPriceText>
+                                            {formatPrice((originalPrice as number) * (quantity as number))}
+                                        </OriginalPriceText>
+                                    )}
+                                </XStack>
 
-                        <QuantityContainer>
-                            <QuantityButton
-                                onPress={handleDecrease}
-                                disabled={quantity <= 1}
-                            >
-                                <Minus size={16} color="$textPrimary" />
-                            </QuantityButton>
+                                <QuantityContainer>
+                                    <QuantityButton
+                                        onPress={handleDecrease}
+                                        disabled={(quantity as number) <= 1}
+                                    >
+                                        <Minus size={16} color="$textPrimary" />
+                                    </QuantityButton>
 
-                            <QuantityText>{quantity}</QuantityText>
+                                    <QuantityText>{quantity}</QuantityText>
 
-                            <QuantityButton
-                                onPress={handleIncrease}
-                                disabled={quantity >= maxQuantity}
-                            >
-                                <Plus size={16} color="$textPrimary" />
-                            </QuantityButton>
-                        </QuantityContainer>
-                    </PriceRow>
-                </ContentContainer>
+                                    <QuantityButton
+                                        onPress={handleIncrease}
+                                        disabled={(quantity as number) >= (maxQuantity as number)}
+                                    >
+                                        <Plus size={16} color="$textPrimary" />
+                                    </QuantityButton>
+                                </QuantityContainer>
+                            </PriceRow>
+                        </ContentContainer>
+                    ) as any
+                }
 
-                <RemoveButton onPress={onRemove}>
-                    <Trash2 size={18} color="$textSecondary" />
-                </RemoveButton>
+                {
+                    (
+                        <RemoveButton onPress={onRemove}>
+                            <Trash2 size={18} color="$textSecondary" />
+                        </RemoveButton>
+                    ) as any
+                }
             </ItemFrame>
         );
     }

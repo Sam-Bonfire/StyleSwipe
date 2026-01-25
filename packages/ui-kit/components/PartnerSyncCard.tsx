@@ -5,9 +5,10 @@
  * Features: Invite card, duration selector, session status
  */
 
+import { Users, Clock, Link2, QrCode, X } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { styled, GetProps, YStack, XStack, Text, Stack, Image } from 'tamagui';
-import { Users, Clock, Link2, QrCode, X } from '@tamagui/lucide-icons';
+
 import { Button } from './Button';
 
 const CardFrame = styled(YStack, {
@@ -218,99 +219,112 @@ const DURATIONS: { value: Duration; label: string }[] = [
 ];
 
 export const PartnerSyncCard = React.forwardRef<typeof CardFrame, PartnerSyncCardProps>(
-    ({
-        onInviteLink,
-        onInviteQR,
-        isActive = false,
-        partnerName,
-        partnerAvatar,
-        remainingTime,
-        onStopSharing,
-        ...props
-    }, ref) => {
+    (props: PartnerSyncCardProps, ref) => {
+        const {
+            onInviteLink,
+            onInviteQR,
+            isActive = false,
+            partnerName,
+            partnerAvatar,
+            remainingTime,
+            onStopSharing,
+            ...rest
+        } = props as any;
         const [selectedDuration, setSelectedDuration] = useState<Duration>('1h');
 
         // Active session view
         if (isActive && partnerName) {
             return (
-                <CardFrame ref={ref} {...props}>
-                    <Header>
-                        <IconBadge>
-                            <Users size={24} color="$primary" />
-                        </IconBadge>
-                        <YStack flex={1}>
-                            <TitleText>Partner Sync Active</TitleText>
-                            <SubtitleText>Your feed is now blended</SubtitleText>
-                        </YStack>
-                    </Header>
+                <CardFrame ref={ref as any} {...rest}>
+                    {
+                        (
+                            <>
+                                <Header>
+                                    <IconBadge>
+                                        {(<Users size={24} color="$primary" />) as any}
+                                    </IconBadge>
+                                    <YStack flex={1}>
+                                        <TitleText>Partner Sync Active</TitleText>
+                                        <SubtitleText>Your feed is now blended</SubtitleText>
+                                    </YStack>
+                                </Header>
 
-                    <ActiveSession>
-                        <PartnerAvatar
-                            source={{ uri: partnerAvatar || 'https://picsum.photos/40' }}
-                        />
-                        <SessionInfo>
-                            <SessionText>Synced with {partnerName}</SessionText>
-                            <TimerText>
-                                <Clock size={12} color="$textSecondary" /> Expires in {remainingTime}
-                            </TimerText>
-                        </SessionInfo>
-                        <StopButton onPress={onStopSharing}>
-                            <X size={20} color="$error" />
-                        </StopButton>
-                    </ActiveSession>
+                                <ActiveSession>
+                                    <PartnerAvatar
+                                        source={{ uri: partnerAvatar || 'https://picsum.photos/40' }}
+                                    />
+                                    <SessionInfo>
+                                        <SessionText>Synced with {partnerName}</SessionText>
+                                        <TimerText>
+                                            {(<Clock size={12} color="$textSecondary" />) as any} Expires in {remainingTime}
+                                        </TimerText>
+                                    </SessionInfo>
+                                    <StopButton onPress={onStopSharing as any}>
+                                        {(<X size={20} color="$error" />) as any}
+                                    </StopButton>
+                                </ActiveSession>
 
-                    <Button variant="secondary" onPress={onStopSharing}>
-                        Stop Sharing
-                    </Button>
+                                <Button variant="secondary" onPress={onStopSharing as any}>
+                                    Stop Sharing
+                                </Button>
+                            </>
+                        ) as any
+                    }
                 </CardFrame>
             );
         }
 
         // Invite view
         return (
-            <CardFrame ref={ref} {...props}>
-                <Header>
-                    <IconBadge>
-                        <Users size={24} color="$primary" />
-                    </IconBadge>
-                    <YStack flex={1}>
-                        <TitleText>Partner Sync</TitleText>
-                        <SubtitleText>Shop together, discover more</SubtitleText>
-                    </YStack>
-                </Header>
+            <CardFrame ref={ref as any} {...rest}>
+                {
+                    (
+                        <>
+                            <Header>
+                                <IconBadge>
+                                    {(<Users size={24} color="$primary" />) as any}
+                                </IconBadge>
+                                <YStack flex={1}>
+                                    <TitleText>Partner Sync</TitleText>
+                                    <SubtitleText>Shop together, discover more</SubtitleText>
+                                </YStack>
+                            </Header>
 
-                <DurationContainer>
-                    <DurationLabel>Choose session duration</DurationLabel>
-                    <DurationRow>
-                        {DURATIONS.map((d) => (
-                            <DurationChip
-                                key={d.value}
-                                selected={selectedDuration === d.value}
-                                onPress={() => setSelectedDuration(d.value)}
-                            >
-                                <DurationChipText selected={selectedDuration === d.value}>
-                                    {d.label}
-                                </DurationChipText>
-                            </DurationChip>
-                        ))}
-                    </DurationRow>
-                </DurationContainer>
+                            <DurationContainer>
+                                <DurationLabel>Choose session duration</DurationLabel>
+                                <DurationRow>
+                                    {DURATIONS.map((d) => (
+                                        <DurationChip
+                                            key={d.value}
+                                            selected={(selectedDuration === d.value) as any}
+                                            onPress={() => setSelectedDuration(d.value)}
+                                        >
+                                            <DurationChipText selected={(selectedDuration === d.value) as any}>
+                                                {d.label}
+                                            </DurationChipText>
+                                        </DurationChip>
+                                    ))}
+                                </DurationRow>
+                            </DurationContainer>
 
-                <ShareRow>
-                    <ShareButton onPress={() => onInviteLink?.(selectedDuration)}>
-                        <ShareIconContainer>
-                            <Link2 size={24} color="$secondary" />
-                        </ShareIconContainer>
-                        <ShareLabel>Share Link</ShareLabel>
-                    </ShareButton>
+                            <ShareRow>
+                                <ShareButton onPress={() => onInviteLink?.(selectedDuration)}>
+                                    <ShareIconContainer>
+                                        {(<Link2 size={24} color="$secondary" />) as any}
+                                    </ShareIconContainer>
+                                    <ShareLabel>Share Link</ShareLabel>
+                                </ShareButton>
 
-                    <ShareButton onPress={() => onInviteQR?.(selectedDuration)}>
-                        <ShareIconContainer>
-                            <QrCode size={24} color="$secondary" />
-                        </ShareIconContainer>
-                        <ShareLabel>Show QR</ShareLabel>
-                    </ShareButton>
-                </ShareRow>
+                                <ShareButton onPress={() => onInviteQR?.(selectedDuration)}>
+                                    <ShareIconContainer>
+                                        {(<QrCode size={24} color="$secondary" />) as any}
+                                    </ShareIconContainer>
+                                    <ShareLabel>Show QR</ShareLabel>
+                                </ShareButton>
+                            </ShareRow>
+                        </>
+                    ) as any
+                }
             </CardFrame>
         );
     }

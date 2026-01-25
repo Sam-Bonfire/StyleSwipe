@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, SafeAreaView } from 'react-native';
-import { SwipeDeck } from '../components/SwipeDeck';
-import { YStack, Text, H2 } from 'tamagui';
+import { SafeAreaView } from 'react-native';
+import { YStack, H2 } from 'tamagui';
+
+import { SwipeDeck } from '../../components/SwipeDeck';
 
 export function DiscoveryScreen() {
     return (

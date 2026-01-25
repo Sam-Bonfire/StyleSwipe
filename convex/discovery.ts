@@ -1,7 +1,83 @@
-import { query } from "./_generated/server";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { SwipeActionSchema } from "@app/core/src/discovery/use-cases/ProcessSwipe";
+
+export const recordProductView = mutation({
+    args: {
+        productId: v.id("products"),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return; // Only track logged in users for now
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_email", (q) => q.eq("email", identity.email!))
+            .first();
+
+        if (!user) return;
+
+        // Log the view event
+        await ctx.db.insert("events", {
+            type: "view_product",
+            userId: user._id,
+            productId: args.productId,
+            isSampled: true, // Always keep view history for functional requirements
+            timestamp: Date.now(),
+        });
+    },
+});
+
+export const getRecentlyViewed = query({
+    args: {
+        limit: v.optional(v.number()),
+    },
+    handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return [];
+
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_email", (q) => q.eq("email", identity.email!))
+            .first();
+
+        if (!user) return [];
+
+        const limit = args.limit ?? 10;
+
+        // Fetch recent view events
+        const views = await ctx.db
+            .query("events")
+            .withIndex("by_user_type", (q) =>
+                q.eq("userId", user._id).eq("type", "view_product")
+            )
+            .order("desc") // Most recent first
+            .take(limit * 3); // Take more to account for duplicates
+
+        // Deduplicate product IDs
+        const uniqueProductIds = new Set<string>();
+        const orderedIds: any[] = [];
+
+        for (const view of views) {
+            if (view.productId && !uniqueProductIds.has(view.productId)) {
+                uniqueProductIds.add(view.productId);
+                orderedIds.push(view.productId);
+                if (orderedIds.length >= limit) break;
+            }
+        }
+
+        if (orderedIds.length === 0) return [];
+
+        // Fetch product details
+        // Note: We can't use getAll with array of IDs in a query easily without helper or mapping.
+        // We can use Promise.all with ctx.db.get
+        const products = await Promise.all(
+            orderedIds.map((id) => ctx.db.get(id))
+        );
+
+        return products.filter((p) => p !== null);
+    },
+});
 
 export const getDiscoveryFeed = query({
     args: {

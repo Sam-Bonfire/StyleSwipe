@@ -1,15 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
- 
- 
-import { createAuthClient } from "better-auth/client";
+import { convexClient } from "@convex-dev/better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
 
 export class AuthAdapter {
-     
-    private client: any;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public client: any;
 
     constructor(baseURL: string) {
         this.client = createAuthClient({
-            baseURL
+            baseURL: baseURL,
+            plugins: [
+                convexClient()
+            ]
         });
     }
 
@@ -39,5 +41,9 @@ export class AuthAdapter {
             email,
             password
         });
+    }
+
+    async signOut(): Promise<void> {
+        await this.client.signOut();
     }
 }

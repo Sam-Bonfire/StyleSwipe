@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { styled, GetProps, Stack, YStack, Text } from 'tamagui';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -17,6 +16,7 @@ import Animated, {
     interpolate,
     Extrapolate,
 } from 'react-native-reanimated';
+import { styled, GetProps, Stack, YStack, Text } from 'tamagui';
 
 const StackContainer = styled(YStack, {
     name: 'SwipeCardStack',
@@ -187,10 +187,10 @@ function AnimatedCard<T>({
                 { translateY: translateY.value + yOffset },
                 { rotate: `${rotate}deg` },
                 { scale },
-            ],
+            ] as any,
             zIndex: 100 - index,
         };
-    });
+    }) as any;
 
     const likeOpacity = useAnimatedStyle(() => ({
         opacity: interpolate(translateX.value, [0, SWIPE_THRESHOLD], [0, 1], Extrapolate.CLAMP),
@@ -270,7 +270,7 @@ export function SwipeCardStack<T>({
     if (visibleData.length === 0) {
         return (
             <StackContainer {...props}>
-                <Text fontSize="$5" color="$textSecondary">No more cards</Text>
+                <Text fontSize="$5" color="$textSecondary">Looks like we don't have any suggestions for you right now. Come back again in some time for more style suggestions</Text>
             </StackContainer>
         );
     }

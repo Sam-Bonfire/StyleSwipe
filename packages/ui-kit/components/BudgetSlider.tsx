@@ -44,7 +44,7 @@ const BandChip = styled(Stack, {
     borderStyle: 'solid',
     cursor: 'pointer',
 
-    animation: 'quick',
+    animation: 'quick' as any,
 
     hoverStyle: {
         scale: 1.02,
@@ -164,28 +164,30 @@ export const DEFAULT_BUDGET_BANDS: BudgetBand[] = [
 ];
 
 export const BudgetSlider = React.forwardRef<typeof SliderFrame, BudgetSliderProps>(
-    ({
-        label = 'Your usual spend per item?',
-        helperText,
-        bands = DEFAULT_BUDGET_BANDS,
-        selectedBandId,
-        onBandSelect,
-        currency = 'INR',
-        locale = 'en-IN',
-        showVisualSlider = true,
-        ...props
-    }, ref) => {
+    (props: BudgetSliderProps, ref) => {
+        const {
+            label = 'Your usual spend per item?',
+            helperText,
+            bands = DEFAULT_BUDGET_BANDS,
+            selectedBandId,
+            onBandSelect,
+            currency = 'INR',
+            locale = 'en-IN',
+            showVisualSlider = true,
+            ..._rest
+        } = props as any;
+
         const formatCurrency = (value: number) => {
-            return new Intl.NumberFormat(locale, {
+            return new Intl.NumberFormat(locale as string, {
                 style: 'currency',
-                currency,
+                currency: currency as string,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             }).format(value);
         };
 
-        const selectedBand = bands.find(b => b.id === selectedBandId);
-        const selectedIndex = bands.findIndex(b => b.id === selectedBandId);
+        const selectedBand = (bands as BudgetBand[]).find(b => b.id === selectedBandId);
+        const selectedIndex = (bands as BudgetBand[]).findIndex(b => b.id === selectedBandId);
         const fillPercentage = selectedIndex >= 0 ? ((selectedIndex + 1) / bands.length) * 100 : 0;
 
         const getSelectedRangeText = () => {
@@ -197,47 +199,53 @@ export const BudgetSlider = React.forwardRef<typeof SliderFrame, BudgetSliderPro
         };
 
         return (
-            <SliderFrame ref={ref} {...props}>
-                {label && <LabelText>{label}</LabelText>}
-                {helperText && <HelperText>{helperText}</HelperText>}
+            <SliderFrame ref={ref as any} {..._rest}>
+                {
+                    (
+                        <>
+                            {label && <LabelText>{label}</LabelText>}
+                            {helperText && <HelperText>{helperText}</HelperText>}
 
-                <BandContainer>
-                    {bands.map((band) => {
-                        const isSelected = band.id === selectedBandId;
-                        const displayLabel = band.maxValue === null
-                            ? `${formatCurrency(band.minValue)}+`
-                            : `${formatCurrency(band.minValue)} - ${formatCurrency(band.maxValue)}`;
+                            <BandContainer>
+                                {(bands as BudgetBand[]).map((band) => {
+                                    const isSelected = band.id === selectedBandId;
+                                    const displayLabel = band.maxValue === null
+                                        ? `${formatCurrency(band.minValue)}+`
+                                        : `${formatCurrency(band.minValue)} - ${formatCurrency(band.maxValue)}`;
 
-                        return (
-                            <BandChip
-                                key={band.id}
-                                selected={isSelected}
-                                onPress={() => onBandSelect(band.id)}
-                            >
-                                <BandChipText selected={isSelected}>
-                                    {displayLabel}
-                                </BandChipText>
-                            </BandChip>
-                        );
-                    })}
-                </BandContainer>
+                                    return (
+                                        <BandChip
+                                            key={band.id}
+                                            selected={isSelected}
+                                            onPress={() => onBandSelect(band.id)}
+                                        >
+                                            <BandChipText selected={isSelected}>
+                                                {displayLabel}
+                                            </BandChipText>
+                                        </BandChip>
+                                    );
+                                })}
+                            </BandContainer>
 
-                {showVisualSlider && (
-                    <>
-                        <SliderTrack>
-                            <SliderFill style={{ width: `${fillPercentage}%` }} />
-                        </SliderTrack>
+                            {showVisualSlider && (
+                                <>
+                                    <SliderTrack>
+                                        <SliderFill style={{ width: `${fillPercentage}%` } as any} />
+                                    </SliderTrack>
 
-                        <SliderLabels>
-                            <SliderLabelText>Budget</SliderLabelText>
-                            <SliderLabelText>Premium</SliderLabelText>
-                        </SliderLabels>
+                                    <SliderLabels>
+                                        <SliderLabelText>Budget</SliderLabelText>
+                                        <SliderLabelText>Premium</SliderLabelText>
+                                    </SliderLabels>
 
-                        <SelectedRangeText>
-                            {getSelectedRangeText()}
-                        </SelectedRangeText>
-                    </>
-                )}
+                                    <SelectedRangeText>
+                                        {getSelectedRangeText()}
+                                    </SelectedRangeText>
+                                </>
+                            )}
+                        </>
+                    ) as any
+                }
             </SliderFrame>
         );
     }

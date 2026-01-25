@@ -10,9 +10,7 @@ export const getVectorFeed = action({
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             // Return public/trending products if not logged in
-            // For now, simple fallback to a query or empty
-            // In real prod: Call a public query
-            return [];
+            return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
         }
 
         // 1. Get User Profile & Vector
@@ -23,10 +21,8 @@ export const getVectorFeed = action({
         });
 
         if (!user || !user.styleProfile?.preferenceVector) {
-            // Fallback: No vector found, return standard feed
-            // return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
-            // For now returning empty to signal "needs questions" or just standard feed
-            return [];
+            // Fallback: No vector found, return standard discovery feed
+            return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
         }
 
         const { preferenceVector } = user.styleProfile;

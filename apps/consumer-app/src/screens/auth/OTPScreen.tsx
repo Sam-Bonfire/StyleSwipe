@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { YStack, Input, Text, H2 } from 'tamagui';
 import { Button } from '@app/ui-kit';
-import { authAdapter } from '../../lib/auth';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
+import React, { useState } from 'react';
 import { Alert } from 'react-native';
+import { YStack, Input, Text, H2 } from 'tamagui';
+
+import { authAdapter } from '../../lib/auth';
 
 export function OTPScreen() {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigation = useNavigation<any>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const route = useRoute<any>();
     const { phone } = route.params || {};
 
@@ -16,11 +17,7 @@ export function OTPScreen() {
         setLoading(true);
         try {
             await authAdapter.verifyOTP(phone, otp);
-            // Reset to Home
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Home' }],
-            });
+            // NavigationGuard in App.tsx will handle the redirect automatically
         } catch (e) {
             console.error(e);
             Alert.alert('Error', 'Invalid Code. Please try again.');

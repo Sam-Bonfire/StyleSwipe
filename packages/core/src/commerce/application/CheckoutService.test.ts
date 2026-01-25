@@ -1,7 +1,8 @@
 import { describe, it, expect, mock } from 'bun:test';
-import { CheckoutService } from './CheckoutService';
+
 import { Cart, CartItem } from '../domain/Cart';
 import { Address } from '../domain/Order';
+import { CheckoutService } from './CheckoutService';
 
 describe('CheckoutService', () => {
     it('should create an order from a cart', async () => {

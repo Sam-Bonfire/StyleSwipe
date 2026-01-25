@@ -122,46 +122,56 @@ const getInitials = (name?: string) => {
 const OVERLAP_MAP = { small: -8, medium: -12, large: -16 };
 
 export const AvatarGroup = React.forwardRef<TamaguiElement, AvatarGroupProps>(
-    ({
-        avatars,
-        max = 4,
-        size = 'medium',
-        overlap,
-        onPress,
-        onAvatarPress,
-        ...props
-    }, ref) => {
-        const displayAvatars = avatars.slice(0, max);
+    (props: AvatarGroupProps, ref) => {
+        const {
+            avatars,
+            max = 4,
+            size = 'medium',
+            overlap,
+            onPress,
+            onAvatarPress,
+            ...rest
+        } = props as any;
+
+        const displayAvatars = (avatars as any[]).slice(0, max);
         const overflowCount = avatars.length - max;
-        const marginLeft = overlap ?? OVERLAP_MAP[size];
+        const marginLeft = overlap ?? OVERLAP_MAP[size as keyof typeof OVERLAP_MAP];
 
         return (
-            <GroupFrame ref={ref} onPress={onPress} cursor={onPress ? 'pointer' : undefined} {...props}>
-                {displayAvatars.map((avatar, index) => (
-                    <AvatarWrapper
-                        key={avatar.id}
-                        size={size}
-                        marginLeft={index === 0 ? 0 : marginLeft}
-                        zIndex={displayAvatars.length - index}
-                        onPress={() => onAvatarPress?.(avatar)}
-                        cursor={onAvatarPress ? 'pointer' : undefined}
-                    >
-                        {avatar.imageUrl ? (
-                            <AvatarImage source={{ uri: avatar.imageUrl }} />
-                        ) : (
-                            <InitialsContainer>
-                                <InitialsText size={size}>
-                                    {getInitials(avatar.name)}
-                                </InitialsText>
-                            </InitialsContainer>
-                        )}
-                    </AvatarWrapper>
-                ))}
+            <GroupFrame ref={ref as any} onPress={onPress} cursor={onPress ? 'pointer' : undefined} {...rest}>
+                {
+                    displayAvatars.map((avatar, index) => (
+                        <AvatarWrapper
+                            key={avatar.id}
+                            size={size as any}
+                            marginLeft={index === 0 ? 0 : marginLeft}
+                            zIndex={displayAvatars.length - index}
+                            onPress={() => onAvatarPress?.(avatar)}
+                            cursor={onAvatarPress ? 'pointer' : undefined}
+                        >
+                            {
+                                (
+                                    avatar.imageUrl ? (
+                                        <AvatarImage source={{ uri: avatar.imageUrl }} />
+                                    ) : (
+                                        <InitialsContainer>
+                                            <InitialsText size={size as any}>
+                                                {getInitials(avatar.name)}
+                                            </InitialsText>
+                                        </InitialsContainer>
+                                    )
+                                ) as any
+                            }
+                        </AvatarWrapper>
+                    )) as any
+                }
 
                 {overflowCount > 0 && (
-                    <OverflowBadge size={size} marginLeft={marginLeft}>
-                        <OverflowText size={size}>+{overflowCount}</OverflowText>
-                    </OverflowBadge>
+                    (
+                        <OverflowBadge size={size as any} marginLeft={marginLeft}>
+                            <OverflowText size={size as any}>+{overflowCount}</OverflowText>
+                        </OverflowBadge>
+                    ) as any
                 )}
             </GroupFrame>
         );

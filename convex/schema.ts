@@ -21,7 +21,7 @@ const users = defineTable({
     image: v.optional(v.string()),
 
     // Custom fields [cite: 107]
-    phone: v.string(), // Required, Unique - Primary auth identifier
+    phone: v.optional(v.string()), // Optional - only required for phone auth
     activeOrgId: v.optional(v.id("organizations")),
 
     // Style DNA [cite: 112-135]

@@ -1,4 +1,35 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@convex-api": [
+        "../../convex/_generated/api"
+      ],
+      "@convex-dataModel": [
+        "../../convex/_generated/dataModel"
+      ],
+      "@app/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@app/core/*": [
+        "../../packages/core/*"
+      ],
+      "@app/infrastructure": [
+        "../../packages/infrastructure/src/index.ts"
+      ],
+      "@app/infrastructure/*": [
+        "../../packages/infrastructure/*"
+      ],
+      "@app/ui-kit": [
+        "../../packages/ui-kit/index.ts"
+      ],
+      "@app/ui-kit/*": [
+        "../../packages/ui-kit/*"
+      ]
+    },
+    "skipLibCheck": true
+  },
   "extends": "expo/tsconfig.base"
 }

@@ -1,5 +1,5 @@
-import { styled, XStack, YStack, Text, Button, GetProps } from 'tamagui';
 import { ShoppingBag } from '@tamagui/lucide-icons';
+import { styled, XStack, YStack, Text, Button, GetProps } from 'tamagui';
 
 const FooterFrame = styled(XStack, {
     name: 'TransactionalFooter',

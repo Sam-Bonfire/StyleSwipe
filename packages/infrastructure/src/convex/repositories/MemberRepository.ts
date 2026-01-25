@@ -5,12 +5,10 @@
 
 import type { MemberRepository } from "@app/core";
 import type { Member, MemberRole } from "@app/core";
+import type { Id } from "@convex-dataModel";
 
+import { api } from "@convex-api";
 import { ConvexClient } from "convex/browser";
-
-import type { Id } from "../../../../convex/_generated/dataModel";
-
-import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of MemberRepository port
