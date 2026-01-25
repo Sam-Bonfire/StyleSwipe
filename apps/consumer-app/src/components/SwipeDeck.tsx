@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
-import { useQuery, useMutation } from 'convex/react';
+import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
-import { YStack } from 'tamagui';
+import { YStack, Button } from 'tamagui';
 
 export function SwipeDeck() {
-    const products = useQuery(api.discovery.getDiscoveryFeed, { limit: 10 });
+    const [products, setProducts] = useState<any[] | null>(null);
+    const getVectorFeed = useAction(api.recommendations.getVectorFeed);
     const swipeMutation = useMutation(api.discovery.processSwipe);
 
-    if (products === undefined) {
+    useEffect(() => {
+        getVectorFeed({ limit: 10 }).then(setProducts).catch(console.error);
+    }, [getVectorFeed]);
+
+    if (products === null) {
         return (
             <YStack flex={1} justifyContent="center" alignItems="center">
                 <ActivityIndicator size="large" />

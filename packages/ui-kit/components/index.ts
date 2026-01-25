@@ -16,6 +16,9 @@ export type { CategoryChipProps } from './CategoryChip';
 export { ProductTile } from './ProductTile';
 export type { ProductTileProps } from './ProductTile';
 
+export { ImageGallery } from './ImageGallery';
+// export type { ImageGalleryProps } from './ImageGallery'; // Not exporting props yet as it's not exported in file
+
 // Navigation Components
 export { NavigationBar } from './NavigationBar';
 export type { NavigationBarProps, NavigationItem } from './NavigationBar';

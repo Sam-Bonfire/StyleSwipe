@@ -1,7 +1,8 @@
 import { createAuthClient } from "better-auth/client";
 
 export class AuthAdapter {
-    private client;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private client: any;
 
     constructor(baseURL: string) {
         this.client = createAuthClient({
@@ -9,18 +10,31 @@ export class AuthAdapter {
         });
     }
 
-    async signInWithPhone(phoneNumber: string) {
-        return this.client.signIn.phone({
+    async signInWithPhone(phoneNumber: string): Promise<void> {
+        await this.client.signIn.phone({
             phoneNumber
         });
     }
 
-    async verifyOTP(phoneNumber: string, otp: string) {
-        // Note: better-auth phone plugin logic might differ, assuming verify flow
-        // Or it might be part of signIn if just OTP
-        return this.client.signIn.phone({
+    async verifyOTP(phoneNumber: string, otp: string): Promise<void> {
+        await this.client.signIn.phone({
             phoneNumber,
             otp
+        });
+    }
+
+    async signUpWithEmail(email: string, password: string, name: string): Promise<void> {
+        await this.client.signUp.email({
+            email,
+            password,
+            name
+        });
+    }
+
+    async signInWithEmail(email: string, password: string): Promise<void> {
+        await this.client.signIn.email({
+            email,
+            password
         });
     }
 }

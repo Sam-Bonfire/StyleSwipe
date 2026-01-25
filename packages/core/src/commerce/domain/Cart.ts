@@ -26,6 +26,17 @@ export class Cart {
         }
     }
 
+    updateItemQuantity(productId: string, quantity: number): void {
+        const existing = this.items.find(i => i.productId === productId);
+        if (existing) {
+            if (quantity <= 0) {
+                this.removeItem(productId);
+            } else {
+                existing.quantity = quantity;
+            }
+        }
+    }
+
     removeItem(productId: string): void {
         this.items = this.items.filter(i => i.productId !== productId);
     }

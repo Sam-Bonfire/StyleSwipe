@@ -103,3 +103,16 @@ export const processSwipe = mutation({
         return { status: "success", swipeId };
     },
 });
+
+export const getUserSwipedIds = query({
+    args: {
+        userId: v.id("users"),
+    },
+    handler: async (ctx, args) => {
+        const swipes = await ctx.db
+            .query("swipes")
+            .withIndex("by_user", (q) => q.eq("userId", args.userId))
+            .collect();
+        return swipes.map(s => s.productId);
+    },
+});

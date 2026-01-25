@@ -24,6 +24,16 @@ export class ManageCart {
         return cart;
     }
 
+    async updateQuantity(userId: string, productId: string, quantity: number): Promise<Cart> {
+        const cart = await this.repo.findByUserId(userId);
+        if (!cart) {
+            throw new Error("Cart not found");
+        }
+        cart.updateItemQuantity(productId, quantity);
+        await this.repo.save(cart);
+        return cart;
+    }
+
     async getCart(userId: string): Promise<Cart | null> {
         return this.repo.findByUserId(userId);
     }

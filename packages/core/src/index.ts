@@ -13,4 +13,5 @@ export * from "./identity/use-cases/GetOnboardingQuestions";
 // Commerce
 export * from "./commerce/domain/Cart";
 export * from "./commerce/domain/CartRepository";
+export * from "./commerce/domain/PriceEstimator";
 export * from "./commerce/application/ManageCart";
