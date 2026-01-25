@@ -1,7 +1,7 @@
 # StyleSwipe Technical Architecture Specification
 
 ## 1. Vision & Strategy
-[cite_start]StyleSwipe is a next-generation fashion discovery platform[cite: 5]. [cite_start]The architecture must support two distinct shopping mentalities: an inspiration-heavy Discover Mode (Tinder-style) and a utility-heavy Shop Mode (Grid-based)[cite: 16, 18, 19].
+StyleSwipe is a next-generation fashion discovery platform. The architecture must support two distinct shopping mentalities: an inspiration-heavy Discover Mode (Tinder-style) and a utility-heavy Shop Mode (Grid-based).
 
 ## 2. Monorepo & Tooling (The Stack)
 * **Runtime**: Bun (Version 1.1+) for performance and workspace management.

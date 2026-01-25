@@ -1,9 +1,6 @@
 import { Cart, CartItem, CartRepository } from "@app/core";
 import { ConvexClient } from "convex/browser";
-// import { api } from "../../../../convex/_generated/api";
-// PROVISIONAL: Mock API object until `convex codegen` is run (requires auth)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const api: any = { cart: { saveCart: "cart:saveCart", getCart: "cart:getCart" } };
+import { api } from "@convex-api";
 
 export class ConvexCartRepository implements CartRepository {
     constructor(private client: ConvexClient) { }

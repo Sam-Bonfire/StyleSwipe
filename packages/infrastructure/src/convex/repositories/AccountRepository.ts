@@ -8,9 +8,9 @@ import type { Account } from "@app/core";
 
 import { ConvexClient } from "convex/browser";
 
-import type { Id } from "../../../../convex/_generated/dataModel";
+import type { Id } from "@convex-dataModel";
 
-import { api } from "../../../../convex/_generated/api";
+import { api } from "@convex-api";
 
 /**
  * Convex implementation of AccountRepository port

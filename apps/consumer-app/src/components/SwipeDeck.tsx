@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { useQuery, useMutation, useAction } from 'convex/react';
-import { api } from '../../convex/_generated/api';
+import { ActivityIndicator } from 'react-native';
+import { useMutation, useAction } from 'convex/react';
+import { api } from '@convex-api';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
-import { YStack, Button } from 'tamagui';
+import { YStack } from 'tamagui';
 
 export function SwipeDeck() {
     const [products, setProducts] = useState<any[] | null>(null);

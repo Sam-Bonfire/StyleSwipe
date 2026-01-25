@@ -1,9 +1,9 @@
 import { betterAuth } from "better-auth";
-import { phone, username } from "better-auth/plugins";
+import { phoneNumber, username } from "better-auth/plugins";
 
 export const auth = betterAuth({
     plugins: [
-        phone(),
+        phoneNumber(),
         username()
     ]
 });
