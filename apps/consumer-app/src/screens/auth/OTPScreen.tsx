@@ -16,11 +16,7 @@ export function OTPScreen() {
         setLoading(true);
         try {
             await authAdapter.verifyOTP(phone, otp);
-            // Reset to Home
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Home' }],
-            });
+            // NavigationGuard in App.tsx will handle the redirect automatically
         } catch (e) {
             console.error(e);
             Alert.alert('Error', 'Invalid Code. Please try again.');

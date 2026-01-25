@@ -1,4 +1,16 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@convex-api": [
+        "../../convex/_generated/api"
+      ],
+      "@convex-dataModel": [
+        "../../convex/_generated/dataModel"
+      ]
+    }
+  },
   "extends": "expo/tsconfig.base"
 }

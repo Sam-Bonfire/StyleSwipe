@@ -270,7 +270,7 @@ export function SwipeCardStack<T>({
     if (visibleData.length === 0) {
         return (
             <StackContainer {...props}>
-                <Text fontSize="$5" color="$textSecondary">No more cards</Text>
+                <Text fontSize="$5" color="$textSecondary">Looks like we don't have any suggestions for you right now. Come back again in some time for more style suggestions</Text>
             </StackContainer>
         );
     }

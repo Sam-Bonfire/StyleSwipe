@@ -12,21 +12,22 @@
         "web": "expo start --web"
     },
     "dependencies": {
+        "@app/core": "workspace:*",
+        "@app/ui-kit": "workspace:*",
+        "@convex-dev/better-auth": "^0.10.10",
+        "@expo/metro-runtime": "~4.0.0",
+        "@react-navigation/native": "^6.1.9",
+        "@react-navigation/stack": "^6.3.20",
         "expo": "~52.0.0",
         "expo-status-bar": "~2.0.0",
         "react": "18.3.1",
-        "react-native": "0.76.0",
-        "react-native-web": "~0.19.13",
         "react-dom": "18.3.1",
-        "react-native-reanimated": "~3.16.1",
+        "react-native": "0.76.0",
         "react-native-gesture-handler": "~2.20.2",
-        "@expo/metro-runtime": "~4.0.0",
-        "@app/core": "workspace:*",
-        "@app/ui-kit": "workspace:*",
-        "@react-navigation/native": "^6.1.9",
-        "@react-navigation/stack": "^6.3.20",
+        "react-native-reanimated": "~3.16.1",
+        "react-native-safe-area-context": "4.8.2",
         "react-native-screens": "~3.29.0",
-        "react-native-safe-area-context": "4.8.2"
+        "react-native-web": "~0.19.13"
     },
     "devDependencies": {
         "@babel/core": "^7.25.0",

@@ -9,8 +9,7 @@
         ".": "./index.ts",
         "./theme": "./theme.ts",
         "./components": "./components/index.ts",
-        "./components/SwipeCardStack": "./components/SwipeCardStack.tsx",
-        "./components/FashionCard": "./components/FashionCard.tsx"
+        "./components/*": "./components/*.tsx"
     },
     "dependencies": {
         "tamagui": "^1.0.0",

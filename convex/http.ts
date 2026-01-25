@@ -1,23 +1,13 @@
 import { httpRouter } from "convex/server";
-import { auth } from "./auth";
-import { httpAction } from "./_generated/server";
+import { authComponent, getAuth } from "./auth";
 
 const http = httpRouter();
 
-http.route({
-    pathPrefix: "/api/auth/",
-    method: "POST",
-    handler: httpAction(async (_ctx, request) => {
-        return auth.handler(request);
-    }),
-});
-
-http.route({
-    pathPrefix: "/api/auth/",
-    method: "GET",
-    handler: httpAction(async (_ctx, request) => {
-        return auth.handler(request);
-    }),
+// Register all Better Auth routes (GET, POST, OPTIONS) with built-in CORS support
+authComponent.registerRoutes(http, getAuth, {
+    cors: {
+        allowedOrigins: ["*"], // Adjust as needed for production
+    }
 });
 
 export default http;
