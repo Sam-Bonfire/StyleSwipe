@@ -106,7 +106,7 @@ const TitleText = styled(Text, {
     color: '$textPrimary',
 });
 
-const IconButton = styled(Stack, {
+export const TopBarIconButton = styled(Stack, {
     name: 'TopBarIconButton',
     width: 40,
     height: 40,
@@ -125,7 +125,7 @@ const IconButton = styled(Stack, {
     },
 });
 
-const BadgeCount = styled(Stack, {
+export const TopBarBadgeCount = styled(Stack, {
     name: 'TopBarBadgeCount',
     position: 'absolute',
     top: 4,
@@ -139,7 +139,7 @@ const BadgeCount = styled(Stack, {
     paddingHorizontal: 4,
 });
 
-const BadgeText = styled(Text, {
+export const TopBarBadgeText = styled(Text, {
     name: 'TopBarBadgeText',
     fontFamily: '$body',
     fontSize: 10,
@@ -225,35 +225,35 @@ export const TopBar = React.forwardRef<typeof TopBarFrame, TopBarProps>(
                                 {rightContent ?? (
                                     <>
                                         {showSearch && (
-                                            <IconButton onPress={onSearchPress}>
+                                            <TopBarIconButton onPress={onSearchPress}>
                                                 {(<Search size={22} color="$textPrimary" />) as any}
-                                            </IconButton>
+                                            </TopBarIconButton>
                                         )}
 
                                         {showWishlist && (
-                                            <IconButton onPress={onWishlistPress}>
+                                            <TopBarIconButton onPress={onWishlistPress}>
                                                 {(<Heart size={22} color="$textPrimary" />) as any}
                                                 {(wishlistCount as number) > 0 && (
-                                                    <BadgeCount>
-                                                        <BadgeText>
+                                                    <TopBarBadgeCount>
+                                                        <TopBarBadgeText>
                                                             {(wishlistCount as number) > 99 ? '99+' : `${wishlistCount}`}
-                                                        </BadgeText>
-                                                    </BadgeCount>
+                                                        </TopBarBadgeText>
+                                                    </TopBarBadgeCount>
                                                 )}
-                                            </IconButton>
+                                            </TopBarIconButton>
                                         )}
 
                                         {showCart && (
-                                            <IconButton onPress={onCartPress}>
+                                            <TopBarIconButton onPress={onCartPress}>
                                                 {(<ShoppingCart size={22} color="$textPrimary" />) as any}
                                                 {(cartCount as number) > 0 && (
-                                                    <BadgeCount>
-                                                        <BadgeText>
+                                                    <TopBarBadgeCount>
+                                                        <TopBarBadgeText>
                                                             {(cartCount as number) > 99 ? '99+' : `${cartCount}`}
-                                                        </BadgeText>
-                                                    </BadgeCount>
+                                                        </TopBarBadgeText>
+                                                    </TopBarBadgeCount>
                                                 )}
-                                            </IconButton>
+                                            </TopBarIconButton>
                                         )}
                                     </>
                                 )}

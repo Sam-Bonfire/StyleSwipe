@@ -11,9 +11,14 @@ fi
 jj new main -m "[$TYPE/$TITLE] Initializing"
 
 # Set the branch name for Graphite to track
-jj branch set "$TYPE/$TITLE"
+# Set the bookmark name for Graphite to track
+jj bookmark set "$TYPE/$TITLE" -r @
 
-# Push to origin to establish the remote backup branch
-jj git push --branch "$TYPE/$TITLE"
+# Push to origin to establish the remote backup
+jj git push --allow-new
+
+# Export to git to ensure local branch exists for tools like Graphite
+echo "🔄 Exporting to Git..."
+jj git export
 
 echo "✅ JJ change initialized. Branch: $TYPE/$TITLE (Remote backup established)"

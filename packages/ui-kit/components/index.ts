@@ -23,8 +23,7 @@ export { ImageGallery } from './ImageGallery';
 export { NavigationBar } from './NavigationBar';
 export type { NavigationBarProps, NavigationItem } from './NavigationBar';
 
-export { TopBar } from './TopBar';
-export type { TopBarProps } from './TopBar';
+export * from './TopBar';
 
 // Style DNA / Onboarding Components
 export { GridSelection } from './GridSelection';
