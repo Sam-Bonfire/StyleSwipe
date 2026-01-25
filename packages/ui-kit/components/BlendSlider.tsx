@@ -5,9 +5,9 @@
  * Features: Visual slider with labels for self vs partner influence
  */
 
+import { User, Users } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, YStack, XStack, Text, Stack, TamaguiElement } from 'tamagui';
-import { User, Users } from '@tamagui/lucide-icons';
 
 const SliderFrame = styled(YStack, {
     name: 'BlendSlider',
@@ -84,14 +84,6 @@ const Thumb = styled(Stack, {
     },
 });
 
-const PercentageLabel = styled(Text, {
-    name: 'BlendSliderPercentage',
-    fontFamily: '$heading',
-    fontSize: '$6',
-    fontWeight: '700',
-    color: '$textPrimary',
-    textAlign: 'center',
-});
 
 const DescriptionText = styled(Text, {
     name: 'BlendSliderDescription',
@@ -110,14 +102,16 @@ export type BlendSliderProps = GetProps<typeof SliderFrame> & {
 };
 
 export const BlendSlider = React.forwardRef<TamaguiElement, BlendSliderProps>(
-    ({
-        value,
-        onChange,
-        partnerName = 'Partner',
-        disabled = false,
-        ...props
-    }, ref) => {
-        const selfInfluence = 100 - value;
+    (props: BlendSliderProps, ref) => {
+        const {
+            value,
+            onChange,
+            partnerName = 'Partner',
+            disabled = false,
+            ...rest
+        } = props as any;
+
+        const selfInfluence = 100 - (value as number);
 
         const handleTrackPress = (e: any) => {
             if (disabled) return;
@@ -132,51 +126,57 @@ export const BlendSlider = React.forwardRef<TamaguiElement, BlendSliderProps>(
         };
 
         const getDescription = () => {
-            if (value === 0) return 'Your feed only';
-            if (value <= 25) return `Subtle hints from ${partnerName}`;
-            if (value <= 50) return `Balanced blend with ${partnerName}`;
-            if (value <= 75) return `${partnerName} leading the way`;
-            if (value < 100) return `Mostly ${partnerName} style`;
+            if ((value as number) === 0) return 'Your feed only';
+            if ((value as number) <= 25) return `Subtle hints from ${partnerName}`;
+            if ((value as number) <= 50) return `Balanced blend with ${partnerName}`;
+            if ((value as number) <= 75) return `${partnerName} leading the way`;
+            if ((value as number) < 100) return `Mostly ${partnerName} style`;
             return `${partnerName} feed only`;
         };
 
         return (
-            <SliderFrame ref={ref} opacity={disabled ? 0.5 : 1} {...props}>
-                <LabelRow>
-                    <SideLabel>
-                        <User size={16} color="$textSecondary" />
-                        <LabelText>You</LabelText>
-                    </SideLabel>
-                    <SideLabel>
-                        <LabelText>{partnerName}</LabelText>
-                        <Users size={16} color="$textSecondary" />
-                    </SideLabel>
-                </LabelRow>
+            <SliderFrame ref={ref as any} opacity={disabled ? 0.5 : 1} {...rest}>
+                {
+                    (
+                        <>
+                            <LabelRow>
+                                <SideLabel>
+                                    {(<User size={16} color="$textSecondary" />) as any}
+                                    <LabelText>You</LabelText>
+                                </SideLabel>
+                                <SideLabel>
+                                    <LabelText>{partnerName}</LabelText>
+                                    {(<Users size={16} color="$textSecondary" />) as any}
+                                </SideLabel>
+                            </LabelRow>
 
-                <TrackContainer onPress={handleTrackPress}>
-                    <Track>
-                        <TrackFill
-                            backgroundColor="$secondary"
-                            width={`${selfInfluence}%`}
-                        />
-                        <TrackFill
-                            backgroundColor="$primary"
-                            width={`${value}%`}
-                        />
-                    </Track>
+                            <TrackContainer onPress={handleTrackPress as any}>
+                                <Track>
+                                    <TrackFill
+                                        backgroundColor="$secondary"
+                                        width={`${selfInfluence}%`}
+                                    />
+                                    <TrackFill
+                                        backgroundColor="$primary"
+                                        width={`${value}%`}
+                                    />
+                                </Track>
 
-                    <Thumb
-                        left={`${value}%`}
-                        transform={[{ translateX: -14 }]}
-                    />
-                </TrackContainer>
+                                <Thumb
+                                    left={`${value}%`}
+                                    transform={[{ translateX: -14 }]}
+                                />
+                            </TrackContainer>
 
-                <XStack justifyContent="space-between">
-                    <ValueText>{selfInfluence}%</ValueText>
-                    <ValueText>{value}%</ValueText>
-                </XStack>
+                            <XStack justifyContent="space-between">
+                                <ValueText>{selfInfluence}%</ValueText>
+                                <ValueText>{value}%</ValueText>
+                            </XStack>
 
-                <DescriptionText>{getDescription()}</DescriptionText>
+                            <DescriptionText>{getDescription()}</DescriptionText>
+                        </>
+                    ) as any
+                }
             </SliderFrame>
         );
     }

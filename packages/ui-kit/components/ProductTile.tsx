@@ -5,9 +5,9 @@
  * Features: Product image, brand name, title, price with discount, rating badge, sale badge
  */
 
+import { Star, Heart } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
-import { Star, Heart } from '@tamagui/lucide-icons';
 
 const TileFrame = styled(Stack, {
     name: 'ProductTile',
@@ -215,26 +215,28 @@ export type ProductTileProps = GetProps<typeof TileFrame> & {
 };
 
 export const ProductTile = React.forwardRef<TamaguiElement, ProductTileProps>(
-    ({
-        imageUrl,
-        brand,
-        title,
-        price,
-        originalPrice,
-        discountPercentage,
-        rating,
-        reviewCount,
-        isOnSale = false,
-        isWishlisted = false,
-        currency = 'INR',
-        onPress,
-        onWishlistToggle,
-        ...props
-    }, ref) => {
+    (props: ProductTileProps, ref) => {
+        const {
+            imageUrl,
+            brand,
+            title,
+            price,
+            originalPrice,
+            discountPercentage,
+            rating,
+            reviewCount,
+            isOnSale = false,
+            isWishlisted = false,
+            currency = 'INR',
+            onPress,
+            onWishlistToggle,
+            ...rest
+        } = props as any;
+
         const formatPrice = (amount: number) => {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
-                currency,
+                currency: currency as string,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
             }).format(amount);
@@ -248,61 +250,75 @@ export const ProductTile = React.forwardRef<TamaguiElement, ProductTileProps>(
         };
 
         return (
-            <TileFrame ref={ref} onPress={onPress} {...props}>
-                <ImageContainer>
-                    <ProductImage
-                        source={{ uri: imageUrl }}
-                        // @ts-ignore
-                        src={imageUrl}
-                        resizeMode="cover"
-                    />
+            <TileFrame ref={ref as any} onPress={onPress} {...rest}>
+                {
+                    (
+                        <>
+                            <ImageContainer>
+                                <ProductImage
+                                    source={{ uri: imageUrl }}
+                                    // @ts-ignore
+                                    src={imageUrl}
+                                    style={{ objectFit: 'cover' } as any}
+                                />
 
-                    {isOnSale && (
-                        <SaleBadge>
-                            <SaleBadgeText>Sale</SaleBadgeText>
-                        </SaleBadge>
-                    )}
+                                {isOnSale && (
+                                    <SaleBadge>
+                                        <SaleBadgeText>Sale</SaleBadgeText>
+                                    </SaleBadge>
+                                )}
 
-                    <WishlistButton onPress={handleWishlistPress}>
-                        <Heart
-                            size={18}
-                            color={isWishlisted ? '$primary' : '$textSecondary'}
-                            fill={isWishlisted ? '$primary' : 'transparent'}
-                        />
-                    </WishlistButton>
-                </ImageContainer>
+                                <WishlistButton onPress={handleWishlistPress}>
+                                    {
+                                        (
+                                            <Heart
+                                                size={18}
+                                                color={isWishlisted ? '$primary' : '$textSecondary'}
+                                                fill={isWishlisted ? '$primary' : 'transparent'}
+                                            />
+                                        ) as any
+                                    }
+                                </WishlistButton>
+                            </ImageContainer>
 
-                <ContentContainer>
-                    <BrandText>{brand}</BrandText>
-                    <TitleText>{title}</TitleText>
+                            <ContentContainer>
+                                <BrandText>{brand}</BrandText>
+                                <TitleText>{title}</TitleText>
 
-                    <PriceRow>
-                        <PriceText>{formatPrice(price)}</PriceText>
+                                <PriceRow>
+                                    <PriceText>{formatPrice(price as number)}</PriceText>
 
-                        {originalPrice && originalPrice > price && (
-                            <OriginalPriceText>
-                                {formatPrice(originalPrice)}
-                            </OriginalPriceText>
-                        )}
+                                    {originalPrice && (originalPrice as number) > (price as number) && (
+                                        <OriginalPriceText>
+                                            {formatPrice(originalPrice as number)}
+                                        </OriginalPriceText>
+                                    )}
 
-                        {discountPercentage && discountPercentage > 0 && (
-                            <DiscountText>{discountPercentage}% OFF</DiscountText>
-                        )}
-                    </PriceRow>
+                                    {(discountPercentage as number) && (discountPercentage as number) > 0 && (
+                                        <DiscountText>{discountPercentage}% OFF</DiscountText>
+                                    )}
+                                </PriceRow>
 
-                    {rating !== undefined && rating > 0 && (
-                        <RatingRow>
-                            <RatingBadge>
-                                <Star size={10} color="$textInverse" fill="$textInverse" />
-                                <RatingText>{rating.toFixed(1)}</RatingText>
-                            </RatingBadge>
+                                {(rating as number) !== undefined && (rating as number) > 0 && (
+                                    <RatingRow>
+                                        <RatingBadge>
+                                            {
+                                                (
+                                                    <Star size={10} color="$textInverse" fill="$textInverse" />
+                                                ) as any
+                                            }
+                                            <RatingText>{(rating as number).toFixed(1)}</RatingText>
+                                        </RatingBadge>
 
-                            {reviewCount !== undefined && reviewCount > 0 && (
-                                <ReviewCountText>({reviewCount})</ReviewCountText>
-                            )}
-                        </RatingRow>
-                    )}
-                </ContentContainer>
+                                        {(reviewCount as number) !== undefined && (reviewCount as number) > 0 && (
+                                            <ReviewCountText>({reviewCount})</ReviewCountText>
+                                        )}
+                                    </RatingRow>
+                                )}
+                            </ContentContainer>
+                        </>
+                    ) as any
+                }
             </TileFrame>
         );
     }

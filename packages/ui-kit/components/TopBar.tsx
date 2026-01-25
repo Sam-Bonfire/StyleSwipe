@@ -5,9 +5,9 @@
  * Features: Left slot (address), Right slot (icon group), optional title center
  */
 
+import { MapPin, Search, Heart, ShoppingCart, ChevronDown } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
-import { MapPin, Search, Heart, ShoppingCart, ChevronDown } from '@tamagui/lucide-icons';
 
 const TopBarFrame = styled(XStack, {
     name: 'TopBar',
@@ -106,7 +106,7 @@ const TitleText = styled(Text, {
     color: '$textPrimary',
 });
 
-const IconButton = styled(Stack, {
+export const TopBarIconButton = styled(Stack, {
     name: 'TopBarIconButton',
     width: 40,
     height: 40,
@@ -125,7 +125,7 @@ const IconButton = styled(Stack, {
     },
 });
 
-const BadgeCount = styled(Stack, {
+export const TopBarBadgeCount = styled(Stack, {
     name: 'TopBarBadgeCount',
     position: 'absolute',
     top: 4,
@@ -139,7 +139,7 @@ const BadgeCount = styled(Stack, {
     paddingHorizontal: 4,
 });
 
-const BadgeText = styled(Text, {
+export const TopBarBadgeText = styled(Text, {
     name: 'TopBarBadgeText',
     fontFamily: '$body',
     fontSize: 10,
@@ -174,85 +174,93 @@ export type TopBarProps = GetProps<typeof TopBarFrame> & {
 };
 
 export const TopBar = React.forwardRef<typeof TopBarFrame, TopBarProps>(
-    ({
-        showAddress = true,
-        addressLabel = 'Deliver to',
-        addressValue,
-        onAddressPress,
-        title,
-        showSearch = true,
-        onSearchPress,
-        showWishlist = true,
-        wishlistCount = 0,
-        onWishlistPress,
-        showCart = true,
-        cartCount = 0,
-        onCartPress,
-        leftContent,
-        centerContent,
-        rightContent,
-        ...props
-    }, ref) => {
+    (props: TopBarProps, ref) => {
+        const {
+            showAddress = true,
+            addressLabel = 'Deliver to',
+            addressValue,
+            onAddressPress,
+            title,
+            showSearch = true,
+            onSearchPress,
+            showWishlist = true,
+            wishlistCount = 0,
+            onWishlistPress,
+            showCart = true,
+            cartCount = 0,
+            onCartPress,
+            leftContent,
+            centerContent,
+            rightContent,
+            ...rest
+        } = props as any;
+
         return (
-            <TopBarFrame ref={ref} {...props}>
-                <LeftSection>
-                    {leftContent ?? (showAddress && (
-                        <AddressButton onPress={onAddressPress}>
-                            <MapPin size={18} color="$primary" />
-                            <YStack>
-                                <AddressLabel>{addressLabel}</AddressLabel>
-                                <XStack alignItems="center" gap="$0.5">
-                                    <AddressText>
-                                        {addressValue || 'Select Address'}
-                                    </AddressText>
-                                    <ChevronDown size={14} color="$textSecondary" />
-                                </XStack>
-                            </YStack>
-                        </AddressButton>
-                    ))}
-                </LeftSection>
-
-                <CenterSection>
-                    {centerContent ?? (title && <TitleText>{title}</TitleText>)}
-                </CenterSection>
-
-                <RightSection>
-                    {rightContent ?? (
+            <TopBarFrame ref={ref as any} {...rest}>
+                {
+                    (
                         <>
-                            {showSearch && (
-                                <IconButton onPress={onSearchPress}>
-                                    <Search size={22} color="$textPrimary" />
-                                </IconButton>
-                            )}
+                            <LeftSection>
+                                {leftContent ?? (showAddress && (
+                                    <AddressButton onPress={onAddressPress}>
+                                        {(<MapPin size={18} color="$primary" />) as any}
+                                        <YStack>
+                                            <AddressLabel>{addressLabel}</AddressLabel>
+                                            <XStack alignItems="center" gap="$0.5">
+                                                <AddressText>
+                                                    {addressValue || 'Select Address'}
+                                                </AddressText>
+                                                {(<ChevronDown size={14} color="$textSecondary" />) as any}
+                                            </XStack>
+                                        </YStack>
+                                    </AddressButton>
+                                ))}
+                            </LeftSection>
 
-                            {showWishlist && (
-                                <IconButton onPress={onWishlistPress}>
-                                    <Heart size={22} color="$textPrimary" />
-                                    {wishlistCount > 0 && (
-                                        <BadgeCount>
-                                            <BadgeText>
-                                                {wishlistCount > 99 ? '99+' : wishlistCount}
-                                            </BadgeText>
-                                        </BadgeCount>
-                                    )}
-                                </IconButton>
-                            )}
+                            <CenterSection>
+                                {centerContent ?? (title && <TitleText>{title}</TitleText>)}
+                            </CenterSection>
 
-                            {showCart && (
-                                <IconButton onPress={onCartPress}>
-                                    <ShoppingCart size={22} color="$textPrimary" />
-                                    {cartCount > 0 && (
-                                        <BadgeCount>
-                                            <BadgeText>
-                                                {cartCount > 99 ? '99+' : cartCount}
-                                            </BadgeText>
-                                        </BadgeCount>
-                                    )}
-                                </IconButton>
-                            )}
+                            <RightSection>
+                                {rightContent ?? (
+                                    <>
+                                        {showSearch && (
+                                            <TopBarIconButton onPress={onSearchPress}>
+                                                {(<Search size={22} color="$textPrimary" />) as any}
+                                            </TopBarIconButton>
+                                        )}
+
+                                        {showWishlist && (
+                                            <TopBarIconButton onPress={onWishlistPress}>
+                                                {(<Heart size={22} color="$textPrimary" />) as any}
+                                                {(wishlistCount as number) > 0 && (
+                                                    <TopBarBadgeCount>
+                                                        <TopBarBadgeText>
+                                                            {(wishlistCount as number) > 99 ? '99+' : `${wishlistCount}`}
+                                                        </TopBarBadgeText>
+                                                    </TopBarBadgeCount>
+                                                )}
+                                            </TopBarIconButton>
+                                        )}
+
+                                        {showCart && (
+                                            <TopBarIconButton onPress={onCartPress}>
+                                                {(<ShoppingCart size={22} color="$textPrimary" />) as any}
+                                                {(cartCount as number) > 0 && (
+                                                    <TopBarBadgeCount>
+                                                        <TopBarBadgeText>
+                                                            {(cartCount as number) > 99 ? '99+' : `${cartCount}`}
+                                                        </TopBarBadgeText>
+                                                    </TopBarBadgeCount>
+                                                )}
+                                            </TopBarIconButton>
+                                        )}
+                                    </>
+                                )}
+                            </RightSection>
                         </>
-                    )}
-                </RightSection>
+                    ) as any
+                }
             </TopBarFrame>
         );
     }

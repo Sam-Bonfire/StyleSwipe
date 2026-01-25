@@ -5,12 +5,10 @@
 
 import type { LogRepository } from "@app/core";
 import type { LogEntry, LogLevel } from "@app/core";
+import type { Id } from "@convex-dataModel";
 
+import { api } from "@convex-api";
 import { ConvexClient } from "convex/browser";
-
-import type { Id } from "../../../../convex/_generated/dataModel";
-
-import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of LogRepository port

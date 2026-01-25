@@ -5,24 +5,8 @@
  * Purpose: Verify visual consistency across Windows/Linux environments
  */
 
-import React, { useState } from 'react';
-import {
-    TamaguiProvider,
-    Theme,
-    YStack,
-    XStack,
-    Text,
-    Stack,
-    ScrollView,
-    H1,
-    H2,
-    H3,
-    Separator,
-} from 'tamagui';
-
 import {
     config,
-    tokens,
     Button,
     FashionCard,
     CategoryChip,
@@ -37,8 +21,21 @@ import {
     DEFAULT_FIT_GROUPS,
     DEFAULT_SIZE_FIELDS,
 } from '@app/ui-kit';
-
-import { Home, Search, Grid, User, Heart, ShoppingCart } from '@tamagui/lucide-icons';
+import { Home, Search, Grid, User } from '@tamagui/lucide-icons';
+import React, { useState } from 'react';
+import {
+    TamaguiProvider,
+    Theme,
+    YStack,
+    XStack,
+    Text,
+    Stack,
+    ScrollView,
+    H1,
+    H2,
+    H3,
+    Separator,
+} from 'tamagui';
 
 // Section wrapper component
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -58,7 +55,8 @@ const ColorSwatch = ({ name, color }: { name: string; color: string }) => (
             width={48}
             height={48}
             borderRadius="$2"
-            backgroundColor={color}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            backgroundColor={color as any}
             borderWidth={1}
             borderColor="$borderColor"
         />

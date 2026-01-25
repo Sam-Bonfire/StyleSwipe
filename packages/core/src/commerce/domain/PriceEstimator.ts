@@ -12,7 +12,7 @@ export interface PriceBreakdown {
 export class PriceEstimator {
     private static readonly FREE_SHIPPING_THRESHOLD = 1000;
     private static readonly DEFAULT_SHIPPING = 100;
-    private static readonly TAX_RATE = 0.18; // 18% GST
+
 
     static estimate(cart: Cart): PriceBreakdown {
         const subtotal = cart.total;

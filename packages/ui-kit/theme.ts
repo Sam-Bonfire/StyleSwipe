@@ -9,9 +9,9 @@
  * PRD Source: Modern Indian e-commerce aesthetic, Gen Z/Millennial target
  */
 
-import { createTamagui, createTokens } from 'tamagui';
 import { createFont } from '@tamagui/core';
 import { shorthands } from '@tamagui/shorthands';
+import { createTamagui, createTokens } from 'tamagui';
 
 // -----------------------------------------------------------------------------
 // Typography: Manrope Font Family
@@ -382,6 +382,7 @@ export { tokens };
 export type AppConfig = typeof config;
 
 declare module 'tamagui' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface TamaguiCustomConfig extends AppConfig { }
 }
 

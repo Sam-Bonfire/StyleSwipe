@@ -22,14 +22,15 @@ export type LoadingSkeletonProps = GetProps<typeof SkeletonBase> & {
 };
 
 export const LoadingSkeleton = React.forwardRef<typeof SkeletonBase, LoadingSkeletonProps>(
-    ({ width = '100%', height = 20, circle = false, ...props }, ref) => {
+    (props: LoadingSkeletonProps, ref) => {
+        const { width = '100%', height = 20, circle = false, ...rest } = props as any;
         return (
             <SkeletonBase
-                ref={ref}
+                ref={ref as any}
                 width={width}
                 height={height}
-                borderRadius={circle ? '$full' : '$2'}
-                {...props}
+                borderRadius={(circle ? '$full' : '$2') as any}
+                {...rest}
             />
         );
     }

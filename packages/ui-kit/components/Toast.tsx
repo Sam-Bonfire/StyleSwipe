@@ -5,9 +5,8 @@
  * Features: Success/Error/Info variants, auto-dismiss, action button
  */
 
-import React, { useEffect } from 'react';
-import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
 import { Check, AlertCircle, Info, X } from '@tamagui/lucide-icons';
+import React, { useEffect } from 'react';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -15,6 +14,7 @@ import Animated, {
     withSpring,
     runOnJS,
 } from 'react-native-reanimated';
+import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
 
 const ToastFrame = styled(XStack, {
     name: 'Toast',
@@ -170,19 +170,20 @@ export const Toast = React.forwardRef<typeof ToastFrame, ToastProps>(
             translateY.value = withSpring(0);
 
             // Auto dismiss
-            if (duration > 0) {
+            if ((duration as number) > 0) {
                 const timer = setTimeout(() => {
                     handleDismiss();
-                }, duration);
+                }, duration as number);
 
                 return () => clearTimeout(timer);
             }
+            return undefined;
         }, [duration]);
 
         const handleDismiss = () => {
             opacity.value = withTiming(0, { duration: 200 });
             translateY.value = withTiming(-20, { duration: 200 }, () => {
-                runOnJS(onDismiss)();
+                runOnJS(onDismiss as any)();
             });
         };
 
@@ -191,30 +192,40 @@ export const Toast = React.forwardRef<typeof ToastFrame, ToastProps>(
             transform: [{ translateY: translateY.value }],
         }));
 
-        const IconComponent = IconMap[variant];
+        const IconComponent = IconMap[variant as any];
 
         return (
             <Animated.View style={animatedStyle}>
-                <ToastFrame ref={ref} variant={variant} {...props}>
-                    <IconContainer variant={variant}>
-                        <IconComponent size={18} color={IconColorMap[variant]} />
-                    </IconContainer>
+                <ToastFrame ref={ref as any} variant={variant as any} {...props}>
+                    {
+                        (
+                            <IconContainer variant={variant as any}>
+                                <IconComponent size={18} color={IconColorMap[variant as any] as any} />
+                            </IconContainer>
+                        ) as any
+                    }
 
-                    <ContentContainer>
-                        {title && <TitleText>{title}</TitleText>}
-                        <MessageText>{message}</MessageText>
+                    {
+                        (
+                            <ContentContainer>
+                                {title && <TitleText>{title}</TitleText>}
+                                <MessageText>{message}</MessageText>
 
-                        {action && (
-                            <ActionButton onPress={action.onPress}>
-                                {action.label}
-                            </ActionButton>
-                        )}
-                    </ContentContainer>
+                                {action && (
+                                    <ActionButton onPress={(action as any).onPress}>
+                                        {(action as any).label}
+                                    </ActionButton>
+                                )}
+                            </ContentContainer>
+                        ) as any
+                    }
 
                     {showClose && (
-                        <CloseButton onPress={handleDismiss}>
-                            <X size={16} color="$textSecondary" />
-                        </CloseButton>
+                        (
+                            <CloseButton onPress={handleDismiss}>
+                                <X size={16} color="$textSecondary" />
+                            </CloseButton>
+                        ) as any
                     )}
                 </ToastFrame>
             </Animated.View>

@@ -43,7 +43,7 @@ const PreferenceButton = styled(YStack, {
     cursor: 'pointer',
     minWidth: 80,
 
-    animation: 'quick',
+    animation: 'quick' as any,
 
     hoverStyle: {
         scale: 1.02,
@@ -241,12 +241,14 @@ export const DEFAULT_FIT_GROUPS: FitGroup[] = [
 ];
 
 export const FitPreferenceButtons = React.forwardRef<typeof ContainerFrame, FitPreferenceButtonsProps>(
-    ({
-        groups = DEFAULT_FIT_GROUPS,
-        selectedOptions,
-        onSelectionChange,
-        ...props
-    }, ref) => {
+    (props: FitPreferenceButtonsProps, ref) => {
+        const {
+            groups = DEFAULT_FIT_GROUPS,
+            selectedOptions,
+            onSelectionChange,
+            ...rest
+        } = props as any;
+
         const handleOptionPress = (group: FitGroup, optionId: string) => {
             const currentSelected = selectedOptions[group.id] || [];
             const isSelected = currentSelected.includes(optionId);
@@ -267,40 +269,44 @@ export const FitPreferenceButtons = React.forwardRef<typeof ContainerFrame, FitP
         };
 
         return (
-            <ContainerFrame ref={ref} {...props}>
-                {groups.map((group) => {
-                    const groupSelected = selectedOptions[group.id] || [];
+            <ContainerFrame ref={ref as any} {...rest}>
+                {
+                    (
+                        (groups as FitGroup[]).map((group) => {
+                            const groupSelected = selectedOptions[group.id] || [];
 
-                    return (
-                        <GroupContainer key={group.id}>
-                            <GroupLabel>{group.label}</GroupLabel>
+                            return (
+                                <GroupContainer key={group.id}>
+                                    <GroupLabel>{group.label}</GroupLabel>
 
-                            <ButtonRow>
-                                {group.options.map((option) => {
-                                    const isSelected = groupSelected.includes(option.id);
-                                    const IconComponent = FitIconMap[option.id.toLowerCase()];
+                                    <ButtonRow>
+                                        {group.options.map((option) => {
+                                            const isSelected = groupSelected.includes(option.id);
+                                            const IconComponent = FitIconMap[option.id.toLowerCase()];
 
-                                    return (
-                                        <PreferenceButton
-                                            key={option.id}
-                                            selected={isSelected}
-                                            onPress={() => handleOptionPress(group, option.id)}
-                                        >
-                                            {IconComponent && (
-                                                <IconContainer selected={isSelected}>
-                                                    <IconComponent selected={isSelected} />
-                                                </IconContainer>
-                                            )}
-                                            <ButtonLabel selected={isSelected}>
-                                                {option.label}
-                                            </ButtonLabel>
-                                        </PreferenceButton>
-                                    );
-                                })}
-                            </ButtonRow>
-                        </GroupContainer>
-                    );
-                })}
+                                            return (
+                                                <PreferenceButton
+                                                    key={option.id}
+                                                    selected={isSelected}
+                                                    onPress={() => handleOptionPress(group, option.id)}
+                                                >
+                                                    {IconComponent && (
+                                                        <IconContainer selected={isSelected as any}>
+                                                            <IconComponent selected={isSelected} />
+                                                        </IconContainer>
+                                                    )}
+                                                    <ButtonLabel selected={isSelected as any}>
+                                                        {option.label}
+                                                    </ButtonLabel>
+                                                </PreferenceButton>
+                                            );
+                                        })}
+                                    </ButtonRow>
+                                </GroupContainer>
+                            );
+                        })
+                    ) as any
+                }
             </ContainerFrame>
         );
     }

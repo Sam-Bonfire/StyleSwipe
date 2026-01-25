@@ -1,21 +1,17 @@
-```
 ---
 description: Standard procedure for starting a new task as an agent
 ---
 
-# Agent Start Task Workflow
+# Workflow: Start Task
 
-1.  **Load Agent Rules**
-    - [ ] `view_file .agent/rules.md`
-    - [ ] Review the mandates for `jj`, `bun`, and strict documentation compliance.
+1. **Bootstrap**
+   - [ ] Read `.agent/PROTOCOL.md` and `docs/Architecture.md`.
+   - [ ] Identify parameters: `type`, `title`, `ticketids`.
+   - [ ] Execute: `bun task {{type}} {{title}}`.
 
-2.  **Read the Constitution**
-    - [ ] `view_file docs/AGENTS.md`
-    - [ ] `view_file docs/Architecture.md`
+2. **Develop & Backup**
+   - [ ] Implement features in the assigned context.
+   - [ ] Run `bun snap` at every stable milestone to ensure remote backups exist.
 
-3.  **Check Sync Status**
-    - [ ] `view_file docs/manifests/current_stack.md`
-    - [ ] Identify if there are dependencies you need to build on.
-
-3.  **Initialize Work**
-    - [ ] `rub_command "jj new -m 'TASK-ID: Description'"`
+3. **Finalize**
+   - [ ] Run `bun submit` to deliver the validated stack to Graphite.

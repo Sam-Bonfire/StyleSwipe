@@ -5,7 +5,9 @@
     "license": "UNLICENSED",
     "private": true,
     "scripts": {
-        "test": "bun test"
+        "test": "bun test",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --ignore-pattern .eslintrc.js"
     },
     "dependencies": {
         "effect": "^2.0.0",

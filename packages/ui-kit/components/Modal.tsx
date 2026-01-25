@@ -5,16 +5,15 @@
  * Features: Overlay, centered content, close on backdrop, animations
  */
 
-import React, { useEffect } from 'react';
-import { styled, GetProps, YStack, XStack, Text, Stack, Portal } from 'tamagui';
 import { X } from '@tamagui/lucide-icons';
+import React, { useEffect } from 'react';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withTiming,
     withSpring,
-    runOnJS,
 } from 'react-native-reanimated';
+import { styled, GetProps, YStack, XStack, Text, Stack, Portal } from 'tamagui';
 
 const Backdrop = styled(Stack, {
     name: 'ModalBackdrop',
@@ -108,16 +107,18 @@ export type ModalProps = GetProps<typeof ModalFrame> & {
 };
 
 export const Modal = React.forwardRef<typeof ModalFrame, ModalProps>(
-    ({
-        open,
-        onClose,
-        title,
-        showCloseButton = true,
-        closeOnBackdrop = true,
-        footer,
-        children,
-        ...props
-    }, ref) => {
+    (props: ModalProps, ref) => {
+        const {
+            open,
+            onClose,
+            title,
+            showCloseButton = true,
+            closeOnBackdrop = true,
+            footer,
+            children,
+            ...rest
+        } = props as any;
+
         const backdropOpacity = useSharedValue(0);
         const modalScale = useSharedValue(0.9);
         const modalOpacity = useSharedValue(0);
@@ -165,27 +166,34 @@ export const Modal = React.forwardRef<typeof ModalFrame, ModalProps>(
                             left: 0,
                             right: 0,
                             bottom: 0,
-                        },
+                            zIndex: 1000,
+                        } as any,
                         backdropStyle,
                     ]}
                 >
                     <Backdrop onPress={handleBackdropPress}>
                         <Animated.View style={modalStyle}>
-                            <ModalFrame ref={ref} onPress={handleModalPress} {...props}>
-                                {(title || showCloseButton) && (
-                                    <ModalHeader>
-                                        {title && <ModalTitle>{title}</ModalTitle>}
-                                        {showCloseButton && (
-                                            <CloseButton onPress={onClose}>
-                                                <X size={20} color="$textSecondary" />
-                                            </CloseButton>
-                                        )}
-                                    </ModalHeader>
-                                )}
+                            <ModalFrame ref={ref as any} onPress={handleModalPress} {...rest}>
+                                {
+                                    (
+                                        <>
+                                            {(title || showCloseButton) && (
+                                                <ModalHeader>
+                                                    {title && <ModalTitle>{title}</ModalTitle>}
+                                                    {showCloseButton && (
+                                                        <CloseButton onPress={onClose}>
+                                                            {(<X size={20} color="$textSecondary" />) as any}
+                                                        </CloseButton>
+                                                    )}
+                                                </ModalHeader>
+                                            )}
 
-                                <ModalBody>{children}</ModalBody>
+                                            <ModalBody>{children}</ModalBody>
 
-                                {footer && <ModalFooter>{footer}</ModalFooter>}
+                                            {footer && <ModalFooter>{footer}</ModalFooter>}
+                                        </>
+                                    ) as any
+                                }
                             </ModalFrame>
                         </Animated.View>
                     </Backdrop>
