@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { YStack } from 'tamagui';
 import { NavigationBar } from '@app/ui-kit';
 import { Home, Search, Layers, User, ShoppingCart } from '@tamagui/lucide-icons';
-import { DiscoveryScreen } from '../discovery/DiscoveryScreen';
+import React, { useState } from 'react';
+import { YStack } from 'tamagui';
+
 import { CartScreen } from '../commerce/CartScreen';
+import { DiscoveryScreen } from '../discovery/DiscoveryScreen';
 import { HomeScreen } from '../home/HomeScreen';
-import { SearchScreen } from '../search/SearchScreen';
 import { ProfileScreen } from '../profile/ProfileScreen';
+import { SearchScreen } from '../search/SearchScreen';
 
 export function MainScreen() {
     const [activeTab, setActiveTab] = useState('discovery');

@@ -1,9 +1,11 @@
-import React from 'react';
-import { YStack, Text, H1, XStack, Spacer } from 'tamagui';
 import { Button } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { YStack, Text, H1, XStack } from 'tamagui';
 
 export function AuthSelectionScreen() {
+     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const navigation = useNavigation<any>();
 
     return (

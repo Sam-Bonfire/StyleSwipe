@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { YStack, Input, Text, H2, XStack } from 'tamagui';
 import { Button } from '@app/ui-kit';
-import { authAdapter } from '../../lib/auth';
-import { useNavigation } from '@react-navigation/native';
-import { Alert } from 'react-native';
-import { useMutation } from 'convex/react';
 import { api } from '@convex-api';
+import { useMutation } from 'convex/react';
+import React, { useState } from 'react';
+import { Alert } from 'react-native';
+import { YStack, Input, Text, H2, XStack } from 'tamagui';
+
+import { authAdapter } from '../../lib/auth';
 
 type EmailMode = 'signin' | 'signup';
 
@@ -15,7 +15,6 @@ export function EmailAuthScreen() {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigation = useNavigation<any>();
     const getOrCreateUser = useMutation(api.users.getOrCreateUser);
 
     const handleSubmit = async () => {

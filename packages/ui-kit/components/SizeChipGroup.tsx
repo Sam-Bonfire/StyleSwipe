@@ -52,7 +52,7 @@ const SizeChip = styled(Stack, {
     alignItems: 'center',
     justifyContent: 'center',
 
-    animation: 'quick',
+    animation: 'quick' as any,
 
     hoverStyle: {
         scale: 1.02,
@@ -237,14 +237,16 @@ export const DEFAULT_SIZE_FIELDS: SizeField[] = [
 ];
 
 export const SizeChipGroup = React.forwardRef<typeof ContainerFrame, SizeChipGroupProps>(
-    ({
-        fields = DEFAULT_SIZE_FIELDS,
-        selectedSizes,
-        selectedRegions = {},
-        onSizeChange,
-        onRegionChange,
-        ...props
-    }, ref) => {
+    (props: SizeChipGroupProps, ref) => {
+        const {
+            fields = DEFAULT_SIZE_FIELDS,
+            selectedSizes,
+            selectedRegions = {},
+            onSizeChange,
+            onRegionChange,
+            ...rest
+        } = props as any;
+
         const handleChipPress = (field: SizeField, sizeId: string) => {
             const currentSelected = selectedSizes[field.id] || [];
             const isSelected = currentSelected.includes(sizeId);
@@ -265,55 +267,59 @@ export const SizeChipGroup = React.forwardRef<typeof ContainerFrame, SizeChipGro
         };
 
         return (
-            <ContainerFrame ref={ref} {...props}>
-                {fields.map((field) => {
-                    const fieldSelected = selectedSizes[field.id] || [];
-                    const activeRegion = selectedRegions[field.id] || field.regions?.[0]?.id;
+            <ContainerFrame ref={ref as any} {...rest}>
+                {
+                    (
+                        (fields as SizeField[]).map((field) => {
+                            const fieldSelected = selectedSizes[field.id] || [];
+                            const activeRegion = selectedRegions[field.id] || field.regions?.[0]?.id;
 
-                    return (
-                        <FieldContainer key={field.id}>
-                            <FieldLabel>{field.label}</FieldLabel>
-                            {field.helperText && (
-                                <FieldHelper>{field.helperText}</FieldHelper>
-                            )}
+                            return (
+                                <FieldContainer key={field.id}>
+                                    <FieldLabel>{field.label}</FieldLabel>
+                                    {field.helperText && (
+                                        <FieldHelper>{field.helperText}</FieldHelper>
+                                    )}
 
-                            {field.hasRegionSelector && field.regions && onRegionChange && (
-                                <RegionSelector>
-                                    {field.regions.map((region) => (
-                                        <RegionButton
-                                            key={region.id}
-                                            active={region.id === activeRegion}
-                                            onPress={() => onRegionChange(field.id, region.id)}
-                                        >
-                                            <RegionButtonText active={region.id === activeRegion}>
-                                                {region.label}
-                                            </RegionButtonText>
-                                        </RegionButton>
-                                    ))}
-                                </RegionSelector>
-                            )}
+                                    {field.hasRegionSelector && field.regions && onRegionChange && (
+                                        <RegionSelector>
+                                            {field.regions.map((region) => (
+                                                <RegionButton
+                                                    key={region.id}
+                                                    active={(region.id === activeRegion) as any}
+                                                    onPress={() => onRegionChange(field.id, region.id)}
+                                                >
+                                                    <RegionButtonText active={(region.id === activeRegion) as any}>
+                                                        {region.label}
+                                                    </RegionButtonText>
+                                                </RegionButton>
+                                            ))}
+                                        </RegionSelector>
+                                    )}
 
-                            <ChipRow>
-                                {field.options.map((option) => {
-                                    const isSelected = fieldSelected.includes(option.id);
+                                    <ChipRow>
+                                        {field.options.map((option) => {
+                                            const isSelected = fieldSelected.includes(option.id);
 
-                                    return (
-                                        <SizeChip
-                                            key={option.id}
-                                            selected={isSelected}
-                                            disabled={option.disabled}
-                                            onPress={() => handleChipPress(field, option.id)}
-                                        >
-                                            <ChipText selected={isSelected}>
-                                                {option.label}
-                                            </ChipText>
-                                        </SizeChip>
-                                    );
-                                })}
-                            </ChipRow>
-                        </FieldContainer>
-                    );
-                })}
+                                            return (
+                                                <SizeChip
+                                                    key={option.id}
+                                                    selected={isSelected as any}
+                                                    disabled={option.disabled as any}
+                                                    onPress={() => handleChipPress(field, option.id)}
+                                                >
+                                                    <ChipText selected={isSelected as any}>
+                                                        {option.label}
+                                                    </ChipText>
+                                                </SizeChip>
+                                            );
+                                        })}
+                                    </ChipRow>
+                                </FieldContainer>
+                            );
+                        })
+                    ) as any
+                }
             </ContainerFrame>
         );
     }

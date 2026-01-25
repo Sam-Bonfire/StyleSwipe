@@ -12,7 +12,7 @@ export function initializeStyleProfile(answers: Record<string, string>): StylePr
     const vector = new Array(512).fill(0);
 
     // Seed with answer hashes for some variability
-    Object.entries(answers).forEach(([_key, value], index) => {
+    Object.values(answers).forEach((value, index) => {
         const charSum = value.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
         const pos = (charSum + index) % 512;
         vector[pos] = 1.0;

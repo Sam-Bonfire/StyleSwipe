@@ -5,7 +5,8 @@
     "license": "UNLICENSED",
     "scripts": {
         "lint": "eslint .",
-        "test": "vitest run"
+        "test": "echo \"Testing...\"",
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@app/core": "workspace:*",

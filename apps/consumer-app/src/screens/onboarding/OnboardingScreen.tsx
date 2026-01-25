@@ -1,12 +1,11 @@
+import { initializeStyleProfile, getOnboardingQuestions, OnboardingQuestion } from '@app/core';
+import { Button, CategoryChip } from '@app/ui-kit';
+import { api } from '@convex-api';
+import { useMutation } from 'convex/react';
+import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, XStack, H1, H2, Text, Button as TamaguiButton, Progress } from 'tamagui';
-import { Button, CategoryChip } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
-import { api } from '@convex-api';
-import { useNavigation } from '@react-navigation/native';
-import { initializeStyleProfile, getOnboardingQuestions, OnboardingQuestion } from '@app/core';
-import { Effect } from 'effect';
 
 export function OnboardingScreen() {
     const [step, setStep] = useState(0);
@@ -14,7 +13,6 @@ export function OnboardingScreen() {
     const questions = Effect.runSync(getOnboardingQuestions()) as OnboardingQuestion[];
 
     const updateStyleProfile = useMutation(api.users.updateStyleProfile);
-    const navigation = useNavigation<any>();
 
     const currentQuestion = questions[step];
     const progress = ((step + 1) / questions.length) * 100;
@@ -30,7 +28,6 @@ export function OnboardingScreen() {
             // Final step - save profile, NavigationGuard will handle transition
             const styleProfile = initializeStyleProfile(answers);
             try {
-                // @ts-ignore - Convex schema might not be in sync yet in editor but should be fine at runtime
                 await updateStyleProfile({ styleProfile });
                 // NavigationGuard in App.tsx will automatically navigate to Discovery
             } catch (e) {
