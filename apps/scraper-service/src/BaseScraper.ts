@@ -1,9 +1,11 @@
 import { chromium, Browser, Page } from 'playwright';
 import { Scraper, ScrapedProduct } from './types.js';
+import { EnvProxyProvider } from './proxies/ProxyProvider.js';
 
 export abstract class BaseScraper implements Scraper {
     protected browser: Browser | null = null;
     protected abstract platformName: string;
+    private proxyProvider = new EnvProxyProvider();
 
     abstract matches(url: string): boolean;
     protected abstract extractProduct(page: Page): Promise<ScrapedProduct>;
@@ -12,8 +14,14 @@ export abstract class BaseScraper implements Scraper {
         console.log(`[${this.platformName}] Starting scrape for: ${url}`);
 
         try {
+            const proxyConfig = await this.proxyProvider.getProxy();
+            if (proxyConfig) {
+                console.log(`[${this.platformName}] Using proxy: ${proxyConfig.server}`);
+            }
+
             this.browser = await chromium.launch({
                 headless: true,
+                proxy: proxyConfig,
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             });
 
