@@ -1,0 +1,19 @@
+{
+    "name": "@app/infrastructure",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "license": "UNLICENSED",
+    "scripts": {
+        "lint": "eslint .",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "better-auth": "^1.1.0",
+        "@app/core": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "typescript": "^5.0.0",
+        "vitest": "^1.0.0"
+    }
+}

@@ -182,6 +182,7 @@ const products = defineTable({
     price: v.number(),
     mrp: v.number(), // Maximum retail price (original)
     category: v.string(),
+    categoryId: v.optional(v.id("categories")),
     images: v.array(v.string()),
     attributes: v.optional(
         v.object({
@@ -263,6 +264,7 @@ export default defineSchema({
 
     // Catalog Context
     products,
+    categories,
 
     // Discovery Context
     partnerSync,
