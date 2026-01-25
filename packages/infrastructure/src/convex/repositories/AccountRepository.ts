@@ -3,11 +3,14 @@
 // Implements AccountRepository port for OAuth provider accounts
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { AccountRepository } from "@app/core";
 import type { Account } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of AccountRepository port

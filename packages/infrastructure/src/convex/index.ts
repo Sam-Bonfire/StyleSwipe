@@ -3,20 +3,21 @@
 // Creates all repository instances with shared Convex client
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
 import type { Repositories } from "@app/core";
 
-import { ConvexUserRepository } from "./repositories/UserRepository";
-import { ConvexSessionRepository } from "./repositories/SessionRepository";
+import { ConvexClient } from "convex/browser";
+
 import { ConvexAccountRepository } from "./repositories/AccountRepository";
-import { ConvexVerificationRepository } from "./repositories/VerificationRepository";
-import { ConvexOrganizationRepository } from "./repositories/OrganizationRepository";
-import { ConvexMemberRepository } from "./repositories/MemberRepository";
+import { ConvexEventRepository } from "./repositories/EventRepository";
 import { ConvexFeatureFlagRepository } from "./repositories/FeatureFlagRepository";
 import { ConvexLogRepository } from "./repositories/LogRepository";
-import { ConvexEventRepository } from "./repositories/EventRepository";
-import { ConvexProductRepository } from "./repositories/ProductRepository";
+import { ConvexMemberRepository } from "./repositories/MemberRepository";
+import { ConvexOrganizationRepository } from "./repositories/OrganizationRepository";
 import { ConvexPartnerSyncRepository } from "./repositories/PartnerSyncRepository";
+import { ConvexProductRepository } from "./repositories/ProductRepository";
+import { ConvexSessionRepository } from "./repositories/SessionRepository";
+import { ConvexUserRepository } from "./repositories/UserRepository";
+import { ConvexVerificationRepository } from "./repositories/VerificationRepository";
 
 /**
  * Factory function to create all Convex repository adapters

@@ -3,11 +3,14 @@
 // Implements LogRepository port for structured logging
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { LogRepository } from "@app/core";
 import type { LogEntry, LogLevel } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of LogRepository port

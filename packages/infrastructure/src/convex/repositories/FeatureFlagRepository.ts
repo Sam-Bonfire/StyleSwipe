@@ -3,11 +3,14 @@
 // Implements FeatureFlagRepository port for A/B testing and rollouts
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { FeatureFlagRepository } from "@app/core";
 import type { FeatureFlag, Environment, FeatureFlagRule } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of FeatureFlagRepository port

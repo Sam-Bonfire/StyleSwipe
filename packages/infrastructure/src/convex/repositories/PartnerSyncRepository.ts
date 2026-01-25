@@ -3,11 +3,14 @@
 // Implements PartnerSyncRepository port for collaborative shopping
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { PartnerSyncRepository } from "@app/core";
 import type { PartnerSync, PartnerSyncStatus } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of PartnerSyncRepository port

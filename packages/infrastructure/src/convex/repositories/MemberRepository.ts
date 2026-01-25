@@ -3,11 +3,14 @@
 // Implements MemberRepository port for RBAC membership
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { MemberRepository } from "@app/core";
 import type { Member, MemberRole } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of MemberRepository port

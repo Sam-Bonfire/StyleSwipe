@@ -3,11 +3,14 @@
 // Implements OrganizationRepository port for multi-tenant orgs
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { OrganizationRepository } from "@app/core";
 import type { Organization, OrganizationMetadata } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of OrganizationRepository port

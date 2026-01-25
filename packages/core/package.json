@@ -4,6 +4,9 @@
     "main": "src/index.ts",
     "license": "UNLICENSED",
     "private": true,
+    "scripts": {
+        "test": "bun test"
+    },
     "dependencies": {
         "effect": "^2.0.0",
         "fast-check": "^3.0.0"

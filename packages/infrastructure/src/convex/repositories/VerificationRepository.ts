@@ -3,11 +3,14 @@
 // Implements VerificationRepository port for OTP lifecycle
 // =============================================================================
 
-import { ConvexClient } from "convex/browser";
-import { api } from "../../../../convex/_generated/api";
-import type { Id } from "../../../../convex/_generated/dataModel";
 import type { VerificationRepository } from "@app/core";
 import type { Verification, VerificationType } from "@app/core";
+
+import { ConvexClient } from "convex/browser";
+
+import type { Id } from "../../../../convex/_generated/dataModel";
+
+import { api } from "../../../../convex/_generated/api";
 
 /**
  * Convex implementation of VerificationRepository port

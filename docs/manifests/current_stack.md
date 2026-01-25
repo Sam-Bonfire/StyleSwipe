@@ -14,3 +14,5 @@
 | ID-002  | Antigravity | ID-001         | Identity            |
 | ID-003  | Antigravity | ID-002         | Identity            |
 | ID-004  | Antigravity | ID-003         | Identity            |
+| COM-001 | Antigravity | ID-004         | Cart                |
+| DIS-001 | Antigravity | ID-004         | Identity, Discovery |

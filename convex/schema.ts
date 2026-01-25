@@ -242,6 +242,36 @@ const partnerSync = defineTable({
     .index("by_initiator", ["initiatorId"])
     .index("by_partner", ["partnerId"]);
 
+// PRD Ref: [cite: 29, 33] - User swipes on products (Discovery Mode)
+const swipes = defineTable({
+    userId: v.id("users"),
+    productId: v.id("products"),
+    action: v.union(v.literal("like"), v.literal("pass"), v.literal("super")),
+    timestamp: v.number(),
+})
+    .index("by_user", ["userId"])
+    .index("by_product", ["productId"])
+    .index("by_user_product", ["userId", "productId"]);
+
+
+// -----------------------------------------------------------------------------
+// COMMERCE CONTEXT - Cart, Checkout, Orders
+// -----------------------------------------------------------------------------
+
+const carts = defineTable({
+    userId: v.string(), // User ID or Session ID
+    items: v.array(
+        v.object({
+            productId: v.id("products"),
+            quantity: v.number(),
+            price: v.number(),
+            attributes: v.optional(v.any()),
+        })
+    ),
+    updatedAt: v.number(),
+})
+    .index("by_user", ["userId"]);
+
 // =============================================================================
 // SCHEMA EXPORT
 // =============================================================================
@@ -268,4 +298,8 @@ export default defineSchema({
 
     // Discovery Context
     partnerSync,
+    swipes,
+
+    // Commerce Context
+    carts,
 });
