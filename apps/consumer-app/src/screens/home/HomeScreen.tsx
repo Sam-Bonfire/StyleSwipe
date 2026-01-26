@@ -85,8 +85,6 @@ export function HomeScreen() {
                             onProductPress={handleProductPress}
                         />
                     </YStack>
-
-                    <Spacer size="$10" />
                 </YStack>
             </ScrollView>
         </YStack>
