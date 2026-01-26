@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import React from 'react';
 import { ScrollView } from 'react-native';
-import { YStack, Spacer } from 'tamagui';
+import { YStack } from 'tamagui';
 
 import { ProductCarousel } from '../../components/ProductCarousel';
 import { SectionHeader } from '../../components/SectionHeader';
@@ -85,8 +85,6 @@ export function HomeScreen() {
                             onProductPress={handleProductPress}
                         />
                     </YStack>
-
-                    <Spacer size="$10" />
                 </YStack>
             </ScrollView>
         </YStack>

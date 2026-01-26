@@ -39,7 +39,7 @@ async function performAnalysisAndSync(db: LocalDatabase) {
     const client = new ConvexHttpClient(CONVEX_URL);
     try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await client.mutation("sync:syncBatch", {
+        await client.mutation("sync:syncBatch" as any, {
             swipes: events.map(e => {
                 const p = JSON.parse(e.payload);
                 return {
@@ -93,9 +93,9 @@ async function executeTask() {
         // Battery Check
         try {
             if (Platform.OS === 'web') {
-                // @ts-ignore
+                // @ts-expect-error - navigator.getBattery is not in standard lib
                 if (navigator.getBattery) {
-                    // @ts-ignore
+                    // @ts-expect-error - navigator.getBattery is not in standard lib
                     const battery = await navigator.getBattery();
                     isCharging = battery.charging;
                 }

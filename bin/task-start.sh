@@ -1,24 +1,14 @@
 #!/bin/bash
-TYPE=$1
-TITLE=$2
+TITLE=$1
+if [ -z "$TITLE" ]; then echo "Usage: bun task <name>"; exit 1; fi
 
-if [ -z "$TITLE" ]; then 
-  echo "Usage: bun task <type> <title>"
-  exit 1
+# Safety check: Ensure we aren't branching directly off main
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$CURRENT_BRANCH" == "main" ]; then
+    echo "⚠️ Warning: You are branching off 'main'. Usually, you should branch off 'dev'."
+    read -p "Continue anyway? (y/N): " CONFIRM
+    if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then exit 1; fi
 fi
 
-# Create a new change off main
-jj new main -m "[$TYPE/$TITLE] Initializing"
-
-# Set the branch name for Graphite to track
-# Set the bookmark name for Graphite to track
-jj bookmark set "$TYPE/$TITLE" -r @
-
-# Push to origin to establish the remote backup
-jj git push --allow-new
-
-# Export to git to ensure local branch exists for tools like Graphite
-echo "🔄 Exporting to Git..."
-jj git export
-
-echo "✅ JJ change initialized. Branch: $TYPE/$TITLE (Remote backup established)"
+gt branch create "$TITLE"
+echo "✅ Stacked new branch: $TITLE"

@@ -47,7 +47,6 @@ export function OnboardingScreen() {
 
                 const vector = await generateEmbedding(semanticDescription);
                 styleProfile.preferenceVector = vector;
-
                 await updateStyleProfile({ styleProfile });
                 // NavigationGuard handles transition
             } catch (e) {

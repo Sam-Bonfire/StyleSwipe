@@ -1,11 +1,22 @@
 #!/bin/bash
 set -e
 
-echo "🛠 Validating with Turbo..."
-bun x turbo run lint test typecheck
+echo "🚀 Starting Production Release..."
+git checkout main && git pull origin main
+git checkout dev && git pull origin dev
 
-echo "🚀 Submitting stack to Graphite..."
-# gt will automatically see the local jj changes exported to the git backend
-gt stack submit --no-edit --publish
+git checkout main
+git merge dev --no-ff -m "chore: release integrated changes from dev"
 
-echo "✅ Stack submitted for review."
+# Versioning
+bun version patch --no-git-tag-version
+VERSION=$(node -p "require('./package.json').version")
+git add package.json && git commit -m "release: v$VERSION"
+
+# Deploy
+git push origin main
+git tag "v$VERSION"
+git push origin --tags
+git checkout dev
+
+echo "🎊 v$VERSION successfully released to main."
