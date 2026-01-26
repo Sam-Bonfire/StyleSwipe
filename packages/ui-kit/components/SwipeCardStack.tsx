@@ -5,8 +5,8 @@
  * Features: Card deck with gesture handlers, swipe left/right/up actions
  */
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Heart, X, Star } from '@tamagui/lucide-icons';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -85,7 +85,7 @@ export type SwipeCardStackProps<T> = Omit<GetProps<typeof StackContainer>, 'chil
 };
 
 // Animated Card Component
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const AnimatedCard = React.forwardRef(({
     item,
     index,
@@ -99,10 +99,10 @@ const AnimatedCard = React.forwardRef(({
     sharedX,
     sharedY,
 }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     item: any;
     index: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     renderCard: (item: any, index: number) => React.ReactNode;
     onSwipe: (direction: SwipeDirection) => void;
     onSwipeStart?: (direction: SwipeDirection) => void;
@@ -303,6 +303,7 @@ export function SwipeCardStack<T>({
             window.addEventListener('keydown', handleKeyDown);
             return () => window.removeEventListener('keydown', handleKeyDown);
         }
+        return undefined;
     }, [currentIndex]);
 
     if (visibleData.length === 0) {

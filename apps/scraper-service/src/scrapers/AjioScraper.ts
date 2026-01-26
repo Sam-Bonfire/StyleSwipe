@@ -1,4 +1,5 @@
 import { Page } from 'playwright';
+
 import { BaseScraper } from '../BaseScraper.js';
 import { ScrapedProduct } from '../types.js';
 

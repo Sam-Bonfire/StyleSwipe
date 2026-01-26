@@ -1,6 +1,7 @@
-import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
 import { SwipeActionSchema } from "@app/core/src/discovery/use-cases/ProcessSwipe";
+import { v } from "convex/values";
+
+import { mutation, query } from "./_generated/server";
 
 export const recordProductView = mutation({
     args: {
@@ -151,7 +152,7 @@ export const processSwipe = mutation({
 
         // Note: In schema we have unique indexes on phone/email.
         // Let's try to find user by email first (common case)
-        let user = await ctx.db
+        const user = await ctx.db
             .query("users")
             .withIndex("by_email", (q) => q.eq("email", identity.email || ""))
             .first();

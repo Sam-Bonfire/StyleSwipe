@@ -1,7 +1,6 @@
 import { registerRootComponent } from 'expo';
 
 import App from './src/App';
-import { registerBackgroundWorker } from './src/workers/BackgroundWorker';
 
 // Register background tasks
 // Register background tasks in App.tsx instead to avoid blocking main thread on boot

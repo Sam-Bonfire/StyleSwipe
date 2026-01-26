@@ -1,6 +1,6 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native';
-import { YStack, H2 } from 'tamagui';
+import { YStack } from 'tamagui';
 
 import { SwipeDeck } from '../../components/SwipeDeck';
 

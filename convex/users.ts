@@ -1,5 +1,6 @@
-import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+
+import { query, mutation } from "./_generated/server";
 
 export const getUserPrivate = query({
     args: {
