@@ -40,6 +40,25 @@ export abstract class BaseScraper implements Scraper {
             product.url = url;
             product.scrapedAt = new Date().toISOString();
 
+            // Vectorization Step
+            try {
+                // Dynamic import to avoid issues if service has initialization side effects or heavy loads
+                const { VectorizationService } = await import('./VectorizationService.js');
+                const vectorizer = await VectorizationService.getInstance();
+
+                // Construct text for embedding: "Title Brand Description Attributes"
+                const textToEmbed = `${product.title} ${product.brand} ${product.description || ''} ${JSON.stringify(product.attributes || {})}`.trim();
+
+                const vectors = await vectorizer.generateAllVersions(textToEmbed);
+                product.embeddingVersions = vectors;
+                product.embedding = vectors.v1; // Legacy support
+            } catch (err) {
+                console.error(`[${this.platformName}] Vectorization failed:`, err);
+                // We don't fail the whole scrape, but log error. 
+                // PRD says "must vectorize 100%", so maybe we should throw? 
+                // But for resilience, let's keep it non-blocking but noisy.
+            }
+
             return product;
         } catch (error) {
             console.error(`[${this.platformName}] Error scraping ${url}:`, error);

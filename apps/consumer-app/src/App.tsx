@@ -61,10 +61,29 @@ function NavigationGuard() {
 }
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+import { Platform } from 'react-native';
 
+import { ModelManager } from './infrastructure/ModelManager';
 import { authAdapter } from './lib/auth';
 
 export default function App() {
+    // -----------------------------------------------------
+    // BACKGROUND MODEL SYNC
+    // -----------------------------------------------------
+    // Trigger Model Download immediately on App Launch (Native Only)
+    // On Web, the engine uses the browser cache automatically when needed.
+    // But for Native, we want to pre-download the 40MB file.
+
+    React.useEffect(() => {
+        if (Platform.OS !== 'web') {
+            console.log("[App] Starting Background Model Download...");
+            ModelManager.downloadModel(() => {
+                // Optional: Log progress or use a global store
+                // console.log(`Model Progress: ${p}`);
+            }).catch(e => console.warn("Background Model Download Failed", e));
+        }
+    }, []);
+
     return (
         <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
             <TamaguiProvider config={config}>

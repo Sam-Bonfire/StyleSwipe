@@ -1,6 +1,10 @@
 import { registerRootComponent } from 'expo';
 
 import App from './src/App';
+import { registerBackgroundWorker } from './src/workers/BackgroundWorker';
+
+// Register background tasks
+registerBackgroundWorker().catch(err => console.error("Failed to register background worker", err));
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,

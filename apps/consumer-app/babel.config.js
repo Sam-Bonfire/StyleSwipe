@@ -5,6 +5,8 @@ module.exports = function (api) {
         plugins: [
             // Required for reanimated to work
             'react-native-reanimated/plugin',
+            // Fix for @xenova/transformers or libraries using import.meta
+            'transform-import-meta',
         ],
     };
 };

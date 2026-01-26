@@ -3,6 +3,7 @@ export * from './catalog/TaggingService';
 
 // Identity
 // export * from "./identity/domain/StyleProfile";
+export * from "./identity/domain/StyleDNA";
 export * from "./identity/application/InitializeStyleProfile";
 export * from "./identity/use-cases/GetOnboardingQuestions";
 

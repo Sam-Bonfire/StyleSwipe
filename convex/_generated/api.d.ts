@@ -15,6 +15,7 @@ import type * as http from "../http.js";
 import type * as products from "../products.js";
 import type * as recommendations from "../recommendations.js";
 import type * as seed from "../seed.js";
+import type * as sync from "../sync.js";
 import type * as users from "../users.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   products: typeof products;
   recommendations: typeof recommendations;
   seed: typeof seed;
+  sync: typeof sync;
   users: typeof users;
 }>;
 
