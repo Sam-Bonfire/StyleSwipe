@@ -16,10 +16,13 @@
         "dev:consumer": "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/consumer-app dev",
         "dev:consumer:web": "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/consumer-app web",
         "typecheck:ui": "bun run --filter @app/ui-kit typecheck",
-        "task": "bash bin/task-start.sh",
-        "snap": "bash bin/snapshot.sh",
-        "submit": "bash bin/submit.sh",
-        "release": "bash bin/release.sh"
+        "task": "sh bin/task-start.sh",
+        "snap": "sh bin/snapshot.sh",
+        "submit": "sh bin/submit.sh",
+        "release": "sh bin/release.sh",
+        "sync": "gt stack get",
+        "lint:fix": "eslint --fix .",
+        "format:fix": "prettier --write ."
     },
     "devDependencies": {
         "@convex-dev/better-auth": "^0.10.10",

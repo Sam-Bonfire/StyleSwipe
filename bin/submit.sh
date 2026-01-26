@@ -1,14 +1,9 @@
 #!/bin/bash
 set -e
 
-echo "🛠 Validating with Turbo..."
-bun x turbo run lint test typecheck
+# --no-edit: Use commit messages for PR titles
+# --submit: Create PRs if they don't exist
+# --publish: Push branches to remote
+gt stack submit --no-edit --submit --publish
 
-echo "� Exporting to Git..."
-jj git export
-
-echo "�🚀 Submitting stack to Graphite..."
-# gt will automatically see the local jj changes exported to the git backend
-gt stack submit --no-edit --publish
-
-echo "✅ Stack submitted for review."
+echo "✅ PRs live on GitHub targeting 'dev'."
