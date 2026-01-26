@@ -1,5 +1,5 @@
-import { Effect } from "effect";
 import { v } from "convex/values";
+import { Effect } from "effect";
 
 /**
  * Value Object validating the Swipe Action

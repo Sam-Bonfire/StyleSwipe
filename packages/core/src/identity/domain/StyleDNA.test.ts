@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { applyDisplacement, Vector384 } from "./StyleDNA";
 
 describe("StyleDNA - applyDisplacement", () => {
