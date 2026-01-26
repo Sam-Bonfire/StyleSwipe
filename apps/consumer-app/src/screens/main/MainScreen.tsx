@@ -72,6 +72,7 @@ export function MainScreen() {
             <YStack flex={1}>
                 {renderContent()}
             </YStack>
+
             <NavigationBar
                 items={navItems}
                 activeKey={activeTab}

@@ -14,3 +14,19 @@ export const getProductsByIds = query({
         return products;
     },
 });
+
+export const getLatest = query({
+    args: {
+        limit: v.optional(v.number()),
+    },
+    handler: async (ctx, args) => {
+        const limit = args.limit ?? 10;
+        return await ctx.db
+            .query("products")
+            .order("desc") // CreatedAt is implicit in ID, but better to use _creationTime if available
+            // Convex documents have _creationTime built-in.
+            // .order("desc") sorts by creation time automatically for table scans?
+            // Actually, ctx.db.query("products").order("desc") sorts by _creationTime descending.
+            .take(limit);
+    },
+});

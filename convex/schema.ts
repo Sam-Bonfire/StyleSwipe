@@ -39,7 +39,15 @@ const users = defineTable({
                 min: v.number(),
                 max: v.number(),
             }),
-            preferenceVector: v.optional(v.array(v.float64())), // 512-dim embedding
+            preferenceVector: v.optional(v.array(v.float64())), // 384-dim embedding (BGE-Small)
+
+            // PRD Ref: [cite: 1.0, 5.0] - Vector DNA & Dual-Vector Strategy
+            activeDNA: v.optional(v.string()), // "v1" or "v2"
+            dna: v.optional(v.object({
+                v1: v.optional(v.array(v.float64())), // 384-dim
+                v2: v.optional(v.array(v.float64())), // Shadow
+            })),
+            lastUpdated: v.optional(v.number()),
         })
     ),
 })
@@ -198,8 +206,13 @@ const products = defineTable({
     priceTier: v.optional(v.union(v.literal("budget"), v.literal("mid"), v.literal("premium"), v.literal("luxury"))),
     onSale: v.optional(v.boolean()),
 
-    // PRD Ref: [cite: 201-203] - 512-dim vector for Discovery Mode similarity search
+    // PRD Ref: [cite: 201-203] - 384-dim vector for Discovery Mode similarity search (BGE-Small)
     embedding: v.optional(v.array(v.float64())),
+    // PRD Ref: [cite: 6.0] - Versioned Embeddings
+    embeddingVersions: v.optional(v.object({
+        v1: v.optional(v.array(v.float64())), // 384-dim for BGE-Small-v1.5
+        v2: v.optional(v.array(v.float64())),
+    })),
     meta: v.optional(v.any()), // Flexible field for scraper extra data
     createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
@@ -213,8 +226,15 @@ const products = defineTable({
     })
     .vectorIndex("by_embedding", {
         vectorField: "embedding",
-        dimensions: 512,
+        dimensions: 384, // Updated to 384 for BGE-Small
         filterFields: ["category", "brand", "gender", "priceTier"],
+    })
+    // We can add vector indexes for v1/v2 later or now. 
+    // Convex supports multiple vector indexes.
+    .vectorIndex("by_embedding_v1", {
+        vectorField: "embeddingVersions.v1",
+        dimensions: 384,
+        filterFields: ["category", "gender", "priceTier"],
     });
 
 // PRD Ref: [cite: 18] - Hierarchical Categories
@@ -258,6 +278,19 @@ const swipes = defineTable({
     .index("by_product", ["productId"])
     .index("by_user_product", ["userId", "productId"]);
 
+
+
+// PRD Ref: [cite: 3.1] - Weekly Semantic Summaries
+const weeklySummaries = defineTable({
+    userId: v.id("users"),
+    period: v.string(), // "2026-W04"
+    granularity: v.string(), // "8bit" or "float32"
+    summary: v.any(), // JSON object with stored analysis
+    centroidShift: v.array(v.float64()), // Vector shift direction
+    hash: v.string(), // SHA-256 batch signature
+    createdAt: v.number(),
+})
+    .index("by_user_period", ["userId", "period"]);
 
 // -----------------------------------------------------------------------------
 // COMMERCE CONTEXT - Cart, Checkout, Orders
@@ -304,6 +337,7 @@ export default defineSchema({
     // Discovery Context
     partnerSync,
     swipes,
+    weeklySummaries,
 
     // Commerce Context
     carts,

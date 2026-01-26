@@ -13,6 +13,11 @@ export interface ScrapedProduct {
     availableSizes?: string[];
     rawJson?: any;
     scrapedAt: string;
+    embedding?: number[];
+    embeddingVersions?: {
+        v1: number[];
+        v2?: number[];
+    };
 }
 
 export interface Scraper {

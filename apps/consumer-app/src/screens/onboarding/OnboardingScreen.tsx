@@ -5,7 +5,9 @@ import { useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
-import { YStack, XStack, H1, H2, Text, Button as TamaguiButton, Progress } from 'tamagui';
+import { YStack, XStack, H1, H2, Text, Button as TamaguiButton, Progress, Spinner } from 'tamagui';
+
+import { generateEmbedding } from '../../infrastructure/InferenceEngine';
 
 export function OnboardingScreen() {
     const [step, setStep] = useState(0);
@@ -21,20 +23,54 @@ export function OnboardingScreen() {
         setAnswers({ ...answers, [currentQuestion.id]: option });
     };
 
+
+
+    const [isGenerating, setIsGenerating] = useState(false);
+
     const handleNext = async () => {
         if (step < questions.length - 1) {
             setStep(step + 1);
         } else {
-            // Final step - save profile, NavigationGuard will handle transition
-            const styleProfile = initializeStyleProfile(answers);
+            // Final step
+            setIsGenerating(true);
             try {
+                // Initialize profile
+                const styleProfile = initializeStyleProfile(answers);
+
+                // ---------------------------------------------------------
+                // REAL ONBOARDING VECTORIZATION
+                // ---------------------------------------------------------
+                // If model is not ready, this might take a moment to download/load
+                const semanticDescription = Object.entries(answers)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(". ");
+
+                const vector = await generateEmbedding(semanticDescription);
+                styleProfile.preferenceVector = vector;
                 await updateStyleProfile({ styleProfile });
-                // NavigationGuard in App.tsx will automatically navigate to Discovery
+                // NavigationGuard handles transition
             } catch (e) {
                 console.error("Failed to save onboarding", e);
+                setIsGenerating(false); // Only reset on error. Success unmounts component.
             }
         }
     };
+
+    // ...
+
+    if (isGenerating) {
+        return (
+            <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+                <YStack flex={1} padding="$4" space="$6" justifyContent="center" alignItems="center">
+                    <Spinner size="large" color="$primary" />
+                    <H2 textAlign="center">Designing Your Experience...</H2>
+                    <Text textAlign="center" color="$textSecondary">
+                        We are analyzing your preferences to curate the best styles for you.
+                    </Text>
+                </YStack>
+            </SafeAreaView>
+        );
+    }
 
     const handleBack = () => {
         if (step > 0) {

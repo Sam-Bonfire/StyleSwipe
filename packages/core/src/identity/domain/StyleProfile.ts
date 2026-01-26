@@ -14,5 +14,5 @@ export interface StyleProfile {
         min: number;
         max: number;
     };
-    preferenceVector?: number[]; // 512-dim embedding
+    preferenceVector?: number[]; // 384-dim embedding (MiniLM/BGE-Small)
 }

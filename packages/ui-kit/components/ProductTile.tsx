@@ -260,6 +260,7 @@ export const ProductTile = React.forwardRef<TamaguiElement, ProductTileProps>(
                                     // @ts-ignore
                                     src={imageUrl}
                                     resizeMode="cover"
+                                    style={{ objectFit: 'cover' } as any}
                                 />
 
                                 {isOnSale && (

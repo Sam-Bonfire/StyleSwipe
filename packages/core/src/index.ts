@@ -1,14 +1,3 @@
-// Catalog
-export * from './catalog/TaggingService';
-
-// Identity
-// export * from "./identity/domain/StyleProfile";
-export * from "./identity/application/InitializeStyleProfile";
-export * from "./identity/use-cases/GetOnboardingQuestions";
-
-// Domain entity types for hexagonal architecture
-// Domain entity types for hexagonal architecture
-export * from "../shared/domain/types";
 
 // Repository port interfaces
 export * from "../shared/domain/ports";
