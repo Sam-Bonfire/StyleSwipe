@@ -1,5 +1,15 @@
+// Catalog
+export * from './catalog/TaggingService';
 
-// Repository port interfaces
+// Identity
+// export * from './identity/User'; // Duplicated in shared/domain/types
+// export * from "./identity/domain/StyleProfile"; // Duplicated in shared/domain/types
+export * from "./identity/domain/StyleDNA";
+export * from "./identity/application/InitializeStyleProfile";
+export * from "./identity/use-cases/GetOnboardingQuestions";
+
+// Shared Domain Types & Ports
+export * from "../shared/domain/types";
 export * from "../shared/domain/ports";
 
 // Commerce
