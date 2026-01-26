@@ -9,7 +9,35 @@ import { generateEmbedding } from '../infrastructure/InferenceEngine';
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 
 const BACKGROUND_TASK_NAME = 'BACKGROUND_STYLE_ANALYSIS';
-const CONVEX_URL = process.env.EXPO_PUBLIC_CONVEX_URL || '';
+const CONVEX_URL = process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL || '';
+const LEARNING_RATE = parseFloat(process.env.EXPO_PUBLIC_LEARNING_RATE_ALPHA || '0.1');
+const PENALTY_RATE = parseFloat(process.env.EXPO_PUBLIC_PENALTY_RATE_BETA || '0.05');
+
+import { authAdapter } from '../lib/auth';
+
+/**
+ * Helper to get the current Auth Token for Convex.
+ * Background tasks run in an isolated environment (native) or separate loop (web).
+ * We need to explicitly retrieve the token to authenticate the ConvexHttpClient.
+ */
+async function getAuthToken(): Promise<string | null> {
+    try {
+        // 1. Try getting session from better-auth client (Works if persistence is set up)
+        const sessionData = await authAdapter.client.getSession();
+        if (sessionData?.data?.session?.token) {
+            // Check if token is directly available in the session object
+            return sessionData.data.session.token;
+        }
+
+        // 2. Fallback: Web LocalStorage (If client above didn't find it but it's there)
+        if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
+            return localStorage.getItem('better-auth.session_token');
+        }
+    } catch (e) {
+        console.warn("[BackgroundWorker] Failed to retrieve auth token:", e);
+    }
+    return null;
+}
 
 // --------------------------------------------------------
 // Core Logic (Platform Agnostic)
@@ -29,7 +57,13 @@ async function performAnalysisAndSync(db: LocalDatabase) {
         const vItem = await generateEmbedding(text);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        userVector = applyDisplacement(userVector, vItem, payload.action as any);
+        userVector = applyDisplacement(userVector, vItem, payload.action as any, {
+            alpha: LEARNING_RATE,
+            beta: PENALTY_RATE
+        });
+
+        // Yield to main thread to prevent blocking UI interactions during heavy batch processing
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     // Save updated vector locally
@@ -37,9 +71,12 @@ async function performAnalysisAndSync(db: LocalDatabase) {
 
     // Sync to Convex
     const client = new ConvexHttpClient(CONVEX_URL);
+    const token = await getAuthToken();
+
     try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await client.mutation("sync:syncBatch" as any, {
+            authToken: token || undefined,
             swipes: events.map(e => {
                 const p = JSON.parse(e.payload);
                 return {
@@ -67,9 +104,12 @@ async function syncRawEventsOnly(db: LocalDatabase) {
     if (events.length === 0) return;
 
     const client = new ConvexHttpClient(CONVEX_URL);
+    const token = await getAuthToken();
+
     try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await client.mutation("sync:syncBatch" as any, {
+            authToken: token || undefined,
             swipes: events.map(e => {
                 const p = JSON.parse(e.payload);
                 return {
@@ -109,12 +149,17 @@ async function executeTask() {
 
         const db = await LocalDatabase.getInstance();
         const isFull = await db.isBufferFull();
+        const hasEvents = (await db.getDatabaseSize()) > 0; // Check if any events exist
 
         if (isCharging) {
             console.log(`[${BACKGROUND_TASK_NAME}] Running Analysis (Charging)...`);
             await performAnalysisAndSync(db);
-        } else if (isFull) {
-            console.log(`[${BACKGROUND_TASK_NAME}] Buffer Full. Syncing Raw Events...`);
+        } else if (isFull || hasEvents) {
+            // Relaxed constraint: Sync raw events if buffer full OR simply if we have events pending (Periodic Sync)
+            // The original requirement was "Buffer hits 20MB... sync". 
+            // But user feedback says "swipe should also periodically occur otherwise".
+            // Since this task runs periodically (every 15m), syncing raw events here satisfies that.
+            console.log(`[${BACKGROUND_TASK_NAME}] Periodic Sync (Raw Events)...`);
             await syncRawEventsOnly(db);
         }
 
@@ -136,10 +181,12 @@ if (Platform.OS !== 'web') {
 
 function runWebBackgroundLoop() {
     console.log(`[${BACKGROUND_TASK_NAME}] Initializing Web Background Loop...`);
-    const INTERVAL = 15 * 60 * 1000; // 15 mins
+    const INTERVAL = 5 * 60 * 1000; // 5 mins
 
-    // Run immediately on boot
-    executeTask();
+    // Run after a delay to avoid blocking startup (e.g. 5 seconds)
+    setTimeout(() => {
+        executeTask();
+    }, 5000);
 
     // Loop
     setInterval(() => {

@@ -101,3 +101,14 @@ export const getOrCreateUser = mutation({
     },
 });
 
+export const debugUserProfile = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return null;
+        return await ctx.db
+            .query("users")
+            .withIndex("by_email", (q) => q.eq("email", identity.email!))
+            .first();
+    },
+});

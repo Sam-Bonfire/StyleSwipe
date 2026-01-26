@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { v } from "convex/values";
 
 /**
@@ -22,17 +23,25 @@ export interface ProcessSwipeInput {
 }
 
 /**
- * Pure Domain Logic for processing a swipe
- * (In a real DDD setup, this might perform complex weight calculations here)
+ * Domain error for swipe processing
  */
-export class ProcessSwipe {
-    execute(input: ProcessSwipeInput): ProcessSwipeInput {
-        // Basic validation
-        if (!input.userId) throw new Error("UserId is required");
-        if (!input.productId) throw new Error("ProductId is required");
-
-        // Using a 'super' like could potentially trigger more complex logic (e.g. notifications)
-        // For now, we just pass through.
-        return input;
-    }
+export class SwipeError extends Error {
+    readonly _tag = "SwipeError";
 }
+
+/**
+ * Pure Domain Logic for processing a swipe using Effect
+ */
+export const processSwipe = (input: ProcessSwipeInput): Effect.Effect<ProcessSwipeInput, SwipeError, never> =>
+    Effect.gen(function* (_) {
+        if (!input.userId) {
+            yield* _(Effect.fail(new SwipeError("UserId is required")));
+        }
+        if (!input.productId) {
+            yield* _(Effect.fail(new SwipeError("ProductId is required")));
+        }
+
+        // Potential for more complex logic here (weighting, notifications, etc)
+        // For now, we just validate and return
+        return input;
+    });

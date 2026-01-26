@@ -1,6 +1,7 @@
 
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
+import { getAuth } from "./auth";
 
 export const syncBatch = mutation({
     args: {
@@ -28,19 +29,41 @@ export const syncBatch = mutation({
                 activeDNA: v.optional(v.string()),
             })
         ),
+        authToken: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        const identity = await ctx.auth.getUserIdentity();
+        let identity = await ctx.auth.getUserIdentity();
+
+        // Fallback: Manual Auth for Background Worker (Opaque Tokens over HTTP)
+        if (!identity && args.authToken) {
+            const auth = getAuth(ctx);
+            const session = await auth.api.getSession({
+                headers: new Headers({ "Authorization": `Bearer ${args.authToken}` })
+            });
+            if (session?.user) {
+                // Mock an identity object from session user
+                identity = {
+                    subject: session.user.id,
+                    email: session.user.email,
+                    issuer: "better-auth",
+                    tokenIdentifier: session.user.id,
+                };
+            }
+        }
+
         if (!identity) {
             throw new Error("Unauthenticated call to syncBatch");
         }
 
-        // In Convex with BetterAuth/custom, we usually store the mapping or use `ctx.auth` correctly.
-        // For this implementation, let's assume we fetch the user by token identity.
         const user = await ctx.db
             .query("users")
-            .withIndex("by_email", (q) => q.eq("email", identity.email!)) // Fallback if subject isn't the ID
-            .first();
+            .withIndex("by_id", (q) => q.eq("_id", identity.subject as any))
+            // Fallback to email lookup if subject is not an ID (though usually it is)
+            .first() || await ctx.db
+                .query("users")
+                .withIndex("by_email", (q) => q.eq("email", identity!.email!))
+                .first();
+
 
         if (!user) {
             throw new Error("User not found");

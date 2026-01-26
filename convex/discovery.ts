@@ -91,8 +91,12 @@ export const getDiscoveryFeed = query({
         // 1. Get user
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
-            // Return public feed or empty
-            return await ctx.db.query("products").take(args.limit || 10);
+            // Return public feed (Top 20 Recent)
+            return await ctx.db
+                .query("products")
+                .withIndex("by_created")
+                .order("desc")
+                .take(args.limit || 20);
         }
 
         // 2. Get user swipes to exclude (naive implementation)
@@ -111,13 +115,18 @@ export const getDiscoveryFeed = query({
 
         const swipedProductIds = new Set(swipes.map(s => s.productId));
 
-        // 3. Fetch products
-        const products = await ctx.db.query("products").take(50); // Fetch more to filter
+        // 3. Fetch recent products (Fallback Logic)
+        // User Request: "Top 20 most recent additions"
+        const products = await ctx.db
+            .query("products")
+            .withIndex("by_created")
+            .order("desc")
+            .take(50); // Fetch more to filter out swipes
 
         // 4. Filter
         const feed = products
             .filter(p => !swipedProductIds.has(p._id))
-            .slice(0, args.limit || 10);
+            .slice(0, args.limit || 20); // Default to 20 as requested
 
         return feed;
     }
@@ -176,6 +185,51 @@ export const processSwipe = mutation({
             timestamp: Date.now(),
         });
 
+        // ---------------------------------------------------------
+        // REAL-TIME VECTOR LEARNING
+        // ---------------------------------------------------------
+        if (action === "like" || action === "super") {
+            const product = await ctx.db.get(productId);
+            if (product && product.embedding) {
+                const LEARNING_RATE = action === "super" ? 0.2 : 0.1; // Super like has more weight
+
+                const currentProfile = user.styleProfile;
+                const currentVector = currentProfile?.preferenceVector;
+
+                const defaultProfile = {
+                    gender: "both" as const,
+                    vibes: [],
+                    sizes: {},
+                    budget: { min: 0, max: 20000 },
+                };
+
+                if (!currentVector) {
+                    await ctx.db.patch(user._id, {
+                        styleProfile: {
+                            ...defaultProfile,
+                            ...currentProfile,
+                            preferenceVector: product.embedding
+                        }
+                    });
+                    console.log(`Cold start: Initialized user vector from ${product.title}`);
+                } else {
+                    const newVector = currentVector.map((val: number, i: number) => {
+                        const targetVal = product.embedding![i];
+                        return val + LEARNING_RATE * (targetVal - val);
+                    });
+
+                    await ctx.db.patch(user._id, {
+                        styleProfile: {
+                            ...defaultProfile,
+                            ...currentProfile,
+                            preferenceVector: newVector
+                        }
+                    });
+                    console.log(`Updated user vector based on ${action}. First 3 dims: ${newVector.slice(0, 3).map((v: number) => v.toFixed(4)).join(", ")}`);
+                }
+            }
+        }
+
         return { status: "success", swipeId };
     },
 });
@@ -190,5 +244,12 @@ export const getUserSwipedIds = query({
             .withIndex("by_user", (q) => q.eq("userId", args.userId))
             .collect();
         return swipes.map(s => s.productId);
+    },
+});
+
+export const debugSwipes = query({
+    args: {},
+    handler: async (ctx) => {
+        return await ctx.db.query("swipes").order("desc").take(10);
     },
 });

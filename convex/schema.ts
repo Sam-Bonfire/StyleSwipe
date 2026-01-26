@@ -235,7 +235,9 @@ const products = defineTable({
         vectorField: "embeddingVersions.v1",
         dimensions: 384,
         filterFields: ["category", "gender", "priceTier"],
-    });
+    })
+    // Efficiently query recent products for fallback feed
+    .index("by_created", ["createdAt"]);
 
 // PRD Ref: [cite: 18] - Hierarchical Categories
 const categories = defineTable({

@@ -70,6 +70,7 @@ yarn-error.*
 # Cache
 .cache/
 docs/design-inspirations/appflow.mp4
+docs/design-inspirations/videos
 
 
 # Windows Zone Identifier

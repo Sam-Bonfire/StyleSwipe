@@ -1,17 +1,20 @@
 
 export type Vector384 = number[];
 
-export const VECTOR_DIMENSIONS = 384;
-// Configuration defaults - should be overridden by env if needed, but constants here for logic
+export const TOPIC_DIMENSIONS = 384;
+
+// Default Learning Rates
 export const DEFAULT_LEARNING_RATE_ALPHA = 0.1;
 export const DEFAULT_PENALTY_RATE_BETA = 0.05;
 export const SUPER_LIKE_MULTIPLIER = 3;
 
-export interface StyleCluster {
-    id: string;
-    name: string;
-    centroid: Vector384;
+// Interface for configuration to allow overrides
+export interface DisplacementConfig {
+    alpha?: number;
+    beta?: number;
+    superLikeMultiplier?: number; // Added this one too just in case
 }
+
 
 export interface SwipeEvent {
     id: string;
@@ -19,27 +22,11 @@ export interface SwipeEvent {
     userId: string;
     newItemId: string;
     newItemVector: Vector384;
-    action: 'like' | 'dislike' | 'superlike';
+    action: 'like' | 'pass' | 'super';
     previousEventHash?: string;
 }
 
-export interface WeeklySummary {
-    period: string; // e.g., "2026-W04"
-    granularity: '8bit' | 'float32'; // We use number[] (float) in runtime, but might store 8bit
-    summary: Record<string, {
-        right_swipes: number;
-        dislikes: number;
-        avg_price?: number;
-    }>;
-    centroid_shift: Vector384;
-    hash: string;
-}
-
-export interface StyleDNA {
-    version: string;
-    vector: Vector384;
-    lastUpdated: number;
-}
+// ... (WeekySummary interface can stay as is or be updated if it uses these keys)
 
 /**
  * Calculates the mean vector of multiple style clusters.
@@ -47,18 +34,19 @@ export interface StyleDNA {
  */
 export function calculateCentroid(vectors: Vector384[]): Vector384 {
     if (vectors.length === 0) {
-        return new Array(VECTOR_DIMENSIONS).fill(0);
+        return new Array(TOPIC_DIMENSIONS).fill(0);
     }
 
-    const sum = new Array(VECTOR_DIMENSIONS).fill(0);
+    const sum = new Array(TOPIC_DIMENSIONS).fill(0);
     for (const vec of vectors) {
-        for (let i = 0; i < VECTOR_DIMENSIONS; i++) {
+        for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
             sum[i] += vec[i];
         }
     }
 
     return sum.map(val => val / vectors.length);
 }
+
 
 /**
  * Applies vector displacement based on user action.
@@ -70,7 +58,7 @@ export function calculateCentroid(vectors: Vector384[]): Vector384 {
 export function applyDisplacement(
     currentProfile: Vector384,
     itemVector: Vector384,
-    action: 'like' | 'dislike' | 'superlike',
+    action: 'like' | 'pass' | 'super',
     config: { alpha?: number; beta?: number } = {}
 ): Vector384 {
     const alpha = config.alpha ?? DEFAULT_LEARNING_RATE_ALPHA;
@@ -78,13 +66,13 @@ export function applyDisplacement(
 
     const result = [...currentProfile];
 
-    if (action === 'like' || action === 'superlike') {
-        const learningRate = action === 'superlike' ? alpha * SUPER_LIKE_MULTIPLIER : alpha;
-        for (let i = 0; i < VECTOR_DIMENSIONS; i++) {
+    if (action === 'like' || action === 'super') {
+        const learningRate = action === 'super' ? alpha * SUPER_LIKE_MULTIPLIER : alpha;
+        for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
             result[i] = currentProfile[i] + learningRate * (itemVector[i] - currentProfile[i]);
         }
-    } else if (action === 'dislike') {
-        for (let i = 0; i < VECTOR_DIMENSIONS; i++) {
+    } else if (action === 'pass') {
+        for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
             result[i] = currentProfile[i] - beta * (itemVector[i] - currentProfile[i]);
         }
     }

@@ -3,99 +3,47 @@ import { mutation } from "./_generated/server";
 export const seedProducts = mutation({
     args: {},
     handler: async (ctx) => {
-        const existing = await ctx.db.query("products").take(1);
-        if (existing.length > 0) {
-            console.log("Products already exist, skipping seed.");
-            return;
+        const existing = await ctx.db.query("products").collect();
+        // Clear existing to ensure schema updates (like createdAt) are applied
+        for (const p of existing) {
+            await ctx.db.delete(p._id);
         }
+        console.log("Cleared existing products.");
 
-        const products = [
-            {
-                brand: "ZARA",
-                title: "Oversized Cotton Blazer",
-                price: 3999,
-                mrp: 5999,
-                category: "outerwear",
-                images: ["https://picsum.photos/320/480?random=1"],
+        // Helper to create random 384-dim vector
+        const createEmbedding = () => Array.from({ length: 384 }, () => Math.random() - 0.5);
+
+        const products = [];
+        const brands = ["ZARA", "H&M", "Uniqlo", "Levi's", "Mango", "Nike", "Adidas", "Gucci", "Prada", "Urban Outfitters"];
+        const categories = ["tops", "bottoms", "outerwear", "dresses", "shoes", "accessories"];
+        const colors = ["black", "white", "beige", "blue", "red", "green", "yellow", "pink"];
+        const genders = ["men", "women", "unisex"];
+        const prices = [990, 1490, 1990, 2990, 3990, 4990, 7990];
+
+        for (let i = 0; i < 20; i++) {
+            const price = prices[Math.floor(Math.random() * prices.length)];
+            const brand = brands[Math.floor(Math.random() * brands.length)];
+            const category = categories[Math.floor(Math.random() * categories.length)];
+
+            products.push({
+                brand: brand,
+                title: `${brand} ${category} ${i + 1}`, // Simple dynamic title
+                price: price,
+                mrp: Math.floor(price * 1.5),
+                category: category,
+                images: [`https://picsum.photos/320/480?random=${i + 10}`],
                 attributes: {
-                    color: "black",
-                    material: "cotton",
-                    fit: "oversized"
-                },
-                gender: "women",
-                priceTier: "mid",
-                onSale: true,
-                createdAt: Date.now(),
-            },
-            {
-                brand: "H&M",
-                title: "Regular Fit Chinos",
-                price: 1499,
-                mrp: 2999,
-                category: "bottoms",
-                images: ["https://picsum.photos/320/480?random=2"],
-                attributes: {
-                    color: "beige",
-                    material: "cotton",
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    material: "mixed",
                     fit: "regular"
                 },
-                gender: "men",
-                priceTier: "budget",
-                onSale: true,
-                createdAt: Date.now(),
-            },
-            {
-                brand: "Uniqlo",
-                title: "Airism Cotton Oversized T-Shirt",
-                price: 990,
-                mrp: 1490,
-                category: "tops",
-                images: ["https://picsum.photos/320/480?random=3"],
-                attributes: {
-                    color: "white",
-                    material: "cotton",
-                    fit: "oversized"
-                },
-                gender: "unisex",
-                priceTier: "budget",
-                onSale: false,
-                createdAt: Date.now(),
-            },
-            {
-                brand: "Levi's",
-                title: "501 Original Jeans",
-                price: 3500,
-                mrp: 5000,
-                category: "bottoms",
-                images: ["https://picsum.photos/320/480?random=4"],
-                attributes: {
-                    color: "blue",
-                    material: "denim",
-                    fit: "regular"
-                },
-                gender: "men",
-                priceTier: "mid",
-                onSale: false,
-                createdAt: Date.now(),
-            },
-            {
-                brand: "Mango",
-                title: "Flowy Floral Dress",
-                price: 4500,
-                mrp: 6000,
-                category: "dresses",
-                images: ["https://picsum.photos/320/480?random=5"],
-                attributes: {
-                    color: "red",
-                    material: "rayon",
-                    fit: "flowy"
-                },
-                gender: "women",
-                priceTier: "premium",
-                onSale: true,
-                createdAt: Date.now(),
-            }
-        ];
+                gender: genders[Math.floor(Math.random() * genders.length)],
+                priceTier: price > 3000 ? "premium" : "budget",
+                onSale: Math.random() > 0.5,
+                createdAt: Date.now() - (i * 100000), // Staggered creation times
+                embedding: createEmbedding(),
+            });
+        }
 
         for (const p of products) {
             // @ts-ignore

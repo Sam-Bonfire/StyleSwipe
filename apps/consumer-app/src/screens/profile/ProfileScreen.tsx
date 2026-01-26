@@ -16,8 +16,6 @@ export function ProfileScreen() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <YStack flex={1} padding="$4" space="$6">
-                <H2>Profile</H2>
-
                 {user && (
                     <XStack alignItems="center" space="$4">
                         <Avatar circular size="$10">

@@ -23,7 +23,6 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
 
 function NavigationGuard() {
     const user = useQuery(api.users.currentUser);
-    console.log("NavigationGuard User State:", JSON.stringify(user));
 
     // Loading state
     if (user === undefined) {
@@ -65,6 +64,9 @@ import { Platform } from 'react-native';
 
 import { ModelManager } from './infrastructure/ModelManager';
 import { authAdapter } from './lib/auth';
+import { registerBackgroundWorker } from './workers/BackgroundWorker';
+
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
     // -----------------------------------------------------
@@ -81,19 +83,27 @@ export default function App() {
                 // Optional: Log progress or use a global store
                 // console.log(`Model Progress: ${p}`);
             }).catch(e => console.warn("Background Model Download Failed", e));
+
+            // Register background tasks
+            registerBackgroundWorker().catch(e => console.error("Failed to register worker", e));
+        } else {
+            // For web, we might want to run the loop directly or handled by worker script
+            registerBackgroundWorker();
         }
     }, []);
 
     return (
-        <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
-            <TamaguiProvider config={config}>
-                <Theme name="BrandIdentityLight">
-                    <NavigationContainer>
-                        <NavigationGuard />
-                    </NavigationContainer>
-                </Theme>
-            </TamaguiProvider>
-        </ConvexBetterAuthProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
+                <TamaguiProvider config={config}>
+                    <Theme name="BrandIdentityLight">
+                        <NavigationContainer>
+                            <NavigationGuard />
+                        </NavigationContainer>
+                    </Theme>
+                </TamaguiProvider>
+            </ConvexBetterAuthProvider>
+        </GestureHandlerRootView>
     );
 }
 

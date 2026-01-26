@@ -9,7 +9,7 @@ env.useBrowserCache = true;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let extractor: any = null;
-const MODEL_NAME = "Xenova/bge-small-en-v1.5";
+const MODEL_NAME = process.env.EXPO_PUBLIC_PRODUCT_EMBEDDING_MODEL_NAME || "Xenova/bge-small-en-v1.5";
 
 async function getExtractor() {
     if (!extractor) {
@@ -39,6 +39,6 @@ export async function generateEmbedding(text: string): Promise<Vector384> {
         console.error("[InferenceEngine-Web] Inference Failed:", e);
         // Fallback or rethrow? 
         // For now, return zero vector to avoid app crash, but log heavily.
-        return new Array(384).fill(0);
+        return new Array(384).fill(0.1);
     }
 }

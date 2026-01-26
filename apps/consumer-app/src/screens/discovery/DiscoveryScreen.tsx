@@ -8,7 +8,6 @@ export function DiscoveryScreen() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <YStack flex={1} padding="$4" space="$4">
-                <H2 textAlign="center">StyleSwipe Discover</H2>
                 <SwipeDeck />
             </YStack>
         </SafeAreaView>
