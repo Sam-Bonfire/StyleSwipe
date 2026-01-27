@@ -119,6 +119,8 @@ export function SwipeDeck() {
                         originalPrice={item.mrp}
                         discountPercentage={discount}
                         brand={item.brand}
+                        width="100%"
+                        height="100%"
                         onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
                     />
                 );

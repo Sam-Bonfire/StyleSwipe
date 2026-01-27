@@ -7,6 +7,7 @@
 
 import { Heart, X, Star } from '@tamagui/lucide-icons';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -231,6 +232,8 @@ const AnimatedCard = React.forwardRef(({
 
         return {
             position: 'absolute' as const,
+            width: '100%',
+            height: '100%',
             transform: [
                 { translateX: translateX.value },
                 { translateY: translateY.value + slotYOffset.value + yDrift },
@@ -287,6 +290,10 @@ export function SwipeCardStack<T>({
     cardScale = 0.96,
     ...props
 }: SwipeCardStackProps<T>) {
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+    const stackWidth = screenWidth * 0.90;
+    const stackHeight = screenHeight * 0.72;
+
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const sharedX = useSharedValue(0);
@@ -328,7 +335,7 @@ export function SwipeCardStack<T>({
 
     return (
         <StackContainer {...props}>
-            <Stack width={320} height={560} position="relative">
+            <Stack width={stackWidth} height={stackHeight} position="relative">
                 {visibleData.map((item, index) => (
                     <AnimatedCard
                         // @ts-ignore
