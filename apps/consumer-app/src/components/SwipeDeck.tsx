@@ -4,7 +4,7 @@ import { api } from '@convex-api';
 import { useAction, useMutation } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { YStack, H2 } from 'tamagui';
+import { YStack, H2, H3 } from 'tamagui';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 
@@ -14,7 +14,7 @@ export function SwipeDeck() {
     const getVectorFeed = useAction(api.recommendations.getVectorFeed);
     const swipeMutation = useMutation(api.discovery.processSwipe);
 
-     
+
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -43,7 +43,7 @@ export function SwipeDeck() {
         return (
             <YStack flex={1} justifyContent="center" alignItems="center">
                 <ActivityIndicator size="large" />
-                <H2>Loading Feed...</H2>
+                <H3>Loading Feed...</H3>
             </YStack>
         );
     }

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { action, query } from "./_generated/server";
+
 import { api } from "./_generated/api";
+import { action, query } from "./_generated/server";
 
 export const searchProducts = action({
     args: {

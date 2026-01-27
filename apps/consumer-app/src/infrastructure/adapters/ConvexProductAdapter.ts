@@ -1,8 +1,7 @@
-import { Effect } from "effect";
 import { ProductSearchRepository, SearchResult, SearchError, Vector384 } from "@app/core";
-import { Product } from "@app/core";
-import { ConvexReactClient } from "convex/react";
 import { api } from "@convex-api";
+import { ConvexReactClient } from "convex/react";
+import { Effect } from "effect";
 
 
 export class ConvexProductAdapter implements ProductSearchRepository {
@@ -14,6 +13,7 @@ export class ConvexProductAdapter implements ProductSearchRepository {
                 const result = await this.convex.action(api.search.searchProducts, { vector, limit });
                 // Map Convex result to Domain result
                 return {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     products: result.products.map((p: any) => ({
                         id: p._id,
                         title: p.title,

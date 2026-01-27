@@ -1,4 +1,5 @@
-import { Effect, Context } from "effect";
+import { Effect } from "effect";
+
 import { Embedder, ProductSearchRepository, SearchResult, EmbeddingError, SearchError } from "../domain/ports";
 
 export class SearchProducts {

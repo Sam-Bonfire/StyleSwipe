@@ -1,5 +1,6 @@
-import { Effect } from "effect";
 import { Embedder, EmbeddingError, Vector384 } from "@app/core";
+import { Effect } from "effect";
+
 import { generateEmbedding } from "../InferenceEngine";
 
 export class OnnxEmbedder implements Embedder {

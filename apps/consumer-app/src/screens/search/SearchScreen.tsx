@@ -1,19 +1,21 @@
-import { Search, Loader } from '@tamagui/lucide-icons';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
-import { YStack, H2, Text, Input, XStack, Button, Spinner } from 'tamagui';
-import { ProductTile } from '@app/ui-kit';
-import { useConvex, useMutation } from 'convex/react';
-import { Effect } from 'effect';
 import { SearchProducts } from '@app/core';
 import { Product } from '@app/core';
-import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
-import { ConvexProductAdapter } from '../../infrastructure/adapters/ConvexProductAdapter';
-import { useNavigation } from '@react-navigation/native';
+import { ProductTile } from '@app/ui-kit';
 import { api } from '@convex-api';
+import { useNavigation } from '@react-navigation/native';
+import { Search } from '@tamagui/lucide-icons';
+import { useConvex, useMutation } from 'convex/react';
+import { Effect } from 'effect';
+import React, { useState, useEffect, useMemo } from 'react';
+import { SafeAreaView, FlatList } from 'react-native';
+import { YStack, Text, Input, XStack, Button, Spinner } from 'tamagui';
+
+import { ConvexProductAdapter } from '../../infrastructure/adapters/ConvexProductAdapter';
+import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
 
 export function SearchScreen() {
     const convex = useConvex();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const navigation = useNavigation<any>();
     const recordView = useMutation(api.discovery.recordProductView);
 
@@ -29,7 +31,6 @@ export function SearchScreen() {
     const [results, setResults] = useState<Product[]>([]);
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const [loadingMore, setLoadingMore] = useState(false);
 
     // Debounce Logic
     useEffect(() => {
@@ -79,6 +80,7 @@ export function SearchScreen() {
 
     const handleProductPress = (productId: string) => {
         // Record view event
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         recordView({ productId: productId as any });
         // Navigate to details
         navigation.navigate('ProductDetail', { productId });
