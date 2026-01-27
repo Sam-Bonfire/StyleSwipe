@@ -29,7 +29,7 @@ const CardFrame = styled(Stack, {
         size: {
             standard: {
                 width: 320,
-                height: 480,
+                height: 560,
             },
             compact: {
                 width: 280,

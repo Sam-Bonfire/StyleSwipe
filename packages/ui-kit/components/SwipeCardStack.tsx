@@ -328,7 +328,7 @@ export function SwipeCardStack<T>({
 
     return (
         <StackContainer {...props}>
-            <Stack width={320} height={480} position="relative">
+            <Stack width={320} height={560} position="relative">
                 {visibleData.map((item, index) => (
                     <AnimatedCard
                         // @ts-ignore
