@@ -29,7 +29,7 @@ const CardFrame = styled(Stack, {
         size: {
             standard: {
                 width: 320,
-                height: 480,
+                height: 560,
             },
             compact: {
                 width: 280,
@@ -196,7 +196,7 @@ export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
         };
 
         return (
-            <CardFrame ref={ref as any} onPress={onPress} {...rest}>
+            <CardFrame ref={ref as any} {...rest}>
                 {
                     (
                         <>
@@ -220,7 +220,7 @@ export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
                                 } as any}
                             />
 
-                            <CardOverlay>
+                            <CardOverlay onPress={onPress}>
                                 <BrandText>{brand}</BrandText>
                                 <TitleText marginBottom="$2">{title}</TitleText>
 

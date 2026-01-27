@@ -43,7 +43,7 @@ export const getVectorFeed = action({
 
         const results = await ctx.vectorSearch("products", "by_embedding", {
             vector: preferenceVector,
-            limit: (args.limit || 10) + swipedIds.length,
+            limit: Math.min(256, (args.limit || 10) + swipedIds.length),
             filter,
         });
 

@@ -7,6 +7,7 @@
 
 import { Heart, X, Star } from '@tamagui/lucide-icons';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -69,8 +70,9 @@ const SPRING_CONFIG = {
 // Swipe thresholds
 const SWIPE_THRESHOLD = 120;
 const SWIPE_UP_THRESHOLD = 100;
+const SWIPE_DOWN_THRESHOLD = 100;
 
-export type SwipeDirection = 'left' | 'right' | 'up';
+export type SwipeDirection = 'left' | 'right' | 'up' | 'down';
 
 export type SwipeCardStackProps<T> = Omit<GetProps<typeof StackContainer>, 'children'> & {
     data: T[];
@@ -160,6 +162,10 @@ const AnimatedCard = React.forwardRef(({
             translateY.value = withTiming(-1000, { duration: EXIT_DURATION }, (finished) => {
                 if (finished) runOnJS(handleSwipeCompletion)('up');
             });
+        } else if (direction === 'down') {
+            translateY.value = withTiming(1000, { duration: EXIT_DURATION }, (finished) => {
+                if (finished) runOnJS(handleSwipeCompletion)('down');
+            });
         }
     }, [translateX, translateY, handleSwipeCompletion]);
 
@@ -177,6 +183,8 @@ const AnimatedCard = React.forwardRef(({
                 runOnJS(onSwipeStart)(event.translationX > 0 ? 'right' : 'left');
             } else if (event.translationY < -50 && onSwipeStart) {
                 runOnJS(onSwipeStart)('up');
+            } else if (event.translationY > 50 && onSwipeStart) {
+                runOnJS(onSwipeStart)('down');
             }
         },
         onEnd: (event) => {
@@ -192,6 +200,10 @@ const AnimatedCard = React.forwardRef(({
             } else if (event.translationY < -SWIPE_UP_THRESHOLD) {
                 translateY.value = withTiming(-1000, { duration: 250 }, (finished) => {
                     if (finished) runOnJS(handleSwipeCompletion)('up');
+                });
+            } else if (event.translationY > SWIPE_DOWN_THRESHOLD) {
+                translateY.value = withTiming(1000, { duration: 250 }, (finished) => {
+                    if (finished) runOnJS(handleSwipeCompletion)('down');
                 });
             } else {
                 translateX.value = withSpring(0, SPRING_CONFIG);
@@ -220,6 +232,8 @@ const AnimatedCard = React.forwardRef(({
 
         return {
             position: 'absolute' as const,
+            width: '100%',
+            height: '100%',
             transform: [
                 { translateX: translateX.value },
                 { translateY: translateY.value + slotYOffset.value + yDrift },
@@ -245,8 +259,8 @@ const AnimatedCard = React.forwardRef(({
     return (
         <Animated.View style={animatedStyle}>
             <PanGestureHandler onGestureEvent={gestureHandler} enabled={isTop}>
-                <Animated.View>
-                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'}>
+                <Animated.View style={{ width: '100%', height: '100%' }}>
+                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
                         {renderCard(item, index)}
                         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }, likeOpacity]}>
                             <LikeOverlay><Heart size={64} color="$success" fill="currentColor" /></LikeOverlay>
@@ -272,10 +286,14 @@ export function SwipeCardStack<T>({
     onSwipeStart,
     onSwipeEnd,
     visibleCards = 4,
-    cardOffset = 25,
-    cardScale = 0.94,
+    cardOffset = 28,
+    cardScale = 0.96,
     ...props
 }: SwipeCardStackProps<T>) {
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+    const stackWidth = screenWidth * 0.90;
+    const stackHeight = screenHeight * 0.72;
+
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const sharedX = useSharedValue(0);
@@ -299,6 +317,7 @@ export function SwipeCardStack<T>({
                 if (e.key === 'ArrowRight') topCardRef.current.swipe('right');
                 if (e.key === 'ArrowLeft') topCardRef.current.swipe('left');
                 if (e.key === 'ArrowUp') topCardRef.current.swipe('up');
+                if (e.key === 'ArrowDown') topCardRef.current.swipe('down');
             };
             window.addEventListener('keydown', handleKeyDown);
             return () => window.removeEventListener('keydown', handleKeyDown);
@@ -316,7 +335,7 @@ export function SwipeCardStack<T>({
 
     return (
         <StackContainer {...props}>
-            <Stack width={320} height={480} position="relative">
+            <Stack width={stackWidth} height={stackHeight} position="relative">
                 {visibleData.map((item, index) => (
                     <AnimatedCard
                         // @ts-ignore
