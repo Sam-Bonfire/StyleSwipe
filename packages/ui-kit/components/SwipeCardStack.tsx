@@ -310,6 +310,7 @@ export function SwipeCardStack<T>({
                 if (e.key === 'ArrowRight') topCardRef.current.swipe('right');
                 if (e.key === 'ArrowLeft') topCardRef.current.swipe('left');
                 if (e.key === 'ArrowUp') topCardRef.current.swipe('up');
+                if (e.key === 'ArrowDown') topCardRef.current.swipe('down');
             };
             window.addEventListener('keydown', handleKeyDown);
             return () => window.removeEventListener('keydown', handleKeyDown);
