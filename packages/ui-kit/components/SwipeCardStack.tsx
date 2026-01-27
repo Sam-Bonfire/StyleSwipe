@@ -283,8 +283,8 @@ export function SwipeCardStack<T>({
     onSwipeStart,
     onSwipeEnd,
     visibleCards = 4,
-    cardOffset = 25,
-    cardScale = 0.94,
+    cardOffset = 28,
+    cardScale = 0.96,
     ...props
 }: SwipeCardStackProps<T>) {
     const [currentIndex, setCurrentIndex] = useState(0);
