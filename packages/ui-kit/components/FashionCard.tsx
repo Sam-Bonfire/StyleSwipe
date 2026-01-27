@@ -22,6 +22,9 @@ const CardFrame = styled(Stack, {
     shadowOpacity: 0.15,
     shadowRadius: 12,
 
+    borderWidth: 8,
+    borderColor: 'white',
+
     variants: {
         size: {
             standard: {

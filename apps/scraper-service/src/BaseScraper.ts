@@ -1,6 +1,7 @@
 import { chromium, Browser, Page } from 'playwright';
-import { Scraper, ScrapedProduct } from './types.js';
+
 import { EnvProxyProvider } from './proxies/ProxyProvider.js';
+import { Scraper, ScrapedProduct } from './types.js';
 
 export abstract class BaseScraper implements Scraper {
     protected browser: Browser | null = null;

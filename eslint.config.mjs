@@ -1,8 +1,8 @@
 import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import perfectionist from 'eslint-plugin-perfectionist';
-import hexagonal from 'eslint-plugin-hexagonal-architecture';
 import prettier from 'eslint-config-prettier';
+import hexagonal from 'eslint-plugin-hexagonal-architecture';
+import perfectionist from 'eslint-plugin-perfectionist';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
     eslint.configs.recommended,

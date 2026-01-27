@@ -1,5 +1,6 @@
-import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+
+import { query, mutation } from "./_generated/server";
 
 export const getUserPrivate = query({
     args: {
@@ -101,3 +102,14 @@ export const getOrCreateUser = mutation({
     },
 });
 
+export const debugUserProfile = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) return null;
+        return await ctx.db
+            .query("users")
+            .withIndex("by_email", (q) => q.eq("email", identity.email!))
+            .first();
+    },
+});

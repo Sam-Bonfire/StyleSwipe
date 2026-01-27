@@ -1,6 +1,7 @@
-import { action } from "./_generated/server";
 import { v } from "convex/values";
+
 import { api } from "./_generated/api";
+import { action } from "./_generated/server";
 
 export const getVectorFeed = action({
     args: {
@@ -55,6 +56,13 @@ export const getVectorFeed = action({
 
         // Bulk fetch details
         const products = await ctx.runQuery(api.products.getProductsByIds, { ids: productIds });
+
+        // Fallback: If vector search yields no results (e.g. no products have embeddings yet),
+        // return the standard discovery feed (recent items)
+        if (products.length === 0) {
+            console.log("Vector search returned 0 items, falling back to discovery feed.");
+            return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
+        }
 
         return products;
     },

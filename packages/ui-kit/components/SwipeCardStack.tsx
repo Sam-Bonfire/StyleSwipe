@@ -5,13 +5,16 @@
  * Features: Card deck with gesture handlers, swipe left/right/up actions
  */
 
-import React, { useState, useCallback } from 'react';
+import { Heart, X, Star } from '@tamagui/lucide-icons';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
     useAnimatedGestureHandler,
+    useAnimatedReaction,
     useSharedValue,
     withSpring,
+    withTiming,
     runOnJS,
     interpolate,
     Extrapolate,
@@ -27,7 +30,6 @@ const StackContainer = styled(YStack, {
 
 const CardWrapper = styled(Stack, {
     name: 'SwipeCardWrapper',
-    position: 'absolute',
 });
 
 const ActionOverlay = styled(Stack, {
@@ -58,27 +60,10 @@ const SuperLikeOverlay = styled(ActionOverlay, {
     borderColor: '$info',
 });
 
-const OverlayText = styled(Text, {
-    name: 'SwipeOverlayText',
-    fontFamily: '$heading',
-    fontSize: '$8',
-    fontWeight: '800',
-    textTransform: 'uppercase',
-
-    variants: {
-        type: {
-            like: { color: '$success' },
-            nope: { color: '$error' },
-            superlike: { color: '$info' },
-        },
-    } as const,
-});
-
-// Spring configuration for natural feel
 const SPRING_CONFIG = {
-    damping: 15,
-    stiffness: 100,
-    mass: 0.5,
+    damping: 20,
+    stiffness: 150,
+    mass: 0.8,
 };
 
 // Swipe thresholds
@@ -100,7 +85,8 @@ export type SwipeCardStackProps<T> = Omit<GetProps<typeof StackContainer>, 'chil
 };
 
 // Animated Card Component
-function AnimatedCard<T>({
+
+const AnimatedCard = React.forwardRef(({
     item,
     index,
     renderCard,
@@ -110,87 +96,139 @@ function AnimatedCard<T>({
     isTop,
     cardOffset,
     cardScale,
+    sharedX,
+    sharedY,
 }: {
-    item: T;
+
+    item: any;
     index: number;
-    renderCard: (item: T, index: number) => React.ReactNode;
+
+    renderCard: (item: any, index: number) => React.ReactNode;
     onSwipe: (direction: SwipeDirection) => void;
     onSwipeStart?: (direction: SwipeDirection) => void;
     onSwipeEnd?: () => void;
     isTop: boolean;
     cardOffset: number;
     cardScale: number;
-}) {
+    sharedX: Animated.SharedValue<number>;
+    sharedY: Animated.SharedValue<number>;
+}, ref) => {
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
 
-    const handleSwipe = useCallback((direction: SwipeDirection) => {
+    // Physical slot positions
+    const slotScale = useSharedValue(isTop ? 1 : cardScale - (index * 0.05));
+    const slotYOffset = useSharedValue(isTop ? 0 : index * cardOffset);
+
+    // Sync prop changes (promotion) with spring
+    useEffect(() => {
+        const targetScale = isTop ? 1 : cardScale - (index * 0.05);
+        const targetY = isTop ? 0 : index * cardOffset;
+
+        slotScale.value = withSpring(targetScale, SPRING_CONFIG);
+        slotYOffset.value = withSpring(targetY, SPRING_CONFIG);
+    }, [index, isTop, cardScale, cardOffset]);
+
+    // Sync local movement to shared values if top card
+    useAnimatedReaction(
+        () => ({ x: translateX.value, y: translateY.value, active: isTop }),
+        (result) => {
+            if (result.active) {
+                sharedX.value = result.x;
+                sharedY.value = result.y;
+            }
+        },
+        [isTop]
+    );
+
+    const handleSwipeCompletion = useCallback((direction: SwipeDirection) => {
         onSwipe(direction);
     }, [onSwipe]);
 
+    const triggerSwipe = useCallback((direction: SwipeDirection) => {
+        'worklet';
+        const EXIT_DURATION = 300;
+        if (direction === 'right') {
+            translateX.value = withTiming(1000, { duration: EXIT_DURATION }, (finished) => {
+                if (finished) runOnJS(handleSwipeCompletion)('right');
+            });
+        } else if (direction === 'left') {
+            translateX.value = withTiming(-1000, { duration: EXIT_DURATION }, (finished) => {
+                if (finished) runOnJS(handleSwipeCompletion)('left');
+            });
+        } else if (direction === 'up') {
+            translateY.value = withTiming(-1000, { duration: EXIT_DURATION }, (finished) => {
+                if (finished) runOnJS(handleSwipeCompletion)('up');
+            });
+        }
+    }, [translateX, translateY, handleSwipeCompletion]);
+
+    React.useImperativeHandle(ref, () => ({
+        swipe: triggerSwipe
+    }));
+
     const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-        onStart: () => { },
         onActive: (event) => {
+            if (!isTop) return;
             translateX.value = event.translationX;
             translateY.value = event.translationY;
 
-            // Detect direction for overlay
-            if (Math.abs(event.translationX) > 50) {
-                const direction = event.translationX > 0 ? 'right' : 'left';
-                if (onSwipeStart) {
-                    runOnJS(onSwipeStart)(direction);
-                }
-            } else if (event.translationY < -50) {
-                if (onSwipeStart) {
-                    runOnJS(onSwipeStart)('up');
-                }
+            if (Math.abs(event.translationX) > 50 && onSwipeStart) {
+                runOnJS(onSwipeStart)(event.translationX > 0 ? 'right' : 'left');
+            } else if (event.translationY < -50 && onSwipeStart) {
+                runOnJS(onSwipeStart)('up');
             }
         },
         onEnd: (event) => {
-            // Check if swipe threshold is met
+            if (!isTop) return;
             if (event.translationX > SWIPE_THRESHOLD) {
-                translateX.value = withSpring(500, SPRING_CONFIG);
-                runOnJS(handleSwipe)('right');
+                translateX.value = withTiming(1000, { duration: 250 }, (finished) => {
+                    if (finished) runOnJS(handleSwipeCompletion)('right');
+                });
             } else if (event.translationX < -SWIPE_THRESHOLD) {
-                translateX.value = withSpring(-500, SPRING_CONFIG);
-                runOnJS(handleSwipe)('left');
+                translateX.value = withTiming(-1000, { duration: 250 }, (finished) => {
+                    if (finished) runOnJS(handleSwipeCompletion)('left');
+                });
             } else if (event.translationY < -SWIPE_UP_THRESHOLD) {
-                translateY.value = withSpring(-600, SPRING_CONFIG);
-                runOnJS(handleSwipe)('up');
+                translateY.value = withTiming(-1000, { duration: 250 }, (finished) => {
+                    if (finished) runOnJS(handleSwipeCompletion)('up');
+                });
             } else {
-                // Snap back
                 translateX.value = withSpring(0, SPRING_CONFIG);
                 translateY.value = withSpring(0, SPRING_CONFIG);
             }
-
-            if (onSwipeEnd) {
-                runOnJS(onSwipeEnd)();
-            }
+            if (onSwipeEnd) runOnJS(onSwipeEnd)();
         },
     });
 
     const animatedStyle = useAnimatedStyle(() => {
-        const rotate = interpolate(
-            translateX.value,
-            [-200, 0, 200],
-            [-15, 0, 15],
-            Extrapolate.CLAMP
-        );
+        const rotate = isTop ? interpolate(translateX.value, [-200, 0, 200], [-15, 0, 15], Extrapolate.CLAMP) : 0;
 
-        // Scale and offset for stacked cards
-        const scale = isTop ? 1 : cardScale - (index * 0.02);
-        const yOffset = isTop ? 0 : index * cardOffset;
+        const maxInteraction = Math.max(Math.abs(sharedX.value), Math.abs(sharedY.value));
+        const progress = interpolate(maxInteraction, [0, SWIPE_THRESHOLD], [0, 1], Extrapolate.CLAMP);
+
+        // Simple drift calculation
+        const nextIdx = index - 1;
+        const effNextIdx = nextIdx < 0 ? 0 : nextIdx;
+        const curScale = isTop ? 1 : cardScale - (index * 0.05);
+        const nxtScale = cardScale - (effNextIdx * 0.05);
+        const sDrift = isTop ? 0 : (nxtScale - curScale) * progress;
+
+        const curY = isTop ? 0 : index * cardOffset;
+        const nxtY = effNextIdx * cardOffset;
+        const yDrift = isTop ? 0 : (nxtY - curY) * progress;
 
         return {
+            position: 'absolute' as const,
             transform: [
                 { translateX: translateX.value },
-                { translateY: translateY.value + yOffset },
+                { translateY: translateY.value + slotYOffset.value + yDrift },
                 { rotate: `${rotate}deg` },
-                { scale },
+                { scale: slotScale.value + sDrift },
             ] as any,
             zIndex: 100 - index,
         };
-    }) as any;
+    });
 
     const likeOpacity = useAnimatedStyle(() => ({
         opacity: interpolate(translateX.value, [0, SWIPE_THRESHOLD], [0, 1], Extrapolate.CLAMP),
@@ -204,47 +242,27 @@ function AnimatedCard<T>({
         opacity: interpolate(translateY.value, [-SWIPE_UP_THRESHOLD, 0], [1, 0], Extrapolate.CLAMP),
     }));
 
-    if (!isTop) {
-        return (
-            <Animated.View style={animatedStyle}>
-                <CardWrapper pointerEvents="none">
-                    {renderCard(item, index)}
-                </CardWrapper>
-            </Animated.View>
-        );
-    }
-
     return (
-        <PanGestureHandler onGestureEvent={gestureHandler}>
-            <Animated.View style={animatedStyle}>
-                <CardWrapper>
-                    {renderCard(item, index)}
-
-                    {/* Like Overlay */}
-                    <Animated.View style={[{ position: 'absolute', top: 0, left: 0 }, likeOpacity]}>
-                        <LikeOverlay>
-                            <OverlayText type="like">LIKE</OverlayText>
-                        </LikeOverlay>
-                    </Animated.View>
-
-                    {/* Nope Overlay */}
-                    <Animated.View style={[{ position: 'absolute', top: 0, right: 0 }, nopeOpacity]}>
-                        <NopeOverlay>
-                            <OverlayText type="nope">NOPE</OverlayText>
-                        </NopeOverlay>
-                    </Animated.View>
-
-                    {/* Super Like Overlay */}
-                    <Animated.View style={[{ position: 'absolute', top: 0, alignSelf: 'center' }, superLikeOpacity]}>
-                        <SuperLikeOverlay>
-                            <OverlayText type="superlike">SUPER LIKE</OverlayText>
-                        </SuperLikeOverlay>
-                    </Animated.View>
-                </CardWrapper>
-            </Animated.View>
-        </PanGestureHandler>
+        <Animated.View style={animatedStyle}>
+            <PanGestureHandler onGestureEvent={gestureHandler} enabled={isTop}>
+                <Animated.View>
+                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'}>
+                        {renderCard(item, index)}
+                        <Animated.View style={[{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }, likeOpacity]}>
+                            <LikeOverlay><Heart size={64} color="$success" fill="currentColor" /></LikeOverlay>
+                        </Animated.View>
+                        <Animated.View style={[{ position: 'absolute', top: 0, right: 0, pointerEvents: 'none' }, nopeOpacity]}>
+                            <NopeOverlay><X size={64} color="$error" /></NopeOverlay>
+                        </Animated.View>
+                        <Animated.View style={[{ position: 'absolute', top: 0, alignSelf: 'center', pointerEvents: 'none' }, superLikeOpacity]}>
+                            <SuperLikeOverlay><Star size={64} color="$info" fill="currentColor" /></SuperLikeOverlay>
+                        </Animated.View>
+                    </CardWrapper>
+                </Animated.View>
+            </PanGestureHandler>
+        </Animated.View>
     );
-}
+});
 
 export function SwipeCardStack<T>({
     data,
@@ -253,48 +271,74 @@ export function SwipeCardStack<T>({
     onSwipe,
     onSwipeStart,
     onSwipeEnd,
-    visibleCards = 3,
-    cardOffset = 8,
-    cardScale = 0.95,
+    visibleCards = 4,
+    cardOffset = 25,
+    cardScale = 0.94,
     ...props
 }: SwipeCardStackProps<T>) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const sharedX = useSharedValue(0);
+    const sharedY = useSharedValue(0);
+
     const handleSwipe = useCallback((item: T, direction: SwipeDirection) => {
+        // RESET sharedX/Y immediately to stop drift calculation for the next card
+        sharedX.value = 0;
+        sharedY.value = 0;
         onSwipe(item, direction);
         setCurrentIndex(prev => prev + 1);
-    }, [onSwipe]);
+    }, [onSwipe, sharedX, sharedY]);
 
     const visibleData = data.slice(currentIndex, currentIndex + visibleCards);
+    const topCardRef = useRef<{ swipe: (dir: SwipeDirection) => void }>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (!topCardRef.current) return;
+                if (e.key === 'ArrowRight') topCardRef.current.swipe('right');
+                if (e.key === 'ArrowLeft') topCardRef.current.swipe('left');
+                if (e.key === 'ArrowUp') topCardRef.current.swipe('up');
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+        return undefined;
+    }, [currentIndex]);
 
     if (visibleData.length === 0) {
         return (
-            <StackContainer {...props}>
-                <Text fontSize="$5" color="$textSecondary">Looks like we don't have any suggestions for you right now. Come back again in some time for more style suggestions</Text>
+            <StackContainer {...props} backgroundColor="$background">
+                <Text fontSize="$6" color="black" textAlign="center" padding="$4">That's all for now!</Text>
             </StackContainer>
         );
     }
 
     return (
         <StackContainer {...props}>
-            {visibleData.map((item, index) => (
-                <AnimatedCard
-                    key={keyExtractor(item, currentIndex + index)}
-                    item={item}
-                    index={index}
-                    renderCard={renderCard}
-                    onSwipe={(direction) => handleSwipe(item, direction)}
-                    onSwipeStart={onSwipeStart}
-                    onSwipeEnd={onSwipeEnd}
-                    isTop={index === 0}
-                    cardOffset={cardOffset}
-                    cardScale={cardScale}
-                />
-            )).reverse()}
+            <Stack width={320} height={480} position="relative">
+                {visibleData.map((item, index) => (
+                    <AnimatedCard
+                        // @ts-ignore
+                        ref={index === 0 ? topCardRef : null}
+                        key={keyExtractor(item, currentIndex + index)}
+                        item={item}
+                        index={index}
+                        renderCard={renderCard}
+                        onSwipe={(direction) => handleSwipe(item, direction)}
+                        onSwipeStart={onSwipeStart}
+                        onSwipeEnd={onSwipeEnd}
+                        isTop={index === 0}
+                        cardOffset={cardOffset}
+                        cardScale={cardScale}
+                        sharedX={sharedX}
+                        sharedY={sharedY}
+                    />
+                )).reverse()}
+            </Stack>
         </StackContainer>
     );
 }
 
 SwipeCardStack.displayName = 'SwipeCardStack';
-
 export default SwipeCardStack;

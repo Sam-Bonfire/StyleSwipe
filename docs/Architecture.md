@@ -77,4 +77,4 @@ To avoid architectural drift and unnecessary complexity, the following are stric
 
 * **Remote Backups**: Every `bun snap` triggers a push to the remote. This ensures hardware failure never results in data loss.
 * **Stacking Protocol**: If Task B depends on Task A, Task B must be rebased onto Task A’s branch using `jj rebase`.
-* **Resource Locking**: Agents must signal in `docs/manifests/current_stack.md` before making breaking changes to `ui-kit` or the Convex schema.
+* **Resource Locking**: Agents must signal in `docs/manifests/current_stack.md` before making breaking changes to `ui-kit`, the Convex schema or any other shared resources.

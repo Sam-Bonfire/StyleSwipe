@@ -12,8 +12,8 @@ import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
 const TopBarFrame = styled(XStack, {
     name: 'TopBar',
     backgroundColor: '$surface',
-    paddingHorizontal: '$2',
-    paddingVertical: '$1.5',
+    paddingHorizontal: '$1',
+    paddingVertical: '$1',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: 1,

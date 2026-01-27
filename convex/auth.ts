@@ -1,7 +1,8 @@
-import { betterAuth } from "better-auth";
-import { phoneNumber, username } from "better-auth/plugins";
 import { createClient } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
+import { betterAuth } from "better-auth";
+import { phoneNumber, username } from "better-auth/plugins";
+
 import { components } from "./_generated/api";
 import authConfig from "./auth.config";
 
