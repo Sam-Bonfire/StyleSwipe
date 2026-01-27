@@ -196,7 +196,7 @@ export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
         };
 
         return (
-            <CardFrame ref={ref as any} onPress={onPress} {...rest}>
+            <CardFrame ref={ref as any} {...rest}>
                 {
                     (
                         <>
@@ -220,7 +220,7 @@ export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
                                 } as any}
                             />
 
-                            <CardOverlay>
+                            <CardOverlay onPress={onPress}>
                                 <BrandText>{brand}</BrandText>
                                 <TitleText marginBottom="$2">{title}</TitleText>
 

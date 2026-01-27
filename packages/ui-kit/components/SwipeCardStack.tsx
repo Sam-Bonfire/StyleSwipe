@@ -69,8 +69,9 @@ const SPRING_CONFIG = {
 // Swipe thresholds
 const SWIPE_THRESHOLD = 120;
 const SWIPE_UP_THRESHOLD = 100;
+const SWIPE_DOWN_THRESHOLD = 100;
 
-export type SwipeDirection = 'left' | 'right' | 'up';
+export type SwipeDirection = 'left' | 'right' | 'up' | 'down';
 
 export type SwipeCardStackProps<T> = Omit<GetProps<typeof StackContainer>, 'children'> & {
     data: T[];
@@ -160,6 +161,10 @@ const AnimatedCard = React.forwardRef(({
             translateY.value = withTiming(-1000, { duration: EXIT_DURATION }, (finished) => {
                 if (finished) runOnJS(handleSwipeCompletion)('up');
             });
+        } else if (direction === 'down') {
+            translateY.value = withTiming(1000, { duration: EXIT_DURATION }, (finished) => {
+                if (finished) runOnJS(handleSwipeCompletion)('down');
+            });
         }
     }, [translateX, translateY, handleSwipeCompletion]);
 
@@ -177,6 +182,8 @@ const AnimatedCard = React.forwardRef(({
                 runOnJS(onSwipeStart)(event.translationX > 0 ? 'right' : 'left');
             } else if (event.translationY < -50 && onSwipeStart) {
                 runOnJS(onSwipeStart)('up');
+            } else if (event.translationY > 50 && onSwipeStart) {
+                runOnJS(onSwipeStart)('down');
             }
         },
         onEnd: (event) => {
@@ -192,6 +199,10 @@ const AnimatedCard = React.forwardRef(({
             } else if (event.translationY < -SWIPE_UP_THRESHOLD) {
                 translateY.value = withTiming(-1000, { duration: 250 }, (finished) => {
                     if (finished) runOnJS(handleSwipeCompletion)('up');
+                });
+            } else if (event.translationY > SWIPE_DOWN_THRESHOLD) {
+                translateY.value = withTiming(1000, { duration: 250 }, (finished) => {
+                    if (finished) runOnJS(handleSwipeCompletion)('down');
                 });
             } else {
                 translateX.value = withSpring(0, SPRING_CONFIG);
@@ -299,6 +310,7 @@ export function SwipeCardStack<T>({
                 if (e.key === 'ArrowRight') topCardRef.current.swipe('right');
                 if (e.key === 'ArrowLeft') topCardRef.current.swipe('left');
                 if (e.key === 'ArrowUp') topCardRef.current.swipe('up');
+                if (e.key === 'ArrowDown') topCardRef.current.swipe('down');
             };
             window.addEventListener('keydown', handleKeyDown);
             return () => window.removeEventListener('keydown', handleKeyDown);
