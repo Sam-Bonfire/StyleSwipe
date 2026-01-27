@@ -90,7 +90,7 @@ export function SearchScreen() {
             : undefined;
 
         return (
-            <YStack flex={1} padding="$2">
+            <YStack width="50%" padding="$1">
                 <ProductTile
                     imageUrl={item.images[0]}
                     brand={item.brand}

@@ -50,6 +50,7 @@ const TileFrame = styled(Stack, {
 const ImageContainer = styled(Stack, {
     name: 'ProductTileImageContainer',
     position: 'relative',
+    width: '100%',
     aspectRatio: 0.75,
     backgroundColor: '$neutral100',
     overflow: 'hidden', // Ensure image stays within bounds
@@ -122,6 +123,7 @@ const BrandText = styled(Text, {
     color: '$textPrimary',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    numberOfLines: 1,
 });
 
 const TitleText = styled(Text, {
