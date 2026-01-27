@@ -1,18 +1,151 @@
-import { Search } from '@tamagui/lucide-icons';
-import React from 'react';
-import { SafeAreaView } from 'react-native';
-import { YStack, H2, Text, Input } from 'tamagui';
+import { Search, Loader } from '@tamagui/lucide-icons';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { SafeAreaView, FlatList, ActivityIndicator } from 'react-native';
+import { YStack, H2, Text, Input, XStack, Button, Spinner } from 'tamagui';
+import { ProductTile } from '@app/ui-kit';
+import { useConvex, useMutation } from 'convex/react';
+import { Effect } from 'effect';
+import { SearchProducts } from '@app/core';
+import { Product } from '@app/core';
+import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
+import { ConvexProductAdapter } from '../../infrastructure/adapters/ConvexProductAdapter';
+import { useNavigation } from '@react-navigation/native';
+import { api } from '@convex-api';
 
 export function SearchScreen() {
+    const convex = useConvex();
+    const navigation = useNavigation<any>();
+    const recordView = useMutation(api.discovery.recordProductView);
+
+    // Dependencies
+    const useCase = useMemo(() => {
+        const embedder = new OnnxEmbedder();
+        const repo = new ConvexProductAdapter(convex);
+        return new SearchProducts(embedder, repo);
+    }, [convex]);
+
+    // State
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState<Product[]>([]);
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    // Debounce Logic
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (query.length >= 3) {
+                performSearch(query);
+            } else {
+                setResults([]);
+            }
+
+            if (query.length >= 1) {
+                fetchSuggestions(query);
+            } else {
+                setSuggestions([]);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [query]);
+
+    const performSearch = async (text: string) => {
+        setLoading(true);
+        try {
+            await Effect.runPromise(
+                useCase.execute(text, 10).pipe(
+                    Effect.tap((result) => Effect.sync(() => setResults(result.products)))
+                )
+            );
+        } catch (e) {
+            console.error("Search failed", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchSuggestions = async (text: string) => {
+        try {
+            await Effect.runPromise(
+                useCase.getSuggestions(text).pipe(
+                    Effect.tap((s) => Effect.sync(() => setSuggestions(s)))
+                )
+            );
+        } catch (e) {
+            console.error("Suggestions failed", e);
+        }
+    };
+
+    const handleProductPress = (productId: string) => {
+        // Record view event
+        recordView({ productId: productId as any });
+        // Navigate to details
+        navigation.navigate('ProductDetail', { productId });
+    };
+
+    const renderItem = ({ item }: { item: Product }) => {
+        const discount = item.mrp && item.price < item.mrp
+            ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
+            : undefined;
+
+        return (
+            <YStack flex={1} padding="$2">
+                <ProductTile
+                    imageUrl={item.images[0]}
+                    brand={item.brand}
+                    title={item.title}
+                    price={item.price}
+                    originalPrice={item.mrp}
+                    discountPercentage={discount}
+                    onPress={() => handleProductPress(item.id)}
+                    size="wide"
+                />
+            </YStack>
+        );
+    };
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            <YStack flex={1} padding="$4" space="$4">
-                <H2>Search</H2>
-                <Input placeholder="Search for items..." size="$4" borderWidth={1} />
-                <YStack flex={1} justifyContent="center" alignItems="center">
-                    <Search size={48} color="$textTertiary" />
-                    <Text color="$textSecondary" marginTop="$4">Browse the marketplace</Text>
+            <YStack flex={1} padding="$2" space="$4">
+                <YStack space="$2">
+                    <Input
+                        placeholder="Search for items..."
+                        size="$4"
+                        borderWidth={1}
+                        value={query}
+                        onChangeText={setQuery}
+                    />
+                    {suggestions.length > 0 && (
+                        <XStack space="$2" flexWrap="wrap">
+                            {suggestions.map((s, i) => (
+                                <Button key={i} size="$2" onPress={() => setQuery(s)}>{s}</Button>
+                            ))}
+                        </XStack>
+                    )}
                 </YStack>
+
+                {loading ? (
+                    <YStack flex={1} justifyContent="center" alignItems="center">
+                        <Spinner size="large" color="$color" />
+                    </YStack>
+                ) : results.length > 0 ? (
+                    <FlatList
+                        data={results}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.id}
+                        onEndReachedThreshold={0.5}
+                        contentContainerStyle={{ paddingBottom: 10 }}
+                        numColumns={2}
+                    />
+                ) : (
+                    <YStack flex={1} justifyContent="center" alignItems="center">
+                        <Search size={48} color="$textTertiary" />
+                        <Text color="$textSecondary" marginTop="$4">
+                            {query.length > 0 ? "No results found" : "Browse the marketplace"}
+                        </Text>
+                    </YStack>
+                )}
             </YStack>
         </SafeAreaView>
     );
