@@ -21,6 +21,8 @@ export * from "./commerce/application/ManageCart";
 export * from "./commerce/application/CheckoutService";
 
 // Discovery
+export { EmbeddingError, SearchError } from "./discovery/domain/ports";
+export type { SearchResult, Embedder, ProductSearchRepository } from "./discovery/domain/ports";
 export * from "./discovery/use-cases/SearchProducts";
 export * from "./discovery/use-cases/ProcessSwipe";
 
