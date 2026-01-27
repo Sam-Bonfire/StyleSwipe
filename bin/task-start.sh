@@ -1,5 +1,6 @@
 #!/bin/bash
-TITLE=$1
+TYPE=$1
+TITLE=$2
 if [ -z "$TITLE" ]; then echo "Usage: bun task <name>"; exit 1; fi
 
 # Safety check: Ensure we aren't branching directly off main
@@ -10,5 +11,5 @@ if [ "$CURRENT_BRANCH" == "main" ]; then
     if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then exit 1; fi
 fi
 
-gt branch create "$TITLE"
-echo "✅ Stacked new branch: $TITLE"
+gt branch create "$TYPE/$TITLE"
+echo "✅ Stacked new branch: $TYPE/$TITLE"

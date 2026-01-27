@@ -6,9 +6,9 @@
 3. **Integrity**: Never bypass the `pre-push` hook. All PRs target `dev`.
 
 ## II. THE WORKFLOW
-1. **Start**: `bun task {{name}}`. 
+1. **Start**: `bun task {{type}} {{name}}`. 
 2. **Work**: Code logic. Use VS Code Source Control to stage files.
-3. **Save**: `bun snap "{{message}}"`.
+3. **Save**: `bun snap "{{type}}/{{name}}"`.
 4. **Submit**: `bun submit`. (Auto-fix + Validation + PR Creation).
 
 ## III. STACK MANAGEMENT

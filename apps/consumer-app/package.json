@@ -5,11 +5,11 @@
     "license": "UNLICENSED",
     "private": true,
     "scripts": {
-        "start": "expo start",
-        "dev": "expo start --web",
-        "android": "expo start --android",
-        "ios": "expo start --ios",
-        "web": "expo start --web",
+        "start": "expo start --lan",
+        "dev": "expo start --lan",
+        "android": "expo start --android --lan",
+        "ios": "expo start --ios --lan",
+        "web": "expo start --web --lan",
         "typecheck": "tsc --noEmit",
         "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'",
         "test": "echo \"No tests yet\""
