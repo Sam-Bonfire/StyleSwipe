@@ -259,8 +259,8 @@ const AnimatedCard = React.forwardRef(({
     return (
         <Animated.View style={animatedStyle}>
             <PanGestureHandler onGestureEvent={gestureHandler} enabled={isTop}>
-                <Animated.View>
-                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'}>
+                <Animated.View style={{ width: '100%', height: '100%' }}>
+                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
                         {renderCard(item, index)}
                         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }, likeOpacity]}>
                             <LikeOverlay><Heart size={64} color="$success" fill="currentColor" /></LikeOverlay>
