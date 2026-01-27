@@ -7,6 +7,7 @@
 
 import { Heart, X, Star } from '@tamagui/lucide-icons';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -231,6 +232,8 @@ const AnimatedCard = React.forwardRef(({
 
         return {
             position: 'absolute' as const,
+            width: '100%',
+            height: '100%',
             transform: [
                 { translateX: translateX.value },
                 { translateY: translateY.value + slotYOffset.value + yDrift },
@@ -256,8 +259,8 @@ const AnimatedCard = React.forwardRef(({
     return (
         <Animated.View style={animatedStyle}>
             <PanGestureHandler onGestureEvent={gestureHandler} enabled={isTop}>
-                <Animated.View>
-                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'}>
+                <Animated.View style={{ width: '100%', height: '100%' }}>
+                    <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
                         {renderCard(item, index)}
                         <Animated.View style={[{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }, likeOpacity]}>
                             <LikeOverlay><Heart size={64} color="$success" fill="currentColor" /></LikeOverlay>
@@ -283,10 +286,14 @@ export function SwipeCardStack<T>({
     onSwipeStart,
     onSwipeEnd,
     visibleCards = 4,
-    cardOffset = 25,
-    cardScale = 0.94,
+    cardOffset = 28,
+    cardScale = 0.96,
     ...props
 }: SwipeCardStackProps<T>) {
+    const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+    const stackWidth = screenWidth * 0.90;
+    const stackHeight = screenHeight * 0.72;
+
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const sharedX = useSharedValue(0);
@@ -328,7 +335,7 @@ export function SwipeCardStack<T>({
 
     return (
         <StackContainer {...props}>
-            <Stack width={320} height={480} position="relative">
+            <Stack width={stackWidth} height={stackHeight} position="relative">
                 {visibleData.map((item, index) => (
                     <AnimatedCard
                         // @ts-ignore
