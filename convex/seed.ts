@@ -13,7 +13,7 @@ export const seedProducts = mutation({
         // Helper to create random 384-dim vector
         const createEmbedding = () => Array.from({ length: 384 }, () => Math.random() - 0.5);
 
-        const products = [];
+        const products: any[] = [];
         const brands = ["ZARA", "H&M", "Uniqlo", "Levi's", "Mango", "Nike", "Adidas", "Gucci", "Prada", "Urban Outfitters"];
         const categories = ["tops", "bottoms", "outerwear", "dresses", "shoes", "accessories"];
         const colors = ["black", "white", "beige", "blue", "red", "green", "yellow", "pink"];

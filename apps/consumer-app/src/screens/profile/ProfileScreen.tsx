@@ -2,7 +2,7 @@ import { api } from '@convex-api';
 import { useQuery } from 'convex/react';
 import React from 'react';
 import { SafeAreaView } from 'react-native';
-import { YStack, H2, Text, Button, Avatar, XStack } from 'tamagui';
+import { YStack, Text, Button, Avatar, XStack } from 'tamagui';
 
 import { authAdapter } from '../../lib/auth';
 

@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
 
 const DB_NAME = 'events.db';
 const MAX_BUFFER_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
@@ -36,8 +36,8 @@ class WebPersistenceDB {
         localStorage.setItem(`metadata_${key}`, value);
     }
 
-    async execAsync(sql: string) { return; }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async runAsync(sql: string, ...args: any[]) {
         if (sql.includes('INSERT INTO events')) {
             const events = this.getEventsFromStorage();
@@ -74,7 +74,6 @@ class WebPersistenceDB {
             // Making this shim generic is hard. 
             // I will update the `LocalDatabase` class methods to branch on Platform for logic, not just the DB driver.
             // But for now, to satisfy the interface:
-            const events = this.getEventsFromStorage();
             // If it's a delete, we might just clear all for now since we process in FIFO?
             // No, that's dangerous.
             // Let's leave it as a TODO or handle in the class method.
@@ -86,7 +85,7 @@ class WebPersistenceDB {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async getAllAsync(sql: string, ...args: any[]): Promise<any[]> {
+    async getAllAsync(sql: string): Promise<any[]> {
         if (sql.includes('SELECT * FROM events')) return this.getEventsFromStorage();
         return [];
     }
@@ -101,7 +100,7 @@ class WebPersistenceDB {
 
 export class LocalDatabase {
     private static instance: LocalDatabase;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     private db: SQLite.SQLiteDatabase | WebPersistenceDB | null = null;
 
     private constructor() { }

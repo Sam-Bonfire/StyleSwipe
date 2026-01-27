@@ -1,5 +1,5 @@
-import { MyntraScraper } from './scrapers/MyntraScraper.js';
 import { AjioScraper } from './scrapers/AjioScraper.js';
+import { MyntraScraper } from './scrapers/MyntraScraper.js';
 
 async function main() {
     const args = process.argv.slice(2);

@@ -61,12 +61,11 @@ function NavigationGuard() {
 
 import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { Platform } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ModelManager } from './infrastructure/ModelManager';
 import { authAdapter } from './lib/auth';
 import { registerBackgroundWorker } from './workers/BackgroundWorker';
-
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
     // -----------------------------------------------------

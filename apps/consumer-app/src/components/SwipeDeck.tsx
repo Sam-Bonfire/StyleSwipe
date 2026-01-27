@@ -1,20 +1,20 @@
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
-import { LocalDatabase } from '../infrastructure/LocalDatabase';
 import { api } from '@convex-api';
 import { useAction, useMutation } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { YStack, H2 } from 'tamagui';
 
+import { LocalDatabase } from '../infrastructure/LocalDatabase';
+
 export function SwipeDeck() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [products, setProducts] = useState<any[] | null>(null);
     const getVectorFeed = useAction(api.recommendations.getVectorFeed);
-    // Removed direct mutation for offline support
     const swipeMutation = useMutation(api.discovery.processSwipe);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
