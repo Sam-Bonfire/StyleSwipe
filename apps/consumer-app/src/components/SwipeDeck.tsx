@@ -106,15 +106,23 @@ export function SwipeDeck() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             keyExtractor={(item: any) => item._id}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            renderCard={(item: any) => (
-                <FashionCard
-                    imageUrl={item.images[0]}
-                    title={item.title}
-                    price={item.price}
-                    brand={item.brand}
-                    onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
-                />
-            )}
+            renderCard={(item: any) => {
+                const discount = item.mrp && item.price < item.mrp
+                    ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
+                    : undefined;
+
+                return (
+                    <FashionCard
+                        imageUrl={item.images[0]}
+                        title={item.title}
+                        price={item.price}
+                        originalPrice={item.mrp}
+                        discountPercentage={discount}
+                        brand={item.brand}
+                        onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+                    />
+                );
+            }}
             onSwipe={handleSwipe}
         />
     );
