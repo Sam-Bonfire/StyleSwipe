@@ -1,10 +1,12 @@
 import { ShoppingBag } from '@tamagui/lucide-icons';
-import { styled, XStack, YStack, Text, Button, GetProps } from 'tamagui';
+import { styled, XStack, YStack, Text, GetProps } from 'tamagui';
+
+import Button from './Button';
 
 const FooterFrame = styled(XStack, {
     name: 'TransactionalFooter',
     backgroundColor: '$surface',
-    padding: '$3',
+    padding: '$2',
     borderTopWidth: 1,
     borderColor: '$borderColor',
     justifyContent: 'space-between',
@@ -21,6 +23,7 @@ const FooterFrame = styled(XStack, {
 
 const PriceContainer = styled(YStack, {
     name: 'FooterPriceContainer',
+    flex: 1,
 });
 
 const TotalLabel = styled(Text, {
@@ -28,32 +31,19 @@ const TotalLabel = styled(Text, {
     fontSize: '$2',
     color: '$textSecondary',
     fontWeight: '500',
+    marginBottom: 2,
 });
 
 const PriceText = styled(Text, {
     name: 'FooterPriceText',
-    fontSize: '$6',
+    fontSize: '$5',
     color: '$textPrimary',
     fontWeight: '700',
 });
 
-const ActionButton = styled(Button, {
-    name: 'FooterActionButton',
-    backgroundColor: '$primary',
-    borderRadius: '$4',
-    paddingHorizontal: '$4',
-    elevation: 2,
-
-    hoverStyle: {
-        backgroundColor: '$primaryDark',
-    },
-    pressStyle: {
-        backgroundColor: '$primaryDark',
-    },
-});
-
 export type TransactionalFooterProps = GetProps<typeof FooterFrame> & {
     price: number;
+    originalPrice?: number;
     currency?: string;
     onAddToCart: () => void;
     isAdded?: boolean;
@@ -62,6 +52,7 @@ export type TransactionalFooterProps = GetProps<typeof FooterFrame> & {
 
 export const TransactionalFooter = ({
     price,
+    originalPrice,
     currency = 'INR',
     onAddToCart,
     isAdded = false,
@@ -77,23 +68,39 @@ export const TransactionalFooter = ({
         }).format(amount);
     };
 
+    const discountPercentage = originalPrice
+        ? Math.round(((originalPrice - price) / originalPrice) * 100)
+        : 0;
+
     return (
         <FooterFrame {...props}>
             <PriceContainer>
                 <TotalLabel>Total Price</TotalLabel>
-                <PriceText>{formatPrice(price)}</PriceText>
+                <XStack alignItems="center" gap="$2">
+                    <PriceText>{formatPrice(price)}</PriceText>
+                    {originalPrice && originalPrice > price && (
+                        <>
+                            <Text fontSize="$3" color="$textSecondary" textDecorationLine="line-through">
+                                {formatPrice(originalPrice)}
+                            </Text>
+                            <Text fontSize="$3" color="$success" fontWeight="700">
+                                {discountPercentage}% OFF
+                            </Text>
+                        </>
+                    )}
+                </XStack>
             </PriceContainer>
 
-            <ActionButton
-                size="$4"
+            <Button
+                size="large"
+                variant="primary"
                 onPress={onAddToCart}
                 disabled={isLoading}
+                loading={isLoading}
                 icon={isAdded ? <ShoppingBag size={20} color="white" /> : undefined}
             >
-                <Text color="white" fontWeight="600" fontSize="$4">
-                    {isLoading ? 'Adding...' : isAdded ? 'Go to Bag' : 'Add to Bag'}
-                </Text>
-            </ActionButton>
+                {isAdded ? 'Go to Bag' : 'Add to Bag'}
+            </Button>
         </FooterFrame>
     );
 };

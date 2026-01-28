@@ -1,53 +1,149 @@
+
 import { ManageCart, CartItem } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
-import { TopBarIconButton } from '@app/ui-kit';
+import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { api } from "@convex-api";
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
-import { useConvex } from 'convex/react';
-import React, { useState, useMemo } from 'react';
-import { YStack, ScrollView, Text, XStack, Separator, Spacer } from 'tamagui';
+import { useConvex, useQuery } from 'convex/react';
+import React, { useMemo, useState } from 'react';
+import { ScrollView, View, useWindowDimensions } from 'react-native';
+import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
 
+import { Id } from '../../../../../convex/_generated/dataModel';
+
+// COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
+    // -------------------------------------------------------------------------
+    // 1. Hooks & State
+    // -------------------------------------------------------------------------
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const route = useRoute<any>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const navigation = useNavigation<any>();
-    const { productId } = route?.params || { productId: 'prod-1' }; // Mock param
+    const theme = useTheme();
     const convex = useConvex();
+    const { height: windowHeight } = useWindowDimensions();
+
+    const { productId } = route?.params || { productId: 'prod-1' };
+
+    // FETCH REAL DATA
+    // We cast productId to any because navigation params are strings, but Convex expects Id<"products">
+    // In a real app, we'd validate this.
+    const productData = useQuery(api.products.get, { id: productId as Id<"products"> });
+
+    const [selectedSizes, setSelectedSizes] = useState<Record<string, string[]>>({});
+    const [showSizeError, setShowSizeError] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
-    // TODO: Ideally use a ProductRepository to fetch details. Mocking for now.
-    const product = {
-        id: productId,
-        brand: 'Urban Monkey',
-        title: 'Streetwear Oversized T-Shirt',
-        price: 1499,
-        originalPrice: 2499,
-        description: 'Premium cotton oversized t-shirt with graphic print. Perfect for casual streetwear look.',
-        images: [
-            'https://placehold.co/400x500/png?text=Front',
-            'https://placehold.co/400x500/png?text=Back',
-            'https://placehold.co/400x500/png?text=Detail'
-        ],
-        attributes: {
-            material: '100% Cotton',
-            fit: 'Oversized',
-            care: 'Machine Wash'
-        }
-    };
 
     const manageCart = useMemo(() => {
         const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
         return new ManageCart(repo);
     }, [convex]);
 
+    // -------------------------------------------------------------------------
+    // 2. Data Mapping
+    // -------------------------------------------------------------------------
+
+    // Loading State
+    if (productData === undefined) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background.val }}>
+                <Spinner size="large" color="$primary" />
+            </View>
+        );
+    }
+
+    // Not Found State
+    if (productData === null) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background.val }}>
+                <Text fontSize="$6" color="$textSecondary">Product not found</Text>
+                <Button
+                    variant="ghost"
+                    onPress={() => navigation.goBack()}
+                    marginTop="$4"
+                >
+                    Go Back
+                </Button>
+            </View>
+        );
+    }
+
+    // 3. Process Attributes
+    const rawAttributes = productData.attributes || {};
+
+    // Normalize attributes for display (flatten arrays to strings)
+    const displayAttributes: Record<string, string> = Object.entries(rawAttributes).reduce((acc, [key, value]) => {
+        if (key === 'size') return acc; // Skip size as key, handled separately in selector
+        if (typeof value === 'string' || typeof value === 'number') {
+            acc[key] = String(value);
+        } else if (Array.isArray(value)) {
+            acc[key] = value.join(', ');
+        }
+        return acc;
+    }, {} as Record<string, string>);
+
+    // Ensure core fields exist for consistent UI if needed, though UI maps dynamically now.
+    // We don't enforce strict shape here to allow flexibility.
+
+    const product = {
+        id: productData._id,
+        brand: productData.brand,
+        title: productData.title,
+        price: productData.price,
+        originalPrice: productData.mrp,
+        description: productData.description || `Experience premium quality with the ${productData.title}.`,
+        rating: productData.rating || 4.5,
+        reviewCount: productData.reviewCount || 128,
+        platform: productData.platform || 'StyleSwipe Verified',
+        images: productData.images && productData.images.length > 0
+            ? productData.images
+            : ['https://placehold.co/400x500/png?text=No+Image'],
+        availableSizes: Array.isArray(rawAttributes.size) ? rawAttributes.size : ['S', 'M', 'L', 'XL'],
+        attributes: {
+            material: 'N/A', // Defaults
+            fit: 'Regular',
+            ...displayAttributes
+        }
+    };
+
+    // -------------------------------------------------------------------------
+    // 3. Logic
+    // -------------------------------------------------------------------------
+    // manageCart moved to top level hook
+
+
+    const sizeField: SizeField = {
+        id: 'product_size',
+        label: 'Select Size',
+        helperText: 'Size guide available',
+        multiSelect: false,
+        options: product.availableSizes.map(size => ({
+            id: size,
+            label: size,
+        }))
+    };
+
+    const handleSizeChange = (fieldId: string, selectedIds: string[]) => {
+        setSelectedSizes({ [fieldId]: selectedIds });
+        setShowSizeError(false);
+    };
+
     const handleAddToCart = async () => {
         if (isAdded) {
             navigation.navigate('Cart');
+            return;
+        }
+
+        const selectedSize = selectedSizes['product_size']?.[0];
+
+        if (!selectedSize) {
+            setShowSizeError(true);
             return;
         }
 
@@ -59,7 +155,7 @@ export function ProductDetailScreen() {
                 product.price,
                 {
                     brand: product.brand,
-                    size: 'M', // Default for now
+                    size: selectedSize,
                     color: 'Black'
                 }
             );
@@ -72,26 +168,21 @@ export function ProductDetailScreen() {
         }
     };
 
+    // -------------------------------------------------------------------------
+    // 4. Render
+    // -------------------------------------------------------------------------
     return (
-        <YStack flex={1} backgroundColor="$background">
-            <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-                {/* Image Gallery */}
+        <View style={{ height: windowHeight, backgroundColor: theme.background.val }}>
+            <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}
+            >
+                {/* 1. Gallery */}
                 <ImageGallery images={product.images} />
 
-                {/* Back Button Overlay */}
-                <YStack position="absolute" top="$2" left="$2" zIndex={100}>
-                    <TopBarIconButton
-                        onPress={() => navigation.goBack()}
-                        backgroundColor="$background"
-                        elevation="$2"
-                        shadowColor="$shadowColor"
-                        shadowRadius={4}
-                        shadowOpacity={0.1}
-                    >
-                        <ChevronLeft size={24} color="$textPrimary" />
-                    </TopBarIconButton>
-                </YStack>
-
+                {/* 2. Content */}
                 <YStack padding="$4" gap="$2">
                     {/* Brand & Title */}
                     <Text fontSize="$3" color="$textSecondary" fontWeight="600" textTransform="uppercase">
@@ -101,20 +192,37 @@ export function ProductDetailScreen() {
                         {product.title}
                     </Text>
 
-                    {/* Price & Discount */}
-                    <XStack alignItems="baseline" gap="$2" marginTop="$1">
-                        <Text fontSize="$6" color="$textPrimary" fontWeight="600">
-                            ₹{product.price}
-                        </Text>
-                        <Text fontSize="$4" color="$textTertiary" textDecorationLine="line-through">
-                            ₹{product.originalPrice}
-                        </Text>
+                    {/* Ratings */}
+                    <XStack alignItems="center" gap="$2" marginTop="$1">
+                        <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
+                        <Stack height={16} width={1} backgroundColor="$borderColor" />
+                        <Text fontSize="$3" color="$primary" fontWeight="500">{product.platform}</Text>
+                    </XStack>
+
+                    {/* Price */}
+                    <XStack alignItems="baseline" gap="$2" marginTop="$2">
+                        <Text fontSize="$6" color="$textPrimary" fontWeight="600">₹{product.price}</Text>
+                        <Text fontSize="$4" color="$textTertiary" textDecorationLine="line-through">₹{product.originalPrice}</Text>
                         <Text fontSize="$4" color="$success" fontWeight="600">
                             {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                         </Text>
                     </XStack>
 
                     <Separator marginVertical="$4" borderColor="$borderColor" />
+
+                    {/* Size Selector */}
+                    <YStack marginBottom="$4">
+                        <SizeChipGroup
+                            fields={[sizeField]}
+                            selectedSizes={selectedSizes}
+                            onSizeChange={handleSizeChange}
+                        />
+                        {showSizeError && (
+                            <Text color="$error" fontSize="$3" marginTop="$1">Please select a size to continue</Text>
+                        )}
+                    </YStack>
+
+                    <Separator marginBottom="$4" borderColor="$borderColor" />
 
                     {/* Description */}
                     <Text fontSize="$4" fontWeight="600" marginBottom="$2">Description</Text>
@@ -124,28 +232,57 @@ export function ProductDetailScreen() {
 
                     <Spacer size="$4" />
 
-                    {/* Product Details */}
-                    <Text fontSize="$4" fontWeight="600" marginBottom="$2">Product Details</Text>
-                    <YStack gap="$1">
+                    {/* Attributes Grid */}
+                    <Text fontSize="$4" fontWeight="600" marginBottom="$3">Product Details</Text>
+                    <YStack gap="$2" flexWrap="wrap">
                         {Object.entries(product.attributes).map(([key, value]) => (
-                            <XStack key={key} justifyContent="space-between">
-                                <Text fontSize="$3" color="$textSecondary" textTransform="capitalize">{key}</Text>
-                                <Text fontSize="$3" color="$textPrimary" fontWeight="500">{value}</Text>
+                            <XStack
+                                key={key}
+                                alignItems="flex-start"
+                                backgroundColor="$surface"
+                                padding="$3"
+                                borderRadius="$3"
+                                borderColor="$borderColor"
+                                borderWidth={1}
+                            >
+                                <Stack width="35%" flexShrink={0}>
+                                    <Text fontSize="$3" color="$textSecondary" textTransform="capitalize" fontWeight="500">
+                                        {key}
+                                    </Text>
+                                </Stack>
+                                <Stack flex={1} paddingLeft="$2">
+                                    <Text fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">
+                                        {value}
+                                    </Text>
+                                </Stack>
                             </XStack>
                         ))}
                     </YStack>
                 </YStack>
             </ScrollView>
 
-            {/* Sticky Action Footer */}
+            {/* 3. Floating UI: Back Button */}
+            <View style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
+                <TopBarIconButton
+                    onPress={() => navigation.goBack()}
+                    backgroundColor="$background"
+                    elevation="$2"
+                    shadowColor="$shadowColor"
+                    shadowRadius={4}
+                    shadowOpacity={0.1}
+                >
+                    <ChevronLeft size={24} color="$textPrimary" />
+                </TopBarIconButton>
+            </View>
+
+            {/* 4. Footer */}
             <TransactionalFooter
                 price={product.price}
+                originalPrice={product.originalPrice}
                 onAddToCart={handleAddToCart}
                 isAdded={isAdded}
                 isLoading={isLoading}
             />
-        </YStack>
+        </View>
     );
-};
-
-export default ProductDetailScreen;
+}

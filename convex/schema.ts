@@ -192,6 +192,10 @@ const products = defineTable({
     category: v.string(),
     categoryId: v.optional(v.id("categories")),
     images: v.array(v.string()),
+    description: v.optional(v.string()),
+    rating: v.optional(v.number()),
+    reviewCount: v.optional(v.number()),
+    platform: v.optional(v.string()),
     attributes: v.optional(
         v.object({
             color: v.optional(v.string()),
@@ -199,6 +203,14 @@ const products = defineTable({
             material: v.optional(v.string()),
             fit: v.optional(v.string()),
             occasion: v.optional(v.array(v.string())),
+            // Extended attributes for PDP
+            care: v.optional(v.string()),
+            origin: v.optional(v.string()),
+            style: v.optional(v.string()),
+            sleeve: v.optional(v.string()),
+            neck: v.optional(v.string()),
+            season: v.optional(v.string()),
+            collection: v.optional(v.string()),
         })
     ),
     // Discovery Attributes for Filtering
