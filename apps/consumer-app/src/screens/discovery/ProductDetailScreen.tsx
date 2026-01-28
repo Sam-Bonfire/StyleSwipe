@@ -1,16 +1,19 @@
 
 import { ManageCart, CartItem } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
-import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Toast } from '@app/ui-kit';
+import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Toast, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
-import { useConvex } from 'convex/react';
+import { useConvex, useQuery } from 'convex/react';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme } from 'tamagui';
+
+import { Spinner } from 'tamagui';
+import { api } from "@convex-api";
 
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
@@ -26,51 +29,95 @@ export function ProductDetailScreen() {
     const { height: windowHeight } = useWindowDimensions();
 
     const { productId } = route?.params || { productId: 'prod-1' };
+
+    // FETCH REAL DATA
+    // We cast productId to any because navigation params are strings, but Convex expects Id<"products">
+    // In a real app, we'd validate this.
+    const productData = useQuery(api.products.get, { id: productId as any });
+
     const [selectedSizes, setSelectedSizes] = useState<Record<string, string[]>>({});
     const [showSizeError, setShowSizeError] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const manageCart = useMemo(() => {
+        const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
+        return new ManageCart(repo);
+    }, [convex]);
+
     // -------------------------------------------------------------------------
-    // 2. Data (Mock)
+    // 2. Data Mapping
     // -------------------------------------------------------------------------
+
+    // Loading State
+    if (productData === undefined) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background.val }}>
+                <Spinner size="large" color="$primary" />
+            </View>
+        );
+    }
+
+    // Not Found State
+    if (productData === null) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background.val }}>
+                <Text fontSize="$6" color="$textSecondary">Product not found</Text>
+                <Button
+                    variant="ghost"
+                    onPress={() => navigation.goBack()}
+                    marginTop="$4"
+                >
+                    Go Back
+                </Button>
+            </View>
+        );
+    }
+
+    // 3. Process Attributes
+    const rawAttributes = productData.attributes || {};
+
+    // Normalize attributes for display (flatten arrays to strings)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const displayAttributes: Record<string, string> = Object.entries(rawAttributes).reduce((acc, [key, value]) => {
+        if (key === 'size') return acc; // Skip size as key, handled separately in selector
+        if (typeof value === 'string' || typeof value === 'number') {
+            acc[key] = String(value);
+        } else if (Array.isArray(value)) {
+            acc[key] = value.join(', ');
+        }
+        return acc;
+    }, {} as Record<string, string>);
+
+    // Ensure core fields exist for consistent UI if needed, though UI maps dynamically now.
+    // We don't enforce strict shape here to allow flexibility.
+
     const product = {
-        id: productId,
-        brand: 'Urban Monkey',
-        title: 'Streetwear Oversized T-Shirt',
-        price: 1499,
-        originalPrice: 2499,
-        description: 'Elevate your streetwear game with this premium cotton oversized t-shirt. Designed for the modern urban explorer, it features a heavy-weight fabric that drapes perfectly for a relaxed, boxy fit. \n\nThe graphic print is high-quality puff print that won\'t crack after washing. Whether you are skating, hanging out with friends, or just lounging, this tee delivers unmatched comfort and style. \n\nPair it with baggy jeans or cargos for the ultimate compassionate look. Available in multiple colors to match your vibe.',
-        rating: 4.5,
-        reviewCount: 128,
-        platform: 'Urban Monkey Official',
-        images: [
-            'https://placehold.co/400x500/png?text=Front',
-            'https://placehold.co/400x500/png?text=Back',
-            'https://placehold.co/400x500/png?text=Detail',
-            'https://placehold.co/400x500/png?text=Lifestyle'
-        ],
-        availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+        id: productData._id,
+        brand: productData.brand,
+        title: productData.title,
+        price: productData.price,
+        originalPrice: productData.mrp,
+        description: productData.description || `Experience premium quality with the ${productData.title}.`,
+        rating: productData.rating || 4.5,
+        reviewCount: productData.reviewCount || 128,
+        platform: productData.platform || 'StyleSwipe Verified',
+        images: productData.images && productData.images.length > 0
+            ? productData.images
+            : ['https://placehold.co/400x500/png?text=No+Image'],
+        availableSizes: Array.isArray(rawAttributes.size) ? rawAttributes.size : ['S', 'M', 'L', 'XL'],
         attributes: {
-            material: '100% Heavyweight Cotton (240 GSM)',
-            fit: 'Oversized / Boxy Fit',
-            care: 'Machine Wash Cold, Do Not Tumble Dry',
-            origin: 'Made in India',
-            style: 'Streetwear / Graphic',
-            sleeve: 'Drop Shoulder',
-            neck: 'Ribbed Crew Neck',
-            season: 'All Season',
-            collection: 'Urban Explorer 2024'
+            material: 'N/A', // Defaults
+            fit: 'Regular',
+            ...displayAttributes
         }
     };
 
     // -------------------------------------------------------------------------
     // 3. Logic
     // -------------------------------------------------------------------------
-    const manageCart = useMemo(() => {
-        const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
-        return new ManageCart(repo);
-    }, [convex]);
+    // manageCart moved to top level hook
+
 
     const sizeField: SizeField = {
         id: 'product_size',

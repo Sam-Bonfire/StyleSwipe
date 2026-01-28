@@ -28,14 +28,27 @@ export const seedProducts = mutation({
             products.push({
                 brand: brand,
                 title: `${brand} ${category} ${i + 1}`, // Simple dynamic title
+                description: `Experience premium quality with the ${brand} ${category}. Crafted for comfort and durability, this piece is designed to elevate your everyday style. Made from high-quality materials, it offers both breathability and a perfect fit.`,
+                rating: 4.0 + Math.random(),
+                reviewCount: Math.floor(Math.random() * 500),
+                platform: "StyleSwipe Verified",
                 price: price,
                 mrp: Math.floor(price * 1.5),
                 category: category,
                 images: [`https://picsum.photos/320/480?random=${i + 10}`],
                 attributes: {
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    material: "mixed",
-                    fit: "regular"
+                    material: "100% Cotton",
+                    fit: "Regular Fit",
+                    size: ["S", "M", "L", "XL"],
+                    occasion: ["Casual", "Daily"],
+                    care: "Machine Wash Cold",
+                    origin: "Imported",
+                    style: "Streetwear",
+                    sleeve: "Short Sleeve",
+                    neck: "Crew Neck",
+                    season: "All Season",
+                    collection: "SS26"
                 },
                 gender: genders[Math.floor(Math.random() * genders.length)],
                 priceTier: price > 3000 ? "premium" : "budget",

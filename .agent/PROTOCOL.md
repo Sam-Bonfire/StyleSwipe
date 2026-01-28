@@ -8,7 +8,7 @@
 ## II. THE WORKFLOW
 1. **Start**: `bun task {{type}} {{name}}`. 
 2. **Work**: Code logic. Use VS Code Source Control to stage files.
-3. **Save**: `bun snap "{{type}}/{{name}}"` with the details about the changes made in the save and not the same as the branch name.
+3. **Save**: `bun snap "{{type}}:{{title}}"` with the details about the changes made in the save and not the same as the branch name in the format type:title.
 4. **Submit**: `bun submit`. (Auto-fix + Validation + PR Creation).
 
 ## III. STACK MANAGEMENT
