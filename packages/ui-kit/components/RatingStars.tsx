@@ -49,18 +49,18 @@ export const RatingStars = React.forwardRef<any, RatingStarsProps>(
 
             // Full Stars
             for (let i = 0; i < fullStars; i++) {
-                stars.push(<Star key={`full-${i}`} size={starSize} color="$warning" fill="currentColor" />);
+                stars.push(<Star key={`full-${i}`} size={starSize as any} color="$warning" fill="currentColor" />);
             }
 
             // Half Star
             if (hasHalfStar) {
-                stars.push(<StarHalf key="half" size={starSize} color="$warning" fill="currentColor" />);
+                stars.push(<StarHalf key="half" size={starSize as any} color="$warning" fill="currentColor" />);
             }
 
             // Empty Stars
             const emptyStars = maxRating - stars.length;
             for (let i = 0; i < emptyStars; i++) {
-                stars.push(<Star key={`empty-${i}`} size={starSize} color="$neutral300" />);
+                stars.push(<Star key={`empty-${i}`} size={starSize as any} color="$neutral300" />);
             }
 
             return stars;
