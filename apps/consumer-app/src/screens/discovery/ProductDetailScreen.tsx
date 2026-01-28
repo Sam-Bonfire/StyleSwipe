@@ -13,7 +13,7 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
 
-import { Id } from '../../../../convex/_generated/dataModel';
+import { Id } from '../../../../../convex/_generated/dataModel';
 
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
