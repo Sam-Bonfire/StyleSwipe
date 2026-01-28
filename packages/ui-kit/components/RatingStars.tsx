@@ -44,8 +44,11 @@ export const RatingStars = React.forwardRef<any, RatingStarsProps>(
         // Render stars logic
         const renderStars = () => {
             const stars = [];
-            const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 >= 0.5;
+            const r = rating as unknown as number;
+            const max = maxRating as unknown as number;
+
+            const fullStars = Math.floor(r);
+            const hasHalfStar = r % 1 >= 0.5;
 
             // Full Stars
             for (let i = 0; i < fullStars; i++) {
@@ -58,7 +61,7 @@ export const RatingStars = React.forwardRef<any, RatingStarsProps>(
             }
 
             // Empty Stars
-            const emptyStars = maxRating - stars.length;
+            const emptyStars = max - stars.length;
             for (let i = 0; i < emptyStars; i++) {
                 stars.push(<Star key={`empty-${i}`} size={starSize as any} color="$neutral300" />);
             }
