@@ -1,19 +1,19 @@
 
 import { ManageCart, CartItem } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
-import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Toast, Button } from '@app/ui-kit';
+import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
+import { api } from "@convex-api";
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions } from 'react-native';
-import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme } from 'tamagui';
+import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
 
-import { Spinner } from 'tamagui';
-import { api } from "@convex-api";
+import { Id } from '../../../../convex/_generated/dataModel';
 
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
@@ -33,7 +33,7 @@ export function ProductDetailScreen() {
     // FETCH REAL DATA
     // We cast productId to any because navigation params are strings, but Convex expects Id<"products">
     // In a real app, we'd validate this.
-    const productData = useQuery(api.products.get, { id: productId as any });
+    const productData = useQuery(api.products.get, { id: productId as Id<"products"> });
 
     const [selectedSizes, setSelectedSizes] = useState<Record<string, string[]>>({});
     const [showSizeError, setShowSizeError] = useState(false);
@@ -78,7 +78,6 @@ export function ProductDetailScreen() {
     const rawAttributes = productData.attributes || {};
 
     // Normalize attributes for display (flatten arrays to strings)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const displayAttributes: Record<string, string> = Object.entries(rawAttributes).reduce((acc, [key, value]) => {
         if (key === 'size') return acc; // Skip size as key, handled separately in selector
         if (typeof value === 'string' || typeof value === 'number') {

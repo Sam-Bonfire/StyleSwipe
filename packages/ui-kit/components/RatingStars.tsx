@@ -4,9 +4,9 @@
  * Displays a star rating (0-5) with support for partial stars and review counts.
  */
 
+import { Star, StarHalf } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, XStack, Text } from 'tamagui';
-import { Star, StarHalf } from '@tamagui/lucide-icons';
 
 const RatingContainer = styled(XStack, {
     name: 'RatingStarsContainer',
