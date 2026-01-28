@@ -71,6 +71,9 @@ export type { EmptyStateProps, EmptyStateType } from './EmptyState';
 export { LoadingSkeleton, ProductTileSkeleton, FashionCardSkeleton, CartItemSkeleton } from './LoadingSkeleton';
 export type { LoadingSkeletonProps } from './LoadingSkeleton';
 
+export { RatingStars } from './RatingStars';
+export type { RatingStarsProps } from './RatingStars';
+
 // Partner Sync Components
 export { PartnerSyncCard } from './PartnerSyncCard';
 export type { PartnerSyncCardProps, Duration } from './PartnerSyncCard';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dimensions, NativeScrollEvent, NativeSyntheticEvent, ScrollView } from 'react-native';
+import { NativeScrollEvent, NativeSyntheticEvent, ScrollView, useWindowDimensions } from 'react-native';
 import { Image, Stack, XStack, YStack } from 'tamagui';
 
 interface ImageGalleryProps {
@@ -7,10 +7,11 @@ interface ImageGalleryProps {
     initialIndex?: number;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) => {
+    const { width: windowWidth } = useWindowDimensions();
     const [activeIndex, setActiveIndex] = useState(initialIndex);
+    const ASPECT_RATIO = 0.7;
+    const galleryHeight = windowWidth / ASPECT_RATIO;
 
     const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -24,7 +25,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
     if (!images || images.length === 0) return null;
 
     return (
-        <YStack position="relative" width={SCREEN_WIDTH} height={500}>
+        <YStack position="relative" width={windowWidth} height={galleryHeight}>
             <ScrollView
                 horizontal
                 pagingEnabled
@@ -35,9 +36,9 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                 bounces={false}
             >
                 {images.map((img, index) => (
-                    <Stack key={index} width={SCREEN_WIDTH} height={500} justifyContent="center" alignItems="center" backgroundColor="$background">
+                    <Stack key={index} width={windowWidth} height={galleryHeight} justifyContent="center" alignItems="center" backgroundColor="$background">
                         <Image
-                            source={{ uri: img, width: SCREEN_WIDTH, height: 500 }}
+                            source={{ uri: img, width: windowWidth, height: galleryHeight }}
                             resizeMode="cover"
                         />
                     </Stack>

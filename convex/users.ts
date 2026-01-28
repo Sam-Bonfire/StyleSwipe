@@ -18,7 +18,6 @@ export const currentUser = query({
     args: {},
     handler: async (ctx) => {
         const identity = await ctx.auth.getUserIdentity();
-        console.log("Convex Identity:", identity);
         if (!identity || !identity.email) {
             return null;
         }
