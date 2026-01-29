@@ -34,7 +34,6 @@ export function PhoneAuthScreen() {
 
             <YStack gap="$4">
                 <Input
-                    size="$4"
                     borderWidth={1}
                     placeholder="+91 99999 99999"
                     value={phone}

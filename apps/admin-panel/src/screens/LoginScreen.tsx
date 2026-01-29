@@ -57,7 +57,6 @@ export function LoginScreen() {
                             <Label htmlFor="email" color="$color">Email Address</Label>
                             <Input
                                 id="email"
-                                size="$4"
                                 value={email}
                                 onChangeText={setEmail}
                                 placeholder="admin@styleswipe.com"
@@ -69,7 +68,6 @@ export function LoginScreen() {
                             <Label htmlFor="password" color="$color">Password</Label>
                             <Input
                                 id="password"
-                                size="$4"
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry

@@ -58,7 +58,7 @@ export class ConvexUserRepository implements UserRepository {
     }
 
     async updateStyleProfile(id: string, profile: StyleProfile): Promise<User> {
-        await this.client.mutation(api.users.updateStyleProfile, {
+        await this.client.mutation(api.users.update, {
             id: id as Id<"users">,
             styleProfile: profile,
         });

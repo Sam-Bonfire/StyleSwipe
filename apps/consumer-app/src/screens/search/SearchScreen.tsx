@@ -113,7 +113,6 @@ export function SearchScreen() {
                 <YStack space="$2">
                     <Input
                         placeholder="Search for items..."
-                        size="$4"
                         borderWidth={1}
                         value={query}
                         onChangeText={setQuery}

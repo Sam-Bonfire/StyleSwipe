@@ -19,6 +19,7 @@ export class ConvexProductAdapter implements ProductSearchRepository {
                         title: p.title,
                         brand: p.brand,
                         price: p.price,
+                        mrp: p.mrp ?? p.price,
                         images: p.images,
                         description: p.description,
                         category: p.category
