@@ -66,7 +66,7 @@ export function ProductsScreen() {
                                     <Text color="$textSecondary">{product.brand}</Text>
                                     <Text fontWeight="bold">₹{product.price}</Text>
                                 </XStack>
-                                <Button size="small" width="100%" onPress={() => handleRetrigger(product._id)}>
+                                <Button size="small" fullWidth onPress={() => handleRetrigger(product._id)}>
                                     Retrigger Scrape
                                 </Button>
                             </Card.Footer>
@@ -74,7 +74,7 @@ export function ProductsScreen() {
                     ))
                 )}
                 {status === "CanLoadMore" && (
-                    <Button onPress={() => loadMore(pageSize)} width="100%">
+                    <Button onPress={() => loadMore(pageSize)} fullWidth>
                         Load More
                     </Button>
                 )}

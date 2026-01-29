@@ -9,6 +9,7 @@
 import React from 'react';
 import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
+import { Button } from './Button';
 
 const CardFrame = styled(Stack, {
     name: 'FashionCard',
@@ -130,34 +131,7 @@ const DiscountText = styled(Text, {
     color: '$textInverse',
 });
 
-const ActionButton = styled(Stack, {
-    name: 'FashionCardActionButton',
-    // Removed absolute positioning
-    backgroundColor: '$primary',
-    paddingHorizontal: '$2',
-    paddingVertical: '$1',
-    borderRadius: '$full',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '$1',
 
-    hoverStyle: {
-        backgroundColor: '$primaryDark',
-        scale: 1.05,
-    },
-
-    pressStyle: {
-        scale: 0.95,
-    },
-});
-
-const ActionButtonText = styled(Text, {
-    name: 'FashionCardActionButtonText',
-    fontFamily: '$body',
-    fontSize: '$3',
-    fontWeight: '600',
-    color: '$textInverse',
-});
 
 export type FashionCardProps = GetProps<typeof CardFrame> & {
     imageUrl: string;
@@ -242,12 +216,16 @@ export const FashionCard = React.forwardRef<TamaguiElement, FashionCardProps>(
                                     </PriceContainer>
 
                                     {onAddToCart && (
-                                        <ActionButton onPress={(e: any) => {
-                                            e.stopPropagation();
-                                            onAddToCart();
-                                        }}>
-                                            <ActionButtonText>Add</ActionButtonText>
-                                        </ActionButton>
+                                        <Button
+                                            size="small"
+                                            variant="primary"
+                                            onPress={(e: any) => {
+                                                e.stopPropagation();
+                                                onAddToCart();
+                                            }}
+                                        >
+                                            Add
+                                        </Button>
                                     )}
                                 </XStack>
                             </CardOverlay>

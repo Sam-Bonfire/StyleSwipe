@@ -40,11 +40,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggleCollapse 
                     </XStack>
                 )}
                 <Button
-                    size="small"
                     circular
-                    width={44}
-                    height={44}
-                    padding={0}
                     icon={isCollapsed ? <ChevronRight size="$3" color="$color" /> : <ChevronLeft size="$3" color="$color" />}
                     onPress={onToggleCollapse}
                     variant="ghost"
@@ -61,14 +57,10 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggleCollapse 
                         return (
                             <Button
                                 key={item.id}
-                                size="small"
                                 variant={isActive ? "primary" : "ghost"}
                                 onPress={() => onNavigate(item.id as Page)}
                                 justifyContent="center"
                                 alignItems="center"
-                                width={44}
-                                height={44}
-                                padding={0}
                                 icon={<Icon size="$3" color={isActive ? "$textInverse" : "$color"} />}
                             />
                         );
@@ -77,7 +69,6 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggleCollapse 
                     return (
                         <Button
                             key={item.id}
-                            size="small"
                             variant={isActive ? "primary" : "ghost"}
                             onPress={() => onNavigate(item.id as Page)}
                             justifyContent="flex-start"

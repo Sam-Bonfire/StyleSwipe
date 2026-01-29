@@ -5,9 +5,10 @@
  * Features: Product image, brand name, title, price with discount, rating badge, sale badge
  */
 
-import { Star, Heart } from '@tamagui/lucide-icons';
+import { Star } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
+import { WishlistButton } from './WishlistButton';
 
 const TileFrame = styled(Stack, {
     name: 'ProductTile',
@@ -67,27 +68,7 @@ const ProductImage = styled(Image, {
     height: '100%',
 });
 
-const WishlistButton = styled(Stack, {
-    name: 'ProductTileWishlistButton',
-    position: 'absolute',
-    top: '$1.5',
-    right: '$1.5',
-    width: 32,
-    height: 32,
-    borderRadius: '$full',
-    backgroundColor: '$surface',
-    alignItems: 'center',
-    justifyContent: 'center',
 
-
-    hoverStyle: {
-        scale: 1.1,
-    },
-
-    pressStyle: {
-        scale: 0.9,
-    },
-});
 
 const SaleBadge = styled(Stack, {
     name: 'ProductTileSaleBadge',
@@ -271,17 +252,15 @@ export const ProductTile = React.forwardRef<TamaguiElement, ProductTileProps>(
                                     </SaleBadge>
                                 )}
 
-                                <WishlistButton onPress={handleWishlistPress}>
-                                    {
-                                        (
-                                            <Heart
-                                                size={18}
-                                                color={isWishlisted ? '$primary' : '$textSecondary'}
-                                                fill={isWishlisted ? '$primary' : 'transparent'}
-                                            />
-                                        ) as any
-                                    }
-                                </WishlistButton>
+                                <WishlistButton
+                                    isWishlisted={isWishlisted}
+                                    onWishlistPress={handleWishlistPress}
+                                    position="absolute"
+                                    top="$1.5"
+                                    right="$1.5"
+                                    hoverStyle={{ scale: 1.1 }}
+                                    pressStyle={{ scale: 0.9 }}
+                                />
                             </ImageContainer>
 
                             <ContentContainer>

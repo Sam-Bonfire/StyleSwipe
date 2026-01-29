@@ -7,6 +7,9 @@
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
 
+export { WishlistButton } from './WishlistButton';
+export type { WishlistButtonProps } from './WishlistButton';
+
 export { FashionCard } from './FashionCard';
 export type { FashionCardProps } from './FashionCard';
 

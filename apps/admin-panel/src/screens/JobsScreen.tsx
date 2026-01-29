@@ -1,8 +1,9 @@
 
+import { Button } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { usePaginatedQuery } from 'convex/react';
 import React from 'react';
-import { YStack, Text, Card, H2, Button, XStack, Spinner, ScrollView, ColorTokens } from 'tamagui';
+import { YStack, Text, Card, H2, XStack, Spinner, ScrollView, ColorTokens } from 'tamagui';
 
 export function JobsScreen() {
     const jobs = usePaginatedQuery(api.admin.getScrapingJobs, {}, { initialNumItems: 20 });

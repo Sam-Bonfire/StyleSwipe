@@ -5,7 +5,8 @@ import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex } from 'convex/react';
 import React, { useState, useMemo } from 'react';
-import { YStack, Text, XStack, Button, ScrollView } from 'tamagui';
+import { Button } from '@app/ui-kit';
+import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
 // Mock Order Repository (In-memory for prototype)
 // TODO: Replace with ConvexOrderRepository
