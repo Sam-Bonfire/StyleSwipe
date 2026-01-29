@@ -2,7 +2,7 @@
 import { api } from '@convex-api';
 import { usePaginatedQuery } from 'convex/react';
 import React from 'react';
-import { YStack, Text, Card, H2, Button, XStack, Spinner, ScrollView } from 'tamagui';
+import { YStack, Text, Card, H2, Button, XStack, Spinner, ScrollView, ColorTokens } from 'tamagui';
 
 export function JobsScreen() {
     const jobs = usePaginatedQuery(api.admin.getScrapingJobs, {}, { initialNumItems: 20 });
@@ -43,13 +43,13 @@ export function JobsScreen() {
 }
 
 function StatusChip({ status }: { status: string }) {
-    let bg = "$neutral200";
+    let bg: ColorTokens = "$neutral200";
     if (status === 'completed') bg = "$success";
     if (status === 'processing') bg = "$info";
     if (status === 'failed') bg = "$error";
 
     return (
-        <XStack backgroundColor={bg as any} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$4">
+        <XStack backgroundColor={bg} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$4">
             <Text fontSize="$2" textTransform="capitalize" color="$textInverse">{status}</Text>
         </XStack>
     )
