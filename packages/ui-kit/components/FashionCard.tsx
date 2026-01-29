@@ -9,6 +9,7 @@
 import React from 'react';
 import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
+
 import { Button } from './Button';
 
 const CardFrame = styled(Stack, {

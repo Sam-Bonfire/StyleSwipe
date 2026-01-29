@@ -8,6 +8,7 @@
 import { Star } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
+
 import { WishlistButton } from './WishlistButton';
 
 const TileFrame = styled(Stack, {

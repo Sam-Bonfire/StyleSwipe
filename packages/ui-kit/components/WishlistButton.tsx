@@ -1,5 +1,6 @@
 import { Heart } from '@tamagui/lucide-icons';
 import React from 'react';
+
 import { Button, ButtonProps } from './Button';
 
 export type WishlistButtonProps = Omit<ButtonProps, 'children'> & {
@@ -13,7 +14,7 @@ export type WishlistButtonProps = Omit<ButtonProps, 'children'> & {
  * Dimensions: 32x32px (overrides default small size of 36px)
  */
 export const WishlistButton = React.forwardRef<HTMLButtonElement, WishlistButtonProps>(
-    ({ isWishlisted, onWishlistPress, size = 'small', ...props }, ref) => {
+    ({ isWishlisted, onWishlistPress, ...props }, ref) => {
         return (
             <Button
                 ref={ref}
