@@ -28,7 +28,6 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         }
 
         // Save to Convex
-        // @ts-ignore
         client.mutation(api.scraper.saveProduct, {
             myntraId: request.data.myntraId,
             url: request.data.url,
@@ -53,6 +52,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         }
 
         // Chunking the batch to avoid Convex timeout on extremely large pages
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const products = request.data.map((item: any) => ({
             myntraId: item.myntraId,
             url: item.url,
@@ -66,7 +66,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         }
 
         const promises = chunks.map(chunk =>
-            // @ts-ignore
+
             client.mutation(api.scraper.saveBatch, { products: chunk })
         );
 

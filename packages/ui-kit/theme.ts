@@ -9,10 +9,10 @@
  * PRD Source: Modern Indian e-commerce aesthetic, Gen Z/Millennial target
  */
 
+import { createAnimations } from '@tamagui/animations-react-native';
 import { createFont } from '@tamagui/core';
 import { shorthands } from '@tamagui/shorthands';
 import { createTamagui, createTokens } from 'tamagui';
-import { createAnimations } from '@tamagui/animations-react-native';
 
 // -----------------------------------------------------------------------------
 // Typography: Manrope Font Family

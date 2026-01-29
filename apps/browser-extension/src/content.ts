@@ -16,10 +16,10 @@ interface ScrapedProduct {
     rating: number;
     reviewCount: number;
     platform: 'Myntra';
-    attributes: Record<string, any>;
+    attributes: Record<string, unknown>;
     gender?: string;
     category?: string;
-    raw: any;
+    raw: unknown;
 }
 
 function extractProductData(): ScrapedProduct | null {
@@ -75,7 +75,9 @@ function extractProductData(): ScrapedProduct | null {
             price: pdpData.price?.discounted || 0,
             mrp: pdpData.price?.mrp || 0,
             discount: pdpData.price?.discount?.label || "",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             images: pdpData.media?.albums?.[0]?.images?.map((img: any) => img.src) || [],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             availableSizes: pdpData.sizes?.map((s: any) => s.label) || [],
             description: pdpData.productDetails?.description || "",
             rating: pdpData.ratings?.averageRating || 0,
@@ -95,9 +97,7 @@ function extractProductData(): ScrapedProduct | null {
                 color: pdpData.baseColor || pdpData.articleAttributes?.['Color'] || '',
                 ...pdpData.articleAttributes
             },
-            // @ts-ignore
             gender: gender,
-            // @ts-ignore
             category: category,
             raw: pdpData
         };
@@ -151,6 +151,7 @@ function extractCategoryData(): ScrapedCategory | null {
         console.log(`[StyleSwipe] Found ${productsRaw.length} products on category page`);
 
         return {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             products: productsRaw.map((p: any) => ({
                 myntraId: p.productId.toString(),
                 url: `https://www.myntra.com/${p.landingPageUrl}`,
