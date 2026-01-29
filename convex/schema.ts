@@ -232,6 +232,7 @@ const products = defineTable({
     .index("by_category", ["category"])
     .index("by_category_price", ["category", "price"])
     .index("by_brand", ["brand"])
+    .index("by_brand_title", ["brand", "title"])
     .searchIndex("search_title", {
         searchField: "title",
         filterFields: ["brand", "category", "gender"],
@@ -355,4 +356,30 @@ export default defineSchema({
 
     // Commerce Context
     carts,
+
+    // -----------------------------------------------------------------------------
+    // SCRAPER CONTEXT - Data Ingestion
+    // -----------------------------------------------------------------------------
+
+    scraped_products: defineTable({
+        myntraId: v.string(),
+        url: v.string(),
+        data: v.any(), // Raw JSON data
+        lastScrapedAt: v.number(),
+        status: v.union(v.literal("active"), v.literal("out_of_stock")),
+    })
+        .index("by_myntraId", ["myntraId"])
+        .index("by_url", ["url"]),
+
+    scrape_jobs: defineTable({
+        type: v.union(v.literal("category"), v.literal("search"), v.literal("single")),
+        query: v.string(), // URL or Search Term
+        status: v.union(v.literal("pending"), v.literal("processing"), v.literal("completed"), v.literal("failed")),
+        productsFound: v.optional(v.number()),
+        errorMessage: v.optional(v.string()),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+    })
+        .index("by_status", ["status"])
+        .index("by_created", ["createdAt"]),
 });

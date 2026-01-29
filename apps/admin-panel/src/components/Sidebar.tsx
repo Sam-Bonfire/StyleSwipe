@@ -1,0 +1,118 @@
+
+import React from 'react';
+import { YStack, XStack, Text, Separator, Avatar, Theme } from 'tamagui';
+import { Button } from '@app/ui-kit'; // Using UI Kit Button
+import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, PieChart } from '@tamagui/lucide-icons';
+import { authAdapter } from '../lib/auth';
+
+type Page = 'overview' | 'products' | 'jobs';
+
+interface SidebarProps {
+    activePage: Page;
+    onNavigate: (page: Page) => void;
+    isCollapsed: boolean;
+    onToggleCollapse: () => void;
+}
+
+export function Sidebar({ activePage, onNavigate, isCollapsed, onToggleCollapse }: SidebarProps) {
+    const menuItems = [
+        { id: 'overview', icon: Home, label: 'Overview' },
+        { id: 'products', icon: Box, label: 'Products' },
+        { id: 'jobs', icon: Activity, label: 'Scraping Jobs' },
+    ];
+
+    return (
+        <YStack
+            width={isCollapsed ? 80 : 260}
+            backgroundColor="$surface"
+            borderRightWidth={0.5}
+            borderColor="$borderColor"
+            paddingVertical="$5"
+            paddingHorizontal="$1" // Reduced padding from previous version
+            animation="quick"
+        >
+            {/* Header */}
+            <XStack alignItems="center" justifyContent={isCollapsed ? "center" : "space-between"} marginBottom="$6">
+                {!isCollapsed && (
+                    <XStack alignItems="center" space="$2" padding="$2">
+                        <Text fontSize="$6" fontWeight="bold" color="$color">StyleSwipe</Text>
+                    </XStack>
+                )}
+                <Button
+                    size="small"
+                    circular
+                    width={44}
+                    height={44}
+                    padding={0}
+                    icon={isCollapsed ? <ChevronRight size="$3" color="$color" /> : <ChevronLeft size="$3" color="$color" />}
+                    onPress={onToggleCollapse}
+                    variant="ghost"
+                />
+            </XStack>
+
+            {/* Navigation */}
+            <YStack space="$2" flex={1} alignItems={isCollapsed ? "center" : "stretch"}>
+                {menuItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activePage === item.id;
+
+                    if (isCollapsed) {
+                        return (
+                            <Button
+                                key={item.id}
+                                size="small"
+                                variant={isActive ? "primary" : "ghost"}
+                                onPress={() => onNavigate(item.id as Page)}
+                                justifyContent="center"
+                                alignItems="center"
+                                width={44}
+                                height={44}
+                                padding={0}
+                                icon={<Icon size="$3" color={isActive ? "$textInverse" : "$color"} />}
+                            />
+                        );
+                    }
+
+                    return (
+                        <Button
+                            key={item.id}
+                            size="small"
+                            variant={isActive ? "primary" : "ghost"}
+                            onPress={() => onNavigate(item.id as Page)}
+                            justifyContent="flex-start"
+                            icon={<Icon size="$3" color={isActive ? "$textInverse" : "$color"} />}
+                        >
+                            {item.label}
+                        </Button>
+                    );
+                })}
+            </YStack>
+
+            {/* User / Logout */}
+            <Separator marginVertical="$4" borderColor="$borderColor" />
+            <YStack space="$3" alignItems={isCollapsed ? "center" : "stretch"}>
+                {!isCollapsed && (
+                    <XStack alignItems="center" space="$2" paddingHorizontal="$1">
+                        <Avatar circular size="$3">
+                            <Avatar.Image src="https://github.com/shadcn.png" />
+                            <Avatar.Fallback backgroundColor="$primaryDark" />
+                        </Avatar>
+                        <YStack>
+                            <Text fontSize="$3" fontWeight="bold" color="$color">Admin</Text>
+                            <Text fontSize="$2" color="$color">admin@styleswipe.com</Text>
+                        </YStack>
+                    </XStack>
+                )}
+
+                <Button
+                    icon={LogOut}
+                    variant="ghost" // Using ghost for logout to be subtle
+                    onPress={() => authAdapter.signOut()}
+                    justifyContent={isCollapsed ? "center" : "flex-start"}
+                >
+                    {!isCollapsed && "Sign Out"}
+                </Button>
+            </YStack>
+        </YStack>
+    );
+}

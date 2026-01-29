@@ -12,5 +12,8 @@
     "dependencies": {
         "effect": "^2.0.0",
         "fast-check": "^3.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.10"
     }
 }

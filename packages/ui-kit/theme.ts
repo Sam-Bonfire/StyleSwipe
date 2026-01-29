@@ -12,6 +12,7 @@
 import { createFont } from '@tamagui/core';
 import { shorthands } from '@tamagui/shorthands';
 import { createTamagui, createTokens } from 'tamagui';
+import { createAnimations } from '@tamagui/animations-react-native';
 
 // -----------------------------------------------------------------------------
 // Typography: Manrope Font Family
@@ -337,7 +338,28 @@ const darkTheme = {
 // Tamagui Configuration
 // -----------------------------------------------------------------------------
 
+const animations = createAnimations({
+    bouncy: {
+        type: 'spring',
+        damping: 10,
+        mass: 0.9,
+        stiffness: 100,
+    },
+    lazy: {
+        type: 'spring',
+        damping: 20,
+        stiffness: 60,
+    },
+    quick: {
+        type: 'spring',
+        damping: 20,
+        mass: 1.2,
+        stiffness: 250,
+    },
+});
+
 export const config = createTamagui({
+    animations,
     tokens,
     themes: {
         BrandIdentityLight: lightTheme,

@@ -1,0 +1,45 @@
+{
+    "name": "@app/admin-panel",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "UNLICENSED",
+    "private": true,
+    "scripts": {
+        "start": "expo start --web --lan --port 8082",
+        "web": "expo start --web --lan --port 8082",
+        "dev": "expo start --web --lan --port 8082",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'"
+    },
+    "dependencies": {
+        "@app/core": "workspace:*",
+        "@app/ui-kit": "workspace:*",
+        "@convex-dev/better-auth": "^0.10.10",
+        "@expo/metro-runtime": "~4.0.0",
+        "@react-navigation/native": "^6.1.9",
+        "@react-navigation/stack": "^6.3.20",
+        "@xenova/transformers": "^2.17.2",
+        "expo": "~52.0.0",
+        "expo-asset": "~11.0.5",
+        "expo-background-fetch": "~13.0.6",
+        "expo-battery": "~9.0.2",
+        "expo-file-system": "~18.0.12",
+        "expo-sqlite": "~15.1.4",
+        "expo-status-bar": "~2.0.0",
+        "expo-task-manager": "~12.0.6",
+        "onnxruntime-react-native": "^1.23.2",
+        "react": "18.3.1",
+        "react-dom": "18.3.1",
+        "react-native": "0.76.9",
+        "react-native-gesture-handler": "~2.20.2",
+        "react-native-reanimated": "~3.16.1",
+        "react-native-safe-area-context": "4.12.0",
+        "react-native-screens": "~4.4.0",
+        "react-native-web": "~0.19.13"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.25.0",
+        "@types/react": "~18.3.12",
+        "babel-plugin-transform-import-meta": "^2.3.3"
+    }
+}

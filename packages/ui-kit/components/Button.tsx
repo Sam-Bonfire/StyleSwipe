@@ -164,9 +164,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ) : (
                     <>
                         {icon}
-                        <ButtonText variant={variant as any} size={size as any}>
-                            {children}
-                        </ButtonText>
+                        {React.Children.count(children) > 0 ? (
+                            <ButtonText variant={variant as any} size={size as any}>
+                                {children}
+                            </ButtonText>
+                        ) : null}
                         {iconAfter}
                     </>
                 )}

@@ -50,7 +50,7 @@ export function EmailAuthScreen() {
             <YStack gap="$4">
                 {emailMode === 'signup' && (
                     <Input
-                        size="$4"
+                        size="large"
                         borderWidth={1}
                         placeholder="Full Name"
                         value={name}
@@ -59,7 +59,7 @@ export function EmailAuthScreen() {
                     />
                 )}
                 <Input
-                    size="$4"
+                    size="large"
                     borderWidth={1}
                     placeholder="Email Address"
                     value={email}
@@ -69,7 +69,7 @@ export function EmailAuthScreen() {
                     autoFocus={emailMode === 'signin'}
                 />
                 <Input
-                    size="$4"
+                    size="large"
                     borderWidth={1}
                     placeholder="Password"
                     value={password}

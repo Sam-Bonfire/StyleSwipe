@@ -6,7 +6,9 @@ import { phoneNumber, username } from "better-auth/plugins";
 import { components } from "./_generated/api";
 import authConfig from "./auth.config";
 
-export const authComponent = createClient(components.auth);
+export const authComponent = createClient(components.auth, {
+    verbose: true,
+});
 
 /**
  * Helper to get the Better Auth instance within a Convex context.
@@ -14,10 +16,15 @@ export const authComponent = createClient(components.auth);
  */
 export const getAuth = (ctx: any) => betterAuth({
     database: authComponent.adapter(ctx),
-    baseURL: process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL,
+    // @ts-ignore
+    baseURL: "http://localhost:3211",
     trustedOrigins: [
         "http://localhost:8081",
         "http://127.0.0.1:8081",
+        "http://localhost:8082",
+        "http://127.0.0.1:8082",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
     advanced: {
         defaultCookieAttributes: {
@@ -35,9 +42,3 @@ export const getAuth = (ctx: any) => betterAuth({
     ]
 });
 
-// For backward compatibility
-export const auth = {
-    handler: async (_request: Request) => {
-        return new Response("Not implemented - use getAuth(ctx)", { status: 501 });
-    }
-};
