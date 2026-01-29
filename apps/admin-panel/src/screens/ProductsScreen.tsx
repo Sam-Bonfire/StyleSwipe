@@ -1,8 +1,10 @@
+import { Button } from '@app/ui-kit';
+import { api } from '@convex-api';
+import { usePaginatedQuery, useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import { YStack, Text, Card, H2, XStack, ScrollView, Spinner, Image, Input } from 'tamagui';
-import { Button } from '@app/ui-kit';
-import { usePaginatedQuery, useMutation } from 'convex/react';
-import { api } from '@convex-api';
+
+import { Id } from '../../../../convex/_generated/dataModel';
 
 export function ProductsScreen() {
     const [search, setSearch] = useState("");
@@ -15,7 +17,7 @@ export function ProductsScreen() {
 
     const retrigger = useMutation(api.admin.retriggerScrape);
 
-    const handleRetrigger = async (id: any) => {
+    const handleRetrigger = async (id: Id<"products">) => {
         await retrigger({ productId: id });
         alert("Scrape scheduled!");
     };
@@ -25,7 +27,7 @@ export function ProductsScreen() {
             <XStack justifyContent="space-between" alignItems="center">
                 <H2>Scraped Products</H2>
                 <XStack space="$2" alignItems="center">
-                    <Text color="$color10">Items per page:</Text>
+                    <Text color="$textSecondary">Items per page:</Text>
                     {[20, 50, 100].map(size => (
                         <Button
                             key={size}
@@ -53,7 +55,7 @@ export function ProductsScreen() {
                 {status === "LoadingFirstPage" ? (
                     <Spinner />
                 ) : (
-                    results?.map((product: any) => (
+                    results?.map((product: { _id: Id<"products">; title: string; brand?: string; price: number; images?: string[] }) => (
                         <Card key={product._id} width={300} bordered backgroundColor="$surface" overflow="hidden">
                             <Card.Header padded paddingBottom="$0">
                                 <Image source={{ uri: product.images?.[0] }} width="100%" height={200} borderRadius="$2" resizeMode="cover" />
@@ -61,7 +63,7 @@ export function ProductsScreen() {
                             <Card.Footer padded flexDirection="column" alignItems="flex-start" gap="$2">
                                 <Text fontWeight="bold" fontSize="$4" numberOfLines={1}>{product.title}</Text>
                                 <XStack justifyContent="space-between" width="100%">
-                                    <Text color="$color10">{product.brand}</Text>
+                                    <Text color="$textSecondary">{product.brand}</Text>
                                     <Text fontWeight="bold">₹{product.price}</Text>
                                 </XStack>
                                 <Button size="small" width="100%" onPress={() => handleRetrigger(product._id)}>

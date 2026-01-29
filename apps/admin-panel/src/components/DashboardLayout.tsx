@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { XStack, YStack } from 'tamagui';
+
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 

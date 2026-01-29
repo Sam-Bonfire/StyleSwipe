@@ -1,13 +1,11 @@
 
+import { api } from '@convex-api';
+import { usePaginatedQuery } from 'convex/react';
 import React from 'react';
 import { YStack, Text, Card, H2, Button, XStack, Spinner, ScrollView } from 'tamagui';
-import { useQuery } from 'convex/react';
-import { api } from '@convex-api';
 
 export function JobsScreen() {
-    const jobs = useQuery(api.admin.getScrapingJobs, {
-        paginationOpts: { numItems: 20, cursor: null }
-    });
+    const jobs = usePaginatedQuery(api.admin.getScrapingJobs, {}, { initialNumItems: 20 });
 
     return (
         <YStack space="$4" flex={1}>
@@ -21,14 +19,14 @@ export function JobsScreen() {
                     <YStack padding="$4"><Spinner /></YStack>
                 ) : (
                     <ScrollView>
-                        {jobs.page.length === 0 ? (
-                            <Text padding="$4" color="$color10">No scraping jobs found.</Text>
+                        {jobs.results.length === 0 ? (
+                            <Text padding="$4" color="$textSecondary">No scraping jobs found.</Text>
                         ) : (
-                            jobs.page.map((job: any) => (
+                            jobs.results.map((job: { _id: string; query: string; createdAt: number; status: string }) => (
                                 <XStack key={job._id} padding="$4" borderBottomWidth={1} borderColor="$borderColor" justifyContent="space-between">
                                     <YStack flex={1}>
                                         <Text fontWeight="bold" numberOfLines={1}>{job.query}</Text>
-                                        <Text fontSize="$2" color="$color10">{new Date(job.createdAt).toLocaleString()}</Text>
+                                        <Text fontSize="$2" color="$textSecondary">{new Date(job.createdAt).toLocaleString()}</Text>
                                     </YStack>
                                     <StatusChip status={job.status} />
                                 </XStack>
@@ -45,14 +43,14 @@ export function JobsScreen() {
 }
 
 function StatusChip({ status }: { status: string }) {
-    let bg = "$color4";
-    if (status === 'completed') bg = "$green4";
-    if (status === 'processing') bg = "$blue4";
-    if (status === 'failed') bg = "$red4";
+    let bg = "$neutral200";
+    if (status === 'completed') bg = "$success";
+    if (status === 'processing') bg = "$info";
+    if (status === 'failed') bg = "$error";
 
     return (
-        <XStack backgroundColor={bg} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$4">
-            <Text fontSize="$2" textTransform="capitalize">{status}</Text>
+        <XStack backgroundColor={bg as any} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$4">
+            <Text fontSize="$2" textTransform="capitalize" color="$textInverse">{status}</Text>
         </XStack>
     )
 }

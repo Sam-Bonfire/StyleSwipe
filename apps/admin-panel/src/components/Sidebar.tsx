@@ -1,8 +1,9 @@
 
-import React from 'react';
-import { YStack, XStack, Text, Separator, Avatar, Theme } from 'tamagui';
 import { Button } from '@app/ui-kit'; // Using UI Kit Button
-import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, PieChart } from '@tamagui/lucide-icons';
+import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight } from '@tamagui/lucide-icons';
+import React from 'react';
+import { YStack, XStack, Text, Separator, Avatar } from 'tamagui';
+
 import { authAdapter } from '../lib/auth';
 
 type Page = 'overview' | 'products' | 'jobs';

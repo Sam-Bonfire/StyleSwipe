@@ -1,8 +1,8 @@
 
+import { api } from '@convex-api';
+import { useQuery } from 'convex/react';
 import React from 'react';
 import { YStack, Text, Card, XStack, H2, H4, Spinner } from 'tamagui';
-import { useQuery } from 'convex/react';
-import { api } from '@convex-api';
 
 export function OverviewScreen() {
     const stats = useQuery(api.admin.getStats);
@@ -25,7 +25,7 @@ export function OverviewScreen() {
                 <Card flex={1} padding="$5" backgroundColor="$surface" shadowColor="$shadowColor" shadowOpacity={0.1} shadowRadius={5}>
                     <H4 marginBottom="$4">Recent Activity</H4>
                     <YStack space="$2">
-                        {stats.recentUsers.map((u: any) => (
+                        {stats.recentUsers.map((u: { _id: string; name?: string; email?: string }) => (
                             <Text key={u._id} color="$color">New user joined: {u.name || u.email}</Text>
                         ))}
                     </YStack>

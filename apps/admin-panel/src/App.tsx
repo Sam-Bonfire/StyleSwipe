@@ -1,19 +1,18 @@
 import 'react-native-gesture-handler';
-import React, { useState, useEffect } from 'react';
-import { ConvexReactClient, useQuery } from 'convex/react';
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
-import { config, Button } from '@app/ui-kit';
-import { TamaguiProvider, Theme, YStack, Text, Card, Spinner, Label, H3, XStack, Image, Input } from 'tamagui';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { authAdapter } from './lib/auth';
+import { config } from '@app/ui-kit';
 import { api } from "@convex-api";
-import { PieChart } from '@tamagui/lucide-icons';
+import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+import { ConvexReactClient, useQuery } from 'convex/react';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { TamaguiProvider, Theme, YStack, Spinner } from 'tamagui';
 
 import { DashboardLayout } from './components/DashboardLayout';
-import { OverviewScreen } from './screens/OverviewScreen';
-import { ProductsScreen } from './screens/ProductsScreen';
+import { authAdapter } from './lib/auth';
 import { JobsScreen } from './screens/JobsScreen';
 import { LoginScreen } from './screens/LoginScreen';
+import { OverviewScreen } from './screens/OverviewScreen';
+import { ProductsScreen } from './screens/ProductsScreen';
 
 // Initialize Convex Client
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {

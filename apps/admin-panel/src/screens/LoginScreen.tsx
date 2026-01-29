@@ -1,7 +1,8 @@
+import { Button } from '@app/ui-kit';
+import { PieChart } from '@tamagui/lucide-icons';
 import React from 'react';
 import { YStack, Text, Card, H3, Label, Input } from 'tamagui';
-import { PieChart } from '@tamagui/lucide-icons';
-import { Button } from '@app/ui-kit';
+
 import { authAdapter } from '../lib/auth';
 
 // Neuro-styled Login Component
@@ -16,9 +17,10 @@ export function LoginScreen() {
         setError("");
         try {
             await authAdapter.signInWithEmail(email, password);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Login failed", err);
-            setError(err.message || "An error occurred");
+            const message = err instanceof Error ? err.message : "An error occurred";
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -55,7 +57,7 @@ export function LoginScreen() {
                             <Label htmlFor="email" color="$color">Email Address</Label>
                             <Input
                                 id="email"
-                                size="large"
+                                size="$4"
                                 value={email}
                                 onChangeText={setEmail}
                                 placeholder="admin@styleswipe.com"
@@ -67,7 +69,7 @@ export function LoginScreen() {
                             <Label htmlFor="password" color="$color">Password</Label>
                             <Input
                                 id="password"
-                                size="large"
+                                size="$4"
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry
