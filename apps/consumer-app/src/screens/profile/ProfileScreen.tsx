@@ -1,8 +1,8 @@
+import { Button } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { useQuery } from 'convex/react';
 import React from 'react';
 import { SafeAreaView } from 'react-native';
-import { Button } from '@app/ui-kit';
 import { YStack, Text, Avatar, XStack } from 'tamagui';
 
 import { authAdapter } from '../../lib/auth';
