@@ -190,6 +190,8 @@ const products = defineTable({
     price: v.number(),
     mrp: v.number(), // Maximum retail price (original)
     category: v.string(),
+    masterCategory: v.optional(v.string()), // e.g., Apparel
+    subCategory: v.optional(v.string()),    // e.g., Topwear
     images: v.array(v.string()),
     description: v.optional(v.string()),
     rating: v.optional(v.number()),
@@ -212,17 +214,18 @@ const products = defineTable({
     updatedAt: v.optional(v.number()),
 })
     .index("by_category", ["category"])
+    .index("by_master_category", ["masterCategory"])
     .index("by_category_price", ["category", "price"])
     .index("by_brand", ["brand"])
     .index("by_brand_title", ["brand", "title"])
     .searchIndex("search_title", {
         searchField: "title",
-        filterFields: ["brand", "category", "gender"],
+        filterFields: ["brand", "category", "masterCategory", "subCategory", "gender"],
     })
     .vectorIndex("by_embedding", {
         vectorField: "embedding",
         dimensions: 384, // Updated to 384 for BGE-Small
-        filterFields: ["category", "brand", "gender", "priceTier"],
+        filterFields: ["category", "masterCategory", "subCategory", "brand", "gender", "priceTier"],
     })
     // We can add vector indexes for v1/v2 later or now. 
     // Convex supports multiple vector indexes.

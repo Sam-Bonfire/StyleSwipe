@@ -19,6 +19,8 @@ interface ScrapedProduct {
     attributes: Record<string, unknown>;
     gender?: string;
     category?: string;
+    masterCategory?: string;
+    subCategory?: string;
     raw: unknown;
 }
 
@@ -54,28 +56,30 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
     const mrp = data.price?.mrp || data.mrp || (typeof data.price === 'number' ? data.price : (data.price?.mrp || 0));
     const discount = data.price?.discount?.label || data.discountDisplayLabel || data.discount || "";
 
-    // Images
+    // Images: remove ($size_representation$)
+    const cleanImageUrl = (url: string) => url.replace(/\(\$size_representation\$\)/g, "").replace(/\$quality\$/g, "90");
+
     let images: string[] = [];
     if (data.media?.albums) {
-        images = data.media.albums.flatMap((album: any) => album.images?.map((img: any) => img.src));
+        images = data.media.albums.flatMap((album: any) => album.images?.map((img: any) => cleanImageUrl(img.src)));
     } else if (data.images && Array.isArray(data.images)) {
-        images = data.images.map((img: any) => typeof img === 'string' ? img : (img.src || img.view || img.srcUrl || ""));
+        images = data.images.map((img: any) => cleanImageUrl(typeof img === 'string' ? img : (img.src || img.view || img.srcUrl || "")));
     } else if (data.searchImage) {
-        images = [data.searchImage];
+        images = [cleanImageUrl(data.searchImage)];
     } else if (data.image) {
-        images = [data.image];
+        images = [cleanImageUrl(data.image)];
     }
 
-    // Sizes
+    // Sizes: Priority to inventoryInfo
     let availableSizes: string[] = [];
-    if (data.sizes) {
+    if (data.inventoryInfo) {
+        availableSizes = data.inventoryInfo.map((i: any) => i.label);
+    } else if (data.sizes) {
         if (Array.isArray(data.sizes)) {
             availableSizes = data.sizes.map((s: any) => s.label || s);
         } else if (typeof data.sizes === 'string') {
             availableSizes = (data.sizes as string).split(',');
         }
-    } else if (data.inventoryInfo) {
-        availableSizes = data.inventoryInfo.map((i: any) => i.label);
     }
 
     // Attributes
@@ -90,10 +94,17 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
             source.forEach((attr: any) => {
                 const key = attr.attribute || attr.name || attr.key || attr.title;
                 const val = attr.value || attr.description || attr.label;
-                if (key && val) attributesRaw[key] = val;
+                if (key && val) {
+                    // Don't save Deal of the day attributes
+                    if (key.toLowerCase().includes("deal of the day") || val.toString().toLowerCase().includes("deal of the day")) return;
+                    attributesRaw[key] = val;
+                }
             });
         } else if (typeof source === 'object') {
-            Object.assign(attributesRaw, source);
+            Object.entries(source).forEach(([key, val]) => {
+                if (key.toLowerCase().includes("deal of the day") || (val && val.toString().toLowerCase().includes("deal of the day"))) return;
+                attributesRaw[key] = val;
+            });
         }
     };
 
@@ -132,6 +143,10 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
     const categoryRaw = data.analytics?.articleType || data.articleType || data.category || "Default";
     const category = typeof categoryRaw === 'string' ? categoryRaw : (categoryRaw.typeName || categoryRaw.name || "Default");
 
+    // Detailed Category Hierarchy
+    const masterCategory = data.analytics?.masterCategory || data.masterCategory || "Apparel";
+    const subCategory = data.analytics?.subCategory || data.subCategory || "Topwear";
+
     return {
         myntraId,
         url: window.location.href.includes(myntraId) ? window.location.href : `https://www.myntra.com/${data.landingPageUrl || myntraId}`,
@@ -155,6 +170,8 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
         },
         gender: gender.toLowerCase(),
         category,
+        masterCategory,
+        subCategory,
         raw: data
     };
 }

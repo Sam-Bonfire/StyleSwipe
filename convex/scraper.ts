@@ -121,6 +121,8 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
         price: price,
         mrp: isMapped ? (data.mrp || 0) : (data.price?.mrp || 0),
         category: category,
+        masterCategory: isMapped ? data.masterCategory : (data.masterCategory || data.analytics?.masterCategory),
+        subCategory: isMapped ? data.subCategory : (data.subCategory || data.analytics?.subCategory),
         images: isMapped ? (Array.isArray(data.images) ? data.images : []) : (data.media?.albums?.flatMap((album: any) => album.images?.map((img: any) => img.src)) || []),
         description: isMapped ? (data.description || "") : (data.description || data.productDetails?.description || ""),
         rating: isMapped ? data.rating : (data.ratings?.averageRating),
