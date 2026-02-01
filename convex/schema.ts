@@ -190,29 +190,12 @@ const products = defineTable({
     price: v.number(),
     mrp: v.number(), // Maximum retail price (original)
     category: v.string(),
-    categoryId: v.optional(v.id("categories")),
     images: v.array(v.string()),
     description: v.optional(v.string()),
     rating: v.optional(v.number()),
     reviewCount: v.optional(v.number()),
     platform: v.optional(v.string()),
-    attributes: v.optional(
-        v.object({
-            color: v.optional(v.string()),
-            size: v.optional(v.array(v.string())),
-            material: v.optional(v.string()),
-            fit: v.optional(v.string()),
-            occasion: v.optional(v.array(v.string())),
-            // Extended attributes for PDP
-            care: v.optional(v.string()),
-            origin: v.optional(v.string()),
-            style: v.optional(v.string()),
-            sleeve: v.optional(v.string()),
-            neck: v.optional(v.string()),
-            season: v.optional(v.string()),
-            collection: v.optional(v.string()),
-        })
-    ),
+    attributes: v.optional(v.any()), // Changed to v.any() to capture all dynamic scraped attributes
     // Discovery Attributes for Filtering
     gender: v.optional(v.union(v.literal("men"), v.literal("women"), v.literal("unisex"))),
     priceTier: v.optional(v.union(v.literal("budget"), v.literal("mid"), v.literal("premium"), v.literal("luxury"))),
@@ -226,7 +209,6 @@ const products = defineTable({
         v2: v.optional(v.array(v.float64())),
     })),
     meta: v.optional(v.any()), // Flexible field for scraper extra data
-    createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
 })
     .index("by_category", ["category"])
@@ -248,9 +230,9 @@ const products = defineTable({
         vectorField: "embeddingVersions.v1",
         dimensions: 384,
         filterFields: ["category", "gender", "priceTier"],
-    })
-    // Efficiently query recent products for fallback feed
-    .index("by_created", ["createdAt"]);
+    });
+// Efficiently query recent products for fallback feed
+// .index("by_created", ["createdAt"]); // Removed as createdAt was deleted
 
 // PRD Ref: [cite: 18] - Hierarchical Categories
 const categories = defineTable({

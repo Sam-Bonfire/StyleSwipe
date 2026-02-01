@@ -109,54 +109,42 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
     // Ensure Color is a string
     const color = isMapped ? (data.attributes?.color || data.attributes?.baseColor) : (data.articleAttributes?.['Color'] || data.baseColor);
 
+    // Ensure category is a string (handle objects like {typeName: "..."})
+    let category = "Default";
+    if (isMapped && data.category) {
+        category = typeof data.category === 'string' ? data.category : (data.category.typeName || data.category.name || "Default");
+    }
+
     const productFields = {
         brand: isMapped ? (data.brand || "Unknown") : (data.brand?.name || "Unknown"),
         title: isMapped ? (data.title || "Unknown Product") : (data.name || "Unknown Product"),
         price: price,
         mrp: isMapped ? (data.mrp || 0) : (data.price?.mrp || 0),
-        category: isMapped ? (data.category || "Default") : "Default",
-        images: isMapped ? (data.images?.map((img: any) => typeof img === 'string' ? img : img.src) || []) : (data.media?.albums?.[0]?.images?.map((img: any) => img.src) || []),
-        description: isMapped ? (data.description || "") : (data.productDetails?.description || ""),
+        category: category,
+        images: isMapped ? (Array.isArray(data.images) ? data.images : []) : (data.media?.albums?.flatMap((album: any) => album.images?.map((img: any) => img.src)) || []),
+        description: isMapped ? (data.description || "") : (data.description || data.productDetails?.description || ""),
         rating: isMapped ? data.rating : (data.ratings?.averageRating),
         reviewCount: isMapped ? data.reviewCount : (data.ratings?.totalCount),
         platform: "Myntra",
         gender: (isMapped && data.gender) ? (data.gender.toLowerCase() as any) : "unisex",
         priceTier: (price < 1000) ? "budget" : (price < 3000) ? "mid" : (price < 10000) ? "premium" : "luxury", // Simple heuristic
         onSale: price < (isMapped ? (data.mrp || 0) : (data.price?.mrp || 0)),
-        attributes: {
-            // Strictly map ONLY schema fields
+        attributes: isMapped ? (data.attributes || {}) : {
+            // Fallback for raw data
+            ...data.articleAttributes,
             color: color || undefined,
-            size: isMapped ? data.availableSizes : [],
-            material: isMapped ? (data.attributes?.material || data.attributes?.['Fabric']) : (data.articleAttributes?.['Fabric']),
-            fit: isMapped ? (data.attributes?.fit || data.attributes?.['Fit']) : (data.articleAttributes?.['Fit']),
-            occasion: occasion.length > 0 ? occasion : undefined,
-            care: isMapped ? (data.attributes?.care || data.attributes?.['Wash Care']) : (data.articleAttributes?.['Wash Care']),
-            origin: isMapped ? (data.attributes?.origin || data.attributes?.['Country of Origin']) : (data.articleAttributes?.['Country of Origin']),
-            style: isMapped ? (data.attributes?.style || data.attributes?.['Style Note']) : (data.articleAttributes?.['Style Note']),
-            sleeve: isMapped ? (data.attributes?.sleeve || data.attributes?.['Sleeve Length']) : (data.articleAttributes?.['Sleeve Length']),
-            neck: isMapped ? (data.attributes?.neck || data.attributes?.['Neck']) : (data.articleAttributes?.['Neck']),
-            season: isMapped ? (data.attributes?.season || data.attributes?.['Season']) : (data.articleAttributes?.['Season']),
-            collection: isMapped ? (data.attributes?.collection || data.attributes?.['Collection Name']) : (data.articleAttributes?.['Collection Name']),
+            size: [], // Fill if possible
         },
         meta: {
             scrapedAt: scraped.lastScrapedAt,
             originalUrl: scraped.url,
-            myntraId: scraped.myntraId
+            myntraId: scraped.myntraId,
+            rawAttributes: data.attributes
         },
         updatedAt: Date.now(),
     };
 
-    // Try to link to Category ID
-    const categorySlug = productFields.category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const categoryDoc = await ctx.db
-        .query("categories")
-        .withIndex("by_slug", (q: any) => q.eq("slug", categorySlug))
-        .first();
-
-    if (categoryDoc) {
-        // @ts-ignore
-        productFields.categoryId = categoryDoc._id;
-    }
+    // Removed categoryId lookup - field no longer in schema
 
     const existingProduct = await ctx.db
         .query("products")
@@ -170,7 +158,7 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
     } else {
         await ctx.db.insert("products", {
             ...productFields,
-            createdAt: Date.now(),
+            // createdAt removed as it is auto-handled by system _creationTime or not needed
         });
     }
 }
@@ -195,8 +183,11 @@ export const getJobs = query({
 });
 
 export const getProducts = query({
-    args: { paginationOpts: paginationOptsValidator },
+    args: { paginationOpts: v.optional(paginationOptsValidator) },
     handler: async (ctx, args) => {
+        if (!args.paginationOpts) {
+            return await ctx.db.query("scraped_products").order("desc").paginate({ numItems: 20, cursor: null });
+        }
         return await ctx.db
             .query("scraped_products")
             .order("desc")

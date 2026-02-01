@@ -2,7 +2,7 @@ import { MyntraScraper } from './scrapers/MyntraScraper';
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../convex/_generated/api";
 
-const CONVEX_URL = process.env.CONVEX_URL || process.env.VITE_CONVEX_URL;
+const CONVEX_URL = process.env.VITE_CONVEX_URL;
 
 if (!CONVEX_URL) {
     console.error("Missing CONVEX_URL. Make sure .env.local is loaded.");

@@ -17,6 +17,15 @@
             "js": [
                 "src/content.ts"
             ]
+        },
+        {
+            "matches": [
+                "https://www.myntra.com/*"
+            ],
+            "js": [
+                "src/main_world.ts"
+            ],
+            "world": "MAIN"
         }
     ],
     "permissions": [

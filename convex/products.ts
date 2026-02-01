@@ -109,7 +109,7 @@ export const create = mutation({
         ),
         embedding: v.optional(v.array(v.float64())),
         meta: v.optional(v.any()), // Loose object
-        createdAt: v.number(),
+        // createdAt removed
         updatedAt: v.number(),
     },
     handler: async (ctx, args) => {

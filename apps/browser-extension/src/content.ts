@@ -22,148 +22,187 @@ interface ScrapedProduct {
     raw: unknown;
 }
 
-function extractProductData(): ScrapedProduct | null {
-    console.log("[StyleSwipe] Attempting to extract product data...");
+// Helper to request data from Main World script
+function getPdpDataFromMainWorld(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            window.removeEventListener('message', listener);
+            reject(new Error("Timeout waiting for Main World data"));
+        }, 3000);
 
-    // 1. Find the script tag containing window.__myx assignment
-    const scripts = Array.from(document.querySelectorAll('script'));
-    const myxScript = scripts.find(s => s.innerText.includes('window.__myx =') || s.innerText.includes('window.__myx='));
+        const listener = (event: MessageEvent) => {
+            if (event.source !== window || !event.data || event.data.type !== 'STYLESWIPE_Data_Response') return;
 
-    if (!myxScript) {
-        console.error("[StyleSwipe] Could not find window.__myx script in current DOM");
-        return null;
-    }
-
-    // 2. Parse JSON using a more robust approach
-    const content = myxScript.innerText;
-
-    // Regex explanation:
-    // window\.__myx\s*=\s* matches the start
-    // (\{.*\}) matches the largest possible JSON object (greedy)
-    // /s flag allows dot to match newlines
-    const match = content.match(/window\.__myx\s*=\s*(\{.*\})/s);
-
-    if (!match || !match[1]) {
-        console.error("[StyleSwipe] Regex failed to extract JSON from script content");
-        return null;
-    }
-
-    try {
-        const rawJson = match[1].trim();
-        // Remove trailing semicolon if present
-        const cleanJson = rawJson.endsWith(';') ? rawJson.slice(0, -1) : rawJson;
-
-        const data = JSON.parse(cleanJson);
-        const pdpData = data.pdpData || data;
-
-        if (!pdpData || !pdpData.id) {
-            console.error("[StyleSwipe] Parsed JSON lacks pdpData or ID", data);
-            return null;
-        }
-
-        console.log("[StyleSwipe] Successfully parsed PDP data for ID:", pdpData.id);
-
-        // 3. Map to Entity (Copied logic)
-        const gender = pdpData.gender || "unisex";
-        const category = pdpData.analytics?.articleType || pdpData.productDetails?.title || "Default";
-
-        return {
-            myntraId: pdpData.id.toString(),
-            url: window.location.href,
-            brand: pdpData.brand?.name || "Unknown",
-            title: pdpData.name || "Unknown Product",
-            price: pdpData.price?.discounted || 0,
-            mrp: pdpData.price?.mrp || 0,
-            discount: pdpData.price?.discount?.label || "",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            images: pdpData.media?.albums?.[0]?.images?.map((img: any) => img.src) || [],
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            availableSizes: pdpData.sizes?.map((s: any) => s.label) || [],
-            description: pdpData.productDetails?.description || "",
-            rating: pdpData.ratings?.averageRating || 0,
-            reviewCount: pdpData.ratings?.totalCount || 0,
-            platform: 'Myntra',
-            attributes: {
-                material: pdpData.articleAttributes?.['Fabric'] || 'N/A',
-                fit: pdpData.articleAttributes?.['Fit'] || 'Regular',
-                care: pdpData.articleAttributes?.['Wash Care'] || '',
-                origin: pdpData.articleAttributes?.['Country of Origin'] || '',
-                style: pdpData.articleAttributes?.['Style Note'] || '',
-                sleeve: pdpData.articleAttributes?.['Sleeve Length'] || '',
-                neck: pdpData.articleAttributes?.['Neck'] || '',
-                season: pdpData.articleAttributes?.['Season'] || '',
-                collection: pdpData.articleAttributes?.['Collection Name'] || '',
-                occasion: pdpData.articleAttributes?.['Occasion'] || '',
-                color: pdpData.baseColor || pdpData.articleAttributes?.['Color'] || '',
-                ...pdpData.articleAttributes
-            },
-            gender: gender,
-            category: category,
-            raw: pdpData
+            clearTimeout(timeout);
+            window.removeEventListener('message', listener);
+            resolve(event.data.data);
         };
 
+        window.addEventListener('message', listener);
+        // Trigger the Main World script to send data
+        window.postMessage({ type: 'STYLESWIPE_Data_Request' }, '*');
+    });
+}
+
+function mapToScrapedProduct(data: any): ScrapedProduct {
+    const myntraId = (data.id || data.productId || data.productId).toString();
+    const gender = data.gender || data.core?.gender || "unisex";
+    const title = data.name || data.productName || data.product || "Unknown Product";
+    const brand = data.brand?.name || data.brand || "Unknown";
+
+    const price = data.price?.discounted || (typeof data.price === 'number' ? data.price : (data.price?.discountedPrice || 0));
+    const mrp = data.price?.mrp || data.mrp || (typeof data.price === 'number' ? data.price : (data.price?.mrp || 0));
+    const discount = data.price?.discount?.label || data.discountDisplayLabel || data.discount || "";
+
+    // Images
+    let images: string[] = [];
+    if (data.media?.albums) {
+        images = data.media.albums.flatMap((album: any) => album.images?.map((img: any) => img.src));
+    } else if (data.images && Array.isArray(data.images)) {
+        images = data.images.map((img: any) => typeof img === 'string' ? img : (img.src || img.view || img.srcUrl || ""));
+    } else if (data.searchImage) {
+        images = [data.searchImage];
+    } else if (data.image) {
+        images = [data.image];
+    }
+
+    // Sizes
+    let availableSizes: string[] = [];
+    if (data.sizes) {
+        if (Array.isArray(data.sizes)) {
+            availableSizes = data.sizes.map((s: any) => s.label || s);
+        } else if (typeof data.sizes === 'string') {
+            availableSizes = (data.sizes as string).split(',');
+        }
+    } else if (data.inventoryInfo) {
+        availableSizes = data.inventoryInfo.map((i: any) => i.label);
+    }
+
+    // Attributes
+    const attributesRaw: Record<string, any> = {
+        ...data.articleAttributes,
+    };
+
+    // Helper to merge attributes from various array or object formats
+    const mergeAttrs = (source: any) => {
+        if (!source) return;
+        if (Array.isArray(source)) {
+            source.forEach((attr: any) => {
+                const key = attr.attribute || attr.name || attr.key || attr.title;
+                const val = attr.value || attr.description || attr.label;
+                if (key && val) attributesRaw[key] = val;
+            });
+        } else if (typeof source === 'object') {
+            Object.assign(attributesRaw, source);
+        }
+    };
+
+    mergeAttrs(data.productAttributes);
+    mergeAttrs(data.attributes);
+    mergeAttrs(data.systemAttributes);
+
+    // Description
+    let description = "";
+    if (Array.isArray(data.productDetails)) {
+        description = data.productDetails.find((s: any) => s.title?.toLowerCase().includes("product details"))?.description || "";
+    } else if (data.productDetails?.description) {
+        description = data.productDetails.description;
+    } else if (data.description) {
+        description = data.description;
+    }
+
+    // Check all descriptors
+    if (!description && Array.isArray(data.productDescriptors)) {
+        const descObj = data.productDescriptors.find((d: any) =>
+            d.title?.toLowerCase().includes("description") || d.title?.toLowerCase().includes("details")
+        );
+        description = descObj?.description || "";
+    }
+
+    if (!description && data.productDescriptors?.description) {
+        description = data.productDescriptors.description;
+    }
+
+    // Final fallback to raw attributes summary if available
+    if (!description && attributesRaw['Style Note']) {
+        description = attributesRaw['Style Note'];
+    }
+
+    // Category
+    const categoryRaw = data.analytics?.articleType || data.articleType || data.category || "Default";
+    const category = typeof categoryRaw === 'string' ? categoryRaw : (categoryRaw.typeName || categoryRaw.name || "Default");
+
+    return {
+        myntraId,
+        url: window.location.href.includes(myntraId) ? window.location.href : `https://www.myntra.com/${data.landingPageUrl || myntraId}`,
+        brand,
+        title,
+        price: typeof price === 'object' ? (price.discounted || 0) : price,
+        mrp: typeof mrp === 'object' ? (mrp.mrp || 0) : mrp,
+        discount,
+        images,
+        availableSizes,
+        description,
+        rating: data.ratings?.averageRating || data.rating || 0,
+        reviewCount: data.ratings?.totalCount || data.reviews || data.ratingCount || 0,
+        platform: 'Myntra' as const,
+        attributes: {
+            material: attributesRaw['Fabric'] || attributesRaw['Material'] || attributesRaw['Fabric 1'] || '',
+            fit: attributesRaw['Fit'] || attributesRaw['Pattern'] || '',
+            care: attributesRaw['Wash Care'] || attributesRaw['Care Instruction'] || '',
+            color: data.baseColor || data.primaryColor || attributesRaw['Color'] || '',
+            ...attributesRaw
+        },
+        gender: gender.toLowerCase(),
+        category,
+        raw: data
+    };
+}
+
+async function extractProductData(): Promise<ScrapedProduct | null> {
+    console.log("[StyleSwipe] Requesting product data from Main World...");
+
+    try {
+        const fullData = await getPdpDataFromMainWorld();
+
+        // Prioritize data sources
+        let data: any = fullData.pdpData;
+        if (!data || !data.id) {
+            if (fullData.plaproduct && fullData.plaproduct.id) data = fullData.plaproduct;
+            else if (fullData.searchData?.results?.products?.[0]) data = fullData.searchData.results.products[0];
+            else if (Array.isArray(fullData.products) && fullData.products.length > 0) data = fullData.products[0];
+        }
+
+        if (!data || (!data.id && !data.productId)) {
+            if (fullData.pdpData?.pdpData) data = fullData.pdpData.pdpData;
+            else return null;
+        }
+
+        return mapToScrapedProduct(data);
     } catch (e) {
-        console.error("[StyleSwipe] JSON Parse or Mapping Error:", e);
+        console.error("[StyleSwipe] Extraction Logic Error:", e);
         return null;
     }
 }
 
 interface ScrapedCategory {
-    products: {
-        myntraId: string;
-        url: string;
-        brand: string;
-        title: string;
-        price: number;
-        mrp: number;
-        platform: 'Myntra';
-    }[];
+    products: ScrapedProduct[];
 }
 
-function extractCategoryData(): ScrapedCategory | null {
-    console.log("[StyleSwipe] Attempting to extract category data...");
-
-    const scripts = Array.from(document.querySelectorAll('script'));
-    const myxScript = scripts.find(s => s.innerText.includes('window.__myx =') || s.innerText.includes('window.__myx='));
-
-    if (!myxScript) {
-        console.error("[StyleSwipe] Could not find window.__myx script");
-        return null;
-    }
-
-    const content = myxScript.innerText;
-    const match = content.match(/window\.__myx\s*=\s*(\{.*\})/s);
-
-    if (!match || !match[1]) return null;
+async function extractCategoryData(): Promise<ScrapedCategory | null> {
+    console.log("[StyleSwipe] Attempting to extract category data from Main World...");
 
     try {
-        const rawJson = match[1].trim();
-        const cleanJson = rawJson.endsWith(';') ? rawJson.slice(0, -1) : rawJson;
-        const data = JSON.parse(cleanJson);
+        const fullData = await getPdpDataFromMainWorld();
+        const productsRaw = fullData.searchData?.results?.products || fullData.products;
 
-        const productsRaw = data.searchData?.results?.products;
-
-        if (!productsRaw || !Array.isArray(productsRaw)) {
-            console.error("[StyleSwipe] No products found in searchData");
-            return null;
-        }
+        if (!productsRaw || !Array.isArray(productsRaw)) return null;
 
         console.log(`[StyleSwipe] Found ${productsRaw.length} products on category page`);
 
         return {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            products: productsRaw.map((p: any) => ({
-                myntraId: p.productId.toString(),
-                url: `https://www.myntra.com/${p.landingPageUrl}`,
-                brand: p.brand,
-                title: p.productName,
-                price: p.price,
-                mrp: p.mrp,
-                images: p.searchImage ? [p.searchImage] : [],
-                platform: 'Myntra'
-            }))
+            products: productsRaw.map(p => mapToScrapedProduct(p))
         };
-
     } catch (e) {
         console.error("[StyleSwipe] Category extraction failed:", e);
         return null;
@@ -178,48 +217,23 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         const scriptTags = Array.from(document.querySelectorAll('script'));
         const hasPdpData = scriptTags.some(s => s.innerText.includes('"pdpData"'));
         const hasSearchData = scriptTags.some(s => s.innerText.includes('"searchData"'));
-
-        sendResponse({
-            type: hasPdpData ? 'pdp' : (hasSearchData ? 'category' : 'unknown'),
-            url: window.location.href
-        });
+        sendResponse({ type: hasPdpData ? 'pdp' : (hasSearchData ? 'category' : 'unknown'), url: window.location.href });
         return true;
     }
 
     if (request.type === "SCRAPE_CURRENT_PAGE") {
-        const product = extractProductData();
-        if (product) {
-            console.log("[StyleSwipe] Product extracted, sending to background...");
-            chrome.runtime.sendMessage({
-                type: "SAVE_PRODUCT",
-                data: product
-            }, (response) => {
-                const err = chrome.runtime.lastError;
-                if (err) {
-                    sendResponse({ success: false, error: "Background sync failed: " + err.message });
-                } else {
-                    sendResponse(response);
-                }
-            });
-            return true;
-        } else {
-            sendResponse({ success: false, error: "Extraction failed." });
-        }
+        extractProductData().then(product => {
+            if (product) chrome.runtime.sendMessage({ type: "SAVE_PRODUCT", data: product }, (response) => sendResponse(response));
+            else sendResponse({ success: false, error: "Extraction failed." });
+        });
+        return true;
     }
 
     if (request.type === "SCRAPE_CATEGORY_PAGE") {
-        const categoryData = extractCategoryData();
-        if (categoryData && categoryData.products.length > 0) {
-            console.log(`[StyleSwipe] Sending ${categoryData.products.length} products to background...`);
-            chrome.runtime.sendMessage({
-                type: "SAVE_BATCH",
-                data: categoryData.products
-            }, (response) => {
-                sendResponse(response);
-            });
-            return true;
-        } else {
-            sendResponse({ success: false, error: "No products found to scrape." });
-        }
+        extractCategoryData().then(categoryData => {
+            if (categoryData && categoryData.products.length > 0) chrome.runtime.sendMessage({ type: "SAVE_BATCH", data: categoryData.products }, (response) => sendResponse(response));
+            else sendResponse({ success: false, error: "No products found." });
+        });
+        return true;
     }
 });

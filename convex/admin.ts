@@ -61,7 +61,7 @@ export const getScrapedProducts = query({
 
         return await ctx.db
             .query("products")
-            .withIndex("by_created")
+            // .withIndex("by_created") // Index removed
             .order("desc")
             .paginate(args.paginationOpts);
     },
