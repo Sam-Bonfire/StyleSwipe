@@ -107,35 +107,58 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
     }
 
     // Ensure Color is a string
-    const color = isMapped ? (data.attributes?.color || data.attributes?.baseColor) : (data.articleAttributes?.['Color'] || data.baseColor);
+    const color = isMapped ?
+        (data.attributes?.color || data.attributes?.colour || data.attributes?.primaryColor || data.attributes?.primaryColour || data.attributes?.baseColor || data.attributes?.baseColour) :
+        (data.primaryColor || data.primaryColour || data.baseColor || data.baseColour || data.articleAttributes?.['Color'] || data.articleAttributes?.['Colour']);
 
     // Ensure category is a string (handle objects like {typeName: "..."})
-    let category = "Default";
+    let category = "";
     if (isMapped && data.category) {
-        category = typeof data.category === 'string' ? data.category : (data.category.typeName || data.category.name || "Default");
+        category = typeof data.category === 'string' ? data.category : (data.category.typeName || data.category.name || "");
+    }
+
+    let masterCategory = "";
+    if (isMapped && data.masterCategory) {
+        masterCategory = typeof data.masterCategory === 'string' ? data.masterCategory : (data.masterCategory.typeName || data.masterCategory.name || "");
+    } else if (data.analytics?.masterCategory) {
+        masterCategory = typeof data.analytics.masterCategory === 'string' ? data.analytics.masterCategory : (data.analytics.masterCategory.typeName || data.analytics.masterCategory.name || "");
+    }
+
+    let subCategory = "";
+    if (isMapped && data.subCategory) {
+        subCategory = typeof data.subCategory === 'string' ? data.subCategory : (data.subCategory.typeName || data.subCategory.name || "");
+    } else if (data.analytics?.subCategory) {
+        subCategory = typeof data.analytics.subCategory === 'string' ? data.analytics.subCategory : (data.analytics.subCategory.typeName || data.analytics.subCategory.name || "");
     }
 
     const productFields = {
-        brand: isMapped ? (data.brand || "Unknown") : (data.brand?.name || "Unknown"),
-        title: isMapped ? (data.title || "Unknown Product") : (data.name || "Unknown Product"),
+        brand: isMapped ? (data.brand || "") : (data.brand?.name || ""),
+        title: isMapped ? (data.title || "") : (data.name || ""),
         price: price,
         mrp: isMapped ? (data.mrp || 0) : (data.price?.mrp || 0),
         category: category,
-        masterCategory: isMapped ? data.masterCategory : (data.masterCategory || data.analytics?.masterCategory),
-        subCategory: isMapped ? data.subCategory : (data.subCategory || data.analytics?.subCategory),
+        masterCategory: masterCategory,
+        subCategory: subCategory,
         images: isMapped ? (Array.isArray(data.images) ? data.images : []) : (data.media?.albums?.flatMap((album: any) => album.images?.map((img: any) => img.src)) || []),
         description: isMapped ? (data.description || "") : (data.description || data.productDetails?.description || ""),
         rating: isMapped ? data.rating : (data.ratings?.averageRating),
         reviewCount: isMapped ? data.reviewCount : (data.ratings?.totalCount),
         platform: "Myntra",
-        gender: (isMapped && data.gender) ? (data.gender.toLowerCase() as any) : "unisex",
+        gender: (isMapped && data.gender && ["men", "women", "unisex"].includes(data.gender.toLowerCase())) ? (data.gender.toLowerCase() as any) : undefined,
         priceTier: (price < 1000) ? "budget" : (price < 3000) ? "mid" : (price < 10000) ? "premium" : "luxury", // Simple heuristic
         onSale: price < (isMapped ? (data.mrp || 0) : (data.price?.mrp || 0)),
-        attributes: isMapped ? (data.attributes || {}) : {
+        attributes: isMapped ? {
+            ...(data.attributes || {}),
+            size: data.availableSizes || data.attributes?.size || [],
+            inventoryInfo: data.inventoryInfo || data.attributes?.inventoryInfo,
+        } : {
             // Fallback for raw data
             ...data.articleAttributes,
             color: color || undefined,
-            size: [], // Fill if possible
+            size: (data.inventoryInfo && Array.isArray(data.inventoryInfo))
+                ? data.inventoryInfo.filter((i: any) => i.available || (i.inventory && i.inventory > 0)).map((i: any) => i.brandSizeLabel || i.label)
+                : (data.availableSizes || []),
+            inventoryInfo: data.inventoryInfo || data.style?.inventoryInfo,
         },
         meta: {
             scrapedAt: scraped.lastScrapedAt,

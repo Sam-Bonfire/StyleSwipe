@@ -47,10 +47,10 @@ function getPdpDataFromMainWorld(): Promise<any> {
 }
 
 function mapToScrapedProduct(data: any): ScrapedProduct {
-    const myntraId = (data.id || data.productId || data.productId).toString();
-    const gender = data.gender || data.core?.gender || "unisex";
-    const title = data.name || data.productName || data.product || "Unknown Product";
-    const brand = data.brand?.name || data.brand || "Unknown";
+    const myntraId = (data.id || data.productId).toString();
+    const gender = data.gender || data.core?.gender || "";
+    const title = data.name || data.productName || data.product || "";
+    const brand = data.brand?.name || data.brand || "";
 
     const price = data.price?.discounted || (typeof data.price === 'number' ? data.price : (data.price?.discountedPrice || 0));
     const mrp = data.price?.mrp || data.mrp || (typeof data.price === 'number' ? data.price : (data.price?.mrp || 0));
@@ -72,8 +72,11 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
 
     // Sizes: Priority to inventoryInfo
     let availableSizes: string[] = [];
-    if (data.inventoryInfo) {
-        availableSizes = data.inventoryInfo.map((i: any) => i.label);
+    const invInfo = data.inventoryInfo || data.style?.inventoryInfo;
+    if (invInfo && Array.isArray(invInfo)) {
+        availableSizes = invInfo
+            .filter((i: any) => i.available || (i.inventory && i.inventory > 0))
+            .map((i: any) => i.brandSizeLabel || i.label);
     } else if (data.sizes) {
         if (Array.isArray(data.sizes)) {
             availableSizes = data.sizes.map((s: any) => s.label || s);
@@ -110,7 +113,6 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
 
     mergeAttrs(data.productAttributes);
     mergeAttrs(data.attributes);
-    mergeAttrs(data.systemAttributes);
 
     // Description
     let description = "";
@@ -140,12 +142,15 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
     }
 
     // Category
-    const categoryRaw = data.analytics?.articleType || data.articleType || data.category || "Default";
-    const category = typeof categoryRaw === 'string' ? categoryRaw : (categoryRaw.typeName || categoryRaw.name || "Default");
+    const categoryRaw = data.analytics?.articleType || data.articleType || data.category || "";
+    const category = typeof categoryRaw === 'string' ? categoryRaw : (categoryRaw.typeName || categoryRaw.name || "");
 
     // Detailed Category Hierarchy
-    const masterCategory = data.analytics?.masterCategory || data.masterCategory || "Apparel";
-    const subCategory = data.analytics?.subCategory || data.subCategory || "Topwear";
+    const masterCategoryRaw = data.analytics?.masterCategory || data.masterCategory || "";
+    const masterCategory = typeof masterCategoryRaw === 'string' ? masterCategoryRaw : (masterCategoryRaw.typeName || masterCategoryRaw.name || "");
+
+    const subCategoryRaw = data.analytics?.subCategory || data.subCategory || "";
+    const subCategory = typeof subCategoryRaw === 'string' ? subCategoryRaw : (subCategoryRaw.typeName || subCategoryRaw.name || "");
 
     return {
         myntraId,
@@ -165,7 +170,11 @@ function mapToScrapedProduct(data: any): ScrapedProduct {
             material: attributesRaw['Fabric'] || attributesRaw['Material'] || attributesRaw['Fabric 1'] || '',
             fit: attributesRaw['Fit'] || attributesRaw['Pattern'] || '',
             care: attributesRaw['Wash Care'] || attributesRaw['Care Instruction'] || '',
-            color: data.baseColor || data.primaryColor || attributesRaw['Color'] || '',
+            color: data.primaryColor || data.primaryColour || data.baseColor || data.baseColour || attributesRaw['Color'] || attributesRaw['Colour'] || '',
+            size: availableSizes,
+            inventoryInfo: invInfo,
+            masterCategory,
+            subCategory,
             ...attributesRaw
         },
         gender: gender.toLowerCase(),
