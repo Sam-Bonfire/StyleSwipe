@@ -189,6 +189,52 @@ export interface PartnerSyncRepository {
 }
 
 // -----------------------------------------------------------------------------
+// QUEUE PORT
+// -----------------------------------------------------------------------------
+
+/**
+ * Generic queue interface for async processing pipelines
+ */
+export interface Queue<T> {
+    /** Add single item to queue, returns item ID */
+    push(item: T): Promise<string>;
+    /** Add multiple items to queue, returns item IDs */
+    pushBatch(items: T[]): Promise<string[]>;
+    /** Pull items for processing (marks as processing) */
+    pull(batchSize?: number): Promise<Array<{ id: string; data: T }>>;
+    /** Mark item as completed and remove from queue */
+    complete(id: string): Promise<void>;
+    /** Mark item as failed, optionally with error message */
+    fail(id: string, error?: string): Promise<void>;
+    /** Get current queue depth */
+    size(): Promise<number>;
+}
+
+// -----------------------------------------------------------------------------
+// EMBEDDER PORT
+// -----------------------------------------------------------------------------
+
+/**
+ * Embedding generation errors
+ */
+export class EmbedderError extends Error {
+    constructor(message: string, public readonly cause?: unknown) {
+        super(message);
+        this.name = "EmbedderError";
+    }
+}
+
+/**
+ * Text embedding generation interface
+ */
+export interface Embedder {
+    /** Generate embedding vector for text */
+    generateEmbedding(text: string): Promise<number[]>;
+    /** Get embedding dimensions (e.g., 384 for BGE-Small) */
+    getDimensions(): number;
+}
+
+// -----------------------------------------------------------------------------
 // AGGREGATE REPOSITORY INTERFACE
 // -----------------------------------------------------------------------------
 
@@ -209,3 +255,4 @@ export interface Repositories {
     products: ProductRepository;
     partnerSync: PartnerSyncRepository;
 }
+

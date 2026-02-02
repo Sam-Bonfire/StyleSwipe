@@ -242,3 +242,37 @@ export const promoteToCatalog = mutation({
         await promoteInternal(ctx, args.scrapedProductId);
     },
 });
+
+// =============================================================================
+// SIMPLER QUERIES FOR SCRAPER API
+// =============================================================================
+
+export const getJobsSimple = query({
+    args: { limit: v.optional(v.number()) },
+    handler: async (ctx, args) => {
+        const limit = args.limit ?? 20;
+        return await ctx.db
+            .query("scrape_jobs")
+            .order("desc")
+            .take(limit);
+    },
+});
+
+export const getJob = query({
+    args: { jobId: v.id("scrape_jobs") },
+    handler: async (ctx, args) => {
+        return await ctx.db.get(args.jobId);
+    },
+});
+
+export const getScrapedProducts = query({
+    args: { limit: v.optional(v.number()) },
+    handler: async (ctx, args) => {
+        const limit = args.limit ?? 50;
+        return await ctx.db
+            .query("scraped_products")
+            .order("desc")
+            .take(limit);
+    },
+});
+

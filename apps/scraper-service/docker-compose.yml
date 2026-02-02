@@ -1,0 +1,43 @@
+services:
+  scraper:
+    build:
+      context: ../..
+      dockerfile: apps/scraper-service/Dockerfile
+    environment:
+      - VITE_CONVEX_URL=${VITE_CONVEX_URL}
+      - SCRAPER_API_PORT=3001
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3001/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Optional: Run additional workers for horizontal scaling
+  scraper-worker:
+    build:
+      context: ../..
+      dockerfile: apps/scraper-service/Dockerfile
+    command: [ "bun", "run", "apps/scraper-service/src/index.ts", "--worker", "--queue", "convex" ]
+    environment:
+      - VITE_CONVEX_URL=${VITE_CONVEX_URL}
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    profiles:
+      - scaled

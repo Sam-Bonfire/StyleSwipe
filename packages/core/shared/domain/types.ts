@@ -271,6 +271,60 @@ export interface PartnerSync {
 }
 
 // -----------------------------------------------------------------------------
+// SCRAPER CONTEXT
+// -----------------------------------------------------------------------------
+
+/**
+ * Supported e-commerce platforms
+ */
+export type Platform = "Myntra" | "Ajio" | "Amazon";
+
+/**
+ * Scraped product data from e-commerce platforms
+ * Matches browser extension's mapToScrapedProduct output
+ */
+export interface ScrapedProduct {
+    externalId: string;
+    url: string;
+    brand: string;
+    title: string;
+    price: number;
+    mrp: number;
+    discount: string;
+    images: string[];
+    availableSizes: string[];
+    description: string;
+    rating: number;
+    reviewCount: number;
+    platform: Platform;
+    attributes: Record<string, unknown>;
+    gender?: string;
+    category?: string;
+    masterCategory?: string;
+    subCategory?: string;
+    embedding?: number[];
+    raw?: unknown;
+}
+
+/**
+ * Queue item status for processing pipeline
+ */
+export type QueueItemStatus = "pending" | "processing" | "completed" | "failed";
+
+/**
+ * Generic queue item wrapper
+ */
+export interface QueueItem<T = unknown> {
+    id: string;
+    data: T;
+    status: QueueItemStatus;
+    retries: number;
+    createdAt: number;
+    updatedAt: number;
+    error?: string;
+}
+
+// -----------------------------------------------------------------------------
 // UTILITY TYPES
 // -----------------------------------------------------------------------------
 
@@ -285,6 +339,7 @@ export type DocumentId<T extends string = string> = string & { __tableName: T };
 export type UnixTimestamp = number;
 
 /**
- * Embedding vector type (512 dimensions)
+ * Embedding vector type (384 dimensions for BGE-Small)
  */
 export type EmbeddingVector = number[];
+
