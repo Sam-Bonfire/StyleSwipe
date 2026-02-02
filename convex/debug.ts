@@ -16,8 +16,8 @@ export const analyzeMismatch = query({
         });
 
         const results = scraped.map(s => {
-            const data = s.data;
-            const key = `${data.brand}|${data.title}`;
+            const data = s.data || {};
+            const key = `${data.brand || ''}|${data.title || ''}`;
             const foundById = catalogById.get(s.externalId);
             const foundByBT = catalogByBrandTitle.get(key);
 
@@ -34,14 +34,19 @@ export const analyzeMismatch = query({
         // Find duplicates in scraped data (same brand/title but different externalId)
         const btCounts = new Map();
         scraped.forEach(s => {
-            const key = `${s.data.brand}|${s.data.title}`;
+            const data = s.data || {};
+            const key = `${data.brand || ''}|${data.title || ''}`;
             if (!btCounts.has(key)) btCounts.set(key, []);
             btCounts.get(key).push(s.externalId);
         });
 
         const potentialCollisions = Array.from(btCounts.entries())
-            .filter(([_, ids]) => ids.length > 1)
-            .map(([key, ids]) => ({ key, ids }));
+            .filter(([_, ids]) => {
+                // Only count as collision if they have different externalIds
+                const uniqueIds = new Set(ids);
+                return uniqueIds.size > 1;
+            })
+            .map(([key, ids]) => ({ key, ids: Array.from(new Set(ids)) }));
 
         return {
             totalScraped: scraped.length,

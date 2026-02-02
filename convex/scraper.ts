@@ -1,5 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Doc, Id } from "./_generated/dataModel";
+import { MutationCtx } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 
 export const createJob = mutation({
@@ -60,10 +62,10 @@ export const saveBatch = mutation({
     },
 });
 
-async function saveInternal(ctx: any, args: { externalId: string, url: string, data: any }) {
+async function saveInternal(ctx: MutationCtx, args: { externalId: string, url: string, data: any }) {
     const existing = await ctx.db
         .query("scraped_products")
-        .withIndex("by_externalId", (q: any) => q.eq("externalId", args.externalId))
+        .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
         .first();
 
     let scrapedId;
@@ -87,7 +89,7 @@ async function saveInternal(ctx: any, args: { externalId: string, url: string, d
 }
 
 // Internal helper for promotion to keep logic DRY
-async function promoteInternal(ctx: any, scrapedProductId: any) {
+async function promoteInternal(ctx: MutationCtx, scrapedProductId: Id<"scraped_products">) {
     const scraped = await ctx.db.get(scrapedProductId);
     if (!scraped) return;
 
@@ -139,13 +141,15 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
         category: category,
         masterCategory: masterCategory,
         subCategory: subCategory,
-        images: isMapped ? (Array.isArray(data.images) ? data.images : []) : (data.media?.albums?.flatMap((album: any) => album.images?.map((img: any) => img.src)) || []),
+        images: isMapped ? (Array.isArray(data.images) ? data.images : []) : (data.media?.albums?.flatMap((album: { images?: { src: string }[] }) => album.images?.map((img) => img.src)) || []),
         description: isMapped ? (data.description || "") : (data.description || data.productDetails?.description || ""),
         rating: isMapped ? data.rating : (data.ratings?.averageRating),
         reviewCount: isMapped ? data.reviewCount : (data.ratings?.totalCount),
         platform: "Myntra",
-        gender: (isMapped && data.gender && ["men", "women", "unisex"].includes(data.gender.toLowerCase())) ? (data.gender.toLowerCase() as any) : undefined,
-        priceTier: (price < 1000) ? "budget" : (price < 3000) ? "mid" : (price < 10000) ? "premium" : "luxury", // Simple heuristic
+        gender: (isMapped && data.gender && ["men", "women", "unisex"].includes(data.gender.toLowerCase()))
+            ? (data.gender.toLowerCase() as "men" | "women" | "unisex")
+            : undefined,
+        priceTier: ((price < 1000) ? "budget" : (price < 3000) ? "mid" : (price < 10000) ? "premium" : "luxury") as "budget" | "mid" | "premium" | "luxury",
         onSale: price < (isMapped ? (data.mrp || 0) : (data.price?.mrp || 0)),
         embedding: data.embedding || undefined, // Prioritize client-side embedding
         attributes: isMapped ? {
@@ -157,7 +161,7 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
             ...data.articleAttributes,
             color: color || undefined,
             size: (data.inventoryInfo && Array.isArray(data.inventoryInfo))
-                ? data.inventoryInfo.filter((i: any) => i.available || (i.inventory && i.inventory > 0)).map((i: any) => i.brandSizeLabel || i.label)
+                ? data.inventoryInfo.filter((i: { available?: boolean; inventory?: number }) => i.available || (i.inventory && i.inventory > 0)).map((i: { brandSizeLabel?: string; label: string }) => i.brandSizeLabel || i.label)
                 : (data.availableSizes || []),
             inventoryInfo: data.inventoryInfo || data.style?.inventoryInfo,
         },
@@ -173,17 +177,17 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
 
     // Removed categoryId lookup - field no longer in schema
 
-    let existingProduct = null;
+    let existingProduct: Doc<"products"> | null = null;
     if (productFields.externalId) {
         existingProduct = await ctx.db
             .query("products")
-            .withIndex("by_externalId", (q: any) => q.eq("externalId", productFields.externalId))
+            .withIndex("by_externalId", (q) => q.eq("externalId", productFields.externalId))
             .first();
     } else {
         // Only fallback to Brand/Title if we don't have a reliable platform ID
         existingProduct = await ctx.db
             .query("products")
-            .withIndex("by_brand_title", (q: any) =>
+            .withIndex("by_brand_title", (q) =>
                 q.eq("brand", productFields.brand).eq("title", productFields.title)
             )
             .first();

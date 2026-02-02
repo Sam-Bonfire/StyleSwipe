@@ -1,13 +1,14 @@
 import { Play, Activity, CheckCircle, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import './App.css';
+import { ScrapedProduct, ExtensionMessage } from './types';
 
 function App() {
   const [status, setStatus] = useState('Ready');
   const [pageType, setPageType] = useState<'pdp' | 'category' | 'unknown'>('unknown');
   const [scrapeCount, setScrapeCount] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [recentScrape, setRecentScrape] = useState<any>(null);
+  const [recentScrape, setRecentScrape] = useState<ScrapedProduct | null>(null);
   const [error, setError] = useState('');
 
   const refreshPageInfo = () => {
@@ -51,7 +52,7 @@ function App() {
   };
 
   useEffect(() => {
-    const listener = (message: any) => {
+    const listener = (message: ExtensionMessage) => {
       if (message.type === 'SCRAPE_SUCCESS') {
         setStatus('Ready');
         setProgress(100);

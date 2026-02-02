@@ -12,7 +12,6 @@ import type * as accounts from "../accounts.js";
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as cart from "../cart.js";
-import type * as debug from "../debug.js";
 import type * as discovery from "../discovery.js";
 import type * as events from "../events.js";
 import type * as featureFlags from "../featureFlags.js";
@@ -42,7 +41,6 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
   cart: typeof cart;
-  debug: typeof debug;
   discovery: typeof discovery;
   events: typeof events;
   featureFlags: typeof featureFlags;

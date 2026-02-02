@@ -2,28 +2,7 @@
 
 // Reusing logic from MyntraScraper.ts but adapted for Browser Extension
 
-interface ScrapedProduct {
-    externalId: string;
-    url: string;
-    brand: string;
-    title: string;
-    price: number;
-    mrp: number;
-    discount: string;
-    images: string[];
-    availableSizes: string[];
-    description: string;
-    rating: number;
-    reviewCount: number;
-    platform: 'Myntra';
-    attributes: Record<string, unknown>;
-    gender?: string;
-    category?: string;
-    masterCategory?: string;
-    subCategory?: string;
-    embedding?: number[];
-    raw: unknown;
-}
+import { ScrapedProduct, TransformerProgress } from './types';
 
 interface MyntraImage {
     src: string;
@@ -436,7 +415,7 @@ async function extractProductData(): Promise<ScrapedProduct | null> {
 
             progressUI.show("Initializing Neural Engine...");
 
-            const vectorizer = await VectorizationService.getInstance((progress: any) => {
+            const vectorizer = await VectorizationService.getInstance((progress: TransformerProgress) => {
                 if (progress.status === 'progress' || progress.status === 'download') {
                     if (progress.total && !isNaN(progress.total)) {
                         const percent = Math.round(progress.loaded / progress.total * 100);
@@ -462,9 +441,10 @@ async function extractProductData(): Promise<ScrapedProduct | null> {
 
             progressUI.update(100, "Optimization Complete");
             setTimeout(() => progressUI.hide(), 1500);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("[StyleSwipe] Vectorization failed:", err);
-            const errorMsg = `Neural Engine Error: ${err.message || 'Unknown error'}`;
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            const errorMsg = `Neural Engine Error: ${msg}`;
             progressUI.update(0, errorMsg);
             chrome.runtime.sendMessage({ type: "SCRAPE_ERROR", error: errorMsg });
             setTimeout(() => progressUI.hide(), 3000);
@@ -472,7 +452,7 @@ async function extractProductData(): Promise<ScrapedProduct | null> {
         }
 
         return mapToScrapedProduct(data as MyntraRawData, embedding);
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error("[StyleSwipe] Extraction Logic Error:", e);
         throw e;
     }
@@ -499,7 +479,7 @@ async function extractCategoryData(): Promise<ScrapedCategory | null> {
         progressUI.show(`Initializing Batch Processor for ${total} products...`);
 
         const { VectorizationService } = await import('./VectorizationService');
-        const vectorizer = await VectorizationService.getInstance((progress: any) => {
+        const vectorizer = await VectorizationService.getInstance((progress: TransformerProgress) => {
             if (progress.status === 'progress' || progress.status === 'download') {
                 if (progress.total && !isNaN(progress.total)) {
                     const percent = Math.round(progress.loaded / progress.total * 100);
@@ -545,9 +525,10 @@ async function extractCategoryData(): Promise<ScrapedCategory | null> {
         setTimeout(() => progressUI.hide(), 1500);
 
         return { products };
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error("[StyleSwipe] Category extraction failed:", e);
-        const error = e.message || "Category extraction failed.";
+        const msg = e instanceof Error ? e.message : 'Category extraction failed.';
+        const error = msg;
         progressUI.update(0, error);
         chrome.runtime.sendMessage({ type: "SCRAPE_ERROR", error });
         setTimeout(() => progressUI.hide(), 3000);
