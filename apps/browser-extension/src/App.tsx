@@ -1,76 +1,156 @@
-/// <reference types="chrome" />
-import { useState, useEffect } from 'react'
-import './App.css'
+import { Play, Activity, CheckCircle, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import './App.css';
 
 function App() {
-  const [status, setStatus] = useState<string>('Ready');
+  const [status, setStatus] = useState('Ready');
   const [pageType, setPageType] = useState<'pdp' | 'category' | 'unknown'>('unknown');
+  const [scrapeCount, setScrapeCount] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [recentScrape, setRecentScrape] = useState<any>(null);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    // Detect page type on load
-    const detect = async () => {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tab.id) {
-        chrome.tabs.sendMessage(tab.id, { type: "GET_PAGE_INFO" }, (response) => {
-          if (response) {
-            setPageType(response.type);
-          }
+  const refreshPageInfo = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_PAGE_INFO' }, (response) => {
+          if (response?.type) setPageType(response.type);
         });
-      }
-    };
-    detect();
-  }, []);
-
-  const handleScrape = async () => {
-    setStatus('Scraping...');
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab.id) return;
-
-    const messageType = pageType === 'category' ? "SCRAPE_CATEGORY_PAGE" : "SCRAPE_CURRENT_PAGE";
-
-    chrome.tabs.sendMessage(tab.id, { type: messageType }, (response) => {
-      if (chrome.runtime.lastError) {
-        const msg = chrome.runtime.lastError.message || '';
-        setStatus('Error: ' + msg);
-        return;
-      }
-
-      if (response && response.success) {
-        setStatus(`Success! ${response.count ? 'Saved ' + response.count + ' products.' : 'Saved to DB.'}`);
-      } else {
-        setStatus('Failed: ' + (response?.error || 'Unknown error'));
       }
     });
   };
 
+  useEffect(() => {
+    refreshPageInfo();
+    // Re-check on tab focus/update
+    const tabUpdateListener = () => refreshPageInfo();
+    chrome.tabs.onUpdated.addListener(tabUpdateListener);
+    chrome.tabs.onActivated.addListener(tabUpdateListener);
+    return () => {
+      chrome.tabs.onUpdated.removeListener(tabUpdateListener);
+      chrome.tabs.onActivated.removeListener(tabUpdateListener);
+    };
+  }, []);
+
+  const handleManualScrape = () => {
+    setStatus('Scraping...');
+    setScrapeCount(0);
+    setProgress(0);
+    setError('');
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        const type = pageType === 'category' ? 'SCRAPE_CATEGORY_PAGE' : 'SCRAPE_CURRENT_PAGE';
+        chrome.tabs.sendMessage(tabs[0].id, { type }, (response) => {
+          if (response?.error) {
+            setError(response.error);
+            setStatus('Error');
+          }
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    const listener = (message: any) => {
+      if (message.type === 'SCRAPE_SUCCESS') {
+        setStatus('Ready');
+        setProgress(100);
+        setRecentScrape(message.data);
+        if (message.data.count) setScrapeCount(message.data.count);
+      }
+      if (message.type === 'SCRAPE_ERROR') {
+        setStatus('Error');
+        setError(message.error || 'An unexpected error occurred.');
+      }
+      if (message.type === 'MODEL_PROGRESS') {
+        setStatus(message.data.status);
+        setProgress(message.data.progress);
+        if (message.data.status.toLowerCase().includes('error')) {
+          setStatus('Error');
+          setError(message.data.status);
+        }
+      }
+    };
+    chrome.runtime.onMessage.addListener(listener);
+    return () => chrome.runtime.onMessage.removeListener(listener);
+  }, []);
+
+  const isModelLoading = status !== 'Ready' && status !== 'Error' && status !== 'Scraping...';
+  const canScrape = (pageType === 'pdp' || pageType === 'category') && status === 'Ready';
+
   return (
-    <div style={{ width: 300, padding: 20 }}>
-      <h3>StyleSwipe Scraper</h3>
-      <p style={{ fontSize: 13, marginBottom: 15 }}>
-        {pageType === 'category'
-          ? 'Found product listing page.'
-          : pageType === 'pdp'
-            ? 'Found individual product page.'
-            : 'Navigate to a Myntra page to start.'}
-      </p>
+    <div className="popup-container">
+      <div className="mesh-bg">
+        <div className="mesh-1"></div>
+        <div className="mesh-2"></div>
+      </div>
 
-      <button
-        onClick={handleScrape}
-        disabled={status === 'Scraping...' || pageType === 'unknown'}
-        style={{ width: '100%', padding: '10px' }}
-      >
-        {status === 'Scraping...'
-          ? 'Processing...'
-          : pageType === 'category'
-            ? 'Scrape All Products on Page'
-            : 'Scrape This Product'}
-      </button>
+      <div className="content-wrapper">
+        <div className="header">
+          <div className="logo-wrapper">
+            <div className="logo-icon">
+              <Activity size={20} color="white" />
+            </div>
+            <h1 className="logo-text">StyleSwipe <span className="logo-accent">Pro</span></h1>
+          </div>
+        </div>
 
-      <p style={{ marginTop: 15, fontSize: 12, color: status.startsWith('Success') ? 'green' : 'gray' }}>
-        Status: {status}
-      </p>
+        <div className="info-card">
+          <div className="card-header">
+            <span className="card-label">Neural Scraper</span>
+            <span className={`status-badge ${status !== 'Ready' && status !== 'Error' ? 'status-active' : (status === 'Error' ? 'status-error' : 'status-ready')}`}>
+              {status}
+            </span>
+          </div>
+          <p className="card-desc">
+            {pageType === 'category' ? 'Category page detected. Batch mode active.' :
+              pageType === 'pdp' ? 'Product page detected. Single mode active.' :
+                'Navigate to Myntra to begin scraping.'}
+          </p>
+          <div className={`status-progress-container ${isModelLoading ? 'active' : ''}`}>
+            <div className="status-progress-fill" style={{ width: `${progress}%` }}></div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleManualScrape}
+          disabled={!canScrape}
+          className="scrape-btn"
+        >
+          <Play size={20} />
+          {pageType === 'category' ? 'Batch Neural Scrape' : 'Manual Neural Scrape'}
+        </button>
+
+        {error && (
+          <div className="error-area">
+            <AlertCircle size={20} color="#EF4444" />
+            <p className="error-text">{error}</p>
+          </div>
+        )}
+
+        {recentScrape && (
+          <div className="success-card">
+            <div className="success-header">
+              <CheckCircle size={16} />
+              <span>{scrapeCount > 0 ? `Synced ${scrapeCount} Products` : 'Sync Successful'}</span>
+            </div>
+            <div className="product-info">
+              <img
+                src={recentScrape.images?.[0] || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200'}
+                alt="Preview"
+                className="product-img"
+              />
+              <div className="product-details">
+                <h3 className="product-title">{recentScrape.title}</h3>
+                <p className="product-brand">{recentScrape.brand}</p>
+                <span className="product-price">₹{recentScrape.price}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

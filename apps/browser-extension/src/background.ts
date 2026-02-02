@@ -4,13 +4,9 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../convex/_generated/api";
 
 const CONVEX_URL = import.meta.env.VITE_CONVEX_URL;
-// Note: Background workers might not have access to .env in some setups, 
-// usually we need to bake this in or load from elsewhere. 
-// For Vite + CRXJS, import.meta.env usually works if defined in .env
 
-// Fallback if needed, but assuming user provides env
 if (!CONVEX_URL) {
-    console.error("Convex URL not found");
+    console.error("Convex configuration missing. URL:", CONVEX_URL);
 }
 
 const client = new ConvexHttpClient(CONVEX_URL!);
@@ -21,15 +17,8 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.type === "SAVE_PRODUCT") {
         console.log("[StyleSwipe] Saving product to Convex:", request.data.title);
 
-        if (!CONVEX_URL) {
-            console.error("[StyleSwipe] Cannot save: VITE_CONVEX_URL is missing in build.");
-            sendResponse({ success: false, error: "Convex URL not configured in extension build." });
-            return false;
-        }
-
-        // Save to Convex
         client.mutation(api.scraper.saveProduct, {
-            myntraId: request.data.myntraId,
+            externalId: request.data.externalId,
             url: request.data.url,
             data: request.data
         }).then(() => {
@@ -46,15 +35,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.type === "SAVE_BATCH") {
         console.log(`[StyleSwipe] Background saving batch of ${request.data.length} products`);
 
-        if (!CONVEX_URL) {
-            sendResponse({ success: false, error: "Convex URL missing" });
-            return false;
-        }
-
-        // Chunking the batch to avoid Convex timeout on extremely large pages
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const products = request.data.map((item: any) => ({
-            myntraId: item.myntraId,
+            externalId: item.externalId,
             url: item.url,
             data: item
         }));
@@ -66,8 +49,9 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         }
 
         const promises = chunks.map(chunk =>
-
-            client.mutation(api.scraper.saveBatch, { products: chunk })
+            client.mutation(api.scraper.saveBatch, {
+                products: chunk
+            })
         );
 
         Promise.all(promises)

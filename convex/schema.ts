@@ -211,8 +211,10 @@ const products = defineTable({
         v2: v.optional(v.array(v.float64())),
     })),
     meta: v.optional(v.any()), // Flexible field for scraper extra data
+    externalId: v.optional(v.string()), // Generalized from Myntra ID for multi-platform support
     updatedAt: v.optional(v.number()),
 })
+    .index("by_externalId", ["externalId"])
     .index("by_category", ["category"])
     .index("by_master_category", ["masterCategory"])
     .index("by_category_price", ["category", "price"])
@@ -347,13 +349,13 @@ export default defineSchema({
     // -----------------------------------------------------------------------------
 
     scraped_products: defineTable({
-        myntraId: v.string(),
+        externalId: v.string(),
         url: v.string(),
         data: v.any(), // Raw JSON data
         lastScrapedAt: v.number(),
         status: v.union(v.literal("active"), v.literal("out_of_stock")),
     })
-        .index("by_myntraId", ["myntraId"])
+        .index("by_externalId", ["externalId"])
         .index("by_url", ["url"]),
 
     scrape_jobs: defineTable({

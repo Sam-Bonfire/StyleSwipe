@@ -1,7 +1,8 @@
 {
     "$schema": "https://turbo.build/schema.json",
     "globalEnv": [
-        "EXPO_PUBLIC_*"
+        "EXPO_PUBLIC_*",
+        "VITE_*"
     ],
     "pipeline": {
         "build": {

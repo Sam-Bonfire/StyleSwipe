@@ -36,7 +36,7 @@ export const updateJobStatus = mutation({
 
 export const saveProduct = mutation({
     args: {
-        myntraId: v.string(),
+        externalId: v.string(),
         url: v.string(),
         data: v.any(),
     },
@@ -48,7 +48,7 @@ export const saveProduct = mutation({
 export const saveBatch = mutation({
     args: {
         products: v.array(v.object({
-            myntraId: v.string(),
+            externalId: v.string(),
             url: v.string(),
             data: v.any(),
         })),
@@ -60,10 +60,10 @@ export const saveBatch = mutation({
     },
 });
 
-async function saveInternal(ctx: any, args: { myntraId: string, url: string, data: any }) {
+async function saveInternal(ctx: any, args: { externalId: string, url: string, data: any }) {
     const existing = await ctx.db
         .query("scraped_products")
-        .withIndex("by_myntraId", (q: any) => q.eq("myntraId", args.myntraId))
+        .withIndex("by_externalId", (q: any) => q.eq("externalId", args.externalId))
         .first();
 
     let scrapedId;
@@ -94,7 +94,7 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
     const data = scraped.data;
 
     // Check if it's already a mapped object from extension or raw pdpData
-    const isMapped = !!data.myntraId;
+    const isMapped = !!data.externalId;
 
     const price = isMapped ? (data.price || 0) : (data.price?.discounted || 0);
 
@@ -147,6 +147,7 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
         gender: (isMapped && data.gender && ["men", "women", "unisex"].includes(data.gender.toLowerCase())) ? (data.gender.toLowerCase() as any) : undefined,
         priceTier: (price < 1000) ? "budget" : (price < 3000) ? "mid" : (price < 10000) ? "premium" : "luxury", // Simple heuristic
         onSale: price < (isMapped ? (data.mrp || 0) : (data.price?.mrp || 0)),
+        embedding: data.embedding || undefined, // Prioritize client-side embedding
         attributes: isMapped ? {
             ...(data.attributes || {}),
             size: data.availableSizes || data.attributes?.size || [],
@@ -163,20 +164,30 @@ async function promoteInternal(ctx: any, scrapedProductId: any) {
         meta: {
             scrapedAt: scraped.lastScrapedAt,
             originalUrl: scraped.url,
-            myntraId: scraped.myntraId,
+            externalId: scraped.externalId,
             rawAttributes: data.attributes
         },
+        externalId: scraped.externalId, // Top-level for indexing
         updatedAt: Date.now(),
     };
 
     // Removed categoryId lookup - field no longer in schema
 
-    const existingProduct = await ctx.db
-        .query("products")
-        .withIndex("by_brand_title", (q: any) =>
-            q.eq("brand", productFields.brand).eq("title", productFields.title)
-        )
-        .first();
+    let existingProduct = null;
+    if (productFields.externalId) {
+        existingProduct = await ctx.db
+            .query("products")
+            .withIndex("by_externalId", (q: any) => q.eq("externalId", productFields.externalId))
+            .first();
+    } else {
+        // Only fallback to Brand/Title if we don't have a reliable platform ID
+        existingProduct = await ctx.db
+            .query("products")
+            .withIndex("by_brand_title", (q: any) =>
+                q.eq("brand", productFields.brand).eq("title", productFields.title)
+            )
+            .first();
+    }
 
     if (existingProduct) {
         await ctx.db.patch(existingProduct._id, productFields);
