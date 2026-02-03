@@ -76,6 +76,7 @@ export class EmbedderAdapter {
             console.log(`[EmbedderAdapter] Loading model: ${MODEL_NAME}`);
             try {
                 const extractor = await pipeline("feature-extraction", MODEL_NAME, {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     progress_callback: progressCallback as any,
                 });
                 this.extractor = extractor as unknown as FeatureExtractionPipeline;
