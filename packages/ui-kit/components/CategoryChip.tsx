@@ -100,6 +100,7 @@ const ChipText = styled(Text, {
     name: 'CategoryChipText',
     fontFamily: '$body',
     fontWeight: '500',
+    textAlignVertical: 'center',
 
     variants: {
         selected: {
@@ -114,12 +115,15 @@ const ChipText = styled(Text, {
         size: {
             small: {
                 fontSize: '$2',
+                lineHeight: '$2',
             },
             medium: {
                 fontSize: '$3',
+                lineHeight: '$3',
             },
             large: {
                 fontSize: '$4',
+                lineHeight: '$4',
             },
         },
     } as const,
