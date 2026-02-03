@@ -31,19 +31,18 @@ export function createServer(config: ServerConfig) {
     app.post("/api/jobs", async (c: Context) => {
         try {
             const body = await c.req.json();
-            const { type, query, maxPages } = body;
+            const { type, query, maxPages, startPage, scraperMode } = body;
 
             if (!type || !query) {
                 return c.json({ error: "type and query are required" }, 400);
             }
 
-            // For category jobs, append maxPages to query
-            const finalQuery =
-                type === "category" && maxPages ? `${query}|${maxPages}` : query;
-
             const jobId = await client.mutation(api.scraper.createJob, {
                 type,
-                query: finalQuery,
+                query,
+                maxPages: maxPages ? Number(maxPages) : undefined,
+                startPage: startPage ? Number(startPage) : undefined,
+                scraperMode: scraperMode as "API" | "BROWSER" | undefined,
             });
 
             return c.json({ jobId, message: "Job created successfully" });

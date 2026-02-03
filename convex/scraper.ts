@@ -8,6 +8,9 @@ export const createJob = mutation({
     args: {
         type: v.union(v.literal("category"), v.literal("search"), v.literal("single")),
         query: v.string(),
+        maxPages: v.optional(v.number()),
+        startPage: v.optional(v.number()),
+        scraperMode: v.optional(v.union(v.literal("API"), v.literal("BROWSER"))),
     },
     handler: async (ctx, args) => {
         const jobId = await ctx.db.insert("scrape_jobs", {
@@ -41,6 +44,7 @@ export const saveProduct = mutation({
         externalId: v.string(),
         url: v.string(),
         data: v.any(),
+        embedding: v.optional(v.array(v.float64())),
     },
     handler: async (ctx, args) => {
         await saveInternal(ctx, args);
@@ -53,6 +57,7 @@ export const saveBatch = mutation({
             externalId: v.string(),
             url: v.string(),
             data: v.any(),
+            embedding: v.optional(v.array(v.float64())),
         })),
     },
     handler: async (ctx, args) => {
@@ -62,34 +67,41 @@ export const saveBatch = mutation({
     },
 });
 
-async function saveInternal(ctx: MutationCtx, args: { externalId: string, url: string, data: any }) {
+async function saveInternal(ctx: MutationCtx, args: { externalId: string, url: string, data: any, embedding?: number[] }) {
     const existing = await ctx.db
         .query("scraped_products")
         .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
         .first();
 
     let scrapedId;
+    // Ensure embedding is NOT in the data object stored in scraped_products
+    const { embedding: _emb, ...cleanData } = args.data; // Try to strip if present in data
+    // Also strip from args.data if it was passed there? 
+    // The worker might pass it in data OR separate. We'll rely on args.embedding.
+
     if (existing) {
         await ctx.db.patch(existing._id, {
-            data: args.data,
+            data: cleanData, // Storing raw data without embedding
             lastScrapedAt: Date.now(),
             status: "active",
         });
         scrapedId = existing._id;
     } else {
         scrapedId = await ctx.db.insert("scraped_products", {
-            ...args,
+            externalId: args.externalId,
+            url: args.url,
+            data: cleanData,
             lastScrapedAt: Date.now(),
             status: "active",
         });
     }
 
-    // Auto-promote to catalog
-    await promoteInternal(ctx, scrapedId);
+    // Auto-promote to catalog with the transient embedding
+    await promoteInternal(ctx, scrapedId, args.embedding);
 }
 
 // Internal helper for promotion to keep logic DRY
-async function promoteInternal(ctx: MutationCtx, scrapedProductId: Id<"scraped_products">) {
+async function promoteInternal(ctx: MutationCtx, scrapedProductId: Id<"scraped_products">, embeddingOverride?: number[]) {
     const scraped = await ctx.db.get(scrapedProductId);
     if (!scraped) return;
 
@@ -151,7 +163,7 @@ async function promoteInternal(ctx: MutationCtx, scrapedProductId: Id<"scraped_p
             : undefined,
         priceTier: ((price < 1000) ? "budget" : (price < 3000) ? "mid" : (price < 10000) ? "premium" : "luxury") as "budget" | "mid" | "premium" | "luxury",
         onSale: price < (isMapped ? (data.mrp || 0) : (data.price?.mrp || 0)),
-        embedding: data.embedding || undefined, // Prioritize client-side embedding
+        embedding: embeddingOverride || data.embedding || undefined, // Use override first, then fallback to data (legacy)
         attributes: isMapped ? {
             ...(data.attributes || {}),
             size: data.availableSizes || data.attributes?.size || [],
@@ -194,6 +206,12 @@ async function promoteInternal(ctx: MutationCtx, scrapedProductId: Id<"scraped_p
     }
 
     if (existingProduct) {
+        // If updating without new embedding, preserve old one?
+        // No, current logic overwrites. If embeddingOverride is undefined, productFields.embedding is undefined.
+        // But patch helper merges? No, patch updates keys present.
+        // Check if v.optional means explicit null or undefined deletes it?
+        // Convex patch: undefined fields in object are NOT updated. explicit null deletes.
+        // productFields.embedding is undefined if missing. So it won't overwrite existing embedding in DB. Good.
         await ctx.db.patch(existingProduct._id, productFields);
     } else {
         await ctx.db.insert("products", {

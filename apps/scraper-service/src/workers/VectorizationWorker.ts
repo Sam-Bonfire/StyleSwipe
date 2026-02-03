@@ -28,7 +28,7 @@ export class VectorizationWorker {
         this.client = new ConvexHttpClient(config.convexUrl);
         this.queue = config.queue;
         this.pollInterval = config.pollIntervalMs ?? 2000;
-        this.batchSize = config.batchSize ?? 5;
+        this.batchSize = config.batchSize ?? 10;
     }
 
     async start(): Promise<void> {
@@ -91,6 +91,7 @@ export class VectorizationWorker {
                 await this.queue.fail(item.id, error instanceof Error ? error.message : "Unknown error");
             }
         }
+        console.log(`[VectorizationWorker] Completed batch of ${items.length} products`);
     }
 
     private async processProduct(_itemId: string, product: ScrapedProduct): Promise<void> {
@@ -108,23 +109,12 @@ export class VectorizationWorker {
 
         // Generate embedding
         const embedding = await this.embedder.generateEmbedding(text);
-        console.log(
-            `[VectorizationWorker] Generated embedding for ${product.externalId}: [${embedding.slice(0, 3).join(", ")}...]`
-        );
-
-        // Add embedding to product
-        const productWithEmbedding: ScrapedProduct = {
-            ...product,
-            embedding,
-        };
-
         // Save to Convex
         await this.client.mutation(api.scraper.saveProduct, {
             externalId: product.externalId,
             url: product.url,
-            data: productWithEmbedding as any,
+            data: product, // This doesn't have embedding yet
+            embedding: embedding, // Pass separately
         });
-
-        console.log(`[VectorizationWorker] Saved product ${product.externalId} to Convex`);
     }
 }

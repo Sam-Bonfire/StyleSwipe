@@ -130,7 +130,7 @@ async function runCategory(url: string, maxPages: number): Promise<void> {
     const scraper = new MyntraScraper();
     await scraper.init();
 
-    const products = await scraper.scrapeCategory(url, maxPages, (progress) => {
+    const products = await scraper.scrapeCategory(url, maxPages, 1, (progress) => {
         console.log(
             `[CLI] Progress: Page ${progress.currentPage}/${progress.totalPages} - ${progress.productsScraped} products`
         );

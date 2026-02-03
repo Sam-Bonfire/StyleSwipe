@@ -7,8 +7,9 @@
 import type { Queue, ScrapedProduct } from "@app/core";
 import { ConvexHttpClient } from "convex/browser";
 import { MyntraScraper } from "../scrapers/MyntraScraper";
+import { MyntraAPIScraper } from "../scrapers/MyntraAPIScraper";
 import { api } from "../../../../convex/_generated/api";
-import type { Id, Doc } from "../../../../convex/_generated/dataModel";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
 export interface ScraperWorkerConfig {
     convexUrl: string;
@@ -16,25 +17,35 @@ export interface ScraperWorkerConfig {
     queue: Queue<ScrapedProduct>;
 }
 
-type ScrapeJob = Doc<"scrape_jobs">;
+
 
 export class ScraperWorker {
     private client: ConvexHttpClient;
-    private scraper: MyntraScraper;
+    private apiScraper: MyntraAPIScraper;
+    private browserScraper: MyntraScraper;
     private queue: Queue<ScrapedProduct>;
     private pollInterval: number;
     private running = false;
+    private browserInitialized = false;
 
     constructor(config: ScraperWorkerConfig) {
         this.client = new ConvexHttpClient(config.convexUrl);
-        this.scraper = new MyntraScraper();
+        this.apiScraper = new MyntraAPIScraper();
+        this.browserScraper = new MyntraScraper();
         this.queue = config.queue;
         this.pollInterval = config.pollIntervalMs ?? 5000;
     }
 
     async start(): Promise<void> {
         console.log("[ScraperWorker] Starting...");
-        await this.scraper.init();
+        await this.apiScraper.init();
+
+        // Pre-init browser if env mode is BROWSER, otherwise lazy init
+        if (process.env.SCRAPER_MODE?.toUpperCase() === "BROWSER") {
+            await this.browserScraper.init();
+            this.browserInitialized = true;
+        }
+
         this.running = true;
 
         while (this.running) {
@@ -51,7 +62,10 @@ export class ScraperWorker {
     async stop(): Promise<void> {
         console.log("[ScraperWorker] Stopping...");
         this.running = false;
-        await this.scraper.close();
+        await this.apiScraper.close();
+        if (this.browserInitialized) {
+            await this.browserScraper.close();
+        }
     }
 
     private async processNextBatch(): Promise<void> {
@@ -63,11 +77,11 @@ export class ScraperWorker {
         }
 
         for (const job of jobs) {
-            await this.processJob(job as ScrapeJob);
+            await this.processJob(job as any);
         }
     }
 
-    private async processJob(job: ScrapeJob): Promise<void> {
+    private async processJob(job: any): Promise<void> {
         console.log(`[ScraperWorker] Processing job ${job._id}: ${job.type} - ${job.query}`);
 
         // Mark as processing
@@ -79,21 +93,44 @@ export class ScraperWorker {
         try {
             let products: ScrapedProduct[] = [];
 
+            // Determine scraper to use
+            const useBrowser = (job.scraperMode === "BROWSER") ||
+                (!job.scraperMode && process.env.SCRAPER_MODE?.toUpperCase() === "BROWSER");
+
+            let scraper: MyntraAPIScraper | MyntraScraper;
+
+            if (useBrowser) {
+                if (!this.browserInitialized) {
+                    console.log("[ScraperWorker] lazily initializing browser scraper...");
+                    await this.browserScraper.init();
+                    this.browserInitialized = true;
+                }
+                scraper = this.browserScraper;
+            } else {
+                scraper = this.apiScraper;
+            }
+
             if (job.type === "single") {
-                const product = await this.scraper.scrapeProduct(job.query);
+                const product = await scraper.scrapeProduct(job.query);
                 if (product) {
                     products = [product];
                 }
             } else if (job.type === "category") {
-                // Parse maxPages from query if present (format: "url|maxPages")
-                const parts = job.query.split("|");
-                const url = parts[0];
-                const maxPages = parts[1] ? parseInt(parts[1], 10) : 5;
+                const url = job.query;
+                const maxPages = job.maxPages || 5;
+                const startPage = job.startPage || 1;
 
-                products = await this.scraper.scrapeCategory(url, maxPages, (progress) => {
+                products = await scraper.scrapeCategory(url, maxPages, startPage, async (progress) => {
                     console.log(
-                        `[ScraperWorker] Category progress: page ${progress.currentPage}/${progress.totalPages}, ${progress.productsScraped} products`
+                        `[ScraperWorker] Category progress: Page ${progress.currentPage}/${progress.totalPages} - Found ${progress.productsFoundOnPage} products on page (Total: ${progress.productsScraped})`
                     );
+
+                    // Update job progress via mutation
+                    await this.client.mutation(api.scraper.updateJobStatus, {
+                        jobId: job._id as Id<"scrape_jobs">,
+                        status: "processing",
+                        productsFound: progress.productsScraped,
+                    });
                 });
             }
 

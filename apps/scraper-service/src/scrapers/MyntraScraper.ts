@@ -15,9 +15,6 @@ const USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.0; rv:121.0) Gecko/20100101 Firefox/121.0",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
 ];
 
@@ -46,7 +43,7 @@ function randomViewport(): { width: number; height: number } {
 // MYNTRA RAW DATA TYPES (from extension)
 // =============================================================================
 
-interface MyntraImage {
+export interface MyntraImage {
     src: string;
     view?: string;
     srcUrl?: string;
@@ -78,7 +75,7 @@ interface MyntraDescriptor {
     description?: string;
 }
 
-interface MyntraRawData {
+export interface MyntraRawData {
     id?: string | number;
     productId?: string | number;
     gender?: string;
@@ -132,7 +129,7 @@ interface MyntraRawData {
     baseColour?: string;
 }
 
-interface MyntraFullData {
+export interface MyntraFullData {
     pdpData?: MyntraRawData;
     plaproduct?: MyntraRawData;
     products?: MyntraRawData[];
@@ -147,13 +144,13 @@ interface MyntraFullData {
 // MAPPING FUNCTIONS (ported from extension)
 // =============================================================================
 
-function cleanImageUrl(url: string): string {
+export function cleanImageUrl(url: string): string {
     return url
         .replace(/\(\$size_representation\$\)/g, "")
         .replace(/\$quality\$/g, "90");
 }
 
-function mapToScrapedProduct(data: MyntraRawData, url: string): ScrapedProduct {
+export function mapToScrapedProduct(data: MyntraRawData, url: string): ScrapedProduct {
     const externalId = (data.id?.toString() || data.productId?.toString() || "").toString();
     const gender = data.gender || data.core?.gender || "";
     const title = data.name || data.productName || data.product || "";
@@ -339,35 +336,54 @@ export interface ScrapeProgress {
     currentPage: number;
     totalPages: number;
     productsScraped: number;
+    productsFoundOnPage: number;
     status: string;
 }
+
+
 
 export class MyntraScraper {
     private browser: Browser | null = null;
 
     async init(): Promise<void> {
         const chromePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
-        const headless = process.env.HEADLESS !== "false";
+        // Default to headed mode (headless: false) unless explicitly set to "true"
+        const headless = process.env.HEADLESS === "true";
 
         console.log(`[MyntraScraper] Launching browser (headless: ${headless})...`);
 
         this.browser = await chromium.launch({
             headless,
             executablePath: chromePath || undefined,
+            ignoreDefaultArgs: ["--enable-automation"],
             args: [
+                "--start-maximized",
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
                 "--disable-http2",
-                "--ignore-certificate-errors",
                 "--disable-blink-features=AutomationControlled",
+                "--disable-infobars",
             ],
         });
     }
+
+
 
     async close(): Promise<void> {
         if (this.browser) {
             await this.browser.close();
             this.browser = null;
+        }
+    }
+
+    private async takeDebugScreenshot(page: Page, name: string) {
+        try {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+            const filename = `debug_${name}_${timestamp}.png`;
+            await page.screenshot({ path: filename, fullPage: true });
+            console.log(`[MyntraScraper] Saved debug screenshot to: ${filename}`);
+        } catch (e) {
+            console.error("[MyntraScraper] Failed to take debug screenshot:", e);
         }
     }
 
@@ -406,7 +422,11 @@ export class MyntraScraper {
         // 3. Mock Plugins
         await page.addInitScript(() => {
             Object.defineProperty(navigator, 'plugins', {
-                get: () => [1, 2, 3],
+                get: () => [
+                    { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer", description: "Portable Document Format" },
+                    { name: "Chrome PDF Viewer", filename: "mhjfbmdgcfjbbpaeojofohoefgiehjmm", description: "" },
+                    { name: "Native Client", filename: "internal-nacl-plugin", description: "" }
+                ],
             });
             Object.defineProperty(navigator, 'languages', {
                 get: () => ['en-US', 'en'],
@@ -493,7 +513,7 @@ export class MyntraScraper {
             console.log(`[MyntraScraper] Scraping product: ${url}`);
             await randomDelay(1000, 2000); // Anti-detection delay
 
-            await page.goto(url, { waitUntil: "commit", timeout: 60000 });
+            await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
 
             const fullData = await this.extractMyntraData(page);
             if (!fullData) {
@@ -523,20 +543,13 @@ export class MyntraScraper {
             }
 
             if (process.env.HEADLESS === "false") {
-                console.log("[MyntraScraper] Success! Pausing 10s for inspection...");
-                await new Promise(r => setTimeout(r, 10000));
+                console.log("[MyntraScraper] Success!");
             }
 
             return mapToScrapedProduct(data, url);
         } catch (error) {
             console.error(`[MyntraScraper] Failed to scrape ${url}:`, error);
-
-            // In headed mode, pause for debugging if there's an error
-            if (process.env.HEADLESS === "false") {
-                console.log("[MyntraScraper] Pausing 30s for debugging...");
-                await new Promise(r => setTimeout(r, 30000));
-            }
-
+            await this.takeDebugScreenshot(page, "error_product");
             return null;
         } finally {
             if (!page.isClosed()) {
@@ -551,69 +564,158 @@ export class MyntraScraper {
     async scrapeCategory(
         url: string,
         maxPages: number = 1,
+        startPage: number = 1,
         onProgress?: (progress: ScrapeProgress) => void
     ): Promise<ScrapedProduct[]> {
         const allProducts: ScrapedProduct[] = [];
         const seenIds = new Set<string>();
 
-        for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
-            const page = await this.getPage();
+        const page = await this.getPage();
+        try {
+            const endPage = startPage + maxPages - 1;
+            for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
 
-            try {
-                // Construct paginated URL
-                const pageUrl = pageNum === 1 ? url : `${url}?p=${pageNum}`;
-                console.log(`[MyntraScraper] Scraping category page ${pageNum}/${maxPages}: ${pageUrl}`);
+                try {
+                    // Construct paginated URL
+                    const separator = url.includes("?") ? "&" : "?";
+                    const pageUrl = pageNum === 1 ? url : `${url}${separator}p=${pageNum}`;
+                    console.log(`[MyntraScraper] Scraping category page ${pageNum}/${maxPages}: ${pageUrl}`);
 
-                onProgress?.({
-                    currentPage: pageNum,
-                    totalPages: maxPages,
-                    productsScraped: allProducts.length,
-                    status: `Scraping page ${pageNum}`,
-                });
+                    onProgress?.({
+                        currentPage: pageNum,
+                        totalPages: maxPages,
+                        productsScraped: allProducts.length,
+                        productsFoundOnPage: 0,
+                        status: `Scraping page ${pageNum}`,
+                    });
 
-                await randomDelay(2000, 4000); // Longer delay for categories to avoid rate limiting
+                    await randomDelay(2000, 4000); // Longer delay for categories to avoid rate limiting
 
-                await page.goto(pageUrl, { waitUntil: "commit", timeout: 60000 });
+                    await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 60000 });
 
-                const fullData = await this.extractMyntraData(page);
-                if (!fullData) {
-                    console.warn(`[MyntraScraper] No data on page ${pageNum}`);
-                    break;
-                }
+                    // Wait a bit for the page to stabilize
+                    await randomDelay(3000, 5000);
 
-                const productsRaw =
-                    fullData.searchData?.results?.products || fullData.products || [];
+                    const fullData = await this.extractMyntraData(page);
+                    let productsRaw: any[] = [];
+                    // let useDomExample = false;
 
-                if (productsRaw.length === 0) {
-                    console.log(`[MyntraScraper] No more products found, stopping at page ${pageNum}`);
-                    break;
-                }
-
-                console.log(`[MyntraScraper] Found ${productsRaw.length} products on page ${pageNum}`);
-
-                for (const productData of productsRaw) {
-                    const product = mapToScrapedProduct(productData, pageUrl);
-                    if (product.externalId && !seenIds.has(product.externalId)) {
-                        seenIds.add(product.externalId);
-                        allProducts.push(product);
+                    if (fullData) {
+                        productsRaw = fullData.searchData?.results?.products || fullData.products || [];
                     }
-                }
 
-                onProgress?.({
-                    currentPage: pageNum,
-                    totalPages: maxPages,
-                    productsScraped: allProducts.length,
-                    status: `Completed page ${pageNum}`,
-                });
-            } catch (error) {
-                console.error(`[MyntraScraper] Error on page ${pageNum}:`, error);
-            } finally {
+                    if (productsRaw.length === 0) {
+                        console.warn(`[MyntraScraper] No JSON data on page ${pageNum}. Attempting DOM fallback...`);
+                        const domProducts = await this.scrapeCategoryFromDOM(page);
+
+                        if (domProducts.length > 0) {
+                            console.log(`[MyntraScraper] Found ${domProducts.length} products via DOM scraping on page ${pageNum}`);
+                            for (const p of domProducts) {
+                                if (p.externalId && !seenIds.has(p.externalId)) {
+                                    seenIds.add(p.externalId);
+                                    allProducts.push(p);
+                                }
+                            }
+                            // Continue to next page loop, skipping the standard mapping below
+                            onProgress?.({
+                                currentPage: pageNum,
+                                totalPages: maxPages,
+                                productsScraped: allProducts.length,
+                                productsFoundOnPage: domProducts.length,
+                                status: `Completed page ${pageNum} (DOM)`,
+                            });
+                            continue;
+                        } else {
+                            console.log(`[MyntraScraper] No products found on page ${pageNum} via DOM fallback. Continuing to next page...`);
+                            continue;
+                        }
+                    }
+
+                    console.log(`[MyntraScraper] Found ${productsRaw.length} products via JSON on page ${pageNum}`);
+
+                    for (const productData of productsRaw) {
+                        const product = mapToScrapedProduct(productData, pageUrl);
+                        if (product.externalId && !seenIds.has(product.externalId)) {
+                            seenIds.add(product.externalId);
+                            allProducts.push(product);
+                        }
+                    }
+
+                    onProgress?.({
+                        currentPage: pageNum,
+                        totalPages: maxPages,
+                        productsScraped: allProducts.length,
+                        productsFoundOnPage: productsRaw.length, // Only correct for JSON path? No, dom path handles its own continuing.
+                        status: `Completed page ${pageNum}`,
+                    });
+                } catch (error) {
+                    console.error(`[MyntraScraper] Error on page ${pageNum}:`, error);
+                    await this.takeDebugScreenshot(page, `error_page_${pageNum}`);
+                }
+            }
+        } finally {
+            if (!page.isClosed()) {
                 await page.close();
             }
         }
 
         console.log(`[MyntraScraper] Category scrape complete: ${allProducts.length} products`);
         return allProducts;
+    }
+
+    /**
+     * Fallback method to scrape products directly from DOM if JSON is missing
+     */
+    private async scrapeCategoryFromDOM(page: Page): Promise<ScrapedProduct[]> {
+        return page.evaluate(() => {
+            const items = document.querySelectorAll("li.product-base");
+            const results: any[] = [];
+
+            items.forEach((item) => {
+                try {
+                    const anchor = item.querySelector("a");
+                    if (!anchor) return;
+
+                    const href = anchor.getAttribute("href");
+                    if (!href) return;
+
+                    const fullUrl = href.startsWith("http") ? href : `https://www.myntra.com/${href}`;
+
+                    // Extract ID from URL (e.g., .../123456/buy)
+                    const matches = fullUrl.match(/\/(\d+)\/buy/);
+                    const id = matches ? matches[1] : null;
+                    if (!id) return;
+
+                    const brand = item.querySelector(".product-brand")?.textContent || "";
+                    const title = item.querySelector(".product-product")?.textContent || "";
+
+                    const priceEl = item.querySelector(".product-discountedPrice") || item.querySelector(".product-price");
+                    const priceText = priceEl?.textContent?.replace(/[^\d]/g, "") || "0";
+                    const price = parseInt(priceText, 10);
+
+                    const img = item.querySelector("img");
+                    const imgUrl = img?.getAttribute("src") || img?.getAttribute("data-src") || "";
+
+                    results.push({
+                        externalId: id,
+                        url: fullUrl,
+                        title: title,
+                        brand: brand,
+                        price: price,
+                        mrp: price, // Approximate
+                        discount: "0",
+                        images: [imgUrl],
+                        availableSizes: [],
+                        attributes: {},
+                        description: "",
+                        scrapedAt: new Date().toISOString()
+                    });
+                } catch (e) {
+                    // Ignore item error
+                }
+            });
+            return results;
+        });
     }
 
     /**

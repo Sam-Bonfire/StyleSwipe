@@ -362,6 +362,9 @@ export default defineSchema({
         type: v.union(v.literal("category"), v.literal("search"), v.literal("single")),
         query: v.string(), // URL or Search Term
         status: v.union(v.literal("pending"), v.literal("processing"), v.literal("completed"), v.literal("failed")),
+        maxPages: v.optional(v.number()),
+        startPage: v.optional(v.number()),
+        scraperMode: v.optional(v.union(v.literal("API"), v.literal("BROWSER"))),
         productsFound: v.optional(v.number()),
         errorMessage: v.optional(v.string()),
         createdAt: v.number(),
