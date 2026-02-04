@@ -1,8 +1,9 @@
+import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 
 import { components } from './_generated/api';
 import { mutation, query } from './_generated/server';
-import { isCoreOrgMember } from './permissions';
+import { isCoreOrgAdmin, requireCoreAdmin } from './permissions';
 
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
@@ -11,44 +12,40 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
  * Admin only
  */
 export const listUsersWithOrgs = query({
-  handler: async (ctx) => {
-    // Get current user
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    // Get current user and check admin status
+    await requireCoreAdmin(ctx);
 
-    // Check if user is core org member
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
-      throw new Error('Unauthorized: Only core organization members can access user management');
-    }
-
-    // Get all users from Component
+    // Paginate users at the app level (components can't use paginate)
     const usersRes = await ctx.runQuery(components.auth.api.findMany, {
       model: 'users',
-      paginationOpts: DEFAULT_PAGINATION,
+      where: [],
+      paginationOpts: args.paginationOpts,
     });
+
     const users = usersRes.page;
 
-    // Get memberships for each user
+    // Fetch memberships for each user
     const usersWithMemberships = await Promise.all(
       users.map(async (user: any) => {
         const membershipsRes = await ctx.runQuery(components.auth.api.findMany, {
-          model: 'members', // Plural
-          where: [{ field: 'userId', operator: 'eq', value: user.id }],
-          paginationOpts: DEFAULT_PAGINATION,
+          model: 'members',
+          where: [{ field: 'userId', operator: 'eq', value: user._id }],
+          paginationOpts: { numItems: 100, cursor: null },
         });
+
         const memberships = membershipsRes.page;
 
         const membershipDetails = await Promise.all(
           memberships.map(async (membership: any) => {
-            const orgsRes = await ctx.runQuery(components.auth.api.findMany, {
-              model: 'organizations', // Plural
+            const org = await ctx.runQuery(components.auth.api.findOne, {
+              model: 'organizations',
               where: [{ field: '_id', operator: 'eq', value: membership.organizationId }],
-              paginationOpts: DEFAULT_PAGINATION,
             });
             return {
               ...membership,
-              organization: orgsRes.page[0],
+              organization: org,
             };
           }),
         );
@@ -60,7 +57,10 @@ export const listUsersWithOrgs = query({
       }),
     );
 
-    return usersWithMemberships;
+    return {
+      ...usersRes,
+      page: usersWithMemberships,
+    };
   },
 });
 
@@ -75,13 +75,7 @@ export const updateUserDetails = mutation({
     email: v.optional(v.string()),
   },
   handler: async (ctx, { userId, name, email }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
-      throw new Error('Unauthorized');
-    }
+    await requireCoreAdmin(ctx);
 
     const updates: any = {};
     if (name !== undefined) updates.name = name;
@@ -106,39 +100,42 @@ export const updateUserDetails = mutation({
  * Admin only
  */
 export const listOrganizationsWithMembers = query({
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
 
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
-      throw new Error('Unauthorized');
-    }
-
+    // Paginate organizations at the app level
     const orgsRes = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'organizations', // Plural
-      paginationOpts: DEFAULT_PAGINATION,
+      model: 'organizations',
+      where: [],
+      paginationOpts: args.paginationOpts,
     });
+
     const orgs = orgsRes.page;
 
+    // Fetch member counts for each organization
     const orgsWithDetails = await Promise.all(
       orgs.map(async (org: any) => {
         const membersRes = await ctx.runQuery(components.auth.api.findMany, {
-          model: 'members', // Plural
-          where: [{ field: 'organizationId', operator: 'eq', value: org.id }],
-          paginationOpts: DEFAULT_PAGINATION,
+          model: 'members',
+          where: [{ field: 'organizationId', operator: 'eq', value: org._id }],
+          paginationOpts: { numItems: 1000, cursor: null },
         });
+
         const members = membersRes.page;
 
         return {
           ...org,
           memberCount: members.length,
-          members,
+          members: members.slice(0, 5), // Only return a snippet
         };
       }),
     );
 
-    return orgsWithDetails;
+    return {
+      ...orgsRes,
+      page: orgsWithDetails,
+    };
   },
 });
 
@@ -147,38 +144,40 @@ export const listOrganizationsWithMembers = query({
  * Admin only
  */
 export const getOrganizationMembers = query({
-  args: { organizationId: v.string() },
-  handler: async (ctx, { organizationId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
+  args: {
+    organizationId: v.string(),
+    paginationOpts: paginationOptsValidator
+  },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
 
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
-      throw new Error('Unauthorized');
-    }
-
+    // Paginate members at the app level
     const membersRes = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'members', // Plural
-      where: [{ field: 'organizationId', operator: 'eq', value: organizationId }],
-      paginationOpts: DEFAULT_PAGINATION,
+      model: 'members',
+      where: [{ field: 'organizationId', operator: 'eq', value: args.organizationId }],
+      paginationOpts: args.paginationOpts,
     });
+
     const members = membersRes.page;
 
+    // Fetch user details for each member
     const membersWithUsers = await Promise.all(
       members.map(async (member: any) => {
-        const usersRes = await ctx.runQuery(components.auth.api.findMany, {
+        const user = await ctx.runQuery(components.auth.api.findOne, {
           model: 'users',
           where: [{ field: '_id', operator: 'eq', value: member.userId }],
-          paginationOpts: DEFAULT_PAGINATION,
         });
         return {
           ...member,
-          user: usersRes.page[0],
+          user,
         };
       }),
     );
 
-    return membersWithUsers;
+    return {
+      ...membersRes,
+      page: membersWithUsers,
+    };
   },
 });
 
@@ -192,13 +191,7 @@ export const updateMemberRole = mutation({
     role: v.string(),
   },
   handler: async (ctx, { memberId, role }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
-      throw new Error('Unauthorized');
-    }
+    await requireCoreAdmin(ctx);
 
     await ctx.runMutation(components.auth.api.updateOne, {
       input: {
@@ -221,13 +214,7 @@ export const removeMemberFromOrg = mutation({
     memberId: v.string(),
   },
   handler: async (ctx, { memberId }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error('Not authenticated');
-
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
-      throw new Error('Unauthorized');
-    }
+    await requireCoreAdmin(ctx);
 
     await ctx.runMutation(components.auth.api.deleteOne, {
       input: {
@@ -250,8 +237,8 @@ export const listOrganizationRoles = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error('Not authenticated');
 
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) {
+    const isAdmin = await isCoreOrgAdmin(ctx, identity.subject);
+    if (!isAdmin) {
       throw new Error('Unauthorized');
     }
 
@@ -290,8 +277,8 @@ export const createCustomRole = mutation({
   handler: async (ctx, { organizationId, roleName, permissions }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error('Not authenticated');
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) throw new Error('Unauthorized');
+    const isAdmin = await isCoreOrgAdmin(ctx, identity.subject);
+    if (!isAdmin) throw new Error('Unauthorized');
 
     for (const perm of permissions) {
       await ctx.runMutation(components.auth.api.create, {
@@ -318,8 +305,8 @@ export const deleteCustomRole = mutation({
   handler: async (ctx, { organizationId, roleName }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error('Not authenticated');
-    const isCoreUser = await isCoreOrgMember(ctx, identity.subject);
-    if (!isCoreUser) throw new Error('Unauthorized');
+    const isAdmin = await isCoreOrgAdmin(ctx, identity.subject);
+    if (!isAdmin) throw new Error('Unauthorized');
 
     // Find IDs to delete
     const rolesRes = await ctx.runQuery(components.auth.api.findMany, {
@@ -336,7 +323,140 @@ export const deleteCustomRole = mutation({
       await ctx.runMutation(components.auth.api.deleteOne, {
         input: {
           model: 'organizationRoles', // Plural
-          where: [{ field: '_id', operator: 'eq', value: role.id }],
+          where: [{ field: '_id', operator: 'eq', value: role._id }],
+        },
+      });
+    }
+
+    return { success: true };
+  },
+});
+
+/**
+ * Search users by name or email
+ * Admin only
+ */
+export const searchUsers = query({
+  args: {
+    searchTerm: v.string(),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+
+    if (!args.searchTerm || args.searchTerm.trim() === '') {
+      return { page: [], isDone: true, continueCursor: '' };
+    }
+
+    const searchLower = args.searchTerm.toLowerCase();
+    const usersRes = await ctx.runQuery(components.auth.api.findMany, {
+      model: 'users',
+      where: [],
+      paginationOpts: { numItems: 100, cursor: null },
+    });
+
+    const filteredUsers = usersRes.page.filter((user: any) =>
+      user.name?.toLowerCase().includes(searchLower) ||
+      user.email?.toLowerCase().includes(searchLower)
+    );
+
+    const usersWithMemberships = await Promise.all(
+      filteredUsers.map(async (user: any) => {
+        const membershipsRes = await ctx.runQuery(components.auth.api.findMany, {
+          model: 'members',
+          where: [{ field: 'userId', operator: 'eq', value: user._id }],
+          paginationOpts: { numItems: 100, cursor: null },
+        });
+
+        const membershipDetails = await Promise.all(
+          membershipsRes.page.map(async (membership: any) => {
+            const org = await ctx.runQuery(components.auth.api.findOne, {
+              model: 'organizations',
+              where: [{ field: '_id', operator: 'eq', value: membership.organizationId }],
+            });
+            return { ...membership, organization: org };
+          }),
+        );
+
+        return { ...user, memberships: membershipDetails };
+      }),
+    );
+
+    return { page: usersWithMemberships, isDone: true, continueCursor: '' };
+  },
+});
+
+/**
+ * Search organizations by name or slug
+ */
+export const searchOrganizations = query({
+  args: {
+    searchTerm: v.string(),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+
+    if (!args.searchTerm || args.searchTerm.trim() === '') {
+      return { page: [], isDone: true, continueCursor: '' };
+    }
+
+    const searchLower = args.searchTerm.toLowerCase();
+    const orgsRes = await ctx.runQuery(components.auth.api.findMany, {
+      model: 'organizations',
+      where: [],
+      paginationOpts: { numItems: 100, cursor: null },
+    });
+
+    const filteredOrgs = orgsRes.page.filter((org: any) =>
+      org.name?.toLowerCase().includes(searchLower) ||
+      org.slug?.toLowerCase().includes(searchLower)
+    );
+
+    const orgsWithDetails = await Promise.all(
+      filteredOrgs.map(async (org: any) => {
+        const membersRes = await ctx.runQuery(components.auth.api.findMany, {
+          model: 'members',
+          where: [{ field: 'organizationId', operator: 'eq', value: org._id }],
+          paginationOpts: { numItems: 1000, cursor: null },
+        });
+
+        return {
+          ...org,
+          memberCount: membersRes.page.length,
+          members: membersRes.page.slice(0, 5),
+        };
+      }),
+    );
+
+    return { page: orgsWithDetails, isDone: true, continueCursor: '' };
+  },
+});
+
+/**
+ * Update organization details
+ */
+export const updateOrganization = mutation({
+  args: {
+    organizationId: v.string(),
+    name: v.optional(v.string()),
+    slug: v.optional(v.string()),
+    metadata: v.optional(v.string()),
+  },
+  handler: async (ctx, { organizationId, name, slug, metadata }) => {
+    await requireCoreAdmin(ctx);
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (slug !== undefined) updates.slug = slug;
+    if (metadata !== undefined) updates.metadata = metadata;
+
+    if (Object.keys(updates).length > 0) {
+      await ctx.runMutation(components.auth.api.updateOne, {
+        input: {
+          model: 'organizations',
+          where: [{ field: '_id', operator: 'eq', value: organizationId }],
+          update: updates,
         },
       });
     }

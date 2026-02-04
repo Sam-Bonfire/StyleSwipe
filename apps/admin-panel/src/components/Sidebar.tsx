@@ -1,24 +1,37 @@
 import { Button } from '@app/ui-kit'; // Using UI Kit Button
-import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight } from '@tamagui/lucide-icons';
+import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, Users, Shield } from '@tamagui/lucide-icons';
 import React from 'react';
 import { YStack, XStack, Text, Separator, Avatar } from 'tamagui';
 
 import { authAdapter } from '../lib/auth';
 
-type Page = 'overview' | 'products' | 'jobs';
+type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations';
 
 interface SidebarProps {
   activePage: Page;
   onNavigate: (page: Page) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  isAdmin: boolean;
 }
 
-export function Sidebar({ activePage, onNavigate, isCollapsed, onToggleCollapse }: SidebarProps) {
+export function Sidebar({
+  activePage,
+  onNavigate,
+  isCollapsed,
+  onToggleCollapse,
+  isAdmin,
+}: SidebarProps) {
   const menuItems = [
     { id: 'overview', icon: Home, label: 'Overview' },
-    { id: 'products', icon: Box, label: 'Products' },
-    { id: 'jobs', icon: Activity, label: 'Scraping Jobs' },
+    ...(isAdmin
+      ? [
+        { id: 'products', icon: Box, label: 'Products' },
+        { id: 'jobs', icon: Activity, label: 'Scraping Jobs' },
+        { id: 'users', icon: Users, label: 'Users' },
+        { id: 'organizations', icon: Shield, label: 'Organizations' },
+      ]
+      : []),
   ];
 
   return (
@@ -117,7 +130,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggleCollapse 
           onPress={() => authAdapter.signOut()}
           justifyContent={isCollapsed ? 'center' : 'flex-start'}
         >
-          {!isCollapsed && 'Sign Out'}
+          {!isCollapsed ? <Text>Sign Out</Text> : null}
         </Button>
       </YStack>
     </YStack>

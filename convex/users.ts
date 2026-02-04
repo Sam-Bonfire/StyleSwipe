@@ -24,32 +24,23 @@ export const currentUser = query({
       return null;
     }
 
-    // 1. Try Lookup by Subject (User ID)
-    let users = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'users',
-      where: [{ field: '_id', operator: operatorMapping('eq'), value: identity.subject }],
-      paginationOpts: DEFAULT_PAGINATION,
+    // Single optimized cross-component call for user data and all permissions
+    const userData = await ctx.runQuery(components.auth.api.getCurrentUserWithPermissions, {
+      subject: identity.subject,
+      email: identity.email,
     });
 
-    let user = users.page[0];
+    if (!userData) return null;
 
-    // 2. Fallback: Lookup by Email (if available and not found by ID)
-    if (!user && identity.email) {
-      users = await ctx.runQuery(components.auth.api.findMany, {
-        model: 'users',
-        where: [{ field: 'email', operator: operatorMapping('eq'), value: identity.email }],
-        paginationOpts: DEFAULT_PAGINATION,
-      });
-      user = users.page[0];
-    }
+    const { isCoreMember, isCoreAdmin, ...user } = userData;
 
-    if (!user) return null;
-
-    const styleProfile = await getStyleProfileInternal(ctx, user.id || user._id);
+    const styleProfile = await getStyleProfileInternal(ctx, user._id || user.id);
 
     return {
       ...user,
       styleProfile: styleProfile || undefined,
+      isCoreMember,
+      isCoreAdmin,
     };
   },
 });

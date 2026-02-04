@@ -7,16 +7,10 @@ export function TopBar() {
   return (
     <XStack justifyContent="space-between" marginBottom="$6">
       <YStack>
-        <Text color="$textSecondary" fontSize="$3" textTransform="uppercase" letterSpacing={1}>
-          Admin Dashboard
-        </Text>
-        <Text color="$color" fontSize="$8" fontWeight="bold">
-          Welcome back!
+        <Text color="$textSecondary" fontSize="$2" textTransform="uppercase" letterSpacing={1}>
+          Please be careful while operating this app
         </Text>
       </YStack>
-      <Button icon={Activity} variant="secondary">
-        Export Report
-      </Button>
     </XStack>
   );
 }

@@ -41,6 +41,7 @@ export const create = mutation({
                 model: 'verifications',
                 data: {
                     ...args,
+                    value: args.identifier,
                     createdAt: Date.now(),
                     updatedAt: Date.now(),
                 },
@@ -75,7 +76,7 @@ export const removeByIdentifier = mutation({
 
 export const deleteExpired = mutation({
     args: { now: v.number() },
-    handler: async (ctx, args) => {
+    handler: async (_ctx, _args) => {
         // Component should ideally handle its own cleanup, 
         // but we provide a placeholder to satisfy the repository.
         return 0;

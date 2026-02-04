@@ -10,27 +10,41 @@ export const isCoreOrgMember = async (
   ctx: QueryCtx | MutationCtx,
   userId: string,
 ): Promise<boolean> => {
-  // Get core org
-  const orgs = await ctx.runQuery(components.auth.api.findMany, {
-    model: 'organizations',
-    where: [{ field: 'slug', operator: 'eq', value: 'styleswipe-core' }],
-    paginationOpts: DEFAULT_PAGINATION,
+  // Get permissions via optimized component query
+  const perms = await ctx.runQuery(components.auth.api.getCorePermissions, {
+    userId,
   });
 
-  if (orgs.page.length === 0) return false;
-  const coreOrg = orgs.page[0];
+  return perms.isMember;
+};
 
-  // Check if user is a member
-  const members = await ctx.runQuery(components.auth.api.findMany, {
-    model: 'members',
-    where: [
-      { field: 'userId', operator: 'eq', value: userId },
-      { field: 'organizationId', operator: 'eq', value: coreOrg.id || coreOrg._id },
-    ],
-    paginationOpts: DEFAULT_PAGINATION,
+/**
+ * Check if user is an admin or owner of the core organization
+ */
+export const isCoreOrgAdmin = async (
+  ctx: QueryCtx | MutationCtx,
+  userId: string,
+): Promise<boolean> => {
+  // Get permissions via optimized component query
+  const perms = await ctx.runQuery(components.auth.api.getCorePermissions, {
+    userId,
   });
 
-  return members.page.length > 0;
+  return perms.isAdmin;
+};
+
+/**
+ * Throws an error if the current user is not a core admin
+ */
+export const requireCoreAdmin = async (ctx: QueryCtx | MutationCtx) => {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) throw new Error('Not authenticated');
+
+  const isAdmin = await isCoreOrgAdmin(ctx, identity.subject);
+  if (!isAdmin) {
+    throw new Error('Unauthorized: Only core organization admins can perform this action');
+  }
+  return identity;
 };
 
 /**

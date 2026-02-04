@@ -31,7 +31,8 @@ export const tables = {
     .index('name', ['name'])
     .index('userId', ['userId'])
     .index('phoneNumber', ['phoneNumber'])
-    .index('username', ['username']),
+    .index('username', ['username'])
+    .index('createdAt', ['createdAt']),
   sessions: defineTable({
     expiresAt: v.number(),
     token: v.string(),
@@ -99,6 +100,7 @@ export const tables = {
   })
     .index('organizationId', ['organizationId'])
     .index('userId', ['userId'])
+    .index('userId_organizationId', ['userId', 'organizationId'])
     .index('role', ['role']),
   invitations: defineTable({
     organizationId: v.string(),

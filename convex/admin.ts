@@ -3,8 +3,7 @@ import { v } from 'convex/values';
 
 import { components } from './_generated/api';
 import { query, mutation } from './_generated/server';
-
-const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
+import { requireCoreAdmin } from './permissions';
 
 // =============================================================================
 // ADMIN DASHBOARD QUERIES
@@ -13,34 +12,27 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 export const getStats = query({
   args: {},
   handler: async (ctx) => {
-    // Fetch recent users from Component
-    const usersRes = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'users',
-      sortBy: { field: 'createdAt', direction: 'desc' },
-      limit: 5,
-      paginationOpts: { numItems: 5, cursor: null },
-    });
-    const recentUsers = usersRes.page;
+    await requireCoreAdmin(ctx);
 
-    const activeJobs = await ctx.db
-      .query('scrape_jobs')
-      .withIndex('by_status', (q) => q.eq('status', 'processing'))
-      .collect();
-
-    // Approximate total users (Component doesn't expose total count easily)
-    const totalUsersRes = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'users',
-      limit: 100, // Cap at 100 for now
-      paginationOpts: DEFAULT_PAGINATION,
-    });
-
-    const totalUsers = totalUsersRes.page.length;
+    // Fast queries with limits to avoid timeout
+    const [activeJobs, products, usersRes] = await Promise.all([
+      ctx.db
+        .query('scrape_jobs')
+        .withIndex('by_status', (q) => q.eq('status', 'processing'))
+        .take(100),
+      ctx.db.query('products').take(1001),
+      ctx.runQuery(components.auth.api.findMany, {
+        model: 'users',
+        where: [],
+        paginationOpts: { numItems: 5, cursor: null },
+      }),
+    ]);
 
     return {
-      totalUsers: totalUsers + (totalUsersRes.continueCursor ? '+' : ''),
-      totalProducts: (await ctx.db.query('products').collect()).length,
+      totalUsers: usersRes.page.length,
+      totalProducts: products.length,
       activeJobs: activeJobs.length,
-      recentUsers,
+      recentUsers: usersRes.page,
     };
   },
 });
@@ -56,6 +48,7 @@ export const getScrapedProducts = query({
     ),
   },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     if (args.filters?.brand) {
       return await ctx.db
         .query('products')
@@ -84,6 +77,7 @@ export const getScrapingJobs = query({
     status: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     if (args.status) {
       return await ctx.db
         .query('scrape_jobs')
@@ -106,6 +100,7 @@ export const getScrapingJobs = query({
 export const retriggerScrape = mutation({
   args: { productId: v.id('products') },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     const product = await ctx.db.get(args.productId);
     if (!product) throw new Error('Product not found');
 
@@ -120,5 +115,44 @@ export const retriggerScrape = mutation({
     });
 
     return { success: true };
+  },
+});
+
+export const searchProducts = query({
+  args: { query: v.string() },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+
+    const searchLower = args.query.toLowerCase();
+
+    // Search by brand first (indexed)
+    const brandResults = await ctx.db
+      .query('products')
+      .withIndex('by_brand')
+      .filter((q) => q.or(
+        q.eq(q.field('brand'), searchLower),
+        q.gte(q.field('brand'), searchLower)
+      ))
+      .take(50);
+
+    // Search all products for title match (fallback)
+    const allProducts = await ctx.db
+      .query('products')
+      .take(200);
+
+    const titleResults = allProducts.filter(p =>
+      p.title?.toLowerCase().includes(searchLower) ||
+      p.brand?.toLowerCase().includes(searchLower)
+    );
+
+    // Combine and deduplicate
+    const seen = new Set<string>();
+    const combined = [...brandResults, ...titleResults].filter(p => {
+      if (seen.has(p._id)) return false;
+      seen.add(p._id);
+      return true;
+    });
+
+    return combined.slice(0, 50);
   },
 });

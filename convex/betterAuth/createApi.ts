@@ -284,5 +284,223 @@ export const createApi = <Schema extends SchemaDefinition<any, any>>(
         };
       },
     }),
+    getCorePermissions: queryGeneric({
+      args: {
+        userId: v.string(),
+      },
+      handler: async (ctx, args) => {
+        const org = await ctx.db
+          .query('organizations' as any)
+          .withIndex('slug', (q: any) => q.eq('slug', 'styleswipe-core'))
+          .first();
+
+        if (!org) return { isMember: false, isAdmin: false };
+
+        // Better Auth IDs are strings, so we use string-based lookup
+        const member = await ctx.db
+          .query('members' as any)
+          .withIndex('userId_organizationId', (q: any) =>
+            q.eq('userId', args.userId).eq('organizationId', org._id)
+          )
+          .first();
+
+        if (!member) return { isMember: false, isAdmin: false };
+
+        const role = member.role;
+        return {
+          isMember: true,
+          isAdmin: role === 'admin' || role === 'owner',
+        };
+      },
+    }),
+    getAdminDashboardStats: queryGeneric({
+      args: {
+        userId: v.string(),
+      },
+      handler: async (ctx, args) => {
+        const org = await ctx.db
+          .query('organizations' as any)
+          .withIndex('slug', (q: any) => q.eq('slug', 'styleswipe-core'))
+          .first();
+
+        if (!org) {
+          return { isMember: false, isAdmin: false, recentUsers: [], totalUsersCount: 0, hasMoreUsers: false };
+        }
+
+        const member = await ctx.db
+          .query('members' as any)
+          .withIndex('userId_organizationId', (q: any) =>
+            q.eq('userId', args.userId).eq('organizationId', org._id)
+          )
+          .first();
+
+        if (!member) {
+          return { isMember: false, isAdmin: false, recentUsers: [], totalUsersCount: 0, hasMoreUsers: false };
+        }
+
+        const recentUsers = await ctx.db
+          .query('users' as any)
+          .withIndex('createdAt')
+          .order('desc')
+          .take(5);
+
+        const totalUsers = await ctx.db
+          .query('users' as any)
+          .withIndex('createdAt')
+          .take(101);
+
+        return {
+          isMember: true,
+          isAdmin: member.role === 'admin' || member.role === 'owner',
+          recentUsers,
+          totalUsersCount: Math.min(totalUsers.length, 100),
+          hasMoreUsers: totalUsers.length > 100,
+        };
+      },
+    }),
+    getCurrentUserWithPermissions: queryGeneric({
+      args: {
+        subject: v.string(),
+        email: v.optional(v.string()),
+      },
+      handler: async (ctx, args) => {
+        // 1. Find User
+        let user = await ctx.db.get(args.subject as any);
+
+        if (!user && args.email) {
+          user = await ctx.db
+            .query('users' as any)
+            .withIndex('email', (q: any) => q.eq('email', args.email))
+            .first();
+        }
+
+        if (!user) return null;
+
+        // 2. Find Permissions
+        const org = await ctx.db
+          .query('organizations' as any)
+          .withIndex('slug', (q: any) => q.eq('slug', 'styleswipe-core'))
+          .first();
+
+        let isMember = false;
+        let isAdmin = false;
+
+        if (org) {
+          const member = await ctx.db
+            .query('members' as any)
+            .withIndex('userId_organizationId', (q: any) =>
+              q.eq('userId', user._id).eq('organizationId', org._id)
+            )
+            .first();
+
+          if (member) {
+            isMember = true;
+            isAdmin = member.role === 'admin' || member.role === 'owner';
+          }
+        }
+
+        return {
+          ...user,
+          isCoreMember: isMember,
+          isCoreAdmin: isAdmin,
+        };
+      },
+    }),
+    getAdminUserList: queryGeneric({
+      args: {
+        paginationOpts: v.optional(paginationOptsValidator),
+      },
+      handler: async (ctx, args) => {
+        const usersRes = await ctx.db.query('users' as any).order('desc').paginate(args.paginationOpts || { numItems: 50, cursor: null });
+        const users = usersRes.page;
+
+        const usersWithMemberships = await Promise.all(
+          users.map(async (user: any) => {
+            const memberships = await ctx.db
+              .query('members' as any)
+              .withIndex('userId', (q: any) => q.eq('userId', user._id))
+              .collect();
+
+            const membershipDetails = await Promise.all(
+              memberships.map(async (membership: any) => {
+                const org = await ctx.db.get(membership.organizationId);
+                return {
+                  ...membership,
+                  organization: org,
+                };
+              }),
+            );
+
+            return {
+              ...user,
+              memberships: membershipDetails,
+            };
+          }),
+        );
+
+        return {
+          ...usersRes,
+          page: usersWithMemberships,
+        };
+      },
+    }),
+    getAdminOrgList: queryGeneric({
+      args: {
+        paginationOpts: v.optional(paginationOptsValidator),
+      },
+      handler: async (ctx, args) => {
+        const orgsRes = await ctx.db.query('organizations' as any).order('desc').paginate(args.paginationOpts || { numItems: 50, cursor: null });
+        const orgs = orgsRes.page;
+
+        const orgsWithDetails = await Promise.all(
+          orgs.map(async (org: any) => {
+            const members = await ctx.db
+              .query('members' as any)
+              .withIndex('organizationId', (q: any) => q.eq('organizationId', org._id))
+              .collect();
+
+            return {
+              ...org,
+              memberCount: members.length,
+              members: members.slice(0, 5), // Only return a snippet to keep response size down
+            };
+          }),
+        );
+
+        return {
+          ...orgsRes,
+          page: orgsWithDetails,
+        };
+      },
+    }),
+    getMembersWithUsers: queryGeneric({
+      args: {
+        organizationId: v.string(),
+        paginationOpts: v.optional(paginationOptsValidator),
+      },
+      handler: async (ctx, args) => {
+        const membersRes = await ctx.db
+          .query('members' as any)
+          .withIndex('organizationId', (q: any) => q.eq('organizationId', args.organizationId))
+          .paginate(args.paginationOpts || { numItems: 100, cursor: null });
+
+        const members = membersRes.page;
+
+        const membersWithUsers = await Promise.all(
+          members.map(async (member: any) => {
+            const user = await ctx.db.get(member.userId);
+            return {
+              ...member,
+              user,
+            };
+          }),
+        );
+
+        return {
+          ...membersRes,
+          page: membersWithUsers,
+        };
+      },
+    }),
   };
 };

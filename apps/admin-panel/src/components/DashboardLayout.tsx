@@ -4,15 +4,21 @@ import { XStack, YStack } from 'tamagui';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
-type Page = 'overview' | 'products' | 'jobs';
+type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   activePage: Page;
   onNavigate: (page: Page) => void;
+  isAdmin: boolean;
 }
 
-export function DashboardLayout({ children, activePage, onNavigate }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  activePage,
+  onNavigate,
+  isAdmin,
+}: DashboardLayoutProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
@@ -22,9 +28,10 @@ export function DashboardLayout({ children, activePage, onNavigate }: DashboardL
         onNavigate={onNavigate}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        isAdmin={isAdmin}
       />
 
-      <YStack flex={1} padding="$6" backgroundColor="$background">
+      <YStack flex={1} padding="$2" backgroundColor="$background">
         <TopBar />
         {children}
       </YStack>

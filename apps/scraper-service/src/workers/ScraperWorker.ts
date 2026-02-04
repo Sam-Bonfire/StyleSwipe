@@ -70,8 +70,8 @@ export class ScraperWorker {
   }
 
   private async processNextBatch(): Promise<void> {
-    // Fetch pending jobs
-    const jobs = await this.client.query(api.scraper.getPendingJobs, {});
+    // Fetch pending jobs using service endpoint (no auth required)
+    const jobs = await this.client.query(api.scraper.servicePendingJobs, {});
 
     if (jobs.length === 0) {
       return;
@@ -85,8 +85,8 @@ export class ScraperWorker {
   private async processJob(job: any): Promise<void> {
     console.log(`[ScraperWorker] Processing job ${job._id}: ${job.type} - ${job.query}`);
 
-    // Mark as processing
-    await this.client.mutation(api.scraper.updateJobStatus, {
+    // Mark as processing using service endpoint
+    await this.client.mutation(api.scraper.serviceUpdateJobStatus, {
       jobId: job._id as Id<'scrape_jobs'>,
       status: 'processing',
     });
@@ -127,8 +127,8 @@ export class ScraperWorker {
             `[ScraperWorker] Category progress: Page ${progress.currentPage}/${progress.totalPages} - Found ${progress.productsFoundOnPage} products on page (Total: ${progress.productsScraped})`,
           );
 
-          // Update job progress via mutation
-          await this.client.mutation(api.scraper.updateJobStatus, {
+          // Update job progress via service mutation
+          await this.client.mutation(api.scraper.serviceUpdateJobStatus, {
             jobId: job._id as Id<'scrape_jobs'>,
             status: 'processing',
             productsFound: progress.productsScraped,
@@ -141,13 +141,13 @@ export class ScraperWorker {
         console.log(`[ScraperWorker] Pushing ${products.length} products to queue`);
         await this.queue.pushBatch(products);
 
-        await this.client.mutation(api.scraper.updateJobStatus, {
+        await this.client.mutation(api.scraper.serviceUpdateJobStatus, {
           jobId: job._id as Id<'scrape_jobs'>,
           status: 'completed',
           productsFound: products.length,
         });
       } else {
-        await this.client.mutation(api.scraper.updateJobStatus, {
+        await this.client.mutation(api.scraper.serviceUpdateJobStatus, {
           jobId: job._id as Id<'scrape_jobs'>,
           status: 'failed',
           errorMessage: 'No products found',
@@ -155,7 +155,7 @@ export class ScraperWorker {
       }
     } catch (error) {
       console.error(`[ScraperWorker] Job ${job._id} failed:`, error);
-      await this.client.mutation(api.scraper.updateJobStatus, {
+      await this.client.mutation(api.scraper.serviceUpdateJobStatus, {
         jobId: job._id as Id<'scrape_jobs'>,
         status: 'failed',
         errorMessage: error instanceof Error ? error.message : 'Unknown error',

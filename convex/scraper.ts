@@ -4,6 +4,7 @@ import { v } from 'convex/values';
 import { Doc, Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { MutationCtx } from './_generated/server';
+import { requireCoreAdmin } from './permissions';
 
 export const createJob = mutation({
   args: {
@@ -14,6 +15,7 @@ export const createJob = mutation({
     scraperMode: v.optional(v.union(v.literal('API'), v.literal('BROWSER'))),
   },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     const jobId = await ctx.db.insert('scrape_jobs', {
       ...args,
       status: 'pending',
@@ -37,6 +39,7 @@ export const updateJobStatus = mutation({
     errorMessage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     const { jobId, ...updates } = args;
     await ctx.db.patch(jobId, {
       ...updates,
@@ -138,17 +141,17 @@ async function promoteInternal(
   // Ensure Color is a string
   const color = isMapped
     ? data.attributes?.color ||
-      data.attributes?.colour ||
-      data.attributes?.primaryColor ||
-      data.attributes?.primaryColour ||
-      data.attributes?.baseColor ||
-      data.attributes?.baseColour
+    data.attributes?.colour ||
+    data.attributes?.primaryColor ||
+    data.attributes?.primaryColour ||
+    data.attributes?.baseColor ||
+    data.attributes?.baseColour
     : data.primaryColor ||
-      data.primaryColour ||
-      data.baseColor ||
-      data.baseColour ||
-      data.articleAttributes?.['Color'] ||
-      data.articleAttributes?.['Colour'];
+    data.primaryColour ||
+    data.baseColor ||
+    data.baseColour ||
+    data.articleAttributes?.['Color'] ||
+    data.articleAttributes?.['Colour'];
 
   // Ensure category is a string (handle objects like {typeName: "..."})
   let category = '';
@@ -198,8 +201,8 @@ async function promoteInternal(
         ? data.images
         : []
       : data.media?.albums?.flatMap((album: { images?: { src: string }[] }) =>
-          album.images?.map((img) => img.src),
-        ) || [],
+        album.images?.map((img) => img.src),
+      ) || [],
     description: isMapped
       ? data.description || ''
       : data.description || data.productDetails?.description || '',
@@ -221,27 +224,27 @@ async function promoteInternal(
     embedding: embeddingOverride || data.embedding || undefined, // Use override first, then fallback to data (legacy)
     attributes: isMapped
       ? {
-          ...(data.attributes || {}),
-          size: data.availableSizes || data.attributes?.size || [],
-          inventoryInfo: data.inventoryInfo || data.attributes?.inventoryInfo,
-        }
+        ...(data.attributes || {}),
+        size: data.availableSizes || data.attributes?.size || [],
+        inventoryInfo: data.inventoryInfo || data.attributes?.inventoryInfo,
+      }
       : {
-          // Fallback for raw data
-          ...data.articleAttributes,
-          color: color || undefined,
-          size:
-            data.inventoryInfo && Array.isArray(data.inventoryInfo)
-              ? data.inventoryInfo
-                  .filter(
-                    (i: { available?: boolean; inventory?: number }) =>
-                      i.available || (i.inventory && i.inventory > 0),
-                  )
-                  .map(
-                    (i: { brandSizeLabel?: string; label: string }) => i.brandSizeLabel || i.label,
-                  )
-              : data.availableSizes || [],
-          inventoryInfo: data.inventoryInfo || data.style?.inventoryInfo,
-        },
+        // Fallback for raw data
+        ...data.articleAttributes,
+        color: color || undefined,
+        size:
+          data.inventoryInfo && Array.isArray(data.inventoryInfo)
+            ? data.inventoryInfo
+              .filter(
+                (i: { available?: boolean; inventory?: number }) =>
+                  i.available || (i.inventory && i.inventory > 0),
+              )
+              .map(
+                (i: { brandSizeLabel?: string; label: string }) => i.brandSizeLabel || i.label,
+              )
+            : data.availableSizes || [],
+        inventoryInfo: data.inventoryInfo || data.style?.inventoryInfo,
+      },
     meta: {
       scrapedAt: scraped.lastScrapedAt,
       originalUrl: scraped.url,
@@ -288,6 +291,7 @@ async function promoteInternal(
 
 export const getPendingJobs = query({
   handler: async (ctx) => {
+    await requireCoreAdmin(ctx);
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
@@ -298,6 +302,7 @@ export const getPendingJobs = query({
 export const getJobs = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     return await ctx.db.query('scrape_jobs').order('desc').paginate(args.paginationOpts);
   },
 });
@@ -305,6 +310,7 @@ export const getJobs = query({
 export const getProducts = query({
   args: { paginationOpts: v.optional(paginationOptsValidator) },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     if (!args.paginationOpts) {
       return await ctx.db
         .query('scraped_products')
@@ -319,6 +325,7 @@ export const promoteToCatalog = mutation({
     scrapedProductId: v.id('scraped_products'),
   },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     await promoteInternal(ctx, args.scrapedProductId);
   },
 });
@@ -330,6 +337,7 @@ export const promoteToCatalog = mutation({
 export const getJobsSimple = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     const limit = args.limit ?? 20;
     return await ctx.db.query('scrape_jobs').order('desc').take(limit);
   },
@@ -338,6 +346,7 @@ export const getJobsSimple = query({
 export const getJob = query({
   args: { jobId: v.id('scrape_jobs') },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     return await ctx.db.get(args.jobId);
   },
 });
@@ -345,7 +354,89 @@ export const getJob = query({
 export const getScrapedProducts = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
     const limit = args.limit ?? 50;
     return await ctx.db.query('scraped_products').order('desc').take(limit);
+  },
+});
+
+// =============================================================================
+// SERVICE ENDPOINTS (No Authentication Required)
+// These are for the backend scraper service worker
+// =============================================================================
+
+/**
+ * Service endpoint: Get pending jobs without authentication
+ * Used by the scraper worker to poll for jobs
+ */
+export const servicePendingJobs = query({
+  handler: async (ctx) => {
+    return await ctx.db
+      .query('scrape_jobs')
+      .withIndex('by_status', (q) => q.eq('status', 'pending'))
+      .take(5);
+  },
+});
+
+/**
+ * Service endpoint: Update job status without authentication
+ * Used by the scraper worker to update job progress
+ */
+export const serviceUpdateJobStatus = mutation({
+  args: {
+    jobId: v.id('scrape_jobs'),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('processing'),
+      v.literal('completed'),
+      v.literal('failed'),
+    ),
+    productsFound: v.optional(v.number()),
+    errorMessage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { jobId, ...updates } = args;
+    await ctx.db.patch(jobId, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Service endpoint: Save product without authentication
+ * Used by the scraper worker to save scraped products
+ */
+export const serviceSaveProduct = mutation({
+  args: {
+    externalId: v.string(),
+    url: v.string(),
+    data: v.any(),
+    embedding: v.optional(v.array(v.float64())),
+  },
+  handler: async (ctx, args) => {
+    await saveInternal(ctx, args);
+  },
+});
+
+/**
+ * Service endpoint: Save batch of products without authentication
+ * Used by the scraper worker to save multiple products at once
+ */
+export const serviceSaveBatch = mutation({
+  args: {
+    products: v.array(
+      v.object({
+        externalId: v.string(),
+        url: v.string(),
+        data: v.any(),
+        embedding: v.optional(v.array(v.float64())),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    for (const product of args.products) {
+      await saveInternal(ctx, product);
+    }
   },
 });

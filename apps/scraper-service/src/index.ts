@@ -111,9 +111,9 @@ async function runScrape(url: string): Promise<void> {
     console.log(`[CLI] Price: ₹${product.price} (MRP: ₹${product.mrp})`);
     console.log(`[CLI] Images: ${product.images.length}`);
 
-    // Save directly to Convex
+    // Save directly to Convex using service endpoint
     const client = new ConvexHttpClient(CONVEX_URL!);
-    await client.mutation(api.scraper.saveProduct, {
+    await client.mutation(api.scraper.serviceSaveProduct, {
       externalId: product.externalId,
       url: product.url,
       data: product as any,
@@ -140,10 +140,10 @@ async function runCategory(url: string, maxPages: number): Promise<void> {
 
   console.log(`[CLI] Found ${products.length} products`);
 
-  // Save all to Convex
+  // Save all to Convex using service endpoint
   const client = new ConvexHttpClient(CONVEX_URL!);
   for (const product of products) {
-    await client.mutation(api.scraper.saveProduct, {
+    await client.mutation(api.scraper.serviceSaveProduct, {
       externalId: product.externalId,
       url: product.url,
       data: product as any,

@@ -1,18 +1,21 @@
 import 'react-native-gesture-handler';
-import { config } from '@app/ui-kit';
+import { config, Button, ToastProvider } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TamaguiProvider, Theme, YStack, Spinner } from 'tamagui';
+import { TamaguiProvider, Theme, YStack, Spinner, Text } from 'tamagui';
 
+import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import { DashboardLayout } from './components/DashboardLayout';
 import { authAdapter } from './lib/auth';
 import { JobsScreen } from './screens/JobsScreen';
 import { LoginScreen } from './screens/LoginScreen';
+import { OrganizationsScreen } from './screens/OrganizationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { ProductsScreen } from './screens/ProductsScreen';
+import { UsersScreen } from './screens/UsersScreen';
 
 // Initialize Convex Client
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {
@@ -22,11 +25,8 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
 function Main() {
   // Use Convex Query to drive auth state, matching consumer-app pattern
   const user = useQuery(api.users.currentUser);
-  const [activePage, setActivePage] = useState<'overview' | 'products' | 'jobs'>('overview');
+  const [activePage, setActivePage] = useState<'overview' | 'products' | 'jobs' | 'users' | 'organizations'>('overview');
 
-  useEffect(() => {
-    console.log('[Main] User state changed:', user);
-  }, [user]);
 
   // undefined = loading, null = not logged in, object = logged in
   if (user === undefined) {
@@ -37,7 +37,26 @@ function Main() {
     );
   }
 
-  if (user === null) {
+  if (user === null || !user.isCoreMember) {
+    if (user !== null && !user.isCoreMember) {
+      return (
+        <YStack
+          flex={1}
+          justifyContent="center"
+          alignItems="center"
+          backgroundColor="$background"
+          padding="$6"
+        >
+          <Text fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
+            Access Denied
+          </Text>
+          <Text fontSize="$4" color="$color" textAlign="center" marginTop="$2" marginBottom="$4">
+            You do not have permission to access this application.
+          </Text>
+          <Button onPress={() => authAdapter.signOut()}>Sign Out</Button>
+        </YStack>
+      );
+    }
     return <LoginScreen />;
   }
 
@@ -46,16 +65,20 @@ function Main() {
       case 'overview':
         return <OverviewScreen />;
       case 'products':
-        return <ProductsScreen />;
+        return user.isCoreAdmin ? <ProductsScreen /> : <OverviewScreen />;
       case 'jobs':
-        return <JobsScreen />;
+        return user.isCoreAdmin ? <JobsScreen /> : <OverviewScreen />;
+      case 'users':
+        return user.isCoreAdmin ? <UsersScreen /> : <OverviewScreen />;
+      case 'organizations':
+        return user.isCoreAdmin ? <OrganizationsScreen /> : <OverviewScreen />;
       default:
         return <OverviewScreen />;
     }
   };
 
   return (
-    <DashboardLayout activePage={activePage} onNavigate={setActivePage}>
+    <DashboardLayout activePage={activePage} onNavigate={setActivePage} isAdmin={user.isCoreAdmin}>
       {renderContent()}
     </DashboardLayout>
   );
@@ -66,10 +89,14 @@ export default function App() {
     <SafeAreaProvider>
       <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
         <TamaguiProvider config={config}>
-          {/* Switching to Light Theme as requested */}
-          <Theme name="BrandIdentityLight">
-            <Main />
-          </Theme>
+          <ToastProvider>
+            <GlobalErrorBoundary>
+              {/* Switching to Light Theme as requested */}
+              <Theme name="BrandIdentityLight">
+                <Main />
+              </Theme>
+            </GlobalErrorBoundary>
+          </ToastProvider>
         </TamaguiProvider>
       </ConvexBetterAuthProvider>
     </SafeAreaProvider>

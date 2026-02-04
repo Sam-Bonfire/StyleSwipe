@@ -114,8 +114,8 @@ export class VectorizationWorker {
 
     // Generate embedding
     const embedding = await this.embedder.generateEmbedding(text);
-    // Save to Convex
-    await this.client.mutation(api.scraper.saveProduct, {
+    // Save to Convex using service endpoint (no auth required)
+    await this.client.mutation(api.scraper.serviceSaveProduct, {
       externalId: product.externalId,
       url: product.url,
       data: product, // This doesn't have embedding yet

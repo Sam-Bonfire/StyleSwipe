@@ -1,22 +1,23 @@
 import { Button } from '@app/ui-kit';
 import { api } from '@convex-api';
-import { ChevronDown, Clock, Package, Hash, Cpu, FileStack } from '@tamagui/lucide-icons';
+import { ChevronDown, Clock, Package, Hash, Cpu, FileStack, AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery } from 'convex/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   YStack,
   Text,
   Card,
-  H2,
   XStack,
   Spinner,
   ScrollView,
   ColorTokens,
   Accordion,
   Square,
+  H3,
 } from 'tamagui';
 
 import { NewJobModal } from '../components/NewJobModal';
+import { useToast } from '@app/ui-kit';
 
 interface ScrapeJob {
   _id: string;
@@ -35,12 +36,24 @@ interface ScrapeJob {
 export function JobsScreen() {
   const jobs = usePaginatedQuery(api.admin.getScrapingJobs, {}, { initialNumItems: 20 });
   const [modalOpen, setModalOpen] = useState(false);
+  const { showToast } = useToast();
+
+  // Handle query errors
+  useEffect(() => {
+    if (jobs?.results === null) {
+      showToast({
+        variant: 'error',
+        title: 'Failed to Load Jobs',
+        message: 'Unable to fetch scraping jobs. Please refresh the page.',
+      });
+    }
+  }, [jobs, showToast]);
 
   return (
     <YStack gap="$4" flex={1}>
       <XStack justifyContent="space-between" alignItems="center">
         <YStack>
-          <H2>Scraping Jobs</H2>
+          <H3>Scraping Jobs</H3>
           <Text fontSize="$2" color="$textSecondary">
             Manage and monitor your data collection tasks
           </Text>
@@ -63,11 +76,21 @@ export function JobsScreen() {
         shadowOpacity={0.1}
         shadowRadius={8}
       >
-        {!jobs ? (
+        {!jobs || jobs.status === 'LoadingFirstPage' ? (
           <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
             <Spinner size="large" color="$primary" />
             <Text marginTop="$3" color="$textSecondary">
               Loading jobs...
+            </Text>
+          </YStack>
+        ) : jobs.results === null ? (
+          <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
+            <AlertCircle size={48} color="$error" />
+            <Text marginTop="$3" fontSize="$5" fontWeight="600" color="$color">
+              Failed to Load Jobs
+            </Text>
+            <Text marginTop="$1" color="$textSecondary" textAlign="center">
+              There was an error loading the scraping jobs
             </Text>
           </YStack>
         ) : jobs.results.length === 0 ? (
