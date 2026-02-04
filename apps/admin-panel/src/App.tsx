@@ -3,12 +3,12 @@ import { config, Button, ToastProvider } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TamaguiProvider, Theme, YStack, Spinner, Text } from 'tamagui';
 
-import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import { DashboardLayout } from './components/DashboardLayout';
+import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import { authAdapter } from './lib/auth';
 import { JobsScreen } from './screens/JobsScreen';
 import { LoginScreen } from './screens/LoginScreen';

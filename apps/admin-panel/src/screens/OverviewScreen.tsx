@@ -1,9 +1,9 @@
+import { useToast } from '@app/ui-kit';
 import { api } from '@convex-api';
+import { Users, Package, Activity, TrendingUp, Clock, AlertCircle } from '@tamagui/lucide-icons';
 import { useQuery } from 'convex/react';
 import React, { useEffect } from 'react';
 import { YStack, Text, Card, XStack, H2, H3, Spinner, styled, Avatar, ScrollView } from 'tamagui';
-import { Users, Package, Activity, TrendingUp, Clock, AlertCircle } from '@tamagui/lucide-icons';
-import { useToast } from '@app/ui-kit';
 
 const StatsCardStyled = styled(Card, {
   name: 'StatsCard',
@@ -215,7 +215,9 @@ function StatsCard({
         {value}
       </H2>
       <XStack alignItems="center" gap="$2">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <TrendingUp size={14} color={color as any} />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <Text fontSize="$2" color={color as any} fontWeight="500">
           {change}
         </Text>

@@ -2,7 +2,7 @@ import { Button } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
-import { Dialog, YStack, XStack, Text, Input, Label } from 'tamagui';
+import { Dialog, YStack, XStack, Input, Label } from 'tamagui';
 
 interface EditUserModalProps {
     user: {

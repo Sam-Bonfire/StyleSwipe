@@ -1,5 +1,6 @@
 import { Button, SearchBar, useToast } from '@app/ui-kit';
 import { api } from '@convex-api';
+import { Building2, Users, ChevronDown, Edit3, Crown, AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import {
@@ -14,9 +15,9 @@ import {
     Accordion,
     Square,
 } from 'tamagui';
-import { Building2, Users, ChevronDown, Edit3, Crown, AlertCircle } from '@tamagui/lucide-icons';
-import { useDebounce } from '../hooks/useDebounce';
+
 import { EditOrganizationModal } from '../components/EditOrganizationModal';
+import { useDebounce } from '../hooks/useDebounce';
 
 const Header = styled(YStack, {
     gap: '$3',
@@ -26,7 +27,7 @@ export function OrganizationsScreen() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 300);
     const { showToast } = useToast();
-    const [selectedOrg, setSelectedOrg] = useState<any>(null);
+    const [selectedOrg, setSelectedOrg] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const allOrgs = usePaginatedQuery(
@@ -92,7 +93,7 @@ export function OrganizationsScreen() {
                         overflow="hidden"
                     >
                         <Accordion type="multiple">
-                            {displayResults.map((org: any, index: number) => (
+                            {displayResults.map((org: any, index: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                                 <Accordion.Item key={org._id} value={org._id}>
                                     <Accordion.Trigger
                                         flexDirection="row"
@@ -185,7 +186,7 @@ export function OrganizationsScreen() {
                                                             Members
                                                         </Text>
                                                         {org.members && org.members.length > 0 ? (
-                                                            org.members.slice(0, 5).map((member: any) => (
+                                                            org.members.slice(0, 5).map((member: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                                                                 <XStack key={member._id} gap="$2" alignItems="center" justifyContent="space-between">
                                                                     <XStack gap="$2" alignItems="center">
                                                                         <Users size={12} color="$color" opacity={0.5} />

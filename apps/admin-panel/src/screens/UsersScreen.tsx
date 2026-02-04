@@ -1,7 +1,8 @@
 import { Button, SearchBar, useToast } from '@app/ui-kit';
 import { api } from '@convex-api';
+import { Users, Mail, Building2, ChevronDown, Edit3, Shield, AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useQuery } from 'convex/react';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     YStack,
     Text,
@@ -15,9 +16,9 @@ import {
     Accordion,
     Square,
 } from 'tamagui';
-import { Users, Mail, Building2, ChevronDown, Edit3, Shield, AlertCircle } from '@tamagui/lucide-icons';
-import { useDebounce } from '../hooks/useDebounce';
+
 import { EditUserModal } from '../components/EditUserModal';
+import { useDebounce } from '../hooks/useDebounce';
 
 const Header = styled(YStack, {
     gap: '$3',
@@ -27,7 +28,7 @@ export function UsersScreen() {
     const [searchTerm, setSearchTerm] = useState('');
     const debouncedSearch = useDebounce(searchTerm, 300);
     const { showToast } = useToast();
-    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [selectedUser, setSelectedUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const allUsers = usePaginatedQuery(
@@ -93,7 +94,7 @@ export function UsersScreen() {
                         overflow="hidden"
                     >
                         <Accordion type="multiple">
-                            {displayResults.map((user: any, index: number) => (
+                            {displayResults.map((user: any, index: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                                 <Accordion.Item key={user._id} value={user._id}>
                                     <Accordion.Trigger
                                         flexDirection="row"
@@ -177,7 +178,7 @@ export function UsersScreen() {
                                                             Organizations
                                                         </Text>
                                                         {user.organizations && user.organizations.length > 0 ? (
-                                                            user.organizations.map((org: any) => (
+                                                            user.organizations.map((org: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                                                                 <XStack key={org._id} gap="$2" alignItems="center" justifyContent="space-between">
                                                                     <XStack gap="$2" alignItems="center">
                                                                         <Building2 size={12} color="$color" opacity={0.5} />

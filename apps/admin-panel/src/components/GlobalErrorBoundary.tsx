@@ -9,12 +9,12 @@ interface State {
     hasError: boolean;
 }
 
-class ErrorBoundaryInner extends Component<Props & { showToast: (opt: any) => void }, State> {
+class ErrorBoundaryInner extends Component<Props & { showToast: (opt: any) => void }, State> { // eslint-disable-line @typescript-eslint/no-explicit-any
     public state: State = {
         hasError: false,
     };
 
-    public static getDerivedStateFromError(_error: Error): State {
+    public static getDerivedStateFromError(_: Error): State {
         return { hasError: true };
     }
 

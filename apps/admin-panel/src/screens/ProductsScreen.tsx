@@ -1,12 +1,12 @@
 import { Button, SearchBar, useToast } from '@app/ui-kit';
 import { api } from '@convex-api';
+import { AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useMutation, useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { YStack, Text, Card, H3, XStack, ScrollView, Spinner, Image } from 'tamagui';
-import { AlertCircle } from '@tamagui/lucide-icons';
-import { useDebounce } from '../hooks/useDebounce';
 
 import { Id } from '../../../../convex/_generated/dataModel';
+import { useDebounce } from '../hooks/useDebounce';
 
 export function ProductsScreen() {
   const [search, setSearch] = useState('');
@@ -47,7 +47,7 @@ export function ProductsScreen() {
         title: 'Scrape Scheduled',
         message: 'Product scrape has been scheduled successfully.',
       });
-    } catch (error) {
+    } catch {
       showToast({
         variant: 'error',
         title: 'Failed to Schedule',

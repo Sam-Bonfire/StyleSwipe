@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { YStack, Portal } from 'tamagui';
+
 import { Toast, ToastProps } from './Toast';
 
 type ToastOptions = Omit<ToastProps, 'onDismiss'>;

@@ -1,5 +1,4 @@
-import { Button } from '@app/ui-kit';
-import { Activity } from '@tamagui/lucide-icons';
+
 import React from 'react';
 import { XStack, YStack, Text } from 'tamagui';
 
