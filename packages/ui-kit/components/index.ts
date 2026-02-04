@@ -71,7 +71,12 @@ export type { ModalProps } from './Modal';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps, EmptyStateType } from './EmptyState';
 
-export { LoadingSkeleton, ProductTileSkeleton, FashionCardSkeleton, CartItemSkeleton } from './LoadingSkeleton';
+export {
+  LoadingSkeleton,
+  ProductTileSkeleton,
+  FashionCardSkeleton,
+  CartItemSkeleton,
+} from './LoadingSkeleton';
 export type { LoadingSkeletonProps } from './LoadingSkeleton';
 
 export { RatingStars } from './RatingStars';

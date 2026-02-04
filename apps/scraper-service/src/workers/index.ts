@@ -1,2 +1,2 @@
-export * from "./ScraperWorker";
-export * from "./VectorizationWorker";
+export * from './ScraperWorker';
+export * from './VectorizationWorker';

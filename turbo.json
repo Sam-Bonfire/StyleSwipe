@@ -1,37 +1,37 @@
 {
-    "$schema": "https://turbo.build/schema.json",
-    "globalEnv": [
-        "EXPO_PUBLIC_*",
-        "VITE_*"
-    ],
-    "pipeline": {
-        "build": {
-            "dependsOn": [
-                "^build"
-            ],
-            "outputs": [
-                "dist/**",
-                "build/**",
-                ".next/**",
-                "!.next/cache/**"
-            ]
-        },
-        "lint": {
-            "outputs": []
-        },
-        "test": {
-            "outputs": []
-        },
-        "dev": {
-            "cache": false,
-            "persistent": true
-        },
-        "typecheck": {
-            "outputs": []
-        },
-        "web": {
-            "cache": false,
-            "persistent": true
-        }
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "EXPO_PUBLIC_*",
+    "VITE_*"
+  ],
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "!.next/cache/**"
+      ]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "outputs": []
+    },
+    "web": {
+      "cache": false,
+      "persistent": true
     }
+  }
 }

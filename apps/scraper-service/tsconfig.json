@@ -1,26 +1,15 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "outDir": "dist",
-        "baseUrl": ".",
-        "noImplicitAny": true,
-        "paths": {
-            "@convex-api": [
-                "../../convex/_generated/api"
-            ],
-            "@convex-dataModel": [
-                "../../convex/_generated/dataModel"
-            ],
-            "@app/core": [
-                "../../packages/core/src/index.ts"
-            ],
-            "@app/infrastructure": [
-                "../../packages/infrastructure/src/index.ts"
-            ]
-        }
-    },
-    "include": [
-        "src",
-        "tests"
-    ]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "noImplicitAny": true,
+    "paths": {
+      "@convex-api": ["../../convex/_generated/api"],
+      "@convex-dataModel": ["../../convex/_generated/dataModel"],
+      "@app/core": ["../../packages/core/src/index.ts"],
+      "@app/infrastructure": ["../../packages/infrastructure/src/index.ts"]
+    }
+  },
+  "include": ["src", "tests"]
 }

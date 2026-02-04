@@ -1,5 +1,6 @@
 import { Play, Activity, CheckCircle, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+
 import './App.css';
 import { ScrapedProduct, ExtensionMessage } from './types';
 
@@ -92,32 +93,34 @@ function App() {
             <div className="logo-icon">
               <Activity size={20} color="white" />
             </div>
-            <h1 className="logo-text">StyleSwipe <span className="logo-accent">Pro</span></h1>
+            <h1 className="logo-text">
+              StyleSwipe <span className="logo-accent">Pro</span>
+            </h1>
           </div>
         </div>
 
         <div className="info-card">
           <div className="card-header">
             <span className="card-label">Neural Scraper</span>
-            <span className={`status-badge ${status !== 'Ready' && status !== 'Error' ? 'status-active' : (status === 'Error' ? 'status-error' : 'status-ready')}`}>
+            <span
+              className={`status-badge ${status !== 'Ready' && status !== 'Error' ? 'status-active' : status === 'Error' ? 'status-error' : 'status-ready'}`}
+            >
               {status}
             </span>
           </div>
           <p className="card-desc">
-            {pageType === 'category' ? 'Category page detected. Batch mode active.' :
-              pageType === 'pdp' ? 'Product page detected. Single mode active.' :
-                'Navigate to Myntra to begin scraping.'}
+            {pageType === 'category'
+              ? 'Category page detected. Batch mode active.'
+              : pageType === 'pdp'
+                ? 'Product page detected. Single mode active.'
+                : 'Navigate to Myntra to begin scraping.'}
           </p>
           <div className={`status-progress-container ${isModelLoading ? 'active' : ''}`}>
             <div className="status-progress-fill" style={{ width: `${progress}%` }}></div>
           </div>
         </div>
 
-        <button
-          onClick={handleManualScrape}
-          disabled={!canScrape}
-          className="scrape-btn"
-        >
+        <button onClick={handleManualScrape} disabled={!canScrape} className="scrape-btn">
           <Play size={20} />
           {pageType === 'category' ? 'Batch Neural Scrape' : 'Manual Neural Scrape'}
         </button>
@@ -137,7 +140,10 @@ function App() {
             </div>
             <div className="product-info">
               <img
-                src={recentScrape.images?.[0] || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200'}
+                src={
+                  recentScrape.images?.[0] ||
+                  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200'
+                }
                 alt="Preview"
                 className="product-img"
               />

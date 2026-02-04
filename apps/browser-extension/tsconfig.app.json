@@ -3,15 +3,9 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "skipLibCheck": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -22,24 +16,12 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@convex-api": [
-        "../../convex/_generated/api"
-      ],
-      "@convex-dataModel": [
-        "../../convex/_generated/dataModel"
-      ],
-      "@app/core": [
-        "../../packages/core/src/index.ts"
-      ],
-      "@app/core/*": [
-        "../../packages/core/*"
-      ],
-      "@app/infrastructure": [
-        "../../packages/infrastructure/src/index.ts"
-      ],
-      "@app/infrastructure/*": [
-        "../../packages/infrastructure/*"
-      ]
+      "@convex-api": ["../../convex/_generated/api"],
+      "@convex-dataModel": ["../../convex/_generated/dataModel"],
+      "@app/core": ["../../packages/core/src/index.ts"],
+      "@app/core/*": ["../../packages/core/*"],
+      "@app/infrastructure": ["../../packages/infrastructure/src/index.ts"],
+      "@app/infrastructure/*": ["../../packages/infrastructure/*"]
     },
     /* Linting */
     "strict": true,
@@ -49,7 +31,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

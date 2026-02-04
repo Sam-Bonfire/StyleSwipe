@@ -1,6 +1,6 @@
 /**
  * StyleSwipe UI-Kit
- * 
+ *
  * Tamagui-based design system for StyleSwipe
  * Exports theme configuration and all components
  */

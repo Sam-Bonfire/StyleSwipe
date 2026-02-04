@@ -1,35 +1,42 @@
-import { Cart, CartItem, CartRepository } from "@app/core";
-import { api } from "@convex-api";
-import { ConvexClient } from "convex/browser";
+import { Cart, CartItem, CartRepository } from '@app/core';
+import { api } from '@convex-api';
+import { ConvexClient } from 'convex/browser';
+import { GenericId } from 'convex/values';
+
+interface ConvexCartItem {
+  productId: string;
+  quantity: number;
+  price: number;
+  attributes?: Record<string, string>;
+}
 
 export class ConvexCartRepository implements CartRepository {
-    constructor(private client: ConvexClient) { }
+  constructor(private client: ConvexClient) { }
 
-    async save(cart: Cart): Promise<void> {
-        await this.client.mutation(api.cart.saveCart, {
-            userId: cart.userId,
-            items: cart.items.map(item => ({
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                productId: item.productId as any, // ID casting
-                quantity: item.quantity,
-                price: item.price,
-                attributes: item.attributes,
-            })),
-        });
-    }
+  async save(cart: Cart): Promise<void> {
+    await this.client.mutation(api.cart.saveCart, {
+      userId: cart.userId,
+      items: cart.items.map((item: CartItem) => ({
+        productId: item.productId as GenericId<'products'>,
+        quantity: item.quantity,
+        price: item.price,
+        attributes: item.attributes,
+      })),
+    });
+  }
 
-    async findByUserId(userId: string): Promise<Cart | null> {
-        const cartData = await this.client.query(api.cart.getCart, { userId });
-        if (!cartData) return null;
+  async findByUserId(userId: string): Promise<Cart | null> {
+    const cartData = (await this.client.query(api.cart.getCart, { userId })) as {
+      userId: string;
+      items: ConvexCartItem[];
+    } | null;
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const items = cartData.items.map((i: any) => new CartItem(
-            i.productId,
-            i.quantity,
-            i.price,
-            i.attributes || {}
-        ));
+    if (!cartData) return null;
 
-        return new Cart(cartData.userId, items);
-    }
+    const items = cartData.items.map(
+      (i) => new CartItem(i.productId, i.quantity, i.price, i.attributes || {}),
+    );
+
+    return new Cart(cartData.userId, items);
+  }
 }
