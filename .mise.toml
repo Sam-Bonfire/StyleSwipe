@@ -96,9 +96,9 @@ run = "bun run --filter @app/scraper-service typecheck"
 description = "Start a new development task"
 usage = """
 arg "<type>" help="Task type (feat, fix, refactor, chore)"
-arg "<title>" help="Brief title of the task"
+arg "<title>..." help="Brief title of the task"
 """
-run = "sh bin/task-start.sh $USAGE_TYPE $USAGE_TITLE"
+run = 'sh bin/task-start.sh "$usage_type" "$usage_title"'
 
 [tasks.snap]
 description = "Create a project snapshot"
@@ -108,4 +108,4 @@ arg "<title>..." help="Brief title"
 flag "-d --description <text>" help="Optional detailed description"
 flag "-t --ticket <id>" help="Optional ticket ID"
 """
-run = "sh bin/snapshot.sh"
+run = 'sh bin/snapshot.sh "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
