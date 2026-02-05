@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
-import { config, ToastProvider } from '@app/ui-kit';
 import { api } from '@app/convex';
+import { config, ToastProvider } from '@app/ui-kit';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ConvexReactClient, useQuery } from 'convex/react';

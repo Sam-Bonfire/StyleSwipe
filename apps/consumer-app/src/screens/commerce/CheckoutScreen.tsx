@@ -1,3 +1,4 @@
+import { api } from '@app/convex';
 import { ManageCart, Address, PriceEstimator } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
 import { ConvexEventRepository } from '@app/infrastructure/src/convex/repositories/EventRepository';
@@ -8,8 +9,6 @@ import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
 import React, { useState, useMemo } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
-
-import { api } from '@app/convex';
 
 
 

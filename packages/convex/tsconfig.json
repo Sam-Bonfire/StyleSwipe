@@ -1,13 +1,13 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "rootDir": "src",
+        "rootDir": "convex",
         "outDir": "dist",
         "composite": true,
         "noEmit": false
     },
     "include": [
-        "src/**/*"
+        "convex/**/*"
     ],
     "exclude": [
         "node_modules",

@@ -3,9 +3,9 @@
 // Implements FeatureFlagRepository port for A/B testing and rollouts
 // =============================================================================
 
+import type { Id } from '@app/convex';
 import type { FeatureFlagRepository } from '@app/core';
 import type { FeatureFlag, Environment, FeatureFlagRule } from '@app/core';
-import type { Id } from '@app/convex';
 
 import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';

@@ -1,5 +1,5 @@
+import { api } from '@app/convex';
 import { ProductSearchRepository, SearchResult, SearchError, Vector384 } from '@app/core';
-import { api, type Doc } from '@app/convex';
 import { ConvexReactClient } from 'convex/react';
 import { Effect } from 'effect';
 

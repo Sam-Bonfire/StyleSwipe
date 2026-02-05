@@ -1,10 +1,10 @@
+import { api } from '@app/convex';
+import { Id } from '@app/convex';
 import { ManageCart, CartItem } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import type { Doc } from '@app/convex';
-import { api } from '@app/convex';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
@@ -12,8 +12,6 @@ import { useConvex, useQuery } from 'convex/react';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
-
-import { Id } from '@app/convex';
 
 type ProductDetailParams = {
   params: {

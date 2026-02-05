@@ -47,6 +47,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     }));
 
     const chunkSize = 20;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const chunks: any[] = [];
     for (let i = 0; i < products.length; i += chunkSize) {
       chunks.push(products.slice(i, i + chunkSize));

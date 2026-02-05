@@ -1,3 +1,4 @@
+import { api } from '@app/convex';
 import { Cart, ManageCart, PriceEstimator } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
@@ -6,8 +7,6 @@ import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { YStack, ScrollView, Text } from 'tamagui';
-
-import { api } from '@app/convex';
 
 export const CartScreen = () => {
   const convex = useConvex();

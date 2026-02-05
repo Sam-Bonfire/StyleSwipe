@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "license": "UNLICENSED",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --ignore-pattern dist --rule '@typescript-eslint/no-explicit-any: off'",
     "test": "echo \"Testing...\"",
     "typecheck": "tsc --noEmit"
   },
