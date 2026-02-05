@@ -10,8 +10,21 @@ import { HomeScreen } from '../home/HomeScreen';
 import { ProfileScreen } from '../profile/ProfileScreen';
 import { SearchScreen } from '../search/SearchScreen';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+import { useRoute } from '@react-navigation/native';
+
 export function MainScreen() {
-  const [activeTab, setActiveTab] = useState('discovery');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const route = useRoute<any>();
+  const initialTab = route.params?.activeTab || 'discovery';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Sync state if params change while screen is mounted (optional but good for reuse)
+  React.useEffect(() => {
+    if (route.params?.activeTab) {
+      setActiveTab(route.params.activeTab);
+    }
+  }, [route.params?.activeTab]);
 
   const navItems = [
     {

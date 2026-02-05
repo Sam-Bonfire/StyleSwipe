@@ -39,4 +39,8 @@ export class ConvexCartRepository implements CartRepository {
 
     return new Cart(cartData.userId, items);
   }
+
+  async clear(userId: string): Promise<void> {
+    await this.client.mutation(api.cart.clear, { userId });
+  }
 }

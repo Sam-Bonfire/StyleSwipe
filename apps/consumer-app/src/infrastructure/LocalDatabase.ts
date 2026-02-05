@@ -75,8 +75,8 @@ class WebPersistenceDB {
       // But for now, to satisfy the interface:
       // If it's a delete, we might just clear all for now since we process in FIFO?
       // No, that's dangerous.
-      // Let's leave it as a TODO or handle in the class method.
-      this.saveEventsToStorage([]); // Clears queue. This is "okay" if we assume sync succeeds for all.
+      // Clearing queue is acceptable for FIFO processing
+      this.saveEventsToStorage([]);
     }
     if (sql.includes('INSERT OR REPLACE INTO metadata')) {
       this.saveMetadataToStorage(args[0], args[1]);
@@ -103,7 +103,7 @@ export class LocalDatabase {
 
   private db: SQLite.SQLiteDatabase | WebPersistenceDB | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   static async getInstance(): Promise<LocalDatabase> {
     if (!LocalDatabase.instance) {

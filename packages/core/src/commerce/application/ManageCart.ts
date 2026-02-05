@@ -2,7 +2,7 @@ import { Cart, CartItem } from '../domain/Cart';
 import { CartRepository } from '../domain/CartRepository';
 
 export class ManageCart {
-  constructor(private repo: CartRepository) {}
+  constructor(private repo: CartRepository) { }
 
   async addToCart(userId: string, item: CartItem): Promise<Cart> {
     let cart = await this.repo.findByUserId(userId);
@@ -36,5 +36,9 @@ export class ManageCart {
 
   async getCart(userId: string): Promise<Cart | null> {
     return this.repo.findByUserId(userId);
+  }
+
+  async clearCart(userId: string): Promise<void> {
+    await this.repo.clear(userId);
   }
 }

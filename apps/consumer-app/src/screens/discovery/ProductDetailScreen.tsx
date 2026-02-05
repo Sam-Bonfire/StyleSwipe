@@ -9,7 +9,7 @@ import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
 import React, { useMemo, useState } from 'react';
-import { ScrollView, View, useWindowDimensions } from 'react-native';
+import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
 
 import { Id } from '../../../../../convex/_generated/dataModel';
@@ -43,6 +43,11 @@ export function ProductDetailScreen() {
     const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
     return new ManageCart(repo);
   }, [convex]);
+
+  // Resolved: Use api.users.currentUser to get the authenticated user
+  // Must be at the top level to avoid Rules of Hooks violation
+  const user = useQuery(api.users.currentUser);
+  const userId = user?._id ?? undefined;
 
   // -------------------------------------------------------------------------
   // 2. Data Mapping
@@ -149,9 +154,12 @@ export function ProductDetailScreen() {
     setShowSizeError(false);
   };
 
+  // Main Logic
+
   const handleAddToCart = async () => {
     if (isAdded) {
-      navigation.navigate('Cart');
+      // Navigate to the Main screen and switch to the 'cart' tab to show nav bars
+      navigation.navigate('Main', { activeTab: 'cart' });
       return;
     }
 
@@ -162,6 +170,14 @@ export function ProductDetailScreen() {
       return;
     }
 
+    // Ensure we have a user ID before adding to cart
+    if (!userId) {
+      // In a real app, prompt for login here.
+      // For now, we return or show a toast if we had one.
+      Alert.alert('Authentication Required', 'User is not authenticated. Please log in.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const item = new CartItem(product.id, 1, product.price, {
@@ -169,10 +185,12 @@ export function ProductDetailScreen() {
         size: selectedSize,
         color: 'Black',
       });
-      await manageCart.addToCart('user-1', item);
+      await manageCart.addToCart(userId, item);
       setIsAdded(true);
-    } catch (e) {
+      Alert.alert('Success', 'Added to cart!');
+    } catch (e: any) {
       console.error('Failed to add to cart', e);
+      Alert.alert('Error', 'Failed to add to cart: ' + e.message);
     } finally {
       setIsLoading(false);
     }
