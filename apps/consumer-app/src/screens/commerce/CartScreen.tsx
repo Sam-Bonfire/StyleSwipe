@@ -3,14 +3,15 @@ import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCar
 import CartItemComponent from '@app/ui-kit/components/CartItem';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
 import { ConvexClient } from 'convex/browser';
-import { useConvex, useConvexAuth, useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { useConvex, useQuery } from 'convex/react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { YStack, ScrollView, Text } from 'tamagui';
 
+import { api } from '../../../../../convex/_generated/api';
+
 export const CartScreen = () => {
   const convex = useConvex();
-  const { isAuthenticated } = useConvexAuth(); // In real app, might need user ID from specific auth hook or query
+  // In real app, might need user ID from specific auth hook or query
   const [cart, setCart] = useState<Cart | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 

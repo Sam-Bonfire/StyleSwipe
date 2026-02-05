@@ -1,4 +1,5 @@
 import { NavigationBar } from '@app/ui-kit';
+import { useRoute } from '@react-navigation/native';
 import { Home, Search, Layers, User, ShoppingCart } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { YStack } from 'tamagui';
@@ -9,9 +10,6 @@ import { DiscoveryScreen } from '../discovery/DiscoveryScreen';
 import { HomeScreen } from '../home/HomeScreen';
 import { ProfileScreen } from '../profile/ProfileScreen';
 import { SearchScreen } from '../search/SearchScreen';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-import { useRoute } from '@react-navigation/native';
 
 export function MainScreen() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

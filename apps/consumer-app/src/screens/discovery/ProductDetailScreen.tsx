@@ -4,7 +4,7 @@ import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from 
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
 import { api } from '@convex-api';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
@@ -14,13 +14,18 @@ import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } fro
 
 import { Id } from '../../../../../convex/_generated/dataModel';
 
+type ProductDetailParams = {
+  params: {
+    productId: string;
+  }
+};
+
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
   // -------------------------------------------------------------------------
   // 1. Hooks & State
   // -------------------------------------------------------------------------
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const route = useRoute<any>();
+  const route = useRoute<RouteProp<ProductDetailParams, 'params'>>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
   const theme = useTheme();
@@ -188,9 +193,10 @@ export function ProductDetailScreen() {
       await manageCart.addToCart(userId, item);
       setIsAdded(true);
       Alert.alert('Success', 'Added to cart!');
-    } catch (e: any) {
+    } catch (e) {
       console.error('Failed to add to cart', e);
-      Alert.alert('Error', 'Failed to add to cart: ' + e.message);
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      Alert.alert('Error', 'Failed to add to cart: ' + message);
     } finally {
       setIsLoading(false);
     }

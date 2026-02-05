@@ -15,7 +15,7 @@ import { ConvexClient } from 'convex/browser';
  * Includes vector similarity search for Discovery Mode
  */
 export class ConvexProductRepository implements ProductRepository {
-  constructor(private client: ConvexClient) {}
+  constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<Product | null> {
     const doc = await this.client.query(api.products.getById, {
@@ -72,7 +72,7 @@ export class ConvexProductRepository implements ProductRepository {
     limit = 10,
     filters?: { category?: string; brand?: string },
   ): Promise<Product[]> {
-    const docs = await this.client.query(api.products.findSimilar, {
+    const docs = await this.client.action(api.products.findSimilar, {
       embedding,
       limit,
       category: filters?.category,

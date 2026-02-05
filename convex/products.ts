@@ -90,7 +90,7 @@ export const findSimilar = action({
 
     if (args.brand || args.category) {
       searchOptions.filter = (q: any) => {
-        const filters = [];
+        const filters: any[] = [];
         if (args.brand) filters.push(q.eq('brand', args.brand));
         if (args.category) filters.push(q.eq('category', args.category));
 
