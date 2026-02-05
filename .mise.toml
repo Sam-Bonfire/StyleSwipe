@@ -2,3 +2,4 @@
 bun = "1.2.23"
 node = "lts"
 "npm:@withgraphite/graphite-cli" = "latest"
+hurl = "latest"

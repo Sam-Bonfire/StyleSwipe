@@ -23,10 +23,11 @@
         "sync": "gt stack get",
         "lint:fix": "eslint --fix .",
         "format:fix": "prettier --write .",
-        "scrape": "bun run --env-file=.env.local --filter @app/scraper-service start --",
-        "scrape:worker": "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/scraper-service start -- --worker",
         "dev:admin": "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/admin-panel dev",
-        "build:extension": "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/browser-extension build"
+        "build:extension": "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/browser-extension build",
+        "dev:scraper": "bun run --env-file=.env.local --filter @app/scraper-service start -- --daemon",
+        "scraper": "bun run --env-file=.env.local --filter @app/scraper-service start --",
+        "verify:scraper": "bun run --filter @app/scraper-service typecheck"
     },
     "devDependencies": {
         "@convex-dev/better-auth": "^0.10.10",

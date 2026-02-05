@@ -6,7 +6,7 @@ The **Consumer App** is the primary frontend for StyleSwipe, built with **Expo (
 ## 🔧 Configuration
 
 ### Environment Variables
-*   Check `.env` in the project root for API keys (e.g., Convex URL).
+*   Check `.env.local` in the project root for API keys (e.g., Convex URL).
 *   **Note**: Never commit real secrets.
 
 ### Dependencies
