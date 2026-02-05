@@ -3,12 +3,14 @@ import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { action, query } from "./_generated/server";
 
+import type { Doc } from "./_generated/dataModel";
+
 export const searchProducts = action({
     args: {
         vector: v.array(v.float64()),
         limit: v.optional(v.number()),
     },
-    handler: async (ctx, args) => {
+    handler: async (ctx, args): Promise<{ products: (Doc<"products"> | null)[] }> => {
         const { vector, limit = 10 } = args;
 
         // Perform vector search

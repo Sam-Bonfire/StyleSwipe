@@ -190,29 +190,14 @@ const products = defineTable({
     price: v.number(),
     mrp: v.number(), // Maximum retail price (original)
     category: v.string(),
-    categoryId: v.optional(v.id("categories")),
+    masterCategory: v.optional(v.string()), // e.g., Apparel
+    subCategory: v.optional(v.string()),    // e.g., Topwear
     images: v.array(v.string()),
     description: v.optional(v.string()),
     rating: v.optional(v.number()),
     reviewCount: v.optional(v.number()),
     platform: v.optional(v.string()),
-    attributes: v.optional(
-        v.object({
-            color: v.optional(v.string()),
-            size: v.optional(v.array(v.string())),
-            material: v.optional(v.string()),
-            fit: v.optional(v.string()),
-            occasion: v.optional(v.array(v.string())),
-            // Extended attributes for PDP
-            care: v.optional(v.string()),
-            origin: v.optional(v.string()),
-            style: v.optional(v.string()),
-            sleeve: v.optional(v.string()),
-            neck: v.optional(v.string()),
-            season: v.optional(v.string()),
-            collection: v.optional(v.string()),
-        })
-    ),
+    attributes: v.optional(v.any()), // Changed to v.any() to capture all dynamic scraped attributes
     // Discovery Attributes for Filtering
     gender: v.optional(v.union(v.literal("men"), v.literal("women"), v.literal("unisex"))),
     priceTier: v.optional(v.union(v.literal("budget"), v.literal("mid"), v.literal("premium"), v.literal("luxury"))),
@@ -226,20 +211,23 @@ const products = defineTable({
         v2: v.optional(v.array(v.float64())),
     })),
     meta: v.optional(v.any()), // Flexible field for scraper extra data
-    createdAt: v.optional(v.number()),
+    externalId: v.optional(v.string()), // Generalized from Myntra ID for multi-platform support
     updatedAt: v.optional(v.number()),
 })
+    .index("by_externalId", ["externalId"])
     .index("by_category", ["category"])
+    .index("by_master_category", ["masterCategory"])
     .index("by_category_price", ["category", "price"])
     .index("by_brand", ["brand"])
+    .index("by_brand_title", ["brand", "title"])
     .searchIndex("search_title", {
         searchField: "title",
-        filterFields: ["brand", "category", "gender"],
+        filterFields: ["brand", "category", "masterCategory", "subCategory", "gender"],
     })
     .vectorIndex("by_embedding", {
         vectorField: "embedding",
         dimensions: 384, // Updated to 384 for BGE-Small
-        filterFields: ["category", "brand", "gender", "priceTier"],
+        filterFields: ["category", "masterCategory", "subCategory", "brand", "gender", "priceTier"],
     })
     // We can add vector indexes for v1/v2 later or now. 
     // Convex supports multiple vector indexes.
@@ -247,9 +235,9 @@ const products = defineTable({
         vectorField: "embeddingVersions.v1",
         dimensions: 384,
         filterFields: ["category", "gender", "priceTier"],
-    })
-    // Efficiently query recent products for fallback feed
-    .index("by_created", ["createdAt"]);
+    });
+// Efficiently query recent products for fallback feed
+// .index("by_created", ["createdAt"]); // Removed as createdAt was deleted
 
 // PRD Ref: [cite: 18] - Hierarchical Categories
 const categories = defineTable({
@@ -355,4 +343,30 @@ export default defineSchema({
 
     // Commerce Context
     carts,
+
+    // -----------------------------------------------------------------------------
+    // SCRAPER CONTEXT - Data Ingestion
+    // -----------------------------------------------------------------------------
+
+    scraped_products: defineTable({
+        externalId: v.string(),
+        url: v.string(),
+        data: v.any(), // Raw JSON data
+        lastScrapedAt: v.number(),
+        status: v.union(v.literal("active"), v.literal("out_of_stock")),
+    })
+        .index("by_externalId", ["externalId"])
+        .index("by_url", ["url"]),
+
+    scrape_jobs: defineTable({
+        type: v.union(v.literal("category"), v.literal("search"), v.literal("single")),
+        query: v.string(), // URL or Search Term
+        status: v.union(v.literal("pending"), v.literal("processing"), v.literal("completed"), v.literal("failed")),
+        productsFound: v.optional(v.number()),
+        errorMessage: v.optional(v.string()),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+    })
+        .index("by_status", ["status"])
+        .index("by_created", ["createdAt"]),
 });

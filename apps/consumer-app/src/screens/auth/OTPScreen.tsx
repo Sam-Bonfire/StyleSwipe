@@ -35,7 +35,6 @@ export function OTPScreen() {
 
             <YStack gap="$4">
                 <Input
-                    size="$4"
                     borderWidth={1}
                     placeholder="123456"
                     value={otp}

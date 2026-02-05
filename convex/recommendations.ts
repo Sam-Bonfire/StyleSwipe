@@ -7,7 +7,7 @@ export const getVectorFeed = action({
     args: {
         limit: v.optional(v.number()),
     },
-    handler: async (ctx, args) => {
+    handler: async (ctx, args): Promise<any> => {
         const identity = await ctx.auth.getUserIdentity();
         if (!identity) {
             // Return public/trending products if not logged in
@@ -35,13 +35,15 @@ export const getVectorFeed = action({
 
         // 3. Vector Search
         // Construct filter based on user gender if specific
-        let filter;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let filter: any;
         if (user.styleProfile?.gender && user.styleProfile.gender !== "both") {
             const gender = user.styleProfile.gender;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             filter = (q: any) => q.eq("gender", gender);
         }
 
-        const results = await ctx.vectorSearch("products", "by_embedding", {
+        const results: { _id: string; _score: number }[] = await ctx.vectorSearch("products", "by_embedding", {
             vector: preferenceVector,
             limit: Math.min(256, (args.limit || 10) + swipedIds.length),
             filter,
@@ -49,13 +51,14 @@ export const getVectorFeed = action({
 
         // 4. Filter & Hydrate
         // Filter out swiped items
-        const filteredResults = results.filter(r => !swipedIds.includes(r._id));
+        const filteredResults = results.filter((r) => !swipedIds.includes(r._id as any));
 
         // We only have the Ids and scores. Need to fetch full docs.
-        const productIds = filteredResults.slice(0, args.limit || 10).map(r => r._id);
+        const productIds = filteredResults.slice(0, args.limit || 10).map((r) => r._id);
 
         // Bulk fetch details
-        const products = await ctx.runQuery(api.products.getProductsByIds, { ids: productIds });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const products: any[] = await ctx.runQuery(api.products.getProductsByIds, { ids: productIds as any });
 
         // Fallback: If vector search yields no results (e.g. no products have embeddings yet),
         // return the standard discovery feed (recent items)

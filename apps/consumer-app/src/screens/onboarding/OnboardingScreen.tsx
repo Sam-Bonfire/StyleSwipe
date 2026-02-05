@@ -5,7 +5,7 @@ import { useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
-import { YStack, XStack, H1, H2, Text, Button as TamaguiButton, Progress, Spinner } from 'tamagui';
+import { YStack, XStack, H1, H2, Text, Progress, Spinner } from 'tamagui';
 
 import { generateEmbedding } from '../../infrastructure/InferenceEngine';
 
@@ -109,12 +109,12 @@ export function OnboardingScreen() {
 
                 <XStack space="$4" justifyContent="center">
                     {step > 0 && (
-                        <TamaguiButton
+                        <Button
                             onPress={handleBack}
                             variant="outlined"
                         >
                             Back
-                        </TamaguiButton>
+                        </Button>
                     )}
                     <Button
                         variant="primary"

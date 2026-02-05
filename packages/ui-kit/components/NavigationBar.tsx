@@ -37,7 +37,7 @@ const NavItemFrame = styled(YStack, {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: '$1',
-    paddingHorizontal: '$2',
+    paddingHorizontal: '$1',
     cursor: 'pointer',
     borderRadius: '$2',
     minWidth: 64,

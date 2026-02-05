@@ -95,7 +95,7 @@ export const getDiscoveryFeed = query({
             // Return public feed (Top 20 Recent)
             return await ctx.db
                 .query("products")
-                .withIndex("by_created")
+                // .withIndex("by_created") // Removed custom index
                 .order("desc")
                 .take(args.limit || 20);
         }
@@ -120,7 +120,7 @@ export const getDiscoveryFeed = query({
         // User Request: "Top 20 most recent additions"
         const products = await ctx.db
             .query("products")
-            .withIndex("by_created")
+            // .withIndex("by_created") // Removed custom index
             .order("desc")
             .take(50); // Fetch more to filter out swipes
 

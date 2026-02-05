@@ -1,3 +1,6 @@
+import React from 'react';
+import { styled, GetProps, Button as TButton, Spinner } from 'tamagui';
+
 /**
  * Button Component
  * 
@@ -6,26 +9,22 @@
  * Sizes: Small, Medium, Large
  */
 
-import React from 'react';
-import { styled, GetProps, Stack, Spinner, Text } from 'tamagui';
-
-const ButtonFrame = styled(Stack, {
+const StyledButton = styled(TButton, {
     name: 'Button',
-    tag: 'button',
-    role: 'button',
+
+    // Base styles
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '$1',
     cursor: 'pointer',
-    borderWidth: 2,
-    borderStyle: 'solid',
 
     variants: {
         variant: {
             primary: {
                 backgroundColor: '$primary',
                 borderColor: '$primary',
+                borderWidth: 2,
+                color: '$textInverse',
                 hoverStyle: {
                     backgroundColor: '$primaryDark',
                     borderColor: '$primaryDark',
@@ -39,18 +38,24 @@ const ButtonFrame = styled(Stack, {
             secondary: {
                 backgroundColor: 'transparent',
                 borderColor: '$secondary',
+                borderWidth: 2,
+                color: '$secondary',
                 hoverStyle: {
                     backgroundColor: '$secondaryLight',
                     borderColor: '$secondary',
+                    color: '$textInverse',
                 },
                 pressStyle: {
                     backgroundColor: '$secondary',
                     scale: 0.98,
+                    color: '$textInverse',
                 },
             },
             ghost: {
                 backgroundColor: 'transparent',
                 borderColor: 'transparent',
+                borderWidth: 0,
+                color: '$textPrimary',
                 hoverStyle: {
                     backgroundColor: '$backgroundHover',
                 },
@@ -59,23 +64,38 @@ const ButtonFrame = styled(Stack, {
                     scale: 0.98,
                 },
             },
+            outlined: {
+                backgroundColor: 'transparent',
+                borderColor: '$borderColor',
+                borderWidth: 1,
+                color: '$textPrimary',
+                hoverStyle: {
+                    backgroundColor: '$backgroundHover',
+                },
+                pressStyle: {
+                    backgroundColor: '$backgroundPress',
+                }
+            }
         },
 
-        size: {
+        buttonSize: {
             small: {
                 height: 36,
                 paddingHorizontal: '$2',
                 borderRadius: '$3',
+                fontSize: '$3',
             },
             medium: {
-                height: 44,
+                height: '$true',
                 paddingHorizontal: '$3',
                 borderRadius: '$3',
+                fontSize: '$4',
             },
             large: {
                 height: 52,
                 paddingHorizontal: '$4',
                 borderRadius: '$4',
+                fontSize: '$5',
             },
         },
 
@@ -92,85 +112,48 @@ const ButtonFrame = styled(Stack, {
                 pointerEvents: 'none',
             },
         },
+
+        circular: {
+            true: {
+                borderRadius: '$full',
+                paddingHorizontal: 0,
+            }
+        }
     } as const,
 
     defaultVariants: {
         variant: 'primary',
-        size: 'medium',
+        buttonSize: 'medium',
     },
 });
 
-const ButtonText = styled(Text, {
-    name: 'ButtonText',
-    fontFamily: '$body',
-    fontWeight: '600',
-
-    variants: {
-        variant: {
-            primary: {
-                color: '$textInverse',
-            },
-            secondary: {
-                color: '$secondary',
-            },
-            ghost: {
-                color: '$textPrimary',
-            },
-        },
-
-        size: {
-            small: {
-                fontSize: '$3',
-            },
-            medium: {
-                fontSize: '$4',
-            },
-            large: {
-                fontSize: '$5',
-            },
-        },
-    } as const,
-
-    defaultVariants: {
-        variant: 'primary',
-        size: 'medium',
-    },
-});
-
-export type ButtonProps = GetProps<typeof ButtonFrame> & {
-    children: React.ReactNode;
+export type ButtonProps = Omit<GetProps<typeof StyledButton>, 'buttonSize' | 'size'> & {
     loading?: boolean;
-    icon?: React.ReactNode;
-    iconAfter?: React.ReactNode;
+    size?: 'small' | 'medium' | 'large';
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ children, loading, icon, iconAfter, variant = 'primary', size = 'medium', disabled, ...props }, ref) => {
+    ({ children, loading, disabled, size = 'medium', icon, iconAfter, ...props }, ref) => {
         const isDisabled = disabled || loading;
 
         return (
-            <ButtonFrame
+            <StyledButton
                 ref={ref}
-                variant={variant as any}
-                size={size as any}
                 disabled={isDisabled as any}
+                buttonSize={size as any}
+                icon={icon}
+                iconAfter={iconAfter}
                 {...props}
             >
                 {loading ? (
                     <Spinner
                         size="small"
-                        color={variant === 'primary' ? '$textInverse' : '$secondary'}
+                        color={props.variant === 'secondary' || props.variant === 'ghost' ? '$secondary' : '$textInverse'}
                     />
                 ) : (
-                    <>
-                        {icon}
-                        <ButtonText variant={variant as any} size={size as any}>
-                            {children}
-                        </ButtonText>
-                        {iconAfter}
-                    </>
+                    children
                 )}
-            </ButtonFrame>
+            </StyledButton>
         );
     }
 );

@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { styled, YStack, XStack, Input, Text, Button, Label } from 'tamagui';
+import { styled, YStack, XStack, Input, Label } from 'tamagui';
+
+import { Button } from './Button';
 
 export interface Address {
     fullName: string;
@@ -29,17 +31,6 @@ const StyledInput = styled(Input, {
 
     focusStyle: {
         borderColor: '$primary',
-    },
-});
-
-const SaveButton = styled(Button, {
-    backgroundColor: '$primary',
-    color: 'white',
-    borderRadius: '$4',
-    marginTop: '$4',
-
-    hoverStyle: {
-        backgroundColor: '$primaryDark',
     },
 });
 
@@ -140,9 +131,15 @@ export const AddressForm = ({ initialAddress, onSubmit }: AddressFormProps) => {
                 />
             </InputGroup>
 
-            <SaveButton onPress={handleSubmit}>
-                <Text color="white" fontWeight="600">Save & Continue</Text>
-            </SaveButton>
+            <Button
+                variant="primary"
+                size="large"
+                marginTop="$4"
+                fullWidth
+                onPress={handleSubmit}
+            >
+                Save & Continue
+            </Button>
         </FormContainer>
     );
 };

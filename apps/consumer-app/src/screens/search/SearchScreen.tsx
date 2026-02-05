@@ -1,6 +1,6 @@
 import { SearchProducts } from '@app/core';
 import { Product } from '@app/core';
-import { ProductTile } from '@app/ui-kit';
+import { ProductTile, Button } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from '@tamagui/lucide-icons';
@@ -8,7 +8,7 @@ import { useConvex, useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState, useEffect, useMemo } from 'react';
 import { SafeAreaView, FlatList } from 'react-native';
-import { YStack, Text, Input, XStack, Button, Spinner } from 'tamagui';
+import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
 
 import { ConvexProductAdapter } from '../../infrastructure/adapters/ConvexProductAdapter';
 import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
@@ -113,7 +113,6 @@ export function SearchScreen() {
                 <YStack space="$2">
                     <Input
                         placeholder="Search for items..."
-                        size="$4"
                         borderWidth={1}
                         value={query}
                         onChangeText={setQuery}
@@ -121,7 +120,7 @@ export function SearchScreen() {
                     {suggestions.length > 0 && (
                         <XStack space="$2" flexWrap="wrap">
                             {suggestions.map((s, i) => (
-                                <Button key={i} size="$2" onPress={() => setQuery(s)}>{s}</Button>
+                                <Button key={i} size="small" onPress={() => setQuery(s)}>{s}</Button>
                             ))}
                         </XStack>
                     )}

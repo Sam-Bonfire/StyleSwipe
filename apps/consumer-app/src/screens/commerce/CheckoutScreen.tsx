@@ -1,11 +1,12 @@
 import { ManageCart, CheckoutService, Address, Order } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { Button } from '@app/ui-kit';
 import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex } from 'convex/react';
 import React, { useState, useMemo } from 'react';
-import { YStack, Text, XStack, Button, ScrollView } from 'tamagui';
+import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
 // Mock Order Repository (In-memory for prototype)
 // TODO: Replace with ConvexOrderRepository

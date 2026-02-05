@@ -92,7 +92,6 @@ export class ConvexProductRepository implements ProductRepository {
             attributes: product.attributes,
             embedding: product.embedding,
             meta: product.meta,
-            createdAt: product.createdAt ?? Date.now(),
             updatedAt: product.updatedAt ?? Date.now(),
         });
         return { ...product, id: id as string };
@@ -138,8 +137,8 @@ export class ConvexProductRepository implements ProductRepository {
             attributes: doc.attributes as ProductAttributes | undefined,
             embedding: doc.embedding as number[] | undefined,
             meta: doc.meta as Record<string, unknown> | undefined,
-            createdAt: doc.createdAt as number | undefined,
-            updatedAt: doc.updatedAt as number | undefined,
+            createdAt: (doc.createdAt as number) || (doc._creationTime as number),
+            updatedAt: (doc.updatedAt as number) || (doc._creationTime as number),
         };
     }
 }
