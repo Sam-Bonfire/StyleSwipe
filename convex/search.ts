@@ -21,7 +21,7 @@ export const searchProducts = action({
 
     // Fetch full product details
     const productIds = results.map((r) => r._id);
-    const products = await ctx.runQuery(api.products.getProductsByIds, { ids: productIds });
+    const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
 
     return { products };
   },

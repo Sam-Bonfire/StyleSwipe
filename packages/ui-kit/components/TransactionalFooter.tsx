@@ -19,6 +19,7 @@ const FooterFrame = styled(XStack, {
   shadowColor: '$shadowColor',
   shadowOpacity: 0.1,
   shadowRadius: 10,
+  zIndex: 1000,
 });
 
 const PriceContainer = styled(YStack, {

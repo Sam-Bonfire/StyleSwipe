@@ -1,4 +1,5 @@
 import { NavigationBar } from '@app/ui-kit';
+import { useRoute } from '@react-navigation/native';
 import { Home, Search, Layers, User, ShoppingCart } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { YStack } from 'tamagui';
@@ -11,7 +12,17 @@ import { ProfileScreen } from '../profile/ProfileScreen';
 import { SearchScreen } from '../search/SearchScreen';
 
 export function MainScreen() {
-  const [activeTab, setActiveTab] = useState('discovery');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const route = useRoute<any>();
+  const initialTab = route.params?.activeTab || 'discovery';
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  // Sync state if params change while screen is mounted (optional but good for reuse)
+  React.useEffect(() => {
+    if (route.params?.activeTab) {
+      setActiveTab(route.params.activeTab);
+    }
+  }, [route.params?.activeTab]);
 
   const navItems = [
     {

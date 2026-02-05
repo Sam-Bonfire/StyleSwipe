@@ -45,3 +45,20 @@ export const saveCart = mutation({
     }
   },
 });
+
+export const clear = mutation({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query('carts')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        items: [],
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});

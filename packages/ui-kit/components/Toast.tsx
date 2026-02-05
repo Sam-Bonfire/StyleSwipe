@@ -18,46 +18,31 @@ import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
 
 const ToastFrame = styled(XStack, {
   name: 'Toast',
-  backgroundColor: '$surface',
-  borderRadius: '$3',
-  padding: '$2',
-  paddingRight: '$3',
+  backgroundColor: '$background',
+  borderRadius: '$full', // Pill shape for ultra-premium feel
+  paddingVertical: '$1', // More compact
+  paddingHorizontal: '$2',
   gap: '$2',
   alignItems: 'center',
-  elevation: 8,
+  // Premium Layout
+  minHeight: 40, // Sleeker touch target
+  // Sophisticated Shadow
+  elevation: 6,
   shadowColor: '$shadowColor',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.15,
-  shadowRadius: 12,
-  maxWidth: 400,
-  borderLeftWidth: 4,
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.08,
+  shadowRadius: 16,
+  maxWidth: '92%',
+  borderWidth: 1,
+  borderColor: '$neutral200', // Very subtle definition
 
-  variants: {
-    variant: {
-      success: {
-        borderLeftColor: '$success',
-      },
-      error: {
-        borderLeftColor: '$error',
-      },
-      info: {
-        borderLeftColor: '$info',
-      },
-      warning: {
-        borderLeftColor: '$warning',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    variant: 'info',
-  },
+  // Removed variants for borderLeftColor to make it cleaner
 });
 
 const IconContainer = styled(Stack, {
   name: 'ToastIcon',
-  width: 32,
-  height: 32,
+  width: 28,
+  height: 28,
   borderRadius: '$full',
   alignItems: 'center',
   justifyContent: 'center',
@@ -82,15 +67,16 @@ const TitleText = styled(Text, {
   name: 'ToastTitle',
   fontFamily: '$body',
   fontSize: '$4',
-  fontWeight: '600',
+  fontWeight: '600', // Semi-bold is more refined than bold
   color: '$textPrimary',
+  letterSpacing: 0.2, // Tiny bit of spacing for readability
 });
 
 const MessageText = styled(Text, {
   name: 'ToastMessage',
   fontFamily: '$body',
   fontSize: '$3',
-  fontWeight: '400',
+  lineHeight: 18, // Fixed line height for consistency
   color: '$textSecondary',
 });
 
@@ -195,15 +181,15 @@ export const Toast = React.forwardRef<typeof ToastFrame, ToastProps>(
       transform: [{ translateY: translateY.value }],
     }));
 
-    const IconComponent = IconMap[variant as any];
+    const IconComponent = IconMap[variant as ToastVariant];
 
     return (
       <Animated.View style={animatedStyle}>
-        <ToastFrame ref={ref as any} variant={variant as any} {...props}>
+        <ToastFrame ref={ref as any} {...props}>
           {
             (
-              <IconContainer variant={variant as any}>
-                <IconComponent size={18} color={IconColorMap[variant as any] as any} />
+              <IconContainer variant={variant as ToastVariant}>
+                <IconComponent size={16} color={IconColorMap[variant as ToastVariant] as any} />
               </IconContainer>
             ) as any
           }

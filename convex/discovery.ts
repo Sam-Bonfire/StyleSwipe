@@ -22,29 +22,9 @@ export const recordProductView = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return;
 
-    // 1. Try Lookup by Subject (User ID)
-    let usersRes = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'users',
-      where: [{ field: '_id', operator: 'eq', value: identity.subject }],
-      paginationOpts: DEFAULT_PAGINATION,
-    });
-    let user = usersRes.page[0];
-
-    // 2. Fallback by Email
-    if (!user && identity.email) {
-      usersRes = await ctx.runQuery(components.auth.api.findMany, {
-        model: 'users',
-        where: [{ field: 'email', operator: 'eq', value: identity.email }],
-        paginationOpts: DEFAULT_PAGINATION,
-      });
-      user = usersRes.page[0];
-    }
-
-    if (!user) return;
-
     await ctx.db.insert('events', {
       type: 'view_product',
-      userId: user.id || user._id, // Use ID string from Component
+      userId: identity.subject,
       productId: args.productId,
       isSampled: true,
       timestamp: Date.now(),
@@ -169,29 +149,7 @@ export const processSwipe = mutation({
       throw new Error('Unauthenticated call to processSwipe');
     }
 
-    // 1. By ID
-    let usersRes = await ctx.runQuery(components.auth.api.findMany, {
-      model: 'users',
-      where: [{ field: '_id', operator: 'eq', value: identity.subject }],
-      paginationOpts: DEFAULT_PAGINATION,
-    });
-    let user = usersRes.page[0];
-
-    // 2. By Email
-    if (!user && identity.email) {
-      usersRes = await ctx.runQuery(components.auth.api.findMany, {
-        model: 'users',
-        where: [{ field: 'email', operator: 'eq', value: identity.email }],
-        paginationOpts: DEFAULT_PAGINATION,
-      });
-      user = usersRes.page[0];
-    }
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const userId = user.id || user._id;
+    const userId = identity.subject;
 
     const { productId, action } = args;
 

@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 
-import { query, mutation } from './_generated/server';
+import { query, mutation, action } from './_generated/server';
+import { api } from './_generated/api';
 
 export const getById = query({
   args: { id: v.id('products') },
@@ -70,16 +71,41 @@ export const searchByTitle = query({
   },
 });
 
-export const findSimilar = query({
+export const findSimilar = action({
   args: {
     embedding: v.array(v.float64()),
     limit: v.optional(v.number()),
     brand: v.optional(v.string()),
     category: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
-    // TODO: Implement actual vector search (requires Action or specific syntax)
-    return await ctx.db.query('products').take(args.limit ?? 10);
+  handler: async (ctx, args): Promise<any> => {
+    const { embedding, limit = 10 } = args;
+
+    // Perform vector search
+    // Conditionally apply filter only if needed
+    const searchOptions: any = {
+      vector: embedding,
+      limit,
+    };
+
+    if (args.brand || args.category) {
+      searchOptions.filter = (q: any) => {
+        const filters: any[] = [];
+        if (args.brand) filters.push(q.eq('brand', args.brand));
+        if (args.category) filters.push(q.eq('category', args.category));
+
+        if (filters.length === 1) return filters[0];
+        return filters.reduce((acc, curr) => q.and(acc, curr));
+      };
+    }
+
+    const results = await ctx.vectorSearch('products', 'by_embedding', searchOptions);
+
+    // Fetch full product details
+    const productIds = results.map((r) => r._id);
+    const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
+
+    return products;
   },
 });
 
@@ -154,20 +180,8 @@ export const remove = mutation({
   },
 });
 
-// Keep existing utilities just in case
-export const getProductsByIds = query({
-  args: {
-    ids: v.array(v.id('products')),
-  },
-  handler: async (ctx, args) => {
-    const products: any[] = [];
-    for (const id of args.ids) {
-      const product = await ctx.db.get(id);
-      if (product) products.push(product);
-    }
-    return products;
-  },
-});
+// Removed getProductsByIds from here to avoid circular dependency
+// Use api.helpers.getProductsByIds instead
 
 export const getLatest = query({
   args: {

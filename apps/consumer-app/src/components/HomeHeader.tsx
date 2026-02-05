@@ -6,27 +6,47 @@
  * - Plus, Bell (with badge), Bag (with badge) on the right
  */
 
-import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText } from '@app/ui-kit';
+import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
+import { api } from '@convex-api';
+import { useNavigation } from '@react-navigation/native';
 import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
+import { useQuery } from 'convex/react';
 import React from 'react';
 
 import { AppLogo } from './AppLogo';
 
 export const HomeHeader = () => {
-  // Mock counts for now as per design
-  const notificationCount = 8;
-  const bagCount = 2;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const navigation = useNavigation<any>();
+  const { showToast } = useToast();
+
+  // Fetch User & Cart
+  const user = useQuery(api.users.currentUser);
+  const userId = user?._id;
+
+  const cart = useQuery(api.cart.getCart, userId ? { userId } : 'skip');
+
+  // Dynamic Counts
+  const notificationCount = 0; // No notifications system yet
+  const bagCount = cart?.items?.length ?? 0;
 
   const handlePlusPress = () => {
     console.log('Plus pressed');
   };
 
   const handleNotificationPress = () => {
-    console.log('Notification pressed');
+    showToast({
+      title: 'Hold your horses! 🐴',
+      message: 'Notifications are still in the oven. Brace yourself!',
+      variant: 'info',
+    });
   };
 
   const handleBagPress = () => {
-    console.log('Bag pressed');
+    // Navigate to Main with activeTab 'cart' to switch tabs
+    // Note: Since we are already in Main, this might need a specific handling if Main doesn't listen to params update while mounted.
+    // But we implemented useEffect in MainScreen to listen to params, so this works.
+    navigation.navigate('Main', { activeTab: 'cart' });
   };
 
   return (
@@ -39,9 +59,7 @@ export const HomeHeader = () => {
       rightContent={
         <>
           <TopBarIconButton onPress={handlePlusPress}>
-            {/* Plus icon - check if circle around it is needed. In design it's a plus within a square/circle box? 
-                            The design shows a plus icon inside a rounded square or circle. TopBarIconButton is circular.
-                        */}
+            {/* Plus icon */}
             <Plus size={24} color="$textPrimary" />
           </TopBarIconButton>
 

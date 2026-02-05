@@ -1,21 +1,17 @@
-import { ManageCart, CheckoutService, Address, Order } from '@app/core';
+import { ManageCart, Address, PriceEstimator } from '@app/core';
 import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { ConvexEventRepository } from '@app/infrastructure/src/convex/repositories/EventRepository';
 import { Button } from '@app/ui-kit';
 import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
-import { useConvex } from 'convex/react';
+import { useConvex, useQuery } from 'convex/react';
 import React, { useState, useMemo } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
-// Mock Order Repository (In-memory for prototype)
-// TODO: Replace with ConvexOrderRepository
-const mockOrderRepo = {
-  save: async (order: Order) => {
-    console.log('Saved order', order);
-  },
-  findById: async () => null,
-};
+import { api } from '../../../../../convex/_generated/api';
+
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CheckoutScreen = ({ navigation }: any) => {
@@ -30,35 +26,48 @@ export const CheckoutScreen = ({ navigation }: any) => {
     return new ManageCart(repo);
   }, [convex]);
 
-  const checkoutService = useMemo(() => {
-    return new CheckoutService(mockOrderRepo);
-  }, []);
+  const eventRepo = useMemo(() => {
+    return new ConvexEventRepository(convex as unknown as ConvexClient);
+  }, [convex]);
 
   const handleAddressSubmit = (addr: Address) => {
     setAddress(addr);
     setStep('PAYMENT');
   };
 
+  // Resolved: Use api.users.currentUser to get the authenticated user
+  const user = useQuery(api.users.currentUser);
+  const userId = user?._id ?? undefined;
+
   const handlePlaceOrder = async () => {
-    if (!address) return;
+    if (!address || !userId) return;
     setIsProcessing(true);
     try {
       // 1. Get current cart
-      const cart = await manageCart.getCart('user-1');
+      const cart = await manageCart.getCart(userId);
       if (!cart) throw new Error('No cart found');
 
-      // 2. Create Order
-      const newOrder = await checkoutService.createOrderFromCart(
-        cart,
-        address,
-        () => `ORD-${Date.now()}`, // Mock ID gen
-      );
+      // 2. Log Checkout Event (replacing Order creation)
+      await eventRepo.create({
+        type: 'checkout_initiated',
+        userId: userId,
+        timestamp: Date.now(),
+        isSampled: true,
+        metadata: {
+          cartItems: cart.items.length,
+          total: PriceEstimator.estimate(cart).total,
+          address,
+        },
+      });
 
-      setOrderId(newOrder.id);
+      // 3. Generate a fake Order ID for display
+      const newOrderId = `ORD-${Date.now()}`;
+      setOrderId(newOrderId);
+
+      // 4. Clear cart
+      await manageCart.clearCart(userId);
+
       setStep('CONFIRMATION');
-
-      // 3. Clear cart (Optional validation step in real app)
-      // await manageCart.clearCart("user-1"); // TODO: Implement clearCart
     } catch (e) {
       console.error('Checkout failed', e);
       // Show error toast

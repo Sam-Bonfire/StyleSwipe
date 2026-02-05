@@ -62,7 +62,7 @@ export const getVectorFeed = action({
 
     // Bulk fetch details
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const products: any[] = await ctx.runQuery(api.products.getProductsByIds, {
+    const products: any[] = await ctx.runQuery(api.helpers.getProductsByIds, {
       ids: productIds as any,
     });
 
