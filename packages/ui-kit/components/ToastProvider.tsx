@@ -35,7 +35,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         width="100%"
                         alignItems="center"
                         pointerEvents="none"
-                        gap="$1"
+                        gap="$2"
                         zIndex={200000}
                     >
                         {toasts.map((toast) => (

@@ -19,27 +19,30 @@ import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
 const ToastFrame = styled(XStack, {
   name: 'Toast',
   backgroundColor: '$background',
-  borderRadius: '$4', // Slightly more rounded (16px) for friendliness
-  padding: '$2',
+  borderRadius: '$full', // Pill shape for ultra-premium feel
+  paddingVertical: '$1', // More compact
+  paddingHorizontal: '$2',
   gap: '$2',
   alignItems: 'center',
-  // Match TransactionalFooter shadow style
-  elevation: 4,
+  // Premium Layout
+  minHeight: 40, // Sleeker touch target
+  // Sophisticated Shadow
+  elevation: 6,
   shadowColor: '$shadowColor',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.1,
-  shadowRadius: 10,
-  maxWidth: '90%', // React to screen width
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.08,
+  shadowRadius: 16,
+  maxWidth: '92%',
   borderWidth: 1,
-  borderColor: '$borderColor',
+  borderColor: '$neutral200', // Very subtle definition
 
   // Removed variants for borderLeftColor to make it cleaner
 });
 
 const IconContainer = styled(Stack, {
   name: 'ToastIcon',
-  width: 32,
-  height: 32,
+  width: 28,
+  height: 28,
   borderRadius: '$full',
   alignItems: 'center',
   justifyContent: 'center',
@@ -64,15 +67,16 @@ const TitleText = styled(Text, {
   name: 'ToastTitle',
   fontFamily: '$body',
   fontSize: '$4',
-  fontWeight: '700', // Bolder title
+  fontWeight: '600', // Semi-bold is more refined than bold
   color: '$textPrimary',
+  letterSpacing: 0.2, // Tiny bit of spacing for readability
 });
 
 const MessageText = styled(Text, {
   name: 'ToastMessage',
   fontFamily: '$body',
   fontSize: '$3',
-  lineHeight: '$3', // Improve readability
+  lineHeight: 18, // Fixed line height for consistency
   color: '$textSecondary',
 });
 
@@ -177,15 +181,15 @@ export const Toast = React.forwardRef<typeof ToastFrame, ToastProps>(
       transform: [{ translateY: translateY.value }],
     }));
 
-    const IconComponent = IconMap[variant as any];
+    const IconComponent = IconMap[variant as ToastVariant];
 
     return (
       <Animated.View style={animatedStyle}>
-        <ToastFrame ref={ref as any} variant={variant as any} {...props}>
+        <ToastFrame ref={ref as any} {...props}>
           {
             (
-              <IconContainer variant={variant as any}>
-                <IconComponent size={18} color={IconColorMap[variant as any] as any} />
+              <IconContainer variant={variant as ToastVariant}>
+                <IconComponent size={16} color={IconColorMap[variant as ToastVariant] as any} />
               </IconContainer>
             ) as any
           }
