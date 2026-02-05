@@ -6,7 +6,7 @@
  * - Plus, Bell (with badge), Bag (with badge) on the right
  */
 
-import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText } from '@app/ui-kit';
+import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { useNavigation } from '@react-navigation/native';
 import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
@@ -18,6 +18,7 @@ import { AppLogo } from './AppLogo';
 export const HomeHeader = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
+  const { showToast } = useToast();
 
   // Fetch User & Cart
   const user = useQuery(api.users.currentUser);
@@ -34,7 +35,11 @@ export const HomeHeader = () => {
   };
 
   const handleNotificationPress = () => {
-    console.log('Notification pressed');
+    showToast({
+      title: 'Hold your horses! 🐴',
+      message: 'Notifications are still in the oven. Brace yourself!',
+      variant: 'info',
+    });
   };
 
   const handleBagPress = () => {

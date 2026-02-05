@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import { config } from '@app/ui-kit';
+import { config, ToastProvider } from '@app/ui-kit';
 import { api } from '@convex-api';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -96,9 +96,11 @@ export default function App() {
       <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
         <TamaguiProvider config={config}>
           <Theme name="BrandIdentityLight">
-            <NavigationContainer>
-              <NavigationGuard />
-            </NavigationContainer>
+            <ToastProvider>
+              <NavigationContainer>
+                <NavigationGuard />
+              </NavigationContainer>
+            </ToastProvider>
           </Theme>
         </TamaguiProvider>
       </ConvexBetterAuthProvider>

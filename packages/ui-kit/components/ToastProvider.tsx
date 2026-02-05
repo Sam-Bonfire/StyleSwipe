@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { YStack, Portal } from 'tamagui';
+import { YStack, Portal, Theme } from 'tamagui';
 
 import { Toast, ToastProps } from './Toast';
 
@@ -15,7 +15,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [toasts, setToasts] = useState<(ToastOptions & { id: number })[]>([]);
 
     const showToast = useCallback((options: ToastOptions) => {
-        setToasts((prev) => [...prev, { ...options, id: Date.now() }]);
+        setToasts((prev) => [...prev, { ...options, id: Date.now() }] as (ToastOptions & { id: number })[]);
     }, []);
 
     const dismissToast = useCallback((id: number) => {
@@ -26,25 +26,29 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         <ToastContext.Provider value={{ showToast }}>
             {children}
             <Portal>
-                <YStack
-                    position="absolute"
-                    top={60}
-                    left={0}
-                    right={0}
-                    alignItems="center"
-                    pointerEvents="none"
-                    gap="$2"
-                    zIndex={200000}
-                >
-                    {toasts.map((toast) => (
-                        <Toast
-                            key={toast.id}
-                            {...toast}
-                            pointerEvents="auto"
-                            onDismiss={() => dismissToast(toast.id)}
-                        />
-                    ))}
-                </YStack>
+                <Theme name="light">
+                    <YStack
+                        position="absolute"
+                        top={60}
+                        left={0}
+                        right={0}
+                        width="100%"
+                        alignItems="center"
+                        pointerEvents="none"
+                        gap="$1"
+                        zIndex={200000}
+                    >
+                        {toasts.map((toast) => (
+                            <Toast
+                                key={toast.id}
+                                {...toast}
+                                pointerEvents="auto"
+                                alignSelf="center"
+                                onDismiss={() => dismissToast(toast.id)}
+                            />
+                        ))}
+                    </YStack>
+                </Theme>
             </Portal>
         </ToastContext.Provider>
     );

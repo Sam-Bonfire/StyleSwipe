@@ -18,40 +18,22 @@ import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
 
 const ToastFrame = styled(XStack, {
   name: 'Toast',
-  backgroundColor: '$surface',
-  borderRadius: '$3',
+  backgroundColor: '$background',
+  borderRadius: '$4', // Slightly more rounded (16px) for friendliness
   padding: '$2',
-  paddingRight: '$3',
   gap: '$2',
   alignItems: 'center',
-  elevation: 8,
+  // Match TransactionalFooter shadow style
+  elevation: 4,
   shadowColor: '$shadowColor',
   shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.15,
-  shadowRadius: 12,
-  maxWidth: 400,
-  borderLeftWidth: 4,
+  shadowOpacity: 0.1,
+  shadowRadius: 10,
+  maxWidth: '90%', // React to screen width
+  borderWidth: 1,
+  borderColor: '$borderColor',
 
-  variants: {
-    variant: {
-      success: {
-        borderLeftColor: '$success',
-      },
-      error: {
-        borderLeftColor: '$error',
-      },
-      info: {
-        borderLeftColor: '$info',
-      },
-      warning: {
-        borderLeftColor: '$warning',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    variant: 'info',
-  },
+  // Removed variants for borderLeftColor to make it cleaner
 });
 
 const IconContainer = styled(Stack, {
@@ -82,7 +64,7 @@ const TitleText = styled(Text, {
   name: 'ToastTitle',
   fontFamily: '$body',
   fontSize: '$4',
-  fontWeight: '600',
+  fontWeight: '700', // Bolder title
   color: '$textPrimary',
 });
 
@@ -90,7 +72,7 @@ const MessageText = styled(Text, {
   name: 'ToastMessage',
   fontFamily: '$body',
   fontSize: '$3',
-  fontWeight: '400',
+  lineHeight: '$3', // Improve readability
   color: '$textSecondary',
 });
 
