@@ -1,7 +1,5 @@
-import { getAuthConfigProvider } from "@convex-dev/better-auth/auth-config";
+import { getAuthConfigProvider } from '@convex-dev/better-auth/auth-config';
 
 export default {
-    providers: [
-        getAuthConfigProvider(),
-    ],
+  providers: [getAuthConfigProvider()],
 };

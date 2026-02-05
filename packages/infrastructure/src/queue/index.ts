@@ -1,1 +1,1 @@
-export * from "./QueueAdapter";
+export * from './QueueAdapter';

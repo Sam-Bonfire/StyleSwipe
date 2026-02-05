@@ -1,91 +1,96 @@
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-import { paginationOptsValidator } from "convex/server";
+import { paginationOptsValidator } from 'convex/server';
+import { v } from 'convex/values';
+
+import { components } from './_generated/api';
+import { query, mutation } from './_generated/server';
+import { requireCoreAdmin } from './permissions';
 
 // =============================================================================
 // ADMIN DASHBOARD QUERIES
 // =============================================================================
 
 export const getStats = query({
-    args: {},
-    handler: async (ctx) => {
-        // In a real production app, we would use a dedicated counters table.
-        // For this MVP, we'll just fetch specific indexes or limited counts.
+  args: {},
+  handler: async (ctx) => {
+    await requireCoreAdmin(ctx);
 
-        // const _products = await ctx.db.query("products").take(1); // just to check existence? No we need counts.
-        // Convex doesn't support efficient counting of full tables without iterating.
-        // We will iterate but with a limit for safety, or assume low volume for now.
+    // Fast queries with limits to avoid timeout
+    const [activeJobs, products, usersRes] = await Promise.all([
+      ctx.db
+        .query('scrape_jobs')
+        .withIndex('by_status', (q) => q.eq('status', 'processing'))
+        .take(100),
+      ctx.db.query('products').take(1001),
+      ctx.runQuery(components.auth.api.findMany, {
+        model: 'users',
+        where: [],
+        paginationOpts: { numItems: 5, cursor: null },
+      }),
+    ]);
 
-        // Efficiently estimate counts or just fetch recent items to show activity
-        const recentUsers = await ctx.db.query("users").order("desc").take(5);
-
-        const activeJobs = await ctx.db.query("scrape_jobs")
-            .withIndex("by_status", (q) => q.eq("status", "processing"))
-            .collect();
-
-        // For total counts in MVP, we might just have to collect all IDs (lightweight) if tables are small (<10k)
-        // Or just show "Recents" in stats for now to be safe.
-        // Let's try to collect all ID's for accuracy if it's small, but cap it.
-
-        return {
-            totalUsers: (await ctx.db.query("users").collect()).length,
-            totalProducts: (await ctx.db.query("products").collect()).length,
-            activeJobs: activeJobs.length,
-            recentUsers,
-        };
-    },
+    return {
+      totalUsers: usersRes.page.length,
+      totalProducts: products.length,
+      activeJobs: activeJobs.length,
+      recentUsers: usersRes.page,
+    };
+  },
 });
 
 export const getScrapedProducts = query({
-    args: {
-        paginationOpts: paginationOptsValidator,
-        filters: v.optional(v.object({
-            brand: v.optional(v.string()),
-            category: v.optional(v.string()),
-        }))
-    },
-    handler: async (ctx, args) => {
-        if (args.filters?.brand) {
-            return await ctx.db
-                .query("products")
-                .withIndex("by_brand", (q) => q.eq("brand", args.filters!.brand!))
-                .paginate(args.paginationOpts);
-        }
+  args: {
+    paginationOpts: paginationOptsValidator,
+    filters: v.optional(
+      v.object({
+        brand: v.optional(v.string()),
+        category: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+    if (args.filters?.brand) {
+      return await ctx.db
+        .query('products')
+        .withIndex('by_brand', (q) => q.eq('brand', args.filters!.brand!))
+        .paginate(args.paginationOpts);
+    }
 
-        if (args.filters?.category) {
-            return await ctx.db
-                .query("products")
-                .withIndex("by_category", (q) => q.eq("category", args.filters!.category!))
-                .paginate(args.paginationOpts);
-        }
+    if (args.filters?.category) {
+      return await ctx.db
+        .query('products')
+        .withIndex('by_category', (q) => q.eq('category', args.filters!.category!))
+        .paginate(args.paginationOpts);
+    }
 
-        return await ctx.db
-            .query("products")
-            // .withIndex("by_created") // Index removed
-            .order("desc")
-            .paginate(args.paginationOpts);
-    },
+    return await ctx.db
+      .query('products')
+      // .withIndex("by_created") // Index removed
+      .order('desc')
+      .paginate(args.paginationOpts);
+  },
 });
 
 export const getScrapingJobs = query({
-    args: {
-        paginationOpts: paginationOptsValidator,
-        status: v.optional(v.string())
-    },
-    handler: async (ctx, args) => {
-        if (args.status) {
-            return await ctx.db
-                .query("scrape_jobs")
-                .withIndex("by_status", (q) => q.eq("status", args.status as any))
-                .paginate(args.paginationOpts);
-        }
+  args: {
+    paginationOpts: paginationOptsValidator,
+    status: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+    if (args.status) {
+      return await ctx.db
+        .query('scrape_jobs')
+        .withIndex('by_status', (q) => q.eq('status', args.status as any))
+        .paginate(args.paginationOpts);
+    }
 
-        return await ctx.db
-            .query("scrape_jobs")
-            .withIndex("by_created")
-            .order("desc")
-            .paginate(args.paginationOpts);
-    },
+    return await ctx.db
+      .query('scrape_jobs')
+      .withIndex('by_created')
+      .order('desc')
+      .paginate(args.paginationOpts);
+  },
 });
 
 // =============================================================================
@@ -93,21 +98,61 @@ export const getScrapingJobs = query({
 // =============================================================================
 
 export const retriggerScrape = mutation({
-    args: { productId: v.id("products") },
-    handler: async (ctx, args) => {
-        const product = await ctx.db.get(args.productId);
-        if (!product) throw new Error("Product not found");
+  args: { productId: v.id('products') },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+    const product = await ctx.db.get(args.productId);
+    if (!product) throw new Error('Product not found');
 
-        // Logic to schedule a scrape
-        // For now, we'll just create a new scrape job
-        await ctx.db.insert("scrape_jobs", {
-            type: "single",
-            query: product.meta?.url || "", // Assuming URL is backed up in meta
-            status: "pending",
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        });
+    // Logic to schedule a scrape
+    // For now, we'll just create a new scrape job
+    await ctx.db.insert('scrape_jobs', {
+      type: 'single',
+      query: product.meta?.url || '', // Assuming URL is backed up in meta
+      status: 'pending',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
 
-        return { success: true };
-    },
+    return { success: true };
+  },
+});
+
+export const searchProducts = query({
+  args: { query: v.string() },
+  handler: async (ctx, args) => {
+    await requireCoreAdmin(ctx);
+
+    const searchLower = args.query.toLowerCase();
+
+    // Search by brand first (indexed)
+    const brandResults = await ctx.db
+      .query('products')
+      .withIndex('by_brand')
+      .filter((q) => q.or(
+        q.eq(q.field('brand'), searchLower),
+        q.gte(q.field('brand'), searchLower)
+      ))
+      .take(50);
+
+    // Search all products for title match (fallback)
+    const allProducts = await ctx.db
+      .query('products')
+      .take(200);
+
+    const titleResults = allProducts.filter(p =>
+      p.title?.toLowerCase().includes(searchLower) ||
+      p.brand?.toLowerCase().includes(searchLower)
+    );
+
+    // Combine and deduplicate
+    const seen = new Set<string>();
+    const combined = [...brandResults, ...titleResults].filter(p => {
+      if (seen.has(p._id)) return false;
+      seen.add(p._id);
+      return true;
+    });
+
+    return combined.slice(0, 50);
+  },
 });

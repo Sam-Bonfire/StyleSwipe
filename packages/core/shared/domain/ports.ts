@@ -4,23 +4,23 @@
 // =============================================================================
 
 import type {
-    User,
-    StyleProfile,
-    Session,
-    Account,
-    Verification,
-    Organization,
-    Member,
-    MemberRole,
-    FeatureFlag,
-    Environment,
-    LogEntry,
-    LogLevel,
-    SampledEvent,
-    Product,
-    PartnerSync,
-    PartnerSyncStatus,
-} from "./types";
+  User,
+  StyleProfile,
+  Session,
+  Account,
+  Verification,
+  Organization,
+  Member,
+  MemberRole,
+  FeatureFlag,
+  Environment,
+  LogEntry,
+  LogLevel,
+  SampledEvent,
+  Product,
+  PartnerSync,
+  PartnerSyncStatus,
+} from './types';
 
 // -----------------------------------------------------------------------------
 // IDENTITY CONTEXT PORTS
@@ -30,51 +30,51 @@ import type {
  * User repository port
  */
 export interface UserRepository {
-    findById(id: string): Promise<User | null>;
-    findByEmail(email: string): Promise<User | null>;
-    findByPhone(phone: string): Promise<User | null>;
-    create(user: Omit<User, "id">): Promise<User>;
-    update(id: string, data: Partial<Omit<User, "id">>): Promise<User>;
-    updateStyleProfile(id: string, profile: StyleProfile): Promise<User>;
-    delete(id: string): Promise<void>;
+  findById(id: string): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
+  findByPhone(phone: string): Promise<User | null>;
+  create(user: Omit<User, 'id'>): Promise<User>;
+  update(id: string, data: Partial<Omit<User, 'id'>>): Promise<User>;
+  updateStyleProfile(id: string, profile: StyleProfile): Promise<User>;
+  delete(id: string): Promise<void>;
 }
 
 /**
  * Session repository port
  */
 export interface SessionRepository {
-    findById(id: string): Promise<Session | null>;
-    findByToken(token: string): Promise<Session | null>;
-    findByUserId(userId: string): Promise<Session[]>;
-    create(session: Omit<Session, "id">): Promise<Session>;
-    delete(id: string): Promise<void>;
-    deleteByUserId(userId: string): Promise<void>;
-    deleteExpired(): Promise<number>; // Returns count of deleted sessions
+  findById(id: string): Promise<Session | null>;
+  findByToken(token: string): Promise<Session | null>;
+  findByUserId(userId: string): Promise<Session[]>;
+  create(session: Omit<Session, 'id'>): Promise<Session>;
+  delete(id: string): Promise<void>;
+  deleteByUserId(userId: string): Promise<void>;
+  deleteExpired(): Promise<number>; // Returns count of deleted sessions
 }
 
 /**
  * Account repository port (OAuth providers)
  */
 export interface AccountRepository {
-    findById(id: string): Promise<Account | null>;
-    findByProvider(providerId: string, providerAccountId: string): Promise<Account | null>;
-    findByUserId(userId: string): Promise<Account[]>;
-    create(account: Omit<Account, "id">): Promise<Account>;
-    update(id: string, data: Partial<Omit<Account, "id">>): Promise<Account>;
-    delete(id: string): Promise<void>;
-    deleteByUserId(userId: string): Promise<void>;
+  findById(id: string): Promise<Account | null>;
+  findByProvider(providerId: string, providerAccountId: string): Promise<Account | null>;
+  findByUserId(userId: string): Promise<Account[]>;
+  create(account: Omit<Account, 'id'>): Promise<Account>;
+  update(id: string, data: Partial<Omit<Account, 'id'>>): Promise<Account>;
+  delete(id: string): Promise<void>;
+  deleteByUserId(userId: string): Promise<void>;
 }
 
 /**
  * Verification repository port (OTP)
  */
 export interface VerificationRepository {
-    findByIdentifier(identifier: string): Promise<Verification | null>;
-    findByToken(token: string): Promise<Verification | null>;
-    create(verification: Omit<Verification, "id">): Promise<Verification>;
-    delete(id: string): Promise<void>;
-    deleteByIdentifier(identifier: string): Promise<void>;
-    deleteExpired(): Promise<number>;
+  findByIdentifier(identifier: string): Promise<Verification | null>;
+  findByToken(token: string): Promise<Verification | null>;
+  create(verification: Omit<Verification, 'id'>): Promise<Verification>;
+  delete(id: string): Promise<void>;
+  deleteByIdentifier(identifier: string): Promise<void>;
+  deleteExpired(): Promise<number>;
 }
 
 // -----------------------------------------------------------------------------
@@ -85,25 +85,25 @@ export interface VerificationRepository {
  * Organization repository port
  */
 export interface OrganizationRepository {
-    findById(id: string): Promise<Organization | null>;
-    findBySlug(slug: string): Promise<Organization | null>;
-    create(org: Omit<Organization, "id">): Promise<Organization>;
-    update(id: string, data: Partial<Omit<Organization, "id">>): Promise<Organization>;
-    delete(id: string): Promise<void>;
+  findById(id: string): Promise<Organization | null>;
+  findBySlug(slug: string): Promise<Organization | null>;
+  create(org: Omit<Organization, 'id'>): Promise<Organization>;
+  update(id: string, data: Partial<Omit<Organization, 'id'>>): Promise<Organization>;
+  delete(id: string): Promise<void>;
 }
 
 /**
  * Member repository port
  */
 export interface MemberRepository {
-    findById(id: string): Promise<Member | null>;
-    findByOrgAndUser(orgId: string, userId: string): Promise<Member | null>;
-    findByOrg(orgId: string): Promise<Member[]>;
-    findByUser(userId: string): Promise<Member[]>;
-    create(member: Omit<Member, "id">): Promise<Member>;
-    updateRole(id: string, role: MemberRole): Promise<Member>;
-    delete(id: string): Promise<void>;
-    deleteByOrg(orgId: string): Promise<void>;
+  findById(id: string): Promise<Member | null>;
+  findByOrgAndUser(orgId: string, userId: string): Promise<Member | null>;
+  findByOrg(orgId: string): Promise<Member[]>;
+  findByUser(userId: string): Promise<Member[]>;
+  create(member: Omit<Member, 'id'>): Promise<Member>;
+  updateRole(id: string, role: MemberRole): Promise<Member>;
+  delete(id: string): Promise<void>;
+  deleteByOrg(orgId: string): Promise<void>;
 }
 
 // -----------------------------------------------------------------------------
@@ -114,33 +114,33 @@ export interface MemberRepository {
  * Feature flag repository port
  */
 export interface FeatureFlagRepository {
-    findById(id: string): Promise<FeatureFlag | null>;
-    findByName(environment: Environment, name: string): Promise<FeatureFlag | null>;
-    findByEnvironment(environment: Environment): Promise<FeatureFlag[]>;
-    create(flag: Omit<FeatureFlag, "id">): Promise<FeatureFlag>;
-    update(id: string, data: Partial<Omit<FeatureFlag, "id">>): Promise<FeatureFlag>;
-    delete(id: string): Promise<void>;
+  findById(id: string): Promise<FeatureFlag | null>;
+  findByName(environment: Environment, name: string): Promise<FeatureFlag | null>;
+  findByEnvironment(environment: Environment): Promise<FeatureFlag[]>;
+  create(flag: Omit<FeatureFlag, 'id'>): Promise<FeatureFlag>;
+  update(id: string, data: Partial<Omit<FeatureFlag, 'id'>>): Promise<FeatureFlag>;
+  delete(id: string): Promise<void>;
 }
 
 /**
  * Log repository port
  */
 export interface LogRepository {
-    create(entry: Omit<LogEntry, "id">): Promise<LogEntry>;
-    findByLevel(level: LogLevel, limit?: number): Promise<LogEntry[]>;
-    findByTraceId(traceId: string): Promise<LogEntry[]>;
-    findByUserId(userId: string, limit?: number): Promise<LogEntry[]>;
-    deleteOlderThan(timestamp: number): Promise<number>;
+  create(entry: Omit<LogEntry, 'id'>): Promise<LogEntry>;
+  findByLevel(level: LogLevel, limit?: number): Promise<LogEntry[]>;
+  findByTraceId(traceId: string): Promise<LogEntry[]>;
+  findByUserId(userId: string, limit?: number): Promise<LogEntry[]>;
+  deleteOlderThan(timestamp: number): Promise<number>;
 }
 
 /**
  * Event repository port (Strategic sampling)
  */
 export interface EventRepository {
-    create(event: Omit<SampledEvent, "id">): Promise<SampledEvent>;
-    findByUserAndType(userId: string, type: string, limit?: number): Promise<SampledEvent[]>;
-    findByType(type: string, limit?: number): Promise<SampledEvent[]>;
-    findSampledByType(type: string, limit?: number): Promise<SampledEvent[]>;
+  create(event: Omit<SampledEvent, 'id'>): Promise<SampledEvent>;
+  findByUserAndType(userId: string, type: string, limit?: number): Promise<SampledEvent[]>;
+  findByType(type: string, limit?: number): Promise<SampledEvent[]>;
+  findSampledByType(type: string, limit?: number): Promise<SampledEvent[]>;
 }
 
 // -----------------------------------------------------------------------------
@@ -151,21 +151,25 @@ export interface EventRepository {
  * Product repository port
  */
 export interface ProductRepository {
-    findById(id: string): Promise<Product | null>;
-    findByCategory(category: string, limit?: number): Promise<Product[]>;
-    findByCategoryAndPrice(
-        category: string,
-        minPrice: number,
-        maxPrice: number,
-        limit?: number
-    ): Promise<Product[]>;
-    findByBrand(brand: string, limit?: number): Promise<Product[]>;
-    searchByTitle(query: string, filters?: { brand?: string; category?: string }): Promise<Product[]>;
-    findSimilar(embedding: number[], limit?: number, filters?: { category?: string; brand?: string }): Promise<Product[]>;
-    create(product: Omit<Product, "id">): Promise<Product>;
-    update(id: string, data: Partial<Omit<Product, "id">>): Promise<Product>;
-    updateEmbedding(id: string, embedding: number[]): Promise<Product>;
-    delete(id: string): Promise<void>;
+  findById(id: string): Promise<Product | null>;
+  findByCategory(category: string, limit?: number): Promise<Product[]>;
+  findByCategoryAndPrice(
+    category: string,
+    minPrice: number,
+    maxPrice: number,
+    limit?: number,
+  ): Promise<Product[]>;
+  findByBrand(brand: string, limit?: number): Promise<Product[]>;
+  searchByTitle(query: string, filters?: { brand?: string; category?: string }): Promise<Product[]>;
+  findSimilar(
+    embedding: number[],
+    limit?: number,
+    filters?: { category?: string; brand?: string },
+  ): Promise<Product[]>;
+  create(product: Omit<Product, 'id'>): Promise<Product>;
+  update(id: string, data: Partial<Omit<Product, 'id'>>): Promise<Product>;
+  updateEmbedding(id: string, embedding: number[]): Promise<Product>;
+  delete(id: string): Promise<void>;
 }
 
 // -----------------------------------------------------------------------------
@@ -176,16 +180,16 @@ export interface ProductRepository {
  * Partner sync repository port
  */
 export interface PartnerSyncRepository {
-    findById(id: string): Promise<PartnerSync | null>;
-    findByInviteCode(inviteCode: string): Promise<PartnerSync | null>;
-    findByInitiator(initiatorId: string): Promise<PartnerSync[]>;
-    findByPartner(partnerId: string): Promise<PartnerSync[]>;
-    findActiveByUser(userId: string): Promise<PartnerSync | null>;
-    create(sync: Omit<PartnerSync, "id">): Promise<PartnerSync>;
-    update(id: string, data: Partial<Omit<PartnerSync, "id">>): Promise<PartnerSync>;
-    updateStatus(id: string, status: PartnerSyncStatus): Promise<PartnerSync>;
-    delete(id: string): Promise<void>;
-    deleteExpired(): Promise<number>;
+  findById(id: string): Promise<PartnerSync | null>;
+  findByInviteCode(inviteCode: string): Promise<PartnerSync | null>;
+  findByInitiator(initiatorId: string): Promise<PartnerSync[]>;
+  findByPartner(partnerId: string): Promise<PartnerSync[]>;
+  findActiveByUser(userId: string): Promise<PartnerSync | null>;
+  create(sync: Omit<PartnerSync, 'id'>): Promise<PartnerSync>;
+  update(id: string, data: Partial<Omit<PartnerSync, 'id'>>): Promise<PartnerSync>;
+  updateStatus(id: string, status: PartnerSyncStatus): Promise<PartnerSync>;
+  delete(id: string): Promise<void>;
+  deleteExpired(): Promise<number>;
 }
 
 // -----------------------------------------------------------------------------
@@ -196,18 +200,18 @@ export interface PartnerSyncRepository {
  * Generic queue interface for async processing pipelines
  */
 export interface Queue<T> {
-    /** Add single item to queue, returns item ID */
-    push(item: T): Promise<string>;
-    /** Add multiple items to queue, returns item IDs */
-    pushBatch(items: T[]): Promise<string[]>;
-    /** Pull items for processing (marks as processing) */
-    pull(batchSize?: number): Promise<Array<{ id: string; data: T }>>;
-    /** Mark item as completed and remove from queue */
-    complete(id: string): Promise<void>;
-    /** Mark item as failed, optionally with error message */
-    fail(id: string, error?: string): Promise<void>;
-    /** Get current queue depth */
-    size(): Promise<number>;
+  /** Add single item to queue, returns item ID */
+  push(item: T): Promise<string>;
+  /** Add multiple items to queue, returns item IDs */
+  pushBatch(items: T[]): Promise<string[]>;
+  /** Pull items for processing (marks as processing) */
+  pull(batchSize?: number): Promise<Array<{ id: string; data: T }>>;
+  /** Mark item as completed and remove from queue */
+  complete(id: string): Promise<void>;
+  /** Mark item as failed, optionally with error message */
+  fail(id: string, error?: string): Promise<void>;
+  /** Get current queue depth */
+  size(): Promise<number>;
 }
 
 // -----------------------------------------------------------------------------
@@ -218,20 +222,23 @@ export interface Queue<T> {
  * Embedding generation errors
  */
 export class EmbedderError extends Error {
-    constructor(message: string, public readonly cause?: unknown) {
-        super(message);
-        this.name = "EmbedderError";
-    }
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = 'EmbedderError';
+  }
 }
 
 /**
  * Text embedding generation interface
  */
 export interface Embedder {
-    /** Generate embedding vector for text */
-    generateEmbedding(text: string): Promise<number[]>;
-    /** Get embedding dimensions (e.g., 384 for BGE-Small) */
-    getDimensions(): number;
+  /** Generate embedding vector for text */
+  generateEmbedding(text: string): Promise<number[]>;
+  /** Get embedding dimensions (e.g., 384 for BGE-Small) */
+  getDimensions(): number;
 }
 
 // -----------------------------------------------------------------------------
@@ -243,16 +250,15 @@ export interface Embedder {
  * Used for dependency injection in use cases
  */
 export interface Repositories {
-    users: UserRepository;
-    sessions: SessionRepository;
-    accounts: AccountRepository;
-    verifications: VerificationRepository;
-    organizations: OrganizationRepository;
-    members: MemberRepository;
-    featureFlags: FeatureFlagRepository;
-    logs: LogRepository;
-    events: EventRepository;
-    products: ProductRepository;
-    partnerSync: PartnerSyncRepository;
+  users: UserRepository;
+  sessions: SessionRepository;
+  accounts: AccountRepository;
+  verifications: VerificationRepository;
+  organizations: OrganizationRepository;
+  members: MemberRepository;
+  featureFlags: FeatureFlagRepository;
+  logs: LogRepository;
+  events: EventRepository;
+  products: ProductRepository;
+  partnerSync: PartnerSyncRepository;
 }
-

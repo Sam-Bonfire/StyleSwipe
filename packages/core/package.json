@@ -1,19 +1,19 @@
 {
-    "name": "@app/core",
-    "version": "0.0.0",
-    "main": "src/index.ts",
-    "license": "UNLICENSED",
-    "private": true,
-    "scripts": {
-        "test": "bun test",
-        "typecheck": "tsc --noEmit",
-        "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --ignore-pattern .eslintrc.js"
-    },
-    "dependencies": {
-        "effect": "^2.0.0",
-        "fast-check": "^3.0.0"
-    },
-    "devDependencies": {
-        "@types/node": "^25.0.10"
-    }
+  "name": "@app/core",
+  "version": "0.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --ignore-pattern .eslintrc.js"
+  },
+  "dependencies": {
+    "effect": "^2.0.0",
+    "fast-check": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10"
+  }
 }

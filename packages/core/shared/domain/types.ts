@@ -12,9 +12,9 @@
  * PRD Ref: [cite: 112-135]
  */
 export interface StyleSizes {
-    top?: string;
-    bottom?: string;
-    shoe?: string;
+  top?: string;
+  bottom?: string;
+  shoe?: string;
 }
 
 /**
@@ -22,8 +22,8 @@ export interface StyleSizes {
  * PRD Ref: [cite: 112-135]
  */
 export interface BudgetRange {
-    min: number;
-    max: number;
+  min: number;
+  max: number;
 }
 
 /**
@@ -31,12 +31,12 @@ export interface BudgetRange {
  * PRD Ref: [cite: 112-135]
  */
 export interface StyleProfile {
-    gender: "men" | "women" | "both";
-    age?: string;
-    sizes: StyleSizes;
-    vibes: string[]; // e.g., ["party", "chill", "adventure"]
-    budget: BudgetRange;
-    preferenceVector?: number[]; // 512-dim embedding
+  gender: 'men' | 'women' | 'both';
+  age?: string;
+  sizes: StyleSizes;
+  vibes: string[]; // e.g., ["party", "chill", "adventure"]
+  budget: BudgetRange;
+  preferenceVector?: number[]; // 512-dim embedding
 }
 
 /**
@@ -44,14 +44,14 @@ export interface StyleProfile {
  * PRD Ref: [cite: 91, 107, 108]
  */
 export interface User {
-    id: string;
-    name: string;
-    email: string;
-    emailVerified: boolean;
-    image?: string;
-    phone: string; // Required, Unique - Primary auth identifier
-    activeOrgId?: string;
-    styleProfile?: StyleProfile;
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image?: string;
+  phone: string; // Required, Unique - Primary auth identifier
+  activeOrgId?: string;
+  styleProfile?: StyleProfile;
 }
 
 /**
@@ -59,13 +59,13 @@ export interface User {
  * PRD Ref: [cite: 91]
  */
 export interface Session {
-    id: string;
-    userId: string;
-    token: string;
-    expiresAt: number;
-    userAgent?: string;
-    ipAddress?: string;
-    createdAt: number;
+  id: string;
+  userId: string;
+  token: string;
+  expiresAt: number;
+  userAgent?: string;
+  ipAddress?: string;
+  createdAt: number;
 }
 
 /**
@@ -73,29 +73,29 @@ export interface Session {
  * PRD Ref: [cite: 91]
  */
 export interface Account {
-    id: string;
-    userId: string;
-    providerId: string;
-    providerAccountId: string;
-    accessToken?: string;
-    refreshToken?: string;
-    accessTokenExpiresAt?: number;
-    scope?: string;
+  id: string;
+  userId: string;
+  providerId: string;
+  providerAccountId: string;
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpiresAt?: number;
+  scope?: string;
 }
 
 /**
  * OTP verification entity
  * PRD Ref: [cite: 91]
  */
-export type VerificationType = "phone_otp" | "email_otp" | "magic_link";
+export type VerificationType = 'phone_otp' | 'email_otp' | 'magic_link';
 
 export interface Verification {
-    id: string;
-    identifier: string;
-    token: string;
-    type: VerificationType;
-    expiresAt: number;
-    createdAt: number;
+  id: string;
+  identifier: string;
+  token: string;
+  type: VerificationType;
+  expiresAt: number;
+  createdAt: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -105,43 +105,43 @@ export interface Verification {
 /**
  * Organization types for multi-tenant classification
  */
-export type OrganizationType = "influencer_agency" | "brand_partner";
+export type OrganizationType = 'influencer_agency' | 'brand_partner';
 
 /**
  * Organization metadata
  */
 export interface OrganizationMetadata {
-    type?: OrganizationType;
-    website?: string;
-    description?: string;
+  type?: OrganizationType;
+  website?: string;
+  description?: string;
 }
 
 /**
  * Multi-tenant organization entity
  */
 export interface Organization {
-    id: string;
-    name: string;
-    slug: string;
-    logo?: string;
-    metadata?: OrganizationMetadata;
-    createdAt: number;
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
+  metadata?: OrganizationMetadata;
+  createdAt: number;
 }
 
 /**
  * RBAC member roles
  */
-export type MemberRole = "admin" | "member" | "influencer" | "brand_manager";
+export type MemberRole = 'admin' | 'member' | 'influencer' | 'brand_manager';
 
 /**
  * Organization membership entity
  */
 export interface Member {
-    id: string;
-    orgId: string;
-    userId: string;
-    role: MemberRole;
-    joinedAt: number;
+  id: string;
+  orgId: string;
+  userId: string;
+  role: MemberRole;
+  joinedAt: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -151,50 +151,50 @@ export interface Member {
 /**
  * Feature flag targeting rule types
  */
-export type FeatureFlagRuleType = "user_id" | "role" | "percentage" | "org_id";
+export type FeatureFlagRuleType = 'user_id' | 'role' | 'percentage' | 'org_id';
 
 /**
  * Targeting rule for gradual rollouts and A/B testing
  */
 export interface FeatureFlagRule {
-    type: FeatureFlagRuleType;
-    value: string;
+  type: FeatureFlagRuleType;
+  value: string;
 }
 
 /**
  * Deployment environment
  */
-export type Environment = "dev" | "staging" | "prod";
+export type Environment = 'dev' | 'staging' | 'prod';
 
 /**
  * Feature flag entity for controlled rollouts
  */
 export interface FeatureFlag {
-    id: string;
-    name: string;
-    description?: string;
-    isEnabled: boolean;
-    environment: Environment;
-    rules?: FeatureFlagRule[];
-    updatedAt: number;
+  id: string;
+  name: string;
+  description?: string;
+  isEnabled: boolean;
+  environment: Environment;
+  rules?: FeatureFlagRule[];
+  updatedAt: number;
 }
 
 /**
  * Log severity levels
  */
-export type LogLevel = "INFO" | "WARN" | "ERROR";
+export type LogLevel = 'INFO' | 'WARN' | 'ERROR';
 
 /**
  * Structured log entry
  */
 export interface LogEntry {
-    id: string;
-    level: LogLevel;
-    message: string;
-    context?: Record<string, unknown>;
-    traceId?: string;
-    userId?: string;
-    timestamp: number;
+  id: string;
+  level: LogLevel;
+  message: string;
+  context?: Record<string, unknown>;
+  traceId?: string;
+  userId?: string;
+  timestamp: number;
 }
 
 /**
@@ -202,14 +202,14 @@ export interface LogEntry {
  * PRD Ref: [cite: 17, 31-33]
  */
 export interface SampledEvent {
-    id: string;
-    type: string;
-    userId?: string;
-    productId?: string;
-    variant?: string;
-    isSampled: boolean;
-    metadata?: Record<string, unknown>;
-    timestamp: number;
+  id: string;
+  type: string;
+  userId?: string;
+  productId?: string;
+  variant?: string;
+  isSampled: boolean;
+  metadata?: Record<string, unknown>;
+  timestamp: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -220,11 +220,11 @@ export interface SampledEvent {
  * Product attributes for filtering and display
  */
 export interface ProductAttributes {
-    color?: string;
-    size?: string[];
-    material?: string;
-    fit?: string;
-    occasion?: string[];
+  color?: string;
+  size?: string[];
+  material?: string;
+  fit?: string;
+  occasion?: string[];
 }
 
 /**
@@ -232,18 +232,18 @@ export interface ProductAttributes {
  * PRD Ref: [cite: 44, 201-203]
  */
 export interface Product {
-    id: string;
-    brand: string;
-    title: string;
-    price: number;
-    mrp: number;
-    category: string;
-    images: string[];
-    attributes?: ProductAttributes;
-    embedding?: number[]; // 512-dim vector for similarity search
-    meta?: Record<string, unknown>;
-    createdAt?: number;
-    updatedAt?: number;
+  id: string;
+  brand: string;
+  title: string;
+  price: number;
+  mrp: number;
+  category: string;
+  images: string[];
+  attributes?: ProductAttributes;
+  embedding?: number[]; // 512-dim vector for similarity search
+  meta?: Record<string, unknown>;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -253,21 +253,21 @@ export interface Product {
 /**
  * Partner sync session status
  */
-export type PartnerSyncStatus = "pending" | "active" | "expired";
+export type PartnerSyncStatus = 'pending' | 'active' | 'expired';
 
 /**
  * Partner sync session for collaborative shopping
  * PRD Ref: [cite: 151-155, 172-173]
  */
 export interface PartnerSync {
-    id: string;
-    initiatorId: string;
-    partnerId?: string;
-    inviteCode: string;
-    status: PartnerSyncStatus;
-    expiresAt: number;
-    influenceRatio: number; // 0.0 to 1.0
-    createdAt: number;
+  id: string;
+  initiatorId: string;
+  partnerId?: string;
+  inviteCode: string;
+  status: PartnerSyncStatus;
+  expiresAt: number;
+  influenceRatio: number; // 0.0 to 1.0
+  createdAt: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -277,51 +277,51 @@ export interface PartnerSync {
 /**
  * Supported e-commerce platforms
  */
-export type Platform = "Myntra" | "Ajio" | "Amazon";
+export type Platform = 'Myntra' | 'Ajio' | 'Amazon';
 
 /**
  * Scraped product data from e-commerce platforms
  * Matches browser extension's mapToScrapedProduct output
  */
 export interface ScrapedProduct {
-    externalId: string;
-    url: string;
-    brand: string;
-    title: string;
-    price: number;
-    mrp: number;
-    discount: string;
-    images: string[];
-    availableSizes: string[];
-    description: string;
-    rating: number;
-    reviewCount: number;
-    platform: Platform;
-    attributes: Record<string, unknown>;
-    gender?: string;
-    category?: string;
-    masterCategory?: string;
-    subCategory?: string;
-    embedding?: number[];
-    raw?: unknown;
+  externalId: string;
+  url: string;
+  brand: string;
+  title: string;
+  price: number;
+  mrp: number;
+  discount: string;
+  images: string[];
+  availableSizes: string[];
+  description: string;
+  rating: number;
+  reviewCount: number;
+  platform: Platform;
+  attributes: Record<string, unknown>;
+  gender?: string;
+  category?: string;
+  masterCategory?: string;
+  subCategory?: string;
+  embedding?: number[];
+  raw?: unknown;
 }
 
 /**
  * Queue item status for processing pipeline
  */
-export type QueueItemStatus = "pending" | "processing" | "completed" | "failed";
+export type QueueItemStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 /**
  * Generic queue item wrapper
  */
 export interface QueueItem<T = unknown> {
-    id: string;
-    data: T;
-    status: QueueItemStatus;
-    retries: number;
-    createdAt: number;
-    updatedAt: number;
-    error?: string;
+  id: string;
+  data: T;
+  status: QueueItemStatus;
+  retries: number;
+  createdAt: number;
+  updatedAt: number;
+  error?: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -342,4 +342,3 @@ export type UnixTimestamp = number;
  * Embedding vector type (384 dimensions for BGE-Small)
  */
 export type EmbeddingVector = number[];
-

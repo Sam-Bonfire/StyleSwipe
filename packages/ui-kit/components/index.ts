@@ -64,6 +64,7 @@ export type { AddressFormProps } from './AddressForm';
 // Feedback Components
 export { Toast } from './Toast';
 export type { ToastProps, ToastVariant } from './Toast';
+export { ToastProvider, useToast } from './ToastProvider';
 
 export { Modal } from './Modal';
 export type { ModalProps } from './Modal';
@@ -71,7 +72,12 @@ export type { ModalProps } from './Modal';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps, EmptyStateType } from './EmptyState';
 
-export { LoadingSkeleton, ProductTileSkeleton, FashionCardSkeleton, CartItemSkeleton } from './LoadingSkeleton';
+export {
+  LoadingSkeleton,
+  ProductTileSkeleton,
+  FashionCardSkeleton,
+  CartItemSkeleton,
+} from './LoadingSkeleton';
 export type { LoadingSkeletonProps } from './LoadingSkeleton';
 
 export { RatingStars } from './RatingStars';
@@ -86,3 +92,6 @@ export type { BlendSliderProps } from './BlendSlider';
 
 export { AvatarGroup } from './AvatarGroup';
 export type { AvatarGroupProps, AvatarItem } from './AvatarGroup';
+
+export { SearchBar } from './SearchBar';
+export type { SearchBarProps } from './SearchBar';

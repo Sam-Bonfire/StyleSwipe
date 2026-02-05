@@ -1,1 +1,1 @@
-export * from "./EmbedderAdapter";
+export * from './EmbedderAdapter';

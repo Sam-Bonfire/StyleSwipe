@@ -7,12 +7,9 @@ import { XStack } from 'tamagui';
 const logoSource = require('../../../../assets/favicon/favicon.png');
 
 export const AppLogo = () => {
-    return (
-        <XStack alignItems="center">
-            <Image
-                source={logoSource}
-                style={{ width: 40, height: 40, resizeMode: 'contain' }}
-            />
-        </XStack>
-    );
+  return (
+    <XStack alignItems="center">
+      <Image source={logoSource} style={{ width: 40, height: 40, resizeMode: 'contain' }} />
+    </XStack>
+  );
 };

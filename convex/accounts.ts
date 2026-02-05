@@ -1,85 +1,69 @@
+import { v } from 'convex/values';
+import { components } from './_generated/api';
+import { mutation, query } from './_generated/server';
 
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 export const getById = query({
-    args: { id: v.id("accounts") },
+    args: { id: v.string() },
     handler: async (ctx, args) => {
-        return await ctx.db.get(args.id);
+        const res = await ctx.runQuery(components.auth.api.findMany, {
+            model: 'accounts',
+            where: [{ field: '_id', operator: 'eq', value: args.id }],
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+        return res.page[0] || null;
     },
 });
 
 export const getByProvider = query({
-    args: { providerId: v.string(), providerAccountId: v.string() },
+    args: { providerId: v.string(), accountId: v.string() },
     handler: async (ctx, args) => {
-        return await ctx.db
-            .query("accounts")
-            .withIndex("by_provider", (q) =>
-                q.eq("providerId", args.providerId).eq("providerAccountId", args.providerAccountId)
-            )
-            .first();
-    },
-});
-
-export const getByUserId = query({
-    args: { userId: v.id("users") },
-    handler: async (ctx, args) => {
-        return await ctx.db
-            .query("accounts")
-            .withIndex("by_user", (q) => q.eq("userId", args.userId))
-            .collect();
+        const res = await ctx.runQuery(components.auth.api.findMany, {
+            model: 'accounts',
+            where: [
+                { field: 'providerId', operator: 'eq', value: args.providerId },
+                { field: 'accountId', operator: 'eq', value: args.accountId },
+            ],
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+        return res.page[0] || null;
     },
 });
 
 export const create = mutation({
     args: {
-        userId: v.id("users"),
+        userId: v.string(),
         providerId: v.string(),
-        providerAccountId: v.string(),
+        accountId: v.string(),
         accessToken: v.optional(v.string()),
         refreshToken: v.optional(v.string()),
-        accessTokenExpiresAt: v.optional(v.number()),
-        scope: v.optional(v.string()),
+        idToken: v.optional(v.string()),
+        expiresAt: v.optional(v.number()),
+        password: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
-        return await ctx.db.insert("accounts", args);
-    },
-});
-
-export const update = mutation({
-    args: {
-        id: v.id("accounts"),
-        userId: v.optional(v.id("users")),
-        providerId: v.optional(v.string()),
-        providerAccountId: v.optional(v.string()),
-        accessToken: v.optional(v.string()),
-        refreshToken: v.optional(v.string()),
-        accessTokenExpiresAt: v.optional(v.number()),
-        scope: v.optional(v.string()),
-        updatedAt: v.optional(v.number()), // Repo passes it even if schema ignores it?
-    },
-    handler: async (ctx, args) => {
-        const { id, updatedAt, ...updates } = args;
-        await ctx.db.patch(id, updates);
+        return await ctx.runMutation(components.auth.api.create, {
+            input: {
+                model: 'accounts',
+                data: {
+                    ...args,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                },
+            },
+        });
     },
 });
 
 export const remove = mutation({
-    args: { id: v.id("accounts") },
+    args: { id: v.string() },
     handler: async (ctx, args) => {
-        await ctx.db.delete(args.id);
-    },
-});
-
-export const removeByUserId = mutation({
-    args: { userId: v.id("users") },
-    handler: async (ctx, args) => {
-        const accounts = await ctx.db
-            .query("accounts")
-            .withIndex("by_user", (q) => q.eq("userId", args.userId))
-            .collect();
-        for (const account of accounts) {
-            await ctx.db.delete(account._id);
-        }
+        await ctx.runMutation(components.auth.api.deleteOne, {
+            input: {
+                model: 'accounts',
+                where: [{ field: '_id', operator: 'eq', value: args.id }],
+            },
+        });
     },
 });

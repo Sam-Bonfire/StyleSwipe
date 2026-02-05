@@ -1,25 +1,16 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "jsx": "react",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "lib": [
-            "DOM",
-            "ESNext"
-        ],
-        "strict": false,
-        "jsx": "react-jsx",
-        "noImplicitAny": false,
-        "skipLibCheck": true,
-        "baseUrl": "."
-    },
-    "include": [
-        "**/*.ts",
-        "**/*.tsx"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["DOM", "ESNext"],
+    "strict": false,
+    "jsx": "react-jsx",
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
 }
