@@ -14,6 +14,7 @@ class ErrorBoundaryInner extends Component<Props & { showToast: (opt: any) => vo
         hasError: false,
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public static getDerivedStateFromError(_: Error): State {
         return { hasError: true };
     }
