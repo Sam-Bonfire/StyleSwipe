@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test';
 
-import { Cart, CartItem } from './Cart';
+import { Cart, CartItem } from '../../../../src/commerce/domain/Cart';
 
 describe('Cart', () => {
   it('should add items and calculate total', () => {

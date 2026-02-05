@@ -1,18 +1,22 @@
-# @app/core
+# @app/core (The Brain)
 
-## Overview
+## Vision
+This package is the **Hexagonal Center** of StyleSwipe. It contains all **Domain Entities**, **Business Logic**, and **Port Interfaces**.
 
-Shared logic library focused on functional programming patterns and robust domain modeling.
+**It represents the "Product", independent of any technology.**
 
-## 🛠️ Stack
+## Strict Constraints (The "Zero Dependency" Rule)
+*   **Allowed**: `zod`, `effect`, `fast-check`, native TS.
+*   **FORBIDDEN**: 
+    *   ❌ `convex` (No database coupling)
+    *   ❌ `react` / `react-native` (No UI coupling)
+    *   ❌ `expo` (No framework coupling)
 
-- **Effect-TS**: Used for error handling, dependency injection, and async control flow.
-- **Fast-Check**: Property-based testing utilities.
+## Structure
+*   `src/*/domain`: Pure Entities (e.g., `StyleDNA`, `User`).
+*   `src/*/application`: Use Cases (e.g., `CalculateStyleMatch`) and Port Interfaces (`IProductRepository`).
 
-## 📦 Usage
-
-Import core logic into apps or other packages:
-
-```typescript
-import { ... } from '@app/core';
-```
+## Testing Strategy
+*   **Must** have unit tests for all logic.
+*   **Run**: `bun test --filter @app/core`.
+*   **Goal**: 100% Logic Coverage, running in milliseconds.

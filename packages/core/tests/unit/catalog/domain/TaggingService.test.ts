@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TaggingService } from './TaggingService';
+import { TaggingService } from '../../../../src/catalog/domain/TaggingService';
 
 describe('TaggingService', () => {
   const service = new TaggingService();

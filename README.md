@@ -1,69 +1,57 @@
 # StyleSwipe Monorepo
 
-## 🏗️ Architecture Overview
+> **Vision**: A next-generation fashion discovery platform combining Tinder-style discovery with utility-focused shopping. Built for high-velocity solo development using AI Agents.
 
-StyleSwipe is a modern monorepo built with **Bun** and **Turborepo**, designed for high-performance mobile and web experiences.
+## Architecture: Hexagonal Monorepo
 
-```mermaid
-graph TD
-    User-->|Mobile/Web| ConsumerApp["Consumer App @app/consumer-app"]
-    ConsumerApp-->|Uses| UIKit["@app/ui-kit"]
-    ConsumerApp-->|Uses| Core["@app/core"]
-    ConsumerApp-->|API| Convex[Convex Backend]
+We strictly enforce a **Hexagonal Architecture** (Ports & Adapters) to separate the "Brain" (Core) from the "Tools" (Infrastructure/UI).
 
-    Scraper[Scraper Service]-->|Updates| Convex
-    Scraper-->|Run via| Playwright
-```
+| Layer | Package | Role | Constraints |
+| :--- | :--- | :--- | :--- |
+| **Core** | `@app/core` | **The Brain**. Pure Business Logic & Entities. | ❌ NO external deps (Convex, React). <br> ✅ Std Lib, Zod, Effect. |
+| **Ports** | `@app/core` | **The Gatekeeper**. Interfaces & Use Cases. | Defined in `core`, implemented in `infra`. |
+| **Adapters** | `@app/infrastructure` | **Persistence**. Implements Core Interfaces. | ✅ Can import `convex`, `better-auth`. |
+| **Adapters** | `@app/consumer-app` | **UI**. Captures gestures, calls Core Use Cases. | ❌ NO business logic. ✅ `tamagui`. |
 
-## 📦 Services
+## "Single Command" Workflow
 
-| Service             | Path                   | Tech Stack               | Purpose                                               |
-| ------------------- | ---------------------- | ------------------------ | ----------------------------------------------------- |
-| **Consumer App**    | `apps/consumer-app`    | React Native (Expo), Bun | Main user interface for iOS, Android, and Web.        |
-| **Scraper Service** | `apps/scraper-service` | Playwright, Bun          | Data ingestion service for fetching external content. |
+We use **Mise** to standardize environments and **Graphite** for stacked changes.
 
-## 🛠️ Shared Packages
-
-| Package            | Path                      | Purpose                                          |
-| ------------------ | ------------------------- | ------------------------------------------------ |
-| **@app/core**      | `packages/core`           | Core business logic using Effect and Fast-Check. |
-| **@app/ui-kit**    | `packages/ui-kit`         | Shared React UI components and design system.    |
-| **Infrastructure** | `packages/infrastructure` | Convex backend definitions and auth logic.       |
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Mise** (Recommended)
-  - This project uses `mise` to ensure all developers use the exact same versions of **Bun**, **Node**, **Jujutsu**, and **Graphite**.
-  - [Install Mise](https://mise.jdx.dev/getting-started.html)
-
-### Environment Setup
-
+### 1. Start
 ```bash
-# Install all required binaries (bun, jj, graphite, node)
-mise install
+# Creates a new stacked branch (slugifies title)
+mise run task feat "My New Feature"
 ```
 
-### Application Installation
-
+### 2. Snapshot (Work in Progress)
 ```bash
-bun install
+# Backs up work to remote without a PR
+# NEVER use `git commit` manually
+mise run snap feat "Refactoring auth"
 ```
 
-### Development
-
-Start the development server (runs all apps):
-
+### 3. Deliver
 ```bash
-bun run dev
+# Lint, Test, and Submit Stack to GitHub
+mise run submit
 ```
 
-### Key Commands
+### 4. Release
+```bash
+# Version bump and tag
+mise run release
+```
 
-| Command                | Description                          |
-| ---------------------- | ------------------------------------ |
-| `bun run build`        | Build all applications and packages. |
-| `bun run lint`         | Run ESLint across the monorepo.      |
-| `bun run test`         | Execute test suites.                 |
-| `bun run dev:consumer` | Start only the Consumer App.         |
+## Agent Instructions
+
+If you are an AI Agent working in this repo:
+1.  **Read the Rules**: Check `.agent/rules/` before touching code.
+2.  **Respect Boundaries**: Do not import `convex` into `core`. Do not put logic in `ui-kit`.
+3.  **Use Tokens**: Never hardcode colors in `ui-kit`.
+4.  **Test Core**: All logic in `@app/core` must have unit tests.
+
+## Setup
+
+1.  **Install Tools**: `mise install` (Installs Bun, Node, Graphite).
+2.  **Install Deps**: `bun install`.
+3.  **Run Dev**: `bun run dev` (Starts Convex, Expo, and Admin).
