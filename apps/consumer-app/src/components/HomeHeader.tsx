@@ -7,7 +7,7 @@
  */
 
 import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { useNavigation } from '@react-navigation/native';
 import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
 import { useQuery } from 'convex/react';

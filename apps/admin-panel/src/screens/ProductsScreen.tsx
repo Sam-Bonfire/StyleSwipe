@@ -1,11 +1,11 @@
 import { Button, SearchBar, useToast } from '@app/ui-kit';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useMutation, useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { YStack, Text, Card, H3, XStack, ScrollView, Spinner, Image } from 'tamagui';
 
-import { Id } from '../../../../convex/_generated/dataModel';
+import { Id } from '@app/convex';
 import { useDebounce } from '../hooks/useDebounce';
 
 export function ProductsScreen() {

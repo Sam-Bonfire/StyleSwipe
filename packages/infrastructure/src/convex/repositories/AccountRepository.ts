@@ -8,7 +8,7 @@ import type { AccountRepository } from '@app/core';
 import type { Account } from '@app/core';
 // import type { Id } from '@convex-dataModel';
 
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';
 
 /**

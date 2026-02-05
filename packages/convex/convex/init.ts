@@ -1,4 +1,6 @@
+import 'convex/server';
 import { v } from 'convex/values';
+import { FunctionReference } from 'convex/server';
 
 import { components } from './_generated/api';
 import { mutation } from './_generated/server';
@@ -54,7 +56,7 @@ export const initializeOrganizations = mutation({
       });
     }
   },
-});
+}) as unknown as FunctionReference<"mutation", "public", any, any>;
 
 export const assignCoreAdmin = mutation({
   args: {

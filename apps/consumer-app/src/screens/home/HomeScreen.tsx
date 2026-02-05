@@ -1,4 +1,4 @@
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { useNavigation } from '@react-navigation/native';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import React from 'react';
@@ -55,7 +55,7 @@ export function HomeScreen() {
         <YStack paddingVertical="$2" space="$6">
           {/* Latest Additions */}
           <YStack>
-            <SectionHeader title="Latest Additions" onSeeAll={() => {}} />
+            <SectionHeader title="Latest Additions" onSeeAll={() => { }} />
             <ProductCarousel
               data={latestProducts}
               isLoading={latestProducts === undefined}

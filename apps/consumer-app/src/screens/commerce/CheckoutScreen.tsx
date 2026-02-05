@@ -9,7 +9,7 @@ import { useConvex, useQuery } from 'convex/react';
 import React, { useState, useMemo } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '@app/convex';
 
 
 

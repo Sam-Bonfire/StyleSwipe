@@ -5,16 +5,16 @@
 
 import type { FeatureFlagRepository } from '@app/core';
 import type { FeatureFlag, Environment, FeatureFlagRule } from '@app/core';
-import type { Id } from '@convex-dataModel';
+import type { Id } from '@app/convex';
 
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';
 
 /**
  * Convex implementation of FeatureFlagRepository port
  */
 export class ConvexFeatureFlagRepository implements FeatureFlagRepository {
-  constructor(private client: ConvexClient) {}
+  constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<FeatureFlag | null> {
     const doc = await this.client.query(api.featureFlags.getById, {

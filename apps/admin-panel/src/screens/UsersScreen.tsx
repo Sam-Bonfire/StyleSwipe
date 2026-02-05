@@ -1,5 +1,5 @@
 import { Button, SearchBar, useToast } from '@app/ui-kit';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { Users, Mail, Building2, ChevronDown, Edit3, Shield, AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';

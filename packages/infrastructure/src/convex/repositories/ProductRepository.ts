@@ -5,9 +5,9 @@
 
 import type { ProductRepository } from '@app/core';
 import type { Product, ProductAttributes } from '@app/core';
-import type { Id } from '@convex-dataModel';
+import type { Id } from '@app/convex';
 
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';
 
 /**

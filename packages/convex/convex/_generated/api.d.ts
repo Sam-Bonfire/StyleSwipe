@@ -20,6 +20,7 @@ import type * as events from "../events.js";
 import type * as featureFlags from "../featureFlags.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
+import type * as index from "../index.js";
 import type * as init from "../init.js";
 import type * as logs from "../logs.js";
 import type * as members from "../members.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   featureFlags: typeof featureFlags;
   helpers: typeof helpers;
   http: typeof http;
+  index: typeof index;
   init: typeof init;
   logs: typeof logs;
   members: typeof members;

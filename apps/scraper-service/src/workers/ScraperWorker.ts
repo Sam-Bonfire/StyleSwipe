@@ -8,9 +8,9 @@ import type { Queue, ScrapedProduct } from '@app/core';
 
 import { ConvexHttpClient } from 'convex/browser';
 
-import type { Id } from '../../../../convex/_generated/dataModel';
+import type { Id } from '@app/convex';
 
-import { api } from '../../../../convex/_generated/api';
+import { api } from '@app/convex';
 import { MyntraAPIScraper } from '../scrapers/MyntraAPIScraper';
 import { MyntraScraper } from '../scrapers/MyntraScraper';
 

@@ -223,8 +223,7 @@ export const ProductTile = React.forwardRef<TamaguiElement, ProductTileProps>(
       }).format(amount);
     };
 
-    const handleWishlistPress = (e: any) => {
-      e.stopPropagation();
+    const handleWishlistPress = () => {
       if (onWishlistToggle) {
         onWishlistToggle();
       }

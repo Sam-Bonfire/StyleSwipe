@@ -1,6 +1,6 @@
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { useNavigation } from '@react-navigation/native';
 import { useAction, useMutation } from 'convex/react';
 import React, { useState, useEffect } from 'react';

@@ -8,7 +8,7 @@ import type { MemberRepository } from '@app/core';
 import type { Member, MemberRole } from '@app/core';
 // import type { Id } from '@convex-dataModel';
 
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';
 
 /**

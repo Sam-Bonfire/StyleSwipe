@@ -1,5 +1,5 @@
 import { Cart, CartItem, CartRepository } from '@app/core';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';
 import { GenericId } from 'convex/values';
 

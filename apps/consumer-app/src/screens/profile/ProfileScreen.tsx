@@ -1,5 +1,5 @@
 import { Button } from '@app/ui-kit';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { useQuery } from 'convex/react';
 import React from 'react';
 import { SafeAreaView } from 'react-native';

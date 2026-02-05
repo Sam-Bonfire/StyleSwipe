@@ -3,3 +3,109 @@ bun = "1.2.23"
 node = "lts"
 "npm:@withgraphite/graphite-cli" = "latest"
 hurl = "latest"
+
+[tasks.dev]
+description = "Start all development services (Convex, Consumer, Admin, Scraper)"
+depends = ["dev:convex", "dev:consumer:run", "dev:admin:run", "dev:scraper:run"]
+
+[tasks."dev:convex"]
+description = "Start Convex backend development server"
+run = "bunx turbo run dev --filter @app/convex"
+
+[tasks."dev:consumer"]
+description = "Start Consumer Mobile/Web App (with Convex)"
+depends = ["dev:convex", "dev:consumer:run"]
+
+[tasks."dev:consumer:run"]
+hide = true
+run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/consumer-app dev"
+
+[tasks."dev:consumer:web"]
+description = "Start Consumer App for Web (with Convex)"
+depends = ["dev:convex", "dev:consumer:web:run"]
+
+[tasks."dev:consumer:web:run"]
+hide = true
+run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/consumer-app web"
+
+[tasks."dev:admin"]
+description = "Start Admin Panel (with Convex)"
+depends = ["dev:convex", "dev:admin:run"]
+
+[tasks."dev:admin:run"]
+hide = true
+run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/admin-panel dev"
+
+[tasks."dev:scraper"]
+description = "Start Scraper Service (with Convex)"
+depends = ["dev:convex", "dev:scraper:run"]
+
+[tasks."dev:scraper:run"]
+hide = true
+run = "bun run --env-file=.env.local --filter @app/scraper-service start -- --daemon"
+
+[tasks.typecheck]
+description = "Run TypeScript type checking across the entire monorepo"
+run = "bunx turbo run typecheck"
+
+[tasks.lint]
+description = "Run ESLint across the entire monorepo"
+run = "bunx turbo run lint"
+
+[tasks.test]
+description = "Run all tests"
+run = "turbo run test"
+
+[tasks.submit]
+description = "Submit current stack to GitHub using Graphite"
+run = "sh bin/submit.sh"
+
+[tasks.release]
+description = "Run release process"
+run = "sh bin/release.sh"
+
+[tasks.sync]
+description = "Sync Graphite stack"
+run = "gt stack get"
+
+[tasks."lint:fix"]
+description = "Automatically fix linting errors"
+run = "eslint --fix ."
+
+[tasks."format:fix"]
+description = "Automatically format code with Prettier"
+run = "prettier --write ."
+
+[tasks."build:extension"]
+description = "Build the Browser Extension"
+run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/browser-extension build"
+
+[tasks."typecheck:ui"]
+description = "Typecheck only the UI Kit"
+run = "bun run --filter @app/ui-kit typecheck"
+
+[tasks.scraper]
+description = "Start Scraper Service (foreground)"
+run = "bun run --env-file=.env.local --filter @app/scraper-service start --"
+
+[tasks."verify:scraper"]
+description = "Typecheck only the Scraper Service"
+run = "bun run --filter @app/scraper-service typecheck"
+
+[tasks.task]
+description = "Start a new development task"
+usage = """
+arg "<type>" help="Task type (feat, fix, refactor, chore)"
+arg "<title>" help="Brief title of the task"
+"""
+run = "sh bin/task-start.sh $USAGE_TYPE $USAGE_TITLE"
+
+[tasks.snap]
+description = "Create a project snapshot"
+usage = """
+arg "<type>" help="Commit type (feat, fix, etc.)"
+arg "<title>..." help="Brief title"
+flag "-d --description <text>" help="Optional detailed description"
+flag "-t --ticket <id>" help="Optional ticket ID"
+"""
+run = "sh bin/snapshot.sh"

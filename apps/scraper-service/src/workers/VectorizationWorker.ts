@@ -9,7 +9,7 @@ import type { Queue, ScrapedProduct } from '@app/core';
 import { EmbedderAdapter, formatProductForEmbedding } from '@app/infrastructure';
 import { ConvexHttpClient } from 'convex/browser';
 
-import { api } from '../../../../convex/_generated/api';
+import { api } from '@app/convex';
 
 export interface VectorizationWorkerConfig {
   convexUrl: string;

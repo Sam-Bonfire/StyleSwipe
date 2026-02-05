@@ -1,6 +1,6 @@
 import { initializeStyleProfile, getOnboardingQuestions, OnboardingQuestion } from '@app/core';
 import { Button, CategoryChip } from '@app/ui-kit';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState } from 'react';

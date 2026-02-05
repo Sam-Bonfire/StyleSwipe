@@ -2,7 +2,7 @@
 
 import { ConvexHttpClient } from 'convex/browser';
 
-import { api } from '../../../convex/_generated/api';
+import { api } from '@app/convex';
 
 const CONVEX_URL = import.meta.env.VITE_CONVEX_URL;
 
@@ -47,7 +47,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     }));
 
     const chunkSize = 20;
-    const chunks = [];
+    const chunks: any[] = [];
     for (let i = 0; i < products.length; i += chunkSize) {
       chunks.push(products.slice(i, i + chunkSize));
     }

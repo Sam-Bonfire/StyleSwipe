@@ -1,12 +1,7 @@
 [install]
 # Skip macOS-only fsevents on Linux
 optional = false
-
-# Ensures that even on Windows, we attempt to use hardlinks
-# This saves disk space and mimics the Linux production environment.
-indexing = "hardlink"
-
-# This prevents the "it works on my machine" syndrome by 
+# This prevents the "it works on my machine" syndrome by
 # ensuring the lockfile is strictly respected.
 frozenLockfile = false
 

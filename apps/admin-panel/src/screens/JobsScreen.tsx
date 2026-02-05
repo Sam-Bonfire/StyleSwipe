@@ -1,6 +1,6 @@
 import { Button } from '@app/ui-kit';
 import { useToast } from '@app/ui-kit';
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ChevronDown, Clock, Package, Hash, Cpu, FileStack, AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';

@@ -9,9 +9,9 @@ import { ConvexHttpClient } from 'convex/browser';
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 
-import type { Id } from '../../../convex/_generated/dataModel';
+import type { Id } from '@app/convex';
 
-import { api } from '../../../convex/_generated/api';
+import { api } from '@app/convex';
 
 export interface ServerConfig {
   convexUrl: string;
