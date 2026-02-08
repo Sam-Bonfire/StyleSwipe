@@ -1,4 +1,23 @@
 {
-  "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": "."
+  },
+  "references": [
+    {
+      "path": "../../packages/infrastructure"
+    },
+    {
+      "path": "../../packages/convex"
+    }
+  ],
+  "include": [
+    "**/*",
+    "manifest.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

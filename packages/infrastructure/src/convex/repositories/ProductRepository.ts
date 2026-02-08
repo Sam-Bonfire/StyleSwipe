@@ -3,11 +3,11 @@
 // Implements ProductRepository port for Convex backend with vector search
 // =============================================================================
 
+import type { Id } from '@app/convex';
 import type { ProductRepository } from '@app/core';
 import type { Product, ProductAttributes } from '@app/core';
-import type { Id } from '@convex-dataModel';
 
-import { api } from '@convex-api';
+import { api } from '@app/convex';
 import { ConvexClient } from 'convex/browser';
 
 /**

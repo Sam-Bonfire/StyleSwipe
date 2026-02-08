@@ -1,32 +1,19 @@
-# Scraper Service
+# @app/scraper-service (Ingestion Adapter)
 
-## Overview
+## Vision
+Autonomous service for ingesting product data from external partners (Myntra, etc.).
 
-The **Scraper Service** is a standalone worker designed to ingest data from external sources using **Playwright**. It runs in a Bun environment.
+## Workflow
+1.  **Fetch**: Playwright automation to crawl pages.
+2.  **Adapt**: Convert external HTML/JSON into **Core Entities** (`Product`).
+3.  **Persist**: Save to Convex via `@app/infrastructure`.
 
-## ⚙️ Configuration
+## Constraints
+*   **Headless**: No UI dependencies (`react`, `tamagui`).
+*   **Standalone**: Runs as a separate worker process.
 
-| Type        | Key          | Purpose                      |
-| ----------- | ------------ | ---------------------------- |
-| **Runtime** | `bun`        | Execution environment.       |
-| **Browser** | `playwright` | Headless browser automation. |
-
-## 🚀 Usage
-
-### Install Dependencies
-
+## Commands
 ```bash
-bun install
+# Run scraper
+bun run start
 ```
-
-### Run Scraper
-
-(Check `package.json` scripts - currently default entry is `src/index.ts`)
-
-```bash
-bun run src/index.ts
-```
-
-## 🧪 Testing
-
-Includes TypeScript support (`bun-types`).

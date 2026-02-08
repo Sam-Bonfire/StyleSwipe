@@ -8,7 +8,7 @@ import type { ScrapedProduct } from '@app/core';
 import { createQueue, type QueueType } from '@app/infrastructure';
 import { ConvexHttpClient } from 'convex/browser';
 
-import { api } from '../../../convex/_generated/api';
+import { api } from '@app/convex';
 import { MyntraScraper } from './scrapers/MyntraScraper';
 import { startServer } from './server';
 import { ScraperWorker, VectorizationWorker } from './workers';

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { applyDisplacement, Vector384 } from './StyleDNA';
+import { applyDisplacement, Vector384 } from '../../../../src/identity/domain/StyleDNA';
 
 describe('StyleDNA - applyDisplacement', () => {
   // Create dummy vectors (size 384)

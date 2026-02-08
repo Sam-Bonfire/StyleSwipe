@@ -42,7 +42,7 @@ export const RatingStars = React.forwardRef<any, RatingStarsProps>((props, ref) 
 
   // Render stars logic
   const renderStars = () => {
-    const stars = [];
+    const stars: any[] = [];
     const r = rating as unknown as number;
     const max = maxRating as unknown as number;
 

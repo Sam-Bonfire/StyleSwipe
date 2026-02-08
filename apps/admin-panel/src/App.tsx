@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
+import { api } from '@app/convex';
 import { config, Button, ToastProvider } from '@app/ui-kit';
-import { api } from '@convex-api';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
 import React, { useState } from 'react';

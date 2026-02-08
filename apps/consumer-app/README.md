@@ -1,44 +1,23 @@
-# @app/consumer-app
+# @app/consumer-app (The UI Adapter)
 
-## Overview
+## Vision
+The primary interface for users. Supports **iOS**, **Android**, and **Web** via Expo.
+**Role**: A "Dumb" UI Adapter.
 
-The **Consumer App** is the primary frontend for StyleSwipe, built with **Expo (React Native)**. It targets iOS, Android, and Web from a single codebase.
+## Architectural Rules
+1.  **Logic Delegation**:
+    *   **UI**: Renders data from Props.
+    *   **Logic**: Calls `@app/core` Use Cases (e.g., `ExecuteSwipe`).
+    *   **State**: Uses `@app/infrastructure` hooks (e.g., `useQuery(api.products.get)`).
+2.  **No Business Match**: Never calculate StyleDNA or matches here. Pass inputs to Core.
 
-## 🔧 Configuration
-
-### Environment Variables
-
-- Check `.env.local` in the project root for API keys (e.g., Convex URL).
-- **Note**: Never commit real secrets.
-
-### Dependencies
-
-- **Expo**: ~52.0.0
-- **React Native**: 0.76.0
-- **React Native Web**: Support for browser rendering.
-
-## 🚀 Development
-
-### Start the App
-
+## Development
 ```bash
-# Start all platforms (interactive menu)
+# Run on all platforms
 bun run start
-
-# Web only
-bun run web
-
-# iOS (requires simulator)
-bun run ios
-
-# Android (requires emulator)
-bun run android
 ```
 
-## 🏗️ Architecture
-
-This app consumes:
-
-- `@app/core`: For functional logic.
-- `@app/ui-kit`: For visual components.
-- `convex`: Direct backend integration.
+## Stack
+*   **Framework**: Expo (React Native).
+*   **Styling**: Tamagui (`@app/ui-kit`).
+*   **Backend**: Convex (`@app/infrastructure`).

@@ -1,5 +1,5 @@
+import { api } from '@app/convex';
 import { Button, CategoryChip } from '@app/ui-kit';
-import { api } from '@convex-api';
 import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import { Dialog, YStack, XStack, Text, Input, Label, Button as TButton } from 'tamagui';

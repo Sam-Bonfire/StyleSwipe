@@ -30,8 +30,7 @@ config.resolver.extraNodeModules = {
     workspaceRoot,
     'node_modules/better-auth/dist/plugins/index.mjs',
   ),
-  '@convex-api': path.resolve(workspaceRoot, 'convex/_generated/api'),
-  '@convex-dataModel': path.resolve(workspaceRoot, 'convex/_generated/dataModel'),
+
 };
 
 module.exports = config;

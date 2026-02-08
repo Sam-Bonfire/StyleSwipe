@@ -1,7 +1,7 @@
+import { api } from '@app/convex';
 import { SearchProducts } from '@app/core';
 import { Product } from '@app/core';
 import { ProductTile, Button } from '@app/ui-kit';
-import { api } from '@convex-api';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from '@tamagui/lucide-icons';
 import { useConvex, useMutation } from 'convex/react';

@@ -1,24 +1,17 @@
-# @app/ui-kit
+# @app/ui-kit (The Design System)
 
-## Overview
+## Vision
+Shared, consistent UI primitives for Web and Mobile. Built with **Tamagui**.
 
-Shared UI Component library for StyleSwipe. Designed to work across Web (React DOM) and Mobile (React Native).
+## The "Token-Only" Rule
+**Constraint**: Developers and Agents must **NEVER** use hardcoded hex values or pixels.
+*   ❌ `color: "#CD0268"` / `padding: 20`
+*   ✅ `color: "$primary"` / `padding: "$3"`
 
-## 🎨 Design System
+## Components
+*   **Location**: `src/components/`
+*   **Theme**: `src/theme.ts` (Validates tokens).
 
-- **Theme**: Defined in `theme.ts`.
-- **Components**: Reusable UI elements located in `components/`.
-
-## 📦 Usage
-
-Add to `package.json` workspace dependencies:
-
-```json
-"@app/ui-kit": "workspace:*"
-```
-
-Import components:
-
-```typescript
-import { Button } from '@app/ui-kit';
-```
+## Dependencies
+*   **Allowed**: `tamagui`, `react`.
+*   **Prohibited**: `convex`, `@app/core` (Keep UI dumb).

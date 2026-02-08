@@ -1,3 +1,5 @@
+import 'convex/server';
+import { FunctionReference } from 'convex/server';
 import { query } from './_generated/server';
 
 export const analyzeMismatch = query({
@@ -55,4 +57,4 @@ export const analyzeMismatch = query({
       details: results,
     };
   },
-});
+}) as unknown as FunctionReference<"query", "public", any, any>;

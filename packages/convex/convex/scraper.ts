@@ -1,4 +1,4 @@
-import { paginationOptsValidator } from 'convex/server';
+import { paginationOptsValidator, FunctionReference, RegisteredQuery } from 'convex/server';
 import { v } from 'convex/values';
 
 import { Doc, Id } from './_generated/dataModel';
@@ -289,15 +289,15 @@ async function promoteInternal(
   }
 }
 
-export const getPendingJobs = query({
-  handler: async (ctx) => {
+export const getPendingJobs: RegisteredQuery<"public", any, any> = query({
+  handler: async (ctx): Promise<any> => {
     await requireCoreAdmin(ctx);
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .take(5);
   },
-});
+}) as any;
 
 export const getJobs = query({
   args: { paginationOpts: paginationOptsValidator },
@@ -369,14 +369,14 @@ export const getScrapedProducts = query({
  * Service endpoint: Get pending jobs without authentication
  * Used by the scraper worker to poll for jobs
  */
-export const servicePendingJobs = query({
-  handler: async (ctx) => {
+export const servicePendingJobs: RegisteredQuery<"public", any, any> = query({
+  handler: async (ctx): Promise<any> => {
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .take(5);
   },
-});
+}) as any;
 
 /**
  * Service endpoint: Update job status without authentication

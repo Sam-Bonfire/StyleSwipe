@@ -17,6 +17,7 @@
   "dependencies": {
     "@app/core": "workspace:*",
     "@app/ui-kit": "workspace:*",
+    "@app/convex": "workspace:*",
     "@convex-dev/better-auth": "^0.10.10",
     "@expo/metro-runtime": "~4.0.0",
     "@react-navigation/native": "^6.1.9",

@@ -1,0 +1,24 @@
+{
+    "name": "@app/convex",
+    "version": "0.0.0",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.js"
+        }
+    },
+    "private": true,
+    "license": "UNLICENSED",
+    "scripts": {
+        "dev": "convex dev",
+        "setup": "convex dev --until-success",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "convex": "^1.31.6"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}

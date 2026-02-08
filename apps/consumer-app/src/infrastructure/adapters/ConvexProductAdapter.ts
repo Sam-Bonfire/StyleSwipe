@@ -1,10 +1,10 @@
+import { api } from '@app/convex';
 import { ProductSearchRepository, SearchResult, SearchError, Vector384 } from '@app/core';
-import { api } from '@convex-api';
 import { ConvexReactClient } from 'convex/react';
 import { Effect } from 'effect';
 
 export class ConvexProductAdapter implements ProductSearchRepository {
-  constructor(private convex: ConvexReactClient) {}
+  constructor(private convex: ConvexReactClient) { }
 
   search(vector: Vector384, limit: number): Effect.Effect<SearchResult, SearchError> {
     return Effect.tryPromise({
