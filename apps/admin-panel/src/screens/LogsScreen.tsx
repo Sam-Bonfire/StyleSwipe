@@ -321,7 +321,7 @@ export function LogsScreen() {
                     <ScrollView>
                         <YStack padding="$3" backgroundColor="$backgroundPress" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                             <Text fontSize="$3" fontFamily="$mono">
-                                {fullLogData ? JSON.stringify(fullLogData, null, 2) : ''}
+                                {fullData ? JSON.stringify(fullData, null, 2) : ''}
                             </Text>
                         </YStack>
                     </ScrollView>
