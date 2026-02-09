@@ -1,11 +1,11 @@
 import { Button } from '@app/ui-kit'; // Using UI Kit Button
-import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, Users, Shield } from '@tamagui/lucide-icons';
+import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, Users, Shield, MessageSquare } from '@tamagui/lucide-icons';
 import React from 'react';
 import { YStack, XStack, Text, Separator, Avatar } from 'tamagui';
 
 import { authAdapter } from '../lib/auth';
 
-type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations';
+type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs';
 
 interface SidebarProps {
   activePage: Page;
@@ -30,6 +30,8 @@ export function Sidebar({
         { id: 'jobs', icon: Activity, label: 'Scraping Jobs' },
         { id: 'users', icon: Users, label: 'Users' },
         { id: 'organizations', icon: Shield, label: 'Organizations' },
+        { id: 'feedback', icon: MessageSquare, label: 'Feedback' },
+        { id: 'logs', icon: Activity, label: 'Logs' },
       ]
       : []),
   ];

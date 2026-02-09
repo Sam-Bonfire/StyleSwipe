@@ -15,9 +15,10 @@
     "test": "echo \"No tests yet\""
   },
   "dependencies": {
-    "@app/core": "workspace:*",
-    "@app/ui-kit": "workspace:*",
     "@app/convex": "workspace:*",
+    "@app/core": "workspace:*",
+    "@app/logger": "workspace:*",
+    "@app/ui-kit": "workspace:*",
     "@convex-dev/better-auth": "^0.10.10",
     "@expo/metro-runtime": "~4.0.0",
     "@react-navigation/native": "^6.1.9",
@@ -27,6 +28,7 @@
     "expo-asset": "~11.0.5",
     "expo-background-fetch": "~13.0.6",
     "expo-battery": "~9.0.2",
+    "expo-document-picker": "^14.0.8",
     "expo-file-system": "~18.0.12",
     "expo-sqlite": "~15.1.4",
     "expo-status-bar": "~2.0.0",

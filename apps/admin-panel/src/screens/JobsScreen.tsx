@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import {
   YStack,
   Text,
-  Card,
   XStack,
   Spinner,
   ScrollView,
@@ -63,18 +62,10 @@ export function JobsScreen() {
 
       <NewJobModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
-      <Card
-        padding="$0"
-        bordered
-        backgroundColor="$background"
+      <YStack
         flex={1}
-        borderRadius="$4"
+        backgroundColor="$background"
         overflow="hidden"
-        elevate
-        shadowColor="$shadowColor"
-        shadowOffset={{ width: 0, height: 2 }}
-        shadowOpacity={0.1}
-        shadowRadius={8}
       >
         {!jobs || jobs.status === 'LoadingFirstPage' ? (
           <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
@@ -106,15 +97,22 @@ export function JobsScreen() {
         ) : (
           <ScrollView>
             <Accordion type="multiple">
-              {jobs.results.map((job: ScrapeJob, index: number) => (
-                <Accordion.Item key={job._id} value={job._id}>
+              {jobs.results.map((job: ScrapeJob) => (
+                <Accordion.Item
+                  key={job._id}
+                  value={job._id}
+                  marginBottom="$2"
+                  borderRadius="$4"
+                  borderWidth={1}
+                  borderColor="$borderColor"
+                  overflow="hidden"
+                  backgroundColor="$background"
+                >
                   <Accordion.Trigger
                     flexDirection="row"
                     justifyContent="space-between"
                     alignItems="center"
                     padding="$4"
-                    borderBottomWidth={index === jobs.results.length - 1 ? 0 : 1}
-                    borderColor="$borderColor"
                     backgroundColor="$background"
                     hoverStyle={{ backgroundColor: '$backgroundHover' }}
                     cursor="pointer"
@@ -165,8 +163,6 @@ export function JobsScreen() {
                       paddingHorizontal="$4"
                       paddingVertical="$3"
                       backgroundColor="$neutral50"
-                      borderBottomWidth={1}
-                      borderColor="$borderColor"
                     >
                       <XStack gap="$6" flexWrap="wrap">
                         <YStack gap="$3" flex={1} minWidth={200}>
@@ -228,12 +224,11 @@ export function JobsScreen() {
                         </YStack>
                       </XStack>
                       {job.errorMessage && (
-                        <Card
+                        <YStack
                           marginTop="$3"
                           padding="$3"
-                          backgroundColor="$error"
+                          backgroundColor="$errorLight"
                           borderRadius="$2"
-                          opacity={0.1}
                         >
                           <Text fontSize="$2" fontWeight="600" color="$error">
                             Error Details
@@ -241,7 +236,7 @@ export function JobsScreen() {
                           <Text fontSize="$2" color="$error" marginTop="$1">
                             {job.errorMessage}
                           </Text>
-                        </Card>
+                        </YStack>
                       )}
                     </Accordion.Content>
                   </Accordion.HeightAnimator>
@@ -257,7 +252,7 @@ export function JobsScreen() {
             )}
           </ScrollView>
         )}
-      </Card>
+      </YStack>
     </YStack>
   );
 }

@@ -26,6 +26,7 @@ const Backdrop = styled(Stack, {
   alignItems: 'center',
   justifyContent: 'center',
   padding: '$4',
+  pointerEvents: 'auto',
 });
 
 const ModalFrame = styled(YStack, {
@@ -160,12 +161,13 @@ export const Modal = React.forwardRef<typeof ModalFrame, ModalProps>((props: Mod
       <Animated.View
         style={[
           {
-            position: 'absolute',
+            position: 'fixed' as any, // Use fixed for web overlay
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            zIndex: 1000,
+            zIndex: 10000, // Higher z-index
+            pointerEvents: 'auto',
           } as any,
           backdropStyle,
         ]}
@@ -197,7 +199,7 @@ export const Modal = React.forwardRef<typeof ModalFrame, ModalProps>((props: Mod
           </Animated.View>
         </Backdrop>
       </Animated.View>
-    </Portal>
+    </Portal >
   );
 });
 

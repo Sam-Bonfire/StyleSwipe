@@ -16,13 +16,28 @@ import { CheckoutScreen } from './screens/commerce/CheckoutScreen';
 import { ProductDetailScreen } from './screens/discovery/ProductDetailScreen';
 import { MainScreen } from './screens/main/MainScreen';
 import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
+import { EditProfileScreen } from './screens/profile/EditProfileScreen';
+import { FeedbackScreen } from './screens/profile/FeedbackScreen';
 
 const Stack = createStackNavigator();
 
+// Convex client is now initialized in index.js
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL);
+import { logger } from './lib/logger';
+
 
 function NavigationGuard() {
   const user = useQuery(api.users.currentUser);
+
+  // Sync User ID with Logger
+  React.useEffect(() => {
+    if (user) {
+      logger.setUserId(user._id);
+      logger.info('User session started', { userId: user._id });
+    } else {
+      logger.setUserId(null);
+    }
+  }, [user]);
 
   // Loading state
   if (user === undefined) {
@@ -48,11 +63,12 @@ function NavigationGuard() {
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       ) : (
         // 3. App Flow
-        // 3. App Flow
         <>
           <Stack.Screen name="Main" component={MainScreen} />
           <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
           <Stack.Screen name="Checkout" component={CheckoutScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="Feedback" component={FeedbackScreen} />
         </>
       )}
     </Stack.Navigator>
@@ -65,6 +81,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ModelManager } from './infrastructure/ModelManager';
 import { authAdapter } from './lib/auth';
+import { navigationRef, onNavigationStateChange } from './lib/NavigationLogger';
 import { registerBackgroundWorker } from './workers/BackgroundWorker';
 
 export default function App() {
@@ -97,7 +114,10 @@ export default function App() {
         <TamaguiProvider config={config}>
           <Theme name="BrandIdentityLight">
             <ToastProvider>
-              <NavigationContainer>
+              <NavigationContainer
+                ref={navigationRef}
+                onStateChange={onNavigationStateChange}
+              >
                 <NavigationGuard />
               </NavigationContainer>
             </ToastProvider>
