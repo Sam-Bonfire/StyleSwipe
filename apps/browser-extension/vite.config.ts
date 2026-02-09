@@ -7,5 +7,9 @@ import manifest from './manifest.json';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(), crx({ manifest })],
+  plugins: [
+    react(),
+    tsconfigPaths(),
+    crx({ manifest }),
+  ],
 });

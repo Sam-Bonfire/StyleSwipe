@@ -1,8 +1,8 @@
 import { Button } from '@app/ui-kit';
-import { PieChart } from '@tamagui/lucide-icons';
 import React from 'react';
-import { YStack, Text, Card, H3, Label, Input } from 'tamagui';
+import { YStack, Text, Card, H3, Label, Input, Image } from 'tamagui';
 
+import logo from '../../../../assets/logo/logo.png';
 import { authAdapter } from '../lib/auth';
 
 // Neuro-styled Login Component
@@ -28,11 +28,15 @@ export function LoginScreen() {
 
   return (
     <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background">
-      {/* Background with slight gradient or pattern could go here */}
-
-      <YStack marginBottom="$6" alignItems="center" space="$3">
-        {/* Logo Placeholder */}
-        <PieChart size="$6" color="$primary" />
+      <YStack marginBottom="$2" alignItems="center" space="$2">
+        <YStack width="80%" aspectRatio={3.13} alignItems="center">
+          <Image
+            source={logo}
+            width="100%"
+            height="100%"
+            resizeMode="contain"
+          />
+        </YStack>
         <H3 color="$color" fontSize="$8">
           StyleSwipe Admin
         </H3>
