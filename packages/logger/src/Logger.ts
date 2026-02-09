@@ -97,36 +97,8 @@ export class Logger implements ILogger {
 
         // 1. Send to transports that handle individual logs (like Console)
         this.config.transports.forEach(t => {
-            // Optimization: ConsoleTransport usually wants instant feedback
-            // But for batching transports, we might want to queue.
-            // For now, we let transports decide, but we also maintain an internal queue for "Batch" transports.
-            // Actually, standard pattern: Transports implement generic log().
-            // If a transport is a "BatchTransport", it queues internally.
-            // But we generally want central queue management to avoid duplicating batch logic.
-
-            // Adaptation: We will queue everything here, but call .log() immediately for dev purposes if needed.
-            // Let's rely on the transport implementation.
-            // IF the transport is Console, it logs immediately.
-            // IF the transport is Convex, it should batch.
-            // HOWEVER, "Core Library Implementation" task says "Implement Batching logic".
-            // So the Logger should probably hold the queue and pass the batch to transports?
-
-            // Let's simple call .log() on transports. The Generic Logger shouldn't assume transport implementation.
-            // BUT, to satisfy "Implement Batching logic" in the Core generic logger (as per plan), 
-            // maybe we should have a `BatchTransport` base class?
-
-            // Alternative: The Logger implementation ITSELF caches logs and emits a "batch" event or calls `flushBatch`.
-            // Let's adhere to the plan: "Implement Batching logic". 
-            // I will put the queue HERE in Logger.ts, and I will introduce a `BatchTransport` interface or similar?
-            // No, let's keep it simple:
-
-            // We log immediately to all transports. 
-            // The ConvextTransport (which we will build next) will handle its own batching?
-            // OR Logger handles batching and sends `logBatch`?
-
-            // Plan update: "Core Library ... Implement Batching logic". 
-            // If I queue here, I can send `flush(batch)` to transports.
-            // Let's change `Transport` interface to support optional `logBatch`.
+            // Send to transports. Individual transports (e.g. ConvexTransport)
+            // handle their own internal queuing or batching.
 
             t.log(entry);
         });
