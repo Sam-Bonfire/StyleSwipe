@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: "High-value rules for UI consistency, testing, and environment safety"
 globs: ["**/*"]
 ---

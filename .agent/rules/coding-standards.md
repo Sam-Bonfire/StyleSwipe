@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: "Strict coding standards for Type Systems, Effect TS, and Code Quality"
 globs: ["**/*.ts", "**/*.tsx"]
 ---

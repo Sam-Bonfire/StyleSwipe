@@ -4,8 +4,7 @@ import { LogEntry, Transport } from '../types';
 
 // Define a minimal interface compatible with ConvexClient and ConvexReactClient
 export interface IConvexClient {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutation(name: any, args?: any): Promise<any>;
+    mutation(name: string, args?: Record<string, unknown>): Promise<unknown>;
 }
 
 export class ConvexTransport implements Transport {
@@ -40,8 +39,8 @@ export class ConvexTransport implements Transport {
         try {
             await this.client.mutation(this.mutation, { logs: logsToSend });
         } catch {
-            console.error('Failed to flush logs to Convex');
-            // Fail safely
+            // Fallback to console if convex fails
+            console.error('Failed to log to Convex');
         }
     }
 

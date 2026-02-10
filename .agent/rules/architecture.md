@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: "Strict Hexagonal Layering Rules and Dependency Enforcement"
 globs: ["packages/**/*", "apps/**/*"]
 ---
