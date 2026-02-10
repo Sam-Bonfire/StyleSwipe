@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: "Directory structure and organization rules"
 globs: ["**/*"]
 ---

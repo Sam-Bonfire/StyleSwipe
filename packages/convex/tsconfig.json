@@ -4,7 +4,9 @@
         "rootDir": "convex",
         "outDir": "dist",
         "composite": true,
-        "noEmit": false
+        "noEmit": false,
+        "allowJs": true,
+        "checkJs": false
     },
     "include": [
         "convex/**/*"

@@ -10,22 +10,24 @@ import { TamaguiProvider, Theme, YStack, Spinner, Text } from 'tamagui';
 import { DashboardLayout } from './components/DashboardLayout';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import { authAdapter } from './lib/auth';
+import { FeedbackScreen } from './screens/FeedbackScreen';
 import { JobsScreen } from './screens/JobsScreen';
 import { LoginScreen } from './screens/LoginScreen';
+import { LogsScreen } from './screens/LogsScreen';
 import { OrganizationsScreen } from './screens/OrganizationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { ProductsScreen } from './screens/ProductsScreen';
 import { UsersScreen } from './screens/UsersScreen';
 
-// Initialize Convex Client
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {
   unsavedChangesWarning: false,
 });
 
+
 function Main() {
   // Use Convex Query to drive auth state, matching consumer-app pattern
   const user = useQuery(api.users.currentUser);
-  const [activePage, setActivePage] = useState<'overview' | 'products' | 'jobs' | 'users' | 'organizations'>('overview');
+  const [activePage, setActivePage] = useState<'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs'>('overview');
 
 
   // undefined = loading, null = not logged in, object = logged in
@@ -72,6 +74,10 @@ function Main() {
         return user.isCoreAdmin ? <UsersScreen /> : <OverviewScreen />;
       case 'organizations':
         return user.isCoreAdmin ? <OrganizationsScreen /> : <OverviewScreen />;
+      case 'feedback':
+        return user.isCoreAdmin ? <FeedbackScreen /> : <OverviewScreen />;
+      case 'logs':
+        return user.isCoreAdmin ? <LogsScreen /> : <OverviewScreen />;
       default:
         return <OverviewScreen />;
     }

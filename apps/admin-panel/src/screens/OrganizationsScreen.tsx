@@ -2,7 +2,7 @@ import { api } from '@app/convex';
 import { Button, SearchBar, useToast } from '@app/ui-kit';
 import { Building2, Users, ChevronDown, Edit3, Crown, AlertCircle } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useQuery } from 'convex/react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     YStack,
     Text,
@@ -11,7 +11,6 @@ import {
     Spinner,
     ScrollView,
     styled,
-    Card,
     Accordion,
     Square,
 } from 'tamagui';
@@ -85,23 +84,27 @@ export function OrganizationsScreen() {
                 ) : null}
 
                 {!isLoading && displayResults.length > 0 ? (
-                    <Card
-                        padding="$0"
-                        bordered
+                    <YStack
                         backgroundColor="$background"
-                        borderRadius="$3"
                         overflow="hidden"
                     >
                         <Accordion type="multiple">
-                            {displayResults.map((org: any, index: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
-                                <Accordion.Item key={org._id} value={org._id}>
+                            {displayResults.map((org: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+                                <Accordion.Item
+                                    key={org._id}
+                                    value={org._id}
+                                    marginBottom="$2"
+                                    borderRadius="$4"
+                                    borderWidth={1}
+                                    borderColor="$borderColor"
+                                    overflow="hidden"
+                                    backgroundColor="$background"
+                                >
                                     <Accordion.Trigger
                                         flexDirection="row"
                                         justifyContent="space-between"
                                         alignItems="center"
                                         padding="$3"
-                                        borderBottomWidth={index === displayResults.length - 1 ? 0 : 1}
-                                        borderColor="$borderColor"
                                         backgroundColor="$background"
                                         hoverStyle={{ backgroundColor: '$backgroundHover' }}
                                         cursor="pointer"
@@ -167,8 +170,6 @@ export function OrganizationsScreen() {
                                             paddingHorizontal="$4"
                                             paddingVertical="$3"
                                             backgroundColor="$backgroundHover"
-                                            borderBottomWidth={1}
-                                            borderColor="$borderColor"
                                         >
                                             <YStack gap="$3">
                                                 <XStack gap="$6" flexWrap="wrap">
@@ -239,7 +240,7 @@ export function OrganizationsScreen() {
                                 </Button>
                             </XStack>
                         ) : null}
-                    </Card>
+                    </YStack>
                 ) : null}
 
                 {selectedOrg && (

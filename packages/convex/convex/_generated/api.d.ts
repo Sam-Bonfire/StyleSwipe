@@ -18,6 +18,7 @@ import type * as debug from "../debug.js";
 import type * as discovery from "../discovery.js";
 import type * as events from "../events.js";
 import type * as featureFlags from "../featureFlags.js";
+import type * as feedback from "../feedback.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
 import type * as index from "../index.js";
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   discovery: typeof discovery;
   events: typeof events;
   featureFlags: typeof featureFlags;
+  feedback: typeof feedback;
   helpers: typeof helpers;
   http: typeof http;
   index: typeof index;

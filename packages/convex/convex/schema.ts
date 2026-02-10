@@ -75,16 +75,46 @@ const featureFlags = defineTable({
 
 // High-fidelity structured logging
 const logs = defineTable({
-  level: v.union(v.literal('INFO'), v.literal('WARN'), v.literal('ERROR')),
+  level: v.union(v.literal('INFO'), v.literal('WARN'), v.literal('ERROR'), v.literal('DEBUG')),
   message: v.string(),
   context: v.optional(v.any()), // Flexible JSON context
   traceId: v.optional(v.string()), // Request correlation ID
   userId: v.optional(v.string()), // Foreign key to users (using string to match Better Auth)
+  sessionId: v.optional(v.string()), // Session ID for correlation
+  app: v.optional(v.string()), // 'consumer-app', 'admin-panel'
   timestamp: v.number(),
+
+  // Smart Context
+  device: v.optional(
+    v.object({
+      model: v.optional(v.union(v.string(), v.null())),
+      osName: v.optional(v.union(v.string(), v.null())),
+      osVersion: v.optional(v.union(v.string(), v.null())),
+      batteryLevel: v.optional(v.union(v.number(), v.null())),
+      networkType: v.optional(v.union(v.string(), v.null())),
+      freeDisk: v.optional(v.union(v.number(), v.null())),
+      freeMemory: v.optional(v.union(v.number(), v.null())),
+      appVersion: v.optional(v.union(v.string(), v.null())),
+      buildNumber: v.optional(v.union(v.string(), v.null())),
+    }),
+  ),
+  breadcrumbs: v.optional(
+    v.array(
+      v.object({
+        category: v.string(),
+        message: v.string(),
+        data: v.optional(v.any()),
+        level: v.optional(v.string()),
+        timestamp: v.number(),
+      }),
+    ),
+  ),
 })
   .index('by_level', ['level'])
   .index('by_user', ['userId'])
-  .index('by_trace', ['traceId']);
+  .index('by_session', ['sessionId'])
+  .index('by_trace', ['traceId'])
+  .index('by_timestamp', ['timestamp']);
 
 // PRD Ref: [cite: 17, 31-33] - Strategic event sampling for analytics
 const events = defineTable({
@@ -263,6 +293,36 @@ const scrape_jobs = defineTable({
   .index('by_status', ['status'])
   .index('by_created', ['createdAt']);
 
+// -----------------------------------------------------------------------------
+// SUPPORT CONTEXT - User Feedback & Support
+// -----------------------------------------------------------------------------
+
+const feedback = defineTable({
+  userId: v.string(), // Foreign key to users
+  name: v.string(),
+  contact: v.string(),
+  type: v.string(), // Bug, Feature, Improvement, Other
+  message: v.string(),
+  attachment: v.optional(v.id('_storage')),
+  status: v.string(), // Open, Read, Replied, Resolved
+  replies: v.array(
+    v.object({
+      adminId: v.string(),
+      message: v.string(),
+      timestamp: v.number(),
+    }),
+  ),
+  updatedAt: v.number(),
+  createdAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_status', ['status'])
+  .index('by_created', ['createdAt'])
+  .searchIndex('search_message', {
+    searchField: 'message',
+    filterFields: ['status', 'type', 'userId'],
+  });
+
 // =============================================================================
 // SCHEMA EXPORT
 // =============================================================================
@@ -291,4 +351,5 @@ export default defineSchema({
   // Scraper Context
   scraped_products,
   scrape_jobs,
+  feedback,
 });

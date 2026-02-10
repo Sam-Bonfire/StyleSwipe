@@ -3,8 +3,7 @@
     "name": "StyleSwipe Admin",
     "slug": "admin-panel",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./../assets/favicon/favicon.png",
+    "icon": "../../assets/favicon/favicon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -14,6 +13,16 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "ios": {
+      "icon": "../../assets/favicon/favicon.png",
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "../../assets/favicon/favicon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
     "web": {
       "favicon": "../../assets/favicon/favicon.png",
       "bundler": "metro"

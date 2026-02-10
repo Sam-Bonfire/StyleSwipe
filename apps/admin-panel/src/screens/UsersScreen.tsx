@@ -12,6 +12,7 @@ import {
     ScrollView,
     Avatar,
     styled,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Card,
     Accordion,
     Square,
@@ -86,23 +87,27 @@ export function UsersScreen() {
                 ) : null}
 
                 {!isLoading && displayResults.length > 0 ? (
-                    <Card
-                        padding="$0"
-                        bordered
+                    <YStack
                         backgroundColor="$background"
-                        borderRadius="$3"
                         overflow="hidden"
                     >
                         <Accordion type="multiple">
-                            {displayResults.map((user: any, index: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
-                                <Accordion.Item key={user._id} value={user._id}>
+                            {displayResults.map((user: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+                                <Accordion.Item
+                                    key={user._id}
+                                    value={user._id}
+                                    marginBottom="$2"
+                                    borderRadius="$4"
+                                    borderWidth={1}
+                                    borderColor="$borderColor"
+                                    overflow="hidden"
+                                    backgroundColor="$background"
+                                >
                                     <Accordion.Trigger
                                         flexDirection="row"
                                         justifyContent="space-between"
                                         alignItems="center"
                                         padding="$3"
-                                        borderBottomWidth={index === displayResults.length - 1 ? 0 : 1}
-                                        borderColor="$borderColor"
                                         backgroundColor="$background"
                                         hoverStyle={{ backgroundColor: '$backgroundHover' }}
                                         cursor="pointer"
@@ -152,8 +157,6 @@ export function UsersScreen() {
                                             paddingHorizontal="$4"
                                             paddingVertical="$3"
                                             backgroundColor="$backgroundHover"
-                                            borderBottomWidth={1}
-                                            borderColor="$borderColor"
                                         >
                                             <YStack gap="$3">
                                                 <XStack gap="$6" flexWrap="wrap">
@@ -226,7 +229,7 @@ export function UsersScreen() {
                                 </Button>
                             </XStack>
                         ) : null}
-                    </Card>
+                    </YStack>
                 ) : null}
 
                 {!isLoading && displayResults.length === 0 ? (

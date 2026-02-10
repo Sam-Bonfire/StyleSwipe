@@ -12,6 +12,7 @@ COPY apps/scraper-service/package.json ./apps/scraper-service/
 RUN bun install --frozen-lockfile
 
 # Copy source code
+COPY assets ./assets
 COPY packages/core ./packages/core
 COPY packages/infrastructure ./packages/infrastructure
 COPY apps/scraper-service ./apps/scraper-service

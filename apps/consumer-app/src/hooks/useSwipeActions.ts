@@ -11,11 +11,6 @@ export function useSwipeActions() {
       productPayload?: any, // Should include text for vectorization if needed
     ) => {
       try {
-        //Fire and forget logic - we don't await the DB write to block the UI,
-        // but we do want to catch errors?
-        // For true fire-and-forget, we don't await.
-        // However, usually await on SQLite is fast enough (<10ms).
-        // User said "Main thread ONLY buffers...".
 
         const db = await LocalDatabase.getInstance();
 
