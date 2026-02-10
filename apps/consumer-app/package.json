@@ -10,6 +10,7 @@
     "android": "expo start --android --lan",
     "ios": "expo start --ios --lan",
     "web": "expo start --web --lan",
+    "build": "expo export -p web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'",
     "test": "echo \"No tests yet\""

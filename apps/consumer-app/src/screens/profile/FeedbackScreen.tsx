@@ -80,7 +80,7 @@ export function FeedbackScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            <XStack alignItems="center" space="$4" padding="$4" borderBottomWidth={1} borderColor="$borderColor">
+            <XStack alignItems="center" space="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
                 <TopBarIconButton
                     onPress={() => navigation.goBack()}
                     backgroundColor="$background"

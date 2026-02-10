@@ -1,29 +1,33 @@
-# Stage 1: Build
+# Stage 1: Pruner
+FROM oven/bun:1-alpine AS pruner
+WORKDIR /app
+RUN npm install -g turbo
+COPY . .
+RUN turbo prune @app/scraper-service --docker
+
+# Stage 2: Builder
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 
-# Copy package manifests first for layer caching
-COPY package.json bun.lockb ./
-COPY packages/core/package.json ./packages/core/
-COPY packages/infrastructure/package.json ./packages/infrastructure/
-COPY apps/scraper-service/package.json ./apps/scraper-service/
-
-# Install all dependencies
+# Add dependencies
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lockb ./bun.lockb
 RUN bun install --frozen-lockfile
 
 # Copy source code
-COPY assets ./assets
-COPY packages/core ./packages/core
-COPY packages/infrastructure ./packages/infrastructure
-COPY apps/scraper-service ./apps/scraper-service
-COPY convex ./convex
-COPY tsconfig.json ./
+COPY --from=pruner /app/out/full/ .
 
-# Stage 2: Production
+# Build/Prepare
+# For Bun apps, we might not strictly need a build step if running ts directly, 
+# but we can check types or just prepare the environment.
+# If we were bundling, we would run 'bun build'.
+# Here we just prepare the runner stage.
+
+# Stage 3: Runner
 FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 
-# Install Chromium and dependencies for Playwright
+# Install system dependencies for Playwright
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -33,7 +37,11 @@ RUN apk add --no-cache \
     ttf-freefont \
     dumb-init
 
-# Copy built artifacts from builder
+ENV NODE_ENV=production
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV SCRAPER_API_PORT=3001
+
+# Copy from builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/scraper-service ./apps/scraper-service
@@ -41,16 +49,7 @@ COPY --from=builder /app/convex ./convex
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/tsconfig.json ./
 
-# Set environment
-ENV NODE_ENV=production
-ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV SCRAPER_API_PORT=3001
-
-# Expose API port
 EXPOSE 3001
 
-# Use dumb-init to handle signals
 ENTRYPOINT ["dumb-init", "--"]
-
-# Default: daemon mode
 CMD ["bun", "run", "apps/scraper-service/src/index.ts", "--daemon"]
