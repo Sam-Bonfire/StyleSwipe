@@ -1,7 +1,15 @@
 {
   "name": "@app/ui-kit",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
+    "directory": "packages/ui-kit"
+  },
   "license": "UNLICENSED",
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -17,15 +25,17 @@
     "./components/*": "./components/*.tsx"
   },
   "dependencies": {
-    "tamagui": "^1.0.0",
+    "@expo-google-fonts/manrope": "^0.4.2",
     "@tamagui/core": "^1.0.0",
+    "@tamagui/linear-gradient": "^1.0.0",
+    "@tamagui/lucide-icons": "^1.0.0",
     "@tamagui/shorthands": "^1.0.0",
     "@tamagui/themes": "^1.0.0",
-    "@tamagui/lucide-icons": "^1.0.0",
-    "@tamagui/linear-gradient": "^1.0.0",
+    "expo-font": "^14.0.11",
     "react": "18.3.1",
     "react-native": "^0.72.0",
-    "react-native-reanimated": ">=3.0.0"
+    "react-native-reanimated": ">=3.0.0",
+    "tamagui": "^1.0.0"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

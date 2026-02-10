@@ -8,6 +8,14 @@
             "require": "./dist/index.js"
         }
     },
+    "publishConfig": {
+        "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
+        "directory": "packages/convex"
+    },
     "private": true,
     "license": "UNLICENSED",
     "scripts": {

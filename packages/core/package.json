@@ -2,6 +2,14 @@
   "name": "@app/core",
   "version": "0.0.0",
   "main": "src/index.ts",
+  "publishConfig": {
+    "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
+    "directory": "packages/core"
+  },
   "license": "UNLICENSED",
   "private": true,
   "scripts": {

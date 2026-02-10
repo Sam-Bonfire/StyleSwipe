@@ -7,6 +7,7 @@
   "scripts": {
     "start": "expo start --web --lan --port 8082",
     "web": "expo start --web --lan --port 8082",
+    "build": "expo export -p web",
     "dev": "expo start --web --lan --port 8082",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'"
