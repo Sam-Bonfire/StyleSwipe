@@ -13,7 +13,7 @@ This is the heart of the hexagon.
 - **Contents**: 
   - **Entities**: `StyleDNA` logic (in `src/*/domain`), `User` entities, `VectorMath`.
   - **Business Rules**: Pure logic.
-- **Strict Rule**: **"Pure TS"**.
+- **Strict Rule**: **"Pure TS"** (Strict Mode, No `any`).
   - ❌ **NO** external dependencies: `convex`, `react`, `expo`, `tamagui`.
   - ✅ **Allowed**: Standard Library, Zod, Effect.
 - **Why**: Represents the "Product" rather than the "Tech". Must be testable in isolation (millisec unit tests).

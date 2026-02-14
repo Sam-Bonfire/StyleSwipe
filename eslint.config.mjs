@@ -46,6 +46,35 @@ export default tseslint.config(
     },
   },
   {
+    /* CORE PURITY: Block infrastructure imports in domain layer */
+    files: ['packages/core/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['convex', 'convex/*'],
+              message: 'Core must be pure TS. Convex belongs in packages/infrastructure.',
+            },
+            {
+              group: ['react', 'react-native', 'react-native/*', 'react/*'],
+              message: 'Core must be framework-agnostic. React belongs in apps/ or ui-kit.',
+            },
+            {
+              group: ['expo', 'expo-*', 'expo/*'],
+              message: 'Core must be framework-agnostic. Expo belongs in apps/.',
+            },
+            {
+              group: ['tamagui', '@tamagui/*'],
+              message: 'Core must be pure TS. Tamagui belongs in packages/ui-kit.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     /* UI Kit - Relaxing type strictness for styling library compatibility */
     files: ['packages/ui-kit/**/*.tsx', 'packages/ui-kit/**/*.ts'],
     rules: {

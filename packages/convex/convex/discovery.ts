@@ -1,16 +1,19 @@
-import { SwipeActionSchema } from '@app/core';
 import { v } from 'convex/values';
 
 import { components } from './_generated/api';
-import { mutation, query } from './_generated/server';
+import { Id } from './_generated/dataModel';
+import { MutationCtx, mutation, query } from './_generated/server';
+
+/** Swipe action validator — defined here in infrastructure, not in core */
+const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.literal('super'));
 
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 // Helper to get style profile
-const getStyleProfile = async (ctx: any, userId: string) => {
+const getStyleProfile = async (ctx: MutationCtx, userId: string) => {
   return await ctx.db
     .query('styleProfiles')
-    .withIndex('by_user', (q: any) => q.eq('userId', userId))
+    .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
 };
 
@@ -72,7 +75,7 @@ export const getRecentlyViewed = query({
       .take(limit * 3);
 
     const uniqueProductIds = new Set<string>();
-    const orderedIds: any[] = [];
+    const orderedIds: Id<'products'>[] = [];
 
     for (const view of views) {
       if (view.productId && !uniqueProductIds.has(view.productId)) {

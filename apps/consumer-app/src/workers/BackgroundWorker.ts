@@ -56,8 +56,8 @@ async function performAnalysisAndSync(db: LocalDatabase) {
     const text = payload.text || payload.description || 'product';
     const vItem = await generateEmbedding(text);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userVector = applyDisplacement(userVector, vItem, payload.action as any, {
+    // Use convex Action type from schema if available, or just string if it matches displacement
+    userVector = applyDisplacement(userVector, vItem, payload.action, {
       alpha: LEARNING_RATE,
       beta: PENALTY_RATE,
     });
@@ -74,8 +74,8 @@ async function performAnalysisAndSync(db: LocalDatabase) {
   const token = await getAuthToken();
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await client.mutation('sync:syncBatch' as any, {
+    // @ts-expect-error - Dynamic string for mutation
+    await client.mutation('sync:syncBatch', {
       authToken: token || undefined,
       swipes: events.map((e) => {
         const p = JSON.parse(e.payload);
@@ -87,8 +87,7 @@ async function performAnalysisAndSync(db: LocalDatabase) {
       }),
       vectorUpdate: {
         v1: userVector,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        activeDNA: 'v1' as any,
+        activeDNA: 'v1',
       },
     });
     console.log(`[${BACKGROUND_TASK_NAME}] Synced ${events.length} swipes and updated vector.`);
@@ -107,8 +106,8 @@ async function syncRawEventsOnly(db: LocalDatabase) {
   const token = await getAuthToken();
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await client.mutation('sync:syncBatch' as any, {
+    // @ts-expect-error - Dynamic string for mutation
+    await client.mutation('sync:syncBatch', {
       authToken: token || undefined,
       swipes: events.map((e) => {
         const p = JSON.parse(e.payload);

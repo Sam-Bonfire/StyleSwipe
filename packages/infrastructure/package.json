@@ -12,8 +12,8 @@
   },
   "license": "UNLICENSED",
   "scripts": {
-    "lint": "eslint . --ignore-pattern dist --rule '@typescript-eslint/no-explicit-any: off'",
-    "test": "echo \"Testing...\"",
+    "lint": "eslint . --ignore-pattern dist",
+    "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

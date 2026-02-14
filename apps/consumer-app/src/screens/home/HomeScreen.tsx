@@ -1,4 +1,4 @@
-import { api } from '@app/convex';
+import { Id, api } from '@app/convex';
 import { useNavigation } from '@react-navigation/native';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import React from 'react';
@@ -39,8 +39,8 @@ export function HomeScreen() {
 
   const handleProductPress = (productId: string) => {
     // Record view event
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recordView({ productId: productId as any });
+    // Record view event
+    recordView({ productId: productId as Id<'products'> });
     // Navigate to details
     navigation.navigate('ProductDetail', { productId });
   };

@@ -1,4 +1,7 @@
+import { Effect } from 'effect';
+
 import { Cart } from '../domain/Cart';
+import { EmptyCartError, RepositoryError } from '../domain/errors';
 import { Order, OrderItem, Address, OrderStatus } from '../domain/Order';
 import { PriceEstimator } from '../domain/PriceEstimator';
 
@@ -8,48 +11,52 @@ export interface OrderRepository {
 }
 
 export class CheckoutService {
-  constructor(private orderRepo: OrderRepository) {}
+  constructor(private orderRepo: OrderRepository) { }
 
-  async createOrderFromCart(
+  createOrderFromCart(
     cart: Cart,
     shippingAddress: Address,
     orderIdGenerator: () => string,
-  ): Promise<Order> {
-    if (cart.items.length === 0) {
-      throw new Error('Cannot checkout empty cart');
-    }
+  ): Effect.Effect<Order, EmptyCartError | RepositoryError> {
+    return Effect.gen(this, function* (_) {
+      if (cart.items.length === 0) {
+        return yield* _(Effect.fail(new EmptyCartError(cart.userId)));
+      }
 
-    const priceBreakdown = PriceEstimator.estimate(cart);
+      const priceBreakdown = PriceEstimator.estimate(cart);
 
-    const orderItems = cart.items.map(
-      (item) =>
-        new OrderItem(
-          item.productId,
-          item.quantity,
-          item.price,
-          item.attributes['brand'] || 'Unknown',
-          `Product ${item.productId}`, // Placeholder: In real app, we'd fetch full details or store title in cart
-          'https://placehold.co/100x100', // Placeholder
-        ),
-    );
+      const orderItems = cart.items.map(
+        (item) =>
+          new OrderItem(
+            item.productId,
+            item.quantity,
+            item.price,
+            item.attributes['brand'] || 'Unknown',
+            `Product ${item.productId}`,
+            'https://placehold.co/100x100',
+          ),
+      );
 
-    const order = new Order(
-      orderIdGenerator(),
-      cart.userId,
-      orderItems,
-      shippingAddress,
-      OrderStatus.PENDING,
-      Date.now(),
-      priceBreakdown.total,
-      priceBreakdown.shipping,
-      priceBreakdown.tax,
-    );
+      const order = new Order(
+        orderIdGenerator(),
+        cart.userId,
+        orderItems,
+        shippingAddress,
+        OrderStatus.PENDING,
+        Date.now(),
+        priceBreakdown.total,
+        priceBreakdown.shipping,
+        priceBreakdown.tax,
+      );
 
-    await this.orderRepo.save(order);
+      yield* _(
+        Effect.tryPromise({
+          try: () => this.orderRepo.save(order),
+          catch: (e) => new RepositoryError('orderRepo.save', e),
+        }),
+      );
 
-    // Note: Cart clearing should be handled by the caller or a separate "clearCart" operation
-    // after successful order creation/payment.
-
-    return order;
+      return order;
+    });
   }
 }

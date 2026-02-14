@@ -57,6 +57,7 @@ const ColorSwatch = ({ name, color }: { name: string; color: string }) => (
       width={48}
       height={48}
       borderRadius="$2"
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       backgroundColor={color as any}
       borderWidth={1}
@@ -255,8 +256,8 @@ export function DesignSystemGallery() {
                   ))}
                 </XStack>
                 <XStack gap="$1.5" flexWrap="wrap">
-                  <CategoryChip label="Cotton" variant="filter" onRemove={() => {}} />
-                  <CategoryChip label="Under 2000" variant="filter" onRemove={() => {}} />
+                  <CategoryChip label="Cotton" variant="filter" onRemove={() => { }} />
+                  <CategoryChip label="Under 2000" variant="filter" onRemove={() => { }} />
                 </XStack>
               </Section>
 

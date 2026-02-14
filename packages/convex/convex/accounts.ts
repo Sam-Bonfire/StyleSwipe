@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+
 import { components } from './_generated/api';
 import { mutation, query } from './_generated/server';
 
@@ -64,6 +65,54 @@ export const remove = mutation({
                 model: 'accounts',
                 where: [{ field: '_id', operator: 'eq', value: args.id }],
             },
+        });
+    },
+});
+
+export const getByUserId = query({
+    args: { userId: v.string() },
+    handler: async (ctx, args) => {
+        const res = await ctx.runQuery(components.auth.api.findMany, {
+            model: 'accounts',
+            where: [{ field: 'userId', operator: 'eq', value: args.userId }],
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+        return res.page;
+    },
+});
+
+
+export const update = mutation({
+    args: {
+        id: v.string(),
+        accessToken: v.optional(v.string()),
+        refreshToken: v.optional(v.string()),
+        expiresAt: v.optional(v.number()),
+    },
+
+    handler: async (ctx, args) => {
+        const { id, ...updates } = args;
+        await ctx.runMutation(components.auth.api.updateMany, {
+            input: {
+                model: 'accounts',
+                where: [{ field: '_id', operator: 'eq', value: id }],
+                update: updates,
+            },
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+    },
+});
+
+
+export const removeByUserId = mutation({
+    args: { userId: v.string() },
+    handler: async (ctx, args) => {
+        await ctx.runMutation(components.auth.api.deleteMany, {
+            input: {
+                model: 'accounts',
+                where: [{ field: 'userId', operator: 'eq', value: args.userId }],
+            },
+            paginationOpts: DEFAULT_PAGINATION,
         });
     },
 });

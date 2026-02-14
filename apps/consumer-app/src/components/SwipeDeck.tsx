@@ -1,4 +1,4 @@
-import { api } from '@app/convex';
+import { Id, api } from '@app/convex';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { useNavigation } from '@react-navigation/native';
@@ -9,9 +9,19 @@ import { YStack, H2, H3 } from 'tamagui';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 
+
+interface SwipeDeckProduct {
+  _id: string;
+  title: string;
+  description?: string;
+  price: number;
+  mrp?: number;
+  brand?: string;
+  images: string[];
+}
+
 export function SwipeDeck() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [products, setProducts] = useState<any[] | null>(null);
+  const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
   const getVectorFeed = useAction(api.recommendations.getVectorFeed);
   const swipeMutation = useMutation(api.discovery.processSwipe);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +33,7 @@ export function SwipeDeck() {
     getVectorFeed({ limit: 10 })
       .then((data) => {
         console.log('Feed data received:', data?.length);
-        setProducts(data);
+        setProducts(data as SwipeDeckProduct[]);
       })
       .catch((e) => {
         console.error('Feed Error:', e);
@@ -60,8 +70,7 @@ export function SwipeDeck() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSwipe = async (item: any, direction: 'left' | 'right' | 'up' | 'down') => {
+  const handleSwipe = async (item: SwipeDeckProduct, direction: 'left' | 'right' | 'up' | 'down') => {
     if (direction === 'down') {
       navigation.navigate('ProductDetail', { productId: item._id });
       return;
@@ -75,7 +84,7 @@ export function SwipeDeck() {
       // 1. Process Online (Real-time update)
       // Error handling inside try/catch to ensure we still buffer if offline
       await swipeMutation({
-        productId: item._id,
+        productId: item._id as Id<'products'>,
         action: action,
       });
       console.log(`Synced ${action} for ${item.title} to Convex.`);
@@ -83,18 +92,14 @@ export function SwipeDeck() {
       // 2. Offline-first: Buffer locally for redundancy/worker analysis
       const db = await LocalDatabase.getInstance();
       await db.bufferEvent('swipe', {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        productId: (item as any)._id,
+        productId: item._id,
         action,
         // We add metadata for the worker to generate embeddings if needed
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        description: (item as any).description || (item as any).title,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        title: (item as any).title,
+        description: item.description || item.title,
+        title: item.title,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      console.log(`Swiped ${direction} on ${(item as any).title}`);
+      console.log(`Swiped ${direction} on ${item.title}`);
     } catch (e) {
       console.warn('Swipe mutation failed (offline?), buffered locally.', e);
     }
@@ -102,12 +107,9 @@ export function SwipeDeck() {
 
   return (
     <SwipeCardStack
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data={products as any[]}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      keyExtractor={(item: any) => item._id}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderCard={(item: any) => {
+      data={products}
+      keyExtractor={(item: SwipeDeckProduct) => item._id}
+      renderCard={(item: SwipeDeckProduct) => {
         const discount =
           item.mrp && item.price < item.mrp
             ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
@@ -115,12 +117,12 @@ export function SwipeDeck() {
 
         return (
           <FashionCard
-            imageUrl={item.images[0]}
+            imageUrl={item.images[0] || ''}
             title={item.title}
             price={item.price}
             originalPrice={item.mrp}
             discountPercentage={discount}
-            brand={item.brand}
+            brand={item.brand || 'Unknown'}
             width="100%"
             height="100%"
             onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}

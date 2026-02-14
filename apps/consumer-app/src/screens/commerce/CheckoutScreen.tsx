@@ -6,6 +6,7 @@ import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
+import { Effect } from 'effect';
 import React, { useState, useMemo } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
@@ -42,7 +43,7 @@ export const CheckoutScreen = ({ navigation }: any) => {
     setIsProcessing(true);
     try {
       // 1. Get current cart
-      const cart = await manageCart.getCart(userId);
+      const cart = await Effect.runPromise(manageCart.getCart(userId));
       if (!cart) throw new Error('No cart found');
 
       // 2. Log Checkout Event (replacing Order creation)
@@ -63,7 +64,7 @@ export const CheckoutScreen = ({ navigation }: any) => {
       setOrderId(newOrderId);
 
       // 4. Clear cart
-      await manageCart.clearCart(userId);
+      await Effect.runPromise(manageCart.clearCart(userId));
 
       setStep('CONFIRMATION');
     } catch (e) {

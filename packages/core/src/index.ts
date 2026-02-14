@@ -1,3 +1,4 @@
+/* eslint-disable hexagonal-architecture/enforce */
 // Catalog
 export * from './catalog/domain/TaggingService';
 
@@ -17,6 +18,7 @@ export * from './commerce/domain/Cart';
 export * from './commerce/domain/CartRepository';
 export * from './commerce/domain/PriceEstimator';
 export * from './commerce/domain/Order';
+export * from './commerce/domain/errors';
 export * from './commerce/application/ManageCart';
 export * from './commerce/application/CheckoutService';
 

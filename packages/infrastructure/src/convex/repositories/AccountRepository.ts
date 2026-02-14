@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX ACCOUNT REPOSITORY ADAPTER
 // Implements AccountRepository port for OAuth provider accounts
@@ -18,14 +18,14 @@ export class ConvexAccountRepository implements AccountRepository {
   constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<Account | null> {
-    const doc = await this.client.query((api as any).accounts.getById, {
+    const doc = await this.client.query(api.accounts.getById, {
       id,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByProvider(providerId: string, providerAccountId: string): Promise<Account | null> {
-    const doc = await this.client.query((api as any).accounts.getByProvider, {
+    const doc = await this.client.query(api.accounts.getByProvider, {
       providerId,
       accountId: providerAccountId,
     });
@@ -33,14 +33,14 @@ export class ConvexAccountRepository implements AccountRepository {
   }
 
   async findByUserId(userId: string): Promise<Account[]> {
-    const docs = await this.client.query((api as any).accounts.getByUserId, {
+    const docs = await this.client.query(api.accounts.getByUserId, {
       userId,
     });
     return docs.map((doc: any) => this.mapToEntity(doc));
   }
 
   async create(account: Omit<Account, 'id'>): Promise<Account> {
-    const id = await this.client.mutation((api as any).accounts.create, {
+    const id = await this.client.mutation(api.accounts.create, {
       userId: account.userId,
       providerId: account.providerId,
       accountId: account.providerAccountId,
@@ -53,7 +53,7 @@ export class ConvexAccountRepository implements AccountRepository {
   }
 
   async update(id: string, data: Partial<Omit<Account, 'id'>>): Promise<Account> {
-    await this.client.mutation((api as any).accounts.update, {
+    await this.client.mutation(api.accounts.update, {
       id,
       ...data,
       accountId: data.providerAccountId,
@@ -64,13 +64,13 @@ export class ConvexAccountRepository implements AccountRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.client.mutation((api as any).accounts.remove, {
+    await this.client.mutation(api.accounts.remove, {
       id,
     });
   }
 
   async deleteByUserId(userId: string): Promise<void> {
-    await this.client.mutation((api as any).accounts.removeByUserId, {
+    await this.client.mutation(api.accounts.removeByUserId, {
       userId,
     });
   }

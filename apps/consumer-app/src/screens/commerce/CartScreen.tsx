@@ -5,6 +5,7 @@ import CartItemComponent from '@app/ui-kit/components/CartItem';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
 import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
+import { Effect } from 'effect';
 import React, { useEffect, useState, useMemo } from 'react';
 import { YStack, ScrollView, Text } from 'tamagui';
 
@@ -30,7 +31,7 @@ export const CartScreen = () => {
 
     setIsLoading(true);
     try {
-      const c = await manageCart.getCart(userId);
+      const c = await Effect.runPromise(manageCart.getCart(userId));
       setCart(c);
     } catch (e) {
       console.error('Failed to load cart', e);
@@ -47,7 +48,7 @@ export const CartScreen = () => {
 
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
     try {
-      const updated = await manageCart.updateQuantity(userId, productId, quantity);
+      const updated = await Effect.runPromise(manageCart.updateQuantity(userId, productId, quantity));
       setCart(updated);
     } catch (e) {
       console.error('Failed to update quantity', e);
@@ -56,7 +57,7 @@ export const CartScreen = () => {
 
   const handleRemove = async (productId: string) => {
     try {
-      const updated = await manageCart.removeFromCart(userId, productId);
+      const updated = await Effect.runPromise(manageCart.removeFromCart(userId, productId));
       setCart(updated);
     } catch (e) {
       console.error('Failed to remove item', e);
