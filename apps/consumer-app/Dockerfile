@@ -11,8 +11,12 @@ COPY . .
 RUN turbo prune @app/consumer-app --docker
 
 # Stage 2: Installer & Builder
-FROM oven/bun:1-alpine AS installer
+# Metro bundler requires Node.js runtime (incompatible with Bun's shim resolution)
+FROM node:20-alpine AS installer
 WORKDIR /app
+
+# Install bun for dependency management
+RUN npm install -g bun
 
 # Add dependencies
 COPY --from=builder /app/out/json/ .
@@ -24,10 +28,8 @@ RUN bun install
 COPY --from=builder /app/out/full/ .
 COPY --from=builder /app/assets ./assets
 
-# Build the project
-# We use 'bun run build' which should trigger 'expo export -p web'
-# Root bun install already handled dependencies, sub-folder install can break links.
-RUN cd apps/consumer-app && bunx expo export -p web
+# Build the project using Node.js runtime for Metro compatibility
+RUN cd apps/consumer-app && npx expo export -p web
 
 # Stage 3: Runner
 FROM nginx:alpine-slim AS runner
