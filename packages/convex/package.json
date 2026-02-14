@@ -3,10 +3,18 @@
     "version": "0.0.0",
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.js"
+            "types": "./convex/index.ts",
+            "import": "./convex/index.ts",
+            "require": "./convex/index.ts"
         }
+    },
+    "publishConfig": {
+        "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
+        "directory": "packages/convex"
     },
     "private": true,
     "license": "UNLICENSED",

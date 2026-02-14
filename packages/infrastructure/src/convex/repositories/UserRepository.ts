@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX USER REPOSITORY ADAPTER
 // Implements UserRepository port for Convex backend

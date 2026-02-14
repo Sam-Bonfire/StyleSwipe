@@ -1,7 +1,7 @@
 import { api } from '@app/convex';
 import { Id } from '@app/convex';
 import { ManageCart, CartItem } from '@app/core';
-import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { ConvexCartRepository } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';

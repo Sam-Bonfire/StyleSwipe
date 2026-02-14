@@ -1,6 +1,6 @@
 import { api } from '@app/convex';
 import { Cart, ManageCart, PriceEstimator } from '@app/core';
-import { ConvexCartRepository } from '@app/infrastructure/src/commerce/ConvexCartRepository';
+import { ConvexCartRepository } from '@app/infrastructure';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
 import { ConvexClient } from 'convex/browser';

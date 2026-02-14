@@ -15,3 +15,6 @@ export * from './queue';
 
 // Embedder Adapter
 export * from './embedder';
+
+// Commerce Adapters
+export * from './commerce/ConvexCartRepository';

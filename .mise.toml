@@ -2,7 +2,7 @@
 bun = "1.2.23"
 node = "lts"
 "npm:@withgraphite/graphite-cli" = "latest"
-hurl = "latest"
+hurl = "7.1.0"
 
 [tasks.dev]
 description = "Start all development services (Convex, Consumer, Admin, Scraper)"
@@ -109,3 +109,14 @@ flag "-d --description <text>" help="Optional detailed description"
 flag "-t --ticket <id>" help="Optional ticket ID"
 """
 run = 'sh bin/snapshot.sh "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
+
+[tasks.clean]
+description = "Cleanup all node_modules, .turbo, and build artifacts"
+run = """
+find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
+find . -name ".turbo" -type d -prune -exec rm -rf '{}' +
+find . -name "dist" -type d -prune -exec rm -rf '{}' +
+find . -name ".expo" -type d -prune -exec rm -rf '{}' +
+find . -name "build" -type d -prune -exec rm -rf '{}' +
+echo "Cleanup complete. Run 'bun install' to restore dependencies."
+"""

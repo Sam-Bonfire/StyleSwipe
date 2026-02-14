@@ -1,3 +1,4 @@
+/* eslint-disable */
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
@@ -33,4 +34,10 @@ config.resolver.extraNodeModules = {
 
 };
 
-module.exports = config;
+const { withTamagui } = require('@tamagui/metro-plugin');
+
+module.exports = withTamagui(config, {
+  components: ['tamagui', '@app/ui-kit'],
+  config: './tamagui.config.ts',
+  outputCSS: './tamagui.css',
+});

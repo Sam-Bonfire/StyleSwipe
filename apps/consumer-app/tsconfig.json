@@ -4,17 +4,6 @@
     "outDir": "dist",
     "baseUrl": "."
   },
-  "references": [
-    {
-      "path": "../../packages/core"
-    },
-    {
-      "path": "../../packages/ui-kit"
-    },
-    {
-      "path": "../../packages/convex"
-    }
-  ],
   "include": [
     "**/*"
   ],

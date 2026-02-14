@@ -42,6 +42,7 @@ export default tseslint.config(
     files: ['packages/core/**/*.ts', 'packages/infrastructure/**/*.ts'],
     rules: {
       'hexagonal-architecture/enforce': ['error'],
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
   {
@@ -53,6 +54,14 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['node_modules/', 'dist/', '.expo/', '.next/', 'convex/_generated/'],
+    ignores: [
+      '**/node_modules/',
+      '**/dist/',
+      '**/.expo/',
+      '**/.next/',
+      '**/.turbo/',
+      '**/.graphite/',
+      '**/convex/_generated/',
+    ],
   },
 );

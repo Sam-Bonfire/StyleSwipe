@@ -3,7 +3,7 @@ import { organizationClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 
 export class AuthAdapter {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   public client: any;
 
   constructor(baseURL: string) {

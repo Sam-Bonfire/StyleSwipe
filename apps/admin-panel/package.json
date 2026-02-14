@@ -7,14 +7,16 @@
   "scripts": {
     "start": "expo start --web --lan --port 8082",
     "web": "expo start --web --lan --port 8082",
+    "build": "expo export -p web",
     "dev": "expo start --web --lan --port 8082",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'"
+    "lint": "NODE_OPTIONS='--max-old-space-size=4096' eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'"
   },
   "dependencies": {
     "@app/core": "workspace:*",
     "@app/ui-kit": "workspace:*",
     "@app/logger": "workspace:*",
+    "@app/infrastructure": "workspace:*",
     "@app/convex": "workspace:*",
     "@convex-dev/better-auth": "^0.10.10",
     "@expo/metro-runtime": "~4.0.0",
@@ -42,6 +44,8 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~18.3.12",
-    "babel-plugin-transform-import-meta": "^2.3.3"
+    "babel-plugin-transform-import-meta": "^2.3.3",
+    "@tamagui/metro-plugin": "^1.100.0",
+    "tamagui": "^1.100.0"
   }
 }

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX MEMBER REPOSITORY ADAPTER
 // Implements MemberRepository port for RBAC membership

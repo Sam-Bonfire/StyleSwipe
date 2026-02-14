@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX SESSION REPOSITORY ADAPTER
 // Implements SessionRepository port for device session management

@@ -123,9 +123,9 @@ export class ConvexQueueAdapter<T> implements Queue<T> {
     // The data is serialized as JSON
     const id = await this.client.mutation(
       // Using dynamic import to avoid circular deps
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       'scraper:enqueueItem' as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       { data: item as any },
     );
     return id;
@@ -141,7 +141,7 @@ export class ConvexQueueAdapter<T> implements Queue<T> {
 
   async pull(batchSize = 10): Promise<Array<{ id: string; data: T }>> {
     const items = await this.client.mutation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       'scraper:dequeueItems' as any,
       { batchSize },
     );
@@ -150,7 +150,7 @@ export class ConvexQueueAdapter<T> implements Queue<T> {
 
   async complete(id: string): Promise<void> {
     await this.client.mutation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       'scraper:completeItem' as any,
       { id },
     );
@@ -158,7 +158,7 @@ export class ConvexQueueAdapter<T> implements Queue<T> {
 
   async fail(id: string, error?: string): Promise<void> {
     await this.client.mutation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       'scraper:failItem' as any,
       { id, error },
     );
@@ -166,7 +166,7 @@ export class ConvexQueueAdapter<T> implements Queue<T> {
 
   async size(): Promise<number> {
     const count = await this.client.query(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       'scraper:getQueueSize' as any,
       {},
     );

@@ -10,11 +10,13 @@
     "android": "expo start --android --lan",
     "ios": "expo start --ios --lan",
     "web": "expo start --web --lan",
+    "build": "expo export -p web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'",
     "test": "echo \"No tests yet\""
   },
   "dependencies": {
+    "@app/infrastructure": "workspace:*",
     "@app/convex": "workspace:*",
     "@app/core": "workspace:*",
     "@app/logger": "workspace:*",
@@ -46,6 +48,8 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~18.3.12",
-    "babel-plugin-transform-import-meta": "^2.3.3"
+    "babel-plugin-transform-import-meta": "^2.3.3",
+    "@tamagui/metro-plugin": "^1.100.0",
+    "tamagui": "^1.100.0"
   }
 }

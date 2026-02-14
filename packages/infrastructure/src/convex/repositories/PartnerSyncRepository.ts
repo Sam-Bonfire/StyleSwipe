@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX PARTNER SYNC REPOSITORY ADAPTER
 // Implements PartnerSyncRepository port for collaborative shopping

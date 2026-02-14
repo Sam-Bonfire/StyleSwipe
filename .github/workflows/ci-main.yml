@@ -1,0 +1,190 @@
+name: CI/CD Main
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  TURBO_CACHE_DIR: .turbo
+
+jobs:
+  setup:
+    needs: []
+    runs-on: docker
+    steps:
+      - uses: https://github.com/actions/checkout@v4
+      - name: Turbo Cache
+        uses: https://github.com/actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: https://github.com/jdx/mise-action@v2
+        with:
+          install: false
+      - name: Install dependencies (Anonymous)
+        run: |
+          unset GITHUB_TOKEN
+          unset GH_TOKEN
+          unset GITHUB_API_TOKEN
+          mise install
+      - run: bun install
+      - name: Run Verifications
+        run: bunx turbo run lint typecheck test
+
+  release:
+    needs: [setup]
+    runs-on: docker
+    outputs:
+      new_version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - uses: https://github.com/actions/checkout@v4
+        with:
+          token: ${{ secrets.CI_TOKEN }}
+          fetch-depth: 0
+
+      - name: Turbo Cache
+        uses: https://github.com/actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - uses: https://github.com/jdx/mise-action@v2
+        with:
+          install: false
+      - name: Install dependencies (Anonymous)
+        run: |
+          unset GITHUB_TOKEN
+          unset GH_TOKEN
+          unset GITHUB_API_TOKEN
+          mise install
+
+      - run: bun install
+
+      - name: Version and Tag
+        id: version
+        run: |
+          git config user.name "CI Bot"
+          git config user.email "ci-bot@yomite.in"
+          
+          # Run changeset version to bump versions and update changelogs
+          bun changeset version
+          
+          # Check if there are changes
+          if [[ -n $(git status -s) ]]; then
+            git add .
+            git commit -m "chore: version packages"
+            
+            # Assuming strictly one version for the app or using the root/main app version
+            # For monorepos, this can be complex. We'll use the root package.json version/tag.
+            VERSION=$(jq -r .version package.json)
+            TAG="v$VERSION"
+            
+            echo "New version: $VERSION"
+            
+            git tag $TAG
+            git push origin main
+            git push origin $TAG
+            
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            echo "TAG=$TAG" >> $GITHUB_ENV
+          else
+            echo "No changesets found, skipping version bump."
+            echo "VERSION=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Forgejo Release
+        if: steps.version.outputs.VERSION != 'none'
+        uses: https://gitea.com/actions/release-action@v1
+        with:
+          api_key: ${{ secrets.CI_TOKEN }}
+          files: |
+            CHANGELOG.md
+          name: Release ${{ steps.version.outputs.VERSION }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+
+  build-push-docker:
+    needs: [release]
+    if: needs.release.outputs.new_version != 'none'
+    runs-on: docker
+    strategy:
+      matrix:
+        app: [admin-panel, consumer-app, scraper-service]
+    steps:
+      - uses: https://github.com/actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_version }}
+
+      - name: Install Docker CLI
+        run: |
+          apt-get update && apt-get install -y curl iproute2
+          curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-27.5.1.tgz \
+            | tar xz --strip-components=1 -C /usr/local/bin docker/docker
+
+      - name: Configure Docker Host
+        run: |
+          GATEWAY=$(ip route | grep default | awk '{print $3}')
+          echo "DOCKER_HOST=tcp://${GATEWAY}:2375" >> $GITHUB_ENV
+
+      - name: Login to Registry
+        run: echo "${{ secrets.CI_TOKEN }}" | docker login git.yomite.in -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push
+        run: |
+          REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          TAG_BASE="git.yomite.in/${REPO}/${{ matrix.app }}"
+          docker build -f apps/${{ matrix.app }}/Dockerfile \
+            -t "${TAG_BASE}:latest" \
+            -t "${TAG_BASE}:${{ needs.release.outputs.new_version }}" \
+            .
+          docker push "${TAG_BASE}:latest"
+          docker push "${TAG_BASE}:${{ needs.release.outputs.new_version }}"
+
+  build-publish-extension:
+    needs: [release]
+    if: needs.release.outputs.new_version != 'none'
+    runs-on: docker
+    steps:
+      - uses: https://github.com/actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_version }}
+      - uses: https://github.com/jdx/mise-action@v2
+        with:
+          install: false
+      - name: Install dependencies (Anonymous)
+        run: |
+          unset GITHUB_TOKEN
+          unset GH_TOKEN
+          unset GITHUB_API_TOKEN
+          mise install
+      - run: bun install
+      - name: Build Extension
+        working-directory: apps/browser-extension
+        run: bun run build
+
+      - name: Install Zip
+        run: apt-get update && apt-get install -y zip
+
+      - name: Zip Extension
+        working-directory: apps/browser-extension/dist
+        run: zip -r extension-v${{ needs.release.outputs.new_version }}.zip .
+      
+      - name: Upload to Release
+        uses: https://gitea.com/actions/release-action@v1
+        with:
+          api_key: ${{ secrets.CI_TOKEN }}
+          files: apps/browser-extension/dist/extension-v${{ needs.release.outputs.new_version }}.zip
+          name: Release ${{ needs.release.outputs.new_version }}
+          tag_name: v${{ needs.release.outputs.new_version }}
+          edit: true

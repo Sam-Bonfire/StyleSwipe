@@ -1,11 +1,11 @@
 import 'react-native-gesture-handler';
 import { api } from '@app/convex';
-import { config, Button, ToastProvider } from '@app/ui-kit';
+import { Button, StyleSwipeProvider } from '@app/ui-kit';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
 import React, { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TamaguiProvider, Theme, YStack, Spinner, Text } from 'tamagui';
+import { YStack, Spinner, Text } from 'tamagui';
 
 import { DashboardLayout } from './components/DashboardLayout';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
@@ -94,16 +94,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
-        <TamaguiProvider config={config}>
-          <ToastProvider>
-            <GlobalErrorBoundary>
-              {/* Switching to Light Theme as requested */}
-              <Theme name="BrandIdentityLight">
-                <Main />
-              </Theme>
-            </GlobalErrorBoundary>
-          </ToastProvider>
-        </TamaguiProvider>
+        <StyleSwipeProvider theme="BrandIdentityLight">
+          <GlobalErrorBoundary>
+            <Main />
+          </GlobalErrorBoundary>
+        </StyleSwipeProvider>
       </ConvexBetterAuthProvider>
     </SafeAreaProvider>
   );

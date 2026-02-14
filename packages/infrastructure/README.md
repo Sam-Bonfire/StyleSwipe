@@ -14,4 +14,4 @@ This package serves as the **Persistence Adapter** for StyleSwipe. Its sole job 
 *   ❌ **NEVER** import UI logic (`tamagui`, `react-native`).
 
 ## Deployment
-Deployed automatically to Convex Cloud via `npx convex deploy`.
+Deployed automatically to Convex Cloud via `bunx convex deploy`.

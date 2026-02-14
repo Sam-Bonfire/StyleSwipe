@@ -12,3 +12,4 @@ export { default as tamaguiConfig } from './theme';
 
 // All Components
 export * from './components';
+export { StyleSwipeProvider } from './provider';

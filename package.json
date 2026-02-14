@@ -12,9 +12,11 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint"
+    "lint": "NODE_OPTIONS='--max-old-space-size=4096' turbo run lint",
+    "test": "turbo run test"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "@convex-dev/better-auth": "^0.10.10",
     "@rollup/rollup-linux-x64-gnu": "^4.56.0",
     "@types/bun": "^1.3.6",

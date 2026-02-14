@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX ACCOUNT REPOSITORY ADAPTER
 // Implements AccountRepository port for OAuth provider accounts

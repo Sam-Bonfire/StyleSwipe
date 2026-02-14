@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX LOG REPOSITORY ADAPTER
 // Implements LogRepository port for structured logging

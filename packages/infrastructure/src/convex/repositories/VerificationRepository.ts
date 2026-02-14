@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX VERIFICATION REPOSITORY ADAPTER
 // Implements VerificationRepository port for OTP lifecycle

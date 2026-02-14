@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX EVENT REPOSITORY ADAPTER
 // Implements EventRepository port for strategic event sampling

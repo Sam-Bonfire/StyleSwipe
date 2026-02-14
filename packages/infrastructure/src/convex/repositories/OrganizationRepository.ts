@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // =============================================================================
 // CONVEX ORGANIZATION REPOSITORY ADAPTER
 // Implements OrganizationRepository port for multi-tenant orgs

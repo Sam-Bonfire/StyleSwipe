@@ -2,6 +2,14 @@
     "name": "@app/logger",
     "version": "0.0.1",
     "private": true,
+    "publishConfig": {
+        "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
+        "directory": "packages/logger"
+    },
     "license": "UNLICENSED",
     "scripts": {
         "typecheck": "tsc --noEmit",

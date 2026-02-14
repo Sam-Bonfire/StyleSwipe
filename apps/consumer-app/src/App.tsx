@@ -1,11 +1,10 @@
 import 'react-native-gesture-handler';
 import { api } from '@app/convex';
-import { config, ToastProvider } from '@app/ui-kit';
+import { StyleSwipeProvider } from '@app/ui-kit';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ConvexReactClient, useQuery } from 'convex/react';
 import React from 'react';
-import { TamaguiProvider, Theme } from 'tamagui';
 import { YStack, Spinner } from 'tamagui';
 
 import { AuthSelectionScreen } from './screens/auth/AuthSelectionScreen';
@@ -111,18 +110,14 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
-        <TamaguiProvider config={config}>
-          <Theme name="BrandIdentityLight">
-            <ToastProvider>
-              <NavigationContainer
-                ref={navigationRef}
-                onStateChange={onNavigationStateChange}
-              >
-                <NavigationGuard />
-              </NavigationContainer>
-            </ToastProvider>
-          </Theme>
-        </TamaguiProvider>
+        <StyleSwipeProvider theme="BrandIdentityLight">
+          <NavigationContainer
+            ref={navigationRef}
+            onStateChange={onNavigationStateChange}
+          >
+            <NavigationGuard />
+          </NavigationContainer>
+        </StyleSwipeProvider>
       </ConvexBetterAuthProvider>
     </GestureHandlerRootView>
   );
