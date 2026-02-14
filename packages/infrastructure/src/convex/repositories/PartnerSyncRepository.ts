@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX PARTNER SYNC REPOSITORY ADAPTER
 // Implements PartnerSyncRepository port for collaborative shopping
@@ -18,35 +18,35 @@ export class ConvexPartnerSyncRepository implements PartnerSyncRepository {
   constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<PartnerSync | null> {
-    const doc = await this.client.query((api as any).partnerSync.getById, {
+    const doc = await this.client.query(api.partnerSync.getById, {
       id: id as Id<'partnerSync'>,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByInviteCode(inviteCode: string): Promise<PartnerSync | null> {
-    const doc = await this.client.query((api as any).partnerSync.getByInviteCode, {
+    const doc = await this.client.query(api.partnerSync.getByInviteCode, {
       inviteCode,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByInitiator(initiatorId: string): Promise<PartnerSync[]> {
-    const docs = await this.client.query((api as any).partnerSync.getByInitiator, {
+    const docs = await this.client.query(api.partnerSync.getByInitiator, {
       initiatorId,
     });
     return (docs as any[]).map((doc: any) => this.mapToEntity(doc));
   }
 
   async findByPartner(partnerId: string): Promise<PartnerSync[]> {
-    const docs = await this.client.query((api as any).partnerSync.getByPartner, {
+    const docs = await this.client.query(api.partnerSync.getByPartner, {
       partnerId,
     });
     return (docs as any[]).map((doc: any) => this.mapToEntity(doc));
   }
 
   async findActiveByUser(userId: string): Promise<PartnerSync | null> {
-    const doc = await this.client.query((api as any).partnerSync.getActiveByUser, {
+    const doc = await this.client.query(api.partnerSync.getActiveByUser, {
       userId,
     });
     return doc ? this.mapToEntity(doc) : null;

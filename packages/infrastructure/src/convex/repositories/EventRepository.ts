@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX EVENT REPOSITORY ADAPTER
 // Implements EventRepository port for strategic event sampling
@@ -19,7 +19,7 @@ export class ConvexEventRepository implements EventRepository {
   constructor(private client: ConvexClient) { }
 
   async create(event: Omit<SampledEvent, 'id'>): Promise<SampledEvent> {
-    const id = await this.client.mutation((api as any).events.create, {
+    const id = await this.client.mutation(api.events.create, {
       type: event.type,
       userId: event.userId,
       productId: event.productId,
@@ -32,7 +32,7 @@ export class ConvexEventRepository implements EventRepository {
   }
 
   async findByUserAndType(userId: string, type: string, limit = 100): Promise<SampledEvent[]> {
-    const docs = await this.client.query((api as any).events.getByUserAndType, {
+    const docs = await this.client.query(api.events.getByUserAndType, {
       userId,
       type,
       limit,
@@ -41,7 +41,7 @@ export class ConvexEventRepository implements EventRepository {
   }
 
   async findByType(type: string, limit = 100): Promise<SampledEvent[]> {
-    const docs = await this.client.query((api as any).events.getByType, {
+    const docs = await this.client.query(api.events.getByType, {
       type,
       limit,
     });
@@ -49,7 +49,7 @@ export class ConvexEventRepository implements EventRepository {
   }
 
   async findSampledByType(type: string, limit = 100): Promise<SampledEvent[]> {
-    const docs = await this.client.query((api as any).events.getSampledByType, {
+    const docs = await this.client.query(api.events.getSampledByType, {
       type,
       limit,
     });

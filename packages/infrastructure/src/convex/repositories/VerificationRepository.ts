@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX VERIFICATION REPOSITORY ADAPTER
 // Implements VerificationRepository port for OTP lifecycle
@@ -18,21 +18,21 @@ export class ConvexVerificationRepository implements VerificationRepository {
   constructor(private client: ConvexClient) { }
 
   async findByIdentifier(identifier: string): Promise<Verification | null> {
-    const doc = await this.client.query((api as any).verifications.getByIdentifier, {
+    const doc = await this.client.query(api.verifications.getByIdentifier, {
       identifier,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByToken(token: string): Promise<Verification | null> {
-    const doc = await this.client.query((api as any).verifications.getByToken, {
+    const doc = await this.client.query(api.verifications.getByToken, {
       value: token,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async create(verification: Omit<Verification, 'id'>): Promise<Verification> {
-    const id = await this.client.mutation((api as any).verifications.create, {
+    const id = await this.client.mutation(api.verifications.create, {
       identifier: verification.identifier,
       value: verification.token,
       expiresAt: verification.expiresAt,
@@ -42,19 +42,19 @@ export class ConvexVerificationRepository implements VerificationRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.client.mutation((api as any).verifications.remove, {
+    await this.client.mutation(api.verifications.remove, {
       id,
     });
   }
 
   async deleteByIdentifier(identifier: string): Promise<void> {
-    await this.client.mutation((api as any).verifications.removeByIdentifier, {
+    await this.client.mutation(api.verifications.removeByIdentifier, {
       identifier,
     });
   }
 
   async deleteExpired(): Promise<number> {
-    return await this.client.mutation((api as any).verifications.deleteExpired, {
+    return await this.client.mutation(api.verifications.deleteExpired, {
       now: Date.now(),
     });
   }

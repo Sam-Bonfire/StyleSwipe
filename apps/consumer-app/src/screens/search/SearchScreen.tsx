@@ -1,4 +1,4 @@
-import { api } from '@app/convex';
+import { Id, api } from '@app/convex';
 import { SearchProducts } from '@app/core';
 import { Product } from '@app/core';
 import { ProductTile, Button } from '@app/ui-kit';
@@ -78,8 +78,8 @@ export function SearchScreen() {
 
   const handleProductPress = (productId: string) => {
     // Record view event
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recordView({ productId: productId as any });
+    // Record view event
+    recordView({ productId: productId as Id<'products'> });
     // Navigate to details
     navigation.navigate('ProductDetail', { productId });
   };

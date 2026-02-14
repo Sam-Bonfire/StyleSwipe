@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX SESSION REPOSITORY ADAPTER
 // Implements SessionRepository port for device session management
@@ -18,26 +18,26 @@ export class ConvexSessionRepository implements SessionRepository {
   constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<Session | null> {
-    const doc = await this.client.query((api as any).sessions.getById, {
+    const doc = await this.client.query(api.sessions.getById, {
       id,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByToken(token: string): Promise<Session | null> {
-    const doc = await this.client.query((api as any).sessions.getByToken, { token });
+    const doc = await this.client.query(api.sessions.getByToken, { token });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByUserId(userId: string): Promise<Session[]> {
-    const docs = await this.client.query((api as any).sessions.getByUserId, {
+    const docs = await this.client.query(api.sessions.getByUserId, {
       userId,
     });
     return docs.map((doc: any) => this.mapToEntity(doc));
   }
 
   async create(session: Omit<Session, 'id'>): Promise<Session> {
-    const id = await this.client.mutation((api as any).sessions.create, {
+    const id = await this.client.mutation(api.sessions.create, {
       userId: session.userId,
       token: session.token,
       expiresAt: session.expiresAt,
@@ -49,19 +49,19 @@ export class ConvexSessionRepository implements SessionRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.client.mutation((api as any).sessions.remove, {
+    await this.client.mutation(api.sessions.remove, {
       id,
     });
   }
 
   async deleteByUserId(userId: string): Promise<void> {
-    await this.client.mutation((api as any).sessions.removeByUserId, {
+    await this.client.mutation(api.sessions.removeByUserId, {
       userId,
     });
   }
 
   async deleteExpired(): Promise<number> {
-    return await this.client.mutation((api as any).sessions.deleteExpired, {
+    return await this.client.mutation(api.sessions.deleteExpired, {
       now: Date.now(),
     });
   }

@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+
 import { components } from './_generated/api';
 import { mutation, query } from './_generated/server';
 
@@ -46,6 +47,57 @@ export const remove = mutation({
                 model: 'sessions',
                 where: [{ field: '_id', operator: 'eq', value: args.id }],
             },
+        });
+    },
+});
+
+export const getById = query({
+    args: { id: v.string() },
+    handler: async (ctx, args) => {
+        const res = await ctx.runQuery(components.auth.api.findMany, {
+            model: 'sessions',
+            where: [{ field: '_id', operator: 'eq', value: args.id }],
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+        return res.page[0] || null;
+    },
+});
+
+export const getByUserId = query({
+    args: { userId: v.string() },
+    handler: async (ctx, args) => {
+        const res = await ctx.runQuery(components.auth.api.findMany, {
+            model: 'sessions',
+            where: [{ field: 'userId', operator: 'eq', value: args.userId }],
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+        return res.page;
+    },
+});
+
+
+export const removeByUserId = mutation({
+    args: { userId: v.string() },
+    handler: async (ctx, args) => {
+        await ctx.runMutation(components.auth.api.deleteMany, {
+            input: {
+                model: 'sessions',
+                where: [{ field: 'userId', operator: 'eq', value: args.userId }],
+            },
+            paginationOpts: DEFAULT_PAGINATION,
+        });
+    },
+});
+
+export const deleteExpired = mutation({
+    args: {},
+    handler: async (ctx) => {
+        await ctx.runMutation(components.auth.api.deleteMany, {
+            input: {
+                model: 'sessions',
+                where: [{ field: 'expiresAt', operator: 'lt', value: Date.now() }],
+            },
+            paginationOpts: DEFAULT_PAGINATION,
         });
     },
 });

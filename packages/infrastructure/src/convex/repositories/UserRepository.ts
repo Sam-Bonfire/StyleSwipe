@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX USER REPOSITORY ADAPTER
 // Implements UserRepository port for Convex backend
@@ -18,24 +18,24 @@ export class ConvexUserRepository implements UserRepository {
   constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<User | null> {
-    const doc = await this.client.query((api as any).users.getById, {
+    const doc = await this.client.query(api.users.getById, {
       id,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const doc = await this.client.query((api as any).users.getByEmail, { email });
+    const doc = await this.client.query(api.users.getByEmail, { email });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByPhone(phone: string): Promise<User | null> {
-    const doc = await this.client.query((api as any).users.getByPhone, { phone });
+    const doc = await this.client.query(api.users.getByPhone, { phone });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async create(user: Omit<User, 'id'>): Promise<User> {
-    const id = await this.client.mutation((api as any).users.create, {
+    const id = await this.client.mutation(api.users.create, {
       name: user.name,
       email: user.email,
       emailVerified: user.emailVerified,
@@ -48,7 +48,7 @@ export class ConvexUserRepository implements UserRepository {
   }
 
   async update(id: string, data: Partial<Omit<User, 'id'>>): Promise<User> {
-    await this.client.mutation((api as any).users.update, {
+    await this.client.mutation(api.users.update, {
       id,
       ...data,
       phoneNumber: data.phone,
@@ -60,7 +60,7 @@ export class ConvexUserRepository implements UserRepository {
   }
 
   async updateStyleProfile(id: string, profile: StyleProfile): Promise<User> {
-    await this.client.mutation((api as any).users.update, {
+    await this.client.mutation(api.users.update, {
       id,
       styleProfile: profile,
     });
@@ -70,7 +70,7 @@ export class ConvexUserRepository implements UserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.client.mutation((api as any).users.remove, {
+    await this.client.mutation(api.users.remove, {
       id,
     });
   }

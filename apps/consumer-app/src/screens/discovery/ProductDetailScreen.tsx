@@ -9,6 +9,7 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
 import { ConvexClient } from 'convex/browser';
 import { useConvex, useQuery } from 'convex/react';
+import { Effect } from 'effect';
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
@@ -189,7 +190,7 @@ export function ProductDetailScreen() {
         size: selectedSize,
         color: 'Black',
       });
-      await manageCart.addToCart(userId, item);
+      await Effect.runPromise(manageCart.addToCart(userId, item));
       setIsAdded(true);
       Alert.alert('Success', 'Added to cart!');
     } catch (e) {

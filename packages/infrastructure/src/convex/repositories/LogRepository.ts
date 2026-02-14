@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX LOG REPOSITORY ADAPTER
 // Implements LogRepository port for structured logging
@@ -18,7 +18,7 @@ export class ConvexLogRepository implements LogRepository {
   constructor(private client: ConvexClient) { }
 
   async create(entry: Omit<LogEntry, 'id'>): Promise<LogEntry> {
-    const id = await this.client.mutation((api as any).logs.create, {
+    const id = await this.client.mutation(api.logs.create, {
       level: entry.level,
       message: entry.message,
       context: entry.context,
@@ -30,7 +30,7 @@ export class ConvexLogRepository implements LogRepository {
   }
 
   async findByLevel(level: LogLevel, limit = 100): Promise<LogEntry[]> {
-    const docs = await this.client.query((api as any).logs.getByLevel, {
+    const docs = await this.client.query(api.logs.getByLevel, {
       level,
       limit,
     });
@@ -38,14 +38,14 @@ export class ConvexLogRepository implements LogRepository {
   }
 
   async findByTraceId(traceId: string): Promise<LogEntry[]> {
-    const docs = await this.client.query((api as any).logs.getByTraceId, {
+    const docs = await this.client.query(api.logs.getByTraceId, {
       traceId,
     });
     return docs.map((doc: any) => this.mapToEntity(doc));
   }
 
   async findByUserId(userId: string, limit = 100): Promise<LogEntry[]> {
-    const docs = await this.client.query((api as any).logs.getByUserId, {
+    const docs = await this.client.query(api.logs.getByUserId, {
       userId,
       limit,
     });
@@ -53,7 +53,7 @@ export class ConvexLogRepository implements LogRepository {
   }
 
   async deleteOlderThan(timestamp: number): Promise<number> {
-    return await this.client.mutation((api as any).logs.deleteOlderThan, {
+    return await this.client.mutation(api.logs.deleteOlderThan, {
       timestamp,
     });
   }

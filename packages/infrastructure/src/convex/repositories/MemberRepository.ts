@@ -1,4 +1,4 @@
- 
+
 // =============================================================================
 // CONVEX MEMBER REPOSITORY ADAPTER
 // Implements MemberRepository port for RBAC membership
@@ -18,14 +18,14 @@ export class ConvexMemberRepository implements MemberRepository {
   constructor(private client: ConvexClient) { }
 
   async findById(id: string): Promise<Member | null> {
-    const doc = await this.client.query((api as any).members.getById, {
+    const doc = await this.client.query(api.members.getById, {
       id,
     });
     return doc ? this.mapToEntity(doc) : null;
   }
 
   async findByOrgAndUser(orgId: string, userId: string): Promise<Member | null> {
-    const doc = await this.client.query((api as any).members.getByOrgAndUser, {
+    const doc = await this.client.query(api.members.getByOrgAndUser, {
       orgId,
       userId,
     });
@@ -33,21 +33,21 @@ export class ConvexMemberRepository implements MemberRepository {
   }
 
   async findByOrg(orgId: string): Promise<Member[]> {
-    const docs = await this.client.query((api as any).members.getByOrg, {
+    const docs = await this.client.query(api.members.getByOrg, {
       orgId,
     });
     return docs.map((doc: any) => this.mapToEntity(doc));
   }
 
   async findByUser(userId: string): Promise<Member[]> {
-    const docs = await this.client.query((api as any).members.getByUser, {
+    const docs = await this.client.query(api.members.getByUser, {
       userId,
     });
     return docs.map((doc: any) => this.mapToEntity(doc));
   }
 
   async create(member: Omit<Member, 'id'>): Promise<Member> {
-    const id = await this.client.mutation((api as any).members.create, {
+    const id = await this.client.mutation(api.members.create, {
       orgId: member.orgId,
       userId: member.userId,
       role: member.role,
@@ -57,7 +57,7 @@ export class ConvexMemberRepository implements MemberRepository {
   }
 
   async updateRole(id: string, role: MemberRole): Promise<Member> {
-    await this.client.mutation((api as any).members.updateRole, {
+    await this.client.mutation(api.members.updateRole, {
       id,
       role,
     });
@@ -67,13 +67,13 @@ export class ConvexMemberRepository implements MemberRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.client.mutation((api as any).members.remove, {
+    await this.client.mutation(api.members.remove, {
       id,
     });
   }
 
   async deleteByOrg(orgId: string): Promise<void> {
-    await this.client.mutation((api as any).members.removeByOrg, {
+    await this.client.mutation(api.members.removeByOrg, {
       orgId,
     });
   }

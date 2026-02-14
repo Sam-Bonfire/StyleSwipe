@@ -1,4 +1,5 @@
 import { describe, it, expect, mock } from 'bun:test';
+import { Effect, Exit } from 'effect';
 
 import { CheckoutService } from '../../../../src/commerce/application/CheckoutService';
 import { Cart, CartItem } from '../../../../src/commerce/domain/Cart';
@@ -24,14 +25,16 @@ describe('CheckoutService', () => {
       phone: '555-0199',
     };
 
-    const order = await service.createOrderFromCart(cart, address, () => 'order-123');
+    const order = await Effect.runPromise(
+      service.createOrderFromCart(cart, address, () => 'order-123'),
+    );
 
     expect(order.id).toBe('order-123');
     expect(order.totalAmount).toBeGreaterThan(1000); // Including tax/shipping
     expect(mockRepo.save).toHaveBeenCalledTimes(1);
   });
 
-  it('should throw on empty cart', async () => {
+  it('should fail with EmptyCartError on empty cart', async () => {
     const mockRepo = {
       save: mock(() => Promise.resolve()),
       findById: mock(() => Promise.resolve(null)),
@@ -47,6 +50,14 @@ describe('CheckoutService', () => {
       phone: '555-0199',
     };
 
-    expect(service.createOrderFromCart(cart, address, () => '1')).rejects.toThrow();
+    const exit = await Effect.runPromiseExit(
+      service.createOrderFromCart(cart, address, () => '1'),
+    );
+
+    expect(Exit.isFailure(exit)).toBe(true);
+    if (Exit.isFailure(exit)) {
+      const error = exit.cause.toJSON();
+      expect(JSON.stringify(error)).toContain('EmptyCartError');
+    }
   });
 });

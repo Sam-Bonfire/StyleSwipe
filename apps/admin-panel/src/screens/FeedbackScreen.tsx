@@ -1,4 +1,4 @@
-import { api } from '@app/convex';
+import { Id, api } from '@app/convex';
 import { Button, useToast } from '@app/ui-kit';
 import { Search, X, Send, ChevronDown } from '@tamagui/lucide-icons';
 import { usePaginatedQuery, useMutation, useQuery } from 'convex/react';
@@ -18,17 +18,33 @@ import {
     Circle,
 } from 'tamagui';
 
+
+interface FeedbackReply {
+    message: string;
+    timestamp: number;
+}
+
+interface Feedback {
+    _id: string;
+    name?: string;
+    email?: string;
+    message: string;
+    type: string;
+    status: string;
+    createdAt: number;
+    contact?: string;
+    replies?: FeedbackReply[];
+}
+
 export function FeedbackScreen() {
     const { showToast } = useToast();
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [selectedFeedback, setSelectedFeedback] = useState<any | null>(null);
+    const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
     const [replyMessage, setReplyMessage] = useState('');
 
     const feedbackList = usePaginatedQuery(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (api as any).feedback.list,
+        api.feedback.list,
         {
             status: statusFilter || undefined,
             search: searchQuery || undefined
@@ -36,17 +52,15 @@ export function FeedbackScreen() {
         { initialNumItems: 50 }
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateStatus = useMutation((api as any).feedback.updateStatus);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const reply = useMutation((api as any).feedback.reply);
+    const updateStatus = useMutation(api.feedback.updateStatus);
+    const reply = useMutation(api.feedback.reply);
     const currentUser = useQuery(api.users.currentUser);
     const isCoreAdmin = currentUser?.isCoreAdmin;
 
     const handleReply = async () => {
         if (!replyMessage.trim() || !selectedFeedback) return;
         try {
-            await reply({ id: selectedFeedback._id, message: replyMessage });
+            await reply({ id: selectedFeedback._id as Id<'feedback'>, message: replyMessage }); // convex ID casting if needed, but safer
             showToast({ title: 'Reply Sent', message: 'Reply sent successfully.', variant: 'success' });
             setReplyMessage('');
         } catch (error) {
@@ -57,8 +71,7 @@ export function FeedbackScreen() {
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await updateStatus({ id: id as any, status: newStatus });
+            await updateStatus({ id: id as Id<'feedback'>, status: newStatus });
             showToast({ title: 'Status Updated', message: `Status changed to ${newStatus}.`, variant: 'success' });
             if (selectedFeedback && selectedFeedback._id === id) {
                 setSelectedFeedback({ ...selectedFeedback, status: newStatus });
@@ -138,15 +151,13 @@ export function FeedbackScreen() {
                             const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
                             const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50;
                             if (isCloseToBottom && feedbackList.status === "CanLoadMore") {
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                (feedbackList as any).loadMore(50);
+                                feedbackList.loadMore(50);
                             }
                         }}
                         scrollEventThrottle={400}
                     >
                         <Accordion type="multiple">
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {feedbackList.results.map((item: any) => (
+                            {feedbackList.results.map((item: Feedback) => (
                                 <Accordion.Item
                                     key={item._id}
                                     value={item._id}
@@ -251,11 +262,10 @@ export function FeedbackScreen() {
                                                     </YStack>
                                                 </YStack>
 
-                                                {item.replies?.length > 0 && (
+                                                {item.replies && item.replies.length > 0 && (
                                                     <YStack space="$2">
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">History</Text>
-                                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                                        {(selectedFeedback.replies as any[] || []).map((r, i) => (
+                                                        {item.replies.map((r, i) => (
                                                             <XStack key={i} space="$3">
                                                                 <Avatar circular size="$2" backgroundColor="$neutral200" />
                                                                 <YStack flex={1} backgroundColor="$background" padding="$3" borderRadius="$4" borderWidth={1} borderColor="$borderColor">

@@ -1,4 +1,3 @@
-import { v } from 'convex/values';
 import { Effect } from 'effect';
 
 /**
@@ -6,7 +5,12 @@ import { Effect } from 'effect';
  */
 export type SwipeAction = 'like' | 'pass' | 'super';
 
-export const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.literal('super'));
+/** Valid swipe actions — pure TS replacement for convex/values schema */
+const VALID_SWIPE_ACTIONS: ReadonlySet<string> = new Set(['like', 'pass', 'super']);
+
+/** Type guard for SwipeAction */
+export const isValidSwipeAction = (value: string): value is SwipeAction =>
+  VALID_SWIPE_ACTIONS.has(value);
 
 /**
  * Input for the ProcessSwipe use case
