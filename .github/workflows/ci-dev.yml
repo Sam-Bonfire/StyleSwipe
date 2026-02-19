@@ -62,6 +62,10 @@ jobs:
       - name: Login to Registry
         run: echo "${{ secrets.CI_TOKEN }}" | docker login git.yomite.in -u ${{ github.actor }} --password-stdin
 
+      - name: Generate env file
+        run: |
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.production
+
       - name: Build and Push
         run: |
           REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')

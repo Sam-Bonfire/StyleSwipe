@@ -4,13 +4,12 @@
  * Does NOT generate embeddings - that's VectorizationWorker's job
  */
 
+import type { Id } from '@app/convex';
 import type { Queue, ScrapedProduct } from '@app/core';
 
+import { api } from '@app/convex';
 import { ConvexHttpClient } from 'convex/browser';
 
-import type { Id } from '@app/convex';
-
-import { api } from '@app/convex';
 import { MyntraAPIScraper } from '../scrapers/MyntraAPIScraper';
 import { MyntraScraper } from '../scrapers/MyntraScraper';
 
@@ -41,10 +40,15 @@ export class ScraperWorker {
     console.log('[ScraperWorker] Starting...');
     await this.apiScraper.init();
 
-    // Pre-init browser if env mode is BROWSER, otherwise lazy init
+    // Check if browser mode is explicitly requested
     if (process.env.SCRAPER_MODE?.toUpperCase() === 'BROWSER') {
-      await this.browserScraper.init();
-      this.browserInitialized = true;
+      console.log('[ScraperWorker] BROWSER mode enabled. Initializing browser...');
+      try {
+        await this.browserScraper.init();
+        this.browserInitialized = true;
+      } catch (e) {
+        console.error('[ScraperWorker] Failed to initialize browser (likely missing binary in optimized image):', e);
+      }
     }
 
     this.running = true;
@@ -78,10 +82,12 @@ export class ScraperWorker {
     }
 
     for (const job of jobs) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await this.processJob(job as any);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async processJob(job: any): Promise<void> {
     console.log(`[ScraperWorker] Processing job ${job._id}: ${job.type} - ${job.query}`);
 
@@ -103,11 +109,22 @@ export class ScraperWorker {
 
       if (useBrowser) {
         if (!this.browserInitialized) {
-          console.log('[ScraperWorker] lazily initializing browser scraper...');
-          await this.browserScraper.init();
-          this.browserInitialized = true;
+          console.log('[ScraperWorker] Job requests BROWSER but it is not initialized. Attempting lazy init...');
+          try {
+            await this.browserScraper.init();
+            this.browserInitialized = true;
+          } catch (e) {
+            console.error('[ScraperWorker] Lazy init failed (missing binary?). Falling back to API scraper.', e);
+            // Fallback to API if browser fails
+            scraper = this.apiScraper;
+          }
         }
-        scraper = this.browserScraper;
+
+        if (this.browserInitialized) {
+          scraper = this.browserScraper;
+        } else {
+          scraper = this.apiScraper;
+        }
       } else {
         scraper = this.apiScraper;
       }

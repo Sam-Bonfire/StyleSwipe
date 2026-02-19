@@ -4,6 +4,7 @@ import { Button, StyleSwipeProvider } from '@app/ui-kit';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
 import React, { useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { YStack, Spinner, Text } from 'tamagui';
 
@@ -92,14 +93,16 @@ function Main() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
-        <StyleSwipeProvider theme="BrandIdentityLight">
-          <GlobalErrorBoundary>
-            <Main />
-          </GlobalErrorBoundary>
-        </StyleSwipeProvider>
-      </ConvexBetterAuthProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
+          <StyleSwipeProvider theme="BrandIdentityLight">
+            <GlobalErrorBoundary>
+              <Main />
+            </GlobalErrorBoundary>
+          </StyleSwipeProvider>
+        </ConvexBetterAuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

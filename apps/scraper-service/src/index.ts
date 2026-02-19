@@ -5,11 +5,11 @@
 
 import type { ScrapedProduct } from '@app/core';
 
+import { api } from '@app/convex';
 import { createQueue, type QueueType } from '@app/infrastructure';
 import { ConvexHttpClient } from 'convex/browser';
 
-import { api } from '@app/convex';
-import { MyntraScraper } from './scrapers/MyntraScraper';
+import { MyntraAPIScraper } from './scrapers/MyntraAPIScraper';
 import { startServer } from './server';
 import { ScraperWorker, VectorizationWorker } from './workers';
 
@@ -101,7 +101,7 @@ ENVIRONMENT:
 async function runScrape(url: string): Promise<void> {
   console.log(`[CLI] Scraping single product: ${url}`);
 
-  const scraper = new MyntraScraper();
+  const scraper = new MyntraAPIScraper();
   await scraper.init();
 
   const product = await scraper.scrapeProduct(url);
@@ -116,6 +116,7 @@ async function runScrape(url: string): Promise<void> {
     await client.mutation(api.scraper.serviceSaveProduct, {
       externalId: product.externalId,
       url: product.url,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: product as any,
     });
     console.log(`[CLI] Saved to database!`);
@@ -129,7 +130,7 @@ async function runScrape(url: string): Promise<void> {
 async function runCategory(url: string, maxPages: number): Promise<void> {
   console.log(`[CLI] Scraping category: ${url} (${maxPages} pages)`);
 
-  const scraper = new MyntraScraper();
+  const scraper = new MyntraAPIScraper();
   await scraper.init();
 
   const products = await scraper.scrapeCategory(url, maxPages, 1, (progress) => {
@@ -146,6 +147,7 @@ async function runCategory(url: string, maxPages: number): Promise<void> {
     await client.mutation(api.scraper.serviceSaveProduct, {
       externalId: product.externalId,
       url: product.url,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: product as any,
     });
   }
