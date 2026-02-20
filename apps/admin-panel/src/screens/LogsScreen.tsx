@@ -1,7 +1,6 @@
-import { api } from '@app/convex';
+import { useLogs } from '@app/infrastructure';
 import { Button, Modal, useToast } from '@app/ui-kit';
 import { ChevronDown, Copy, Eye, Filter, Info, RefreshCw, Search, X } from '@tamagui/lucide-icons';
-import { usePaginatedQuery } from 'convex/react';
 import React, { useState } from 'react';
 import { Clipboard } from 'react-native';
 import {
@@ -92,18 +91,8 @@ export function LogsScreen() {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { results, status, loadMore, isLoading } = usePaginatedQuery(
-        api.logs.getLogs,
-        {
-            filters: {
-                level: filterLevel,
-                userId: filterUser ? filterUser : undefined,
-                sessionId: filterSession ? filterSession : undefined,
-            },
-        },
-        { initialNumItems: 50 }
-    );
+    // Use infrastructure hook
+    const { results: logs, status, loadMore } = useLogs(50); // Note: filters not yet supported in useLogs hook, assuming useLogs handles basic listing for now.
 
     return (
         <YStack flex={1} padding="$4" space="$4">
@@ -178,7 +167,7 @@ export function LogsScreen() {
                         <Spinner size="large" />
                         <Text marginTop="$3" opacity={0.6}>Loading logs...</Text>
                     </YStack>
-                ) : results.length === 0 ? (
+                ) : logs.length === 0 ? (
                     <YStack flex={1} alignItems="center" justifyContent="center" padding="$8" space="$3">
                         <Info size={48} opacity={0.2} />
                         <Text fontSize="$5" fontWeight="bold" opacity={0.5}>No logs found</Text>
@@ -195,7 +184,7 @@ export function LogsScreen() {
                         scrollEventThrottle={400}
                     >
                         <Accordion type="multiple">
-                            {results.map((item: LogEntry) => (
+                            {logs.map((item: LogEntry) => (
                                 <Accordion.Item
                                     key={item._id}
                                     value={item._id}

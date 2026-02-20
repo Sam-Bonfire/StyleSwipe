@@ -124,6 +124,11 @@ export class ConvexProductRepository implements ProductRepository {
     });
   }
 
+  async getLatest(limit: number): Promise<Product[]> {
+    const docs = await this.client.query(api.products.getLatest, { limit });
+    return docs.map((doc) => this.mapToEntity(doc));
+  }
+
   // Map Convex document to domain entity
   private mapToEntity(doc: Record<string, unknown>): Product {
     return {

@@ -83,6 +83,28 @@ export default tseslint.config(
     },
   },
   {
+    /* APPS - UI Adapter Layer: Block direct infrastructure imports */
+    files: ['apps/**/*.tsx', 'apps/**/*.ts'],
+    ignores: ['apps/scraper-service/**'], // Scraper service is a backend service, effectively infra
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['convex/react', 'convex/browser'],
+              message: 'Violation of Hexagonal Architecture. UI adapters must use @app/infrastructure hooks, not direct Convex bindings.',
+            },
+            {
+              group: ['@app/convex'],
+              message: 'Violation of Hexagonal Architecture. UI adapters must use @app/infrastructure hooks, not direct Convex bindings.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       '**/node_modules/',
       '**/dist/',

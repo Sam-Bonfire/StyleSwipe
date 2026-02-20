@@ -1,9 +1,6 @@
 import { Effect } from 'effect';
 
-/**
- * Value Object validating the Swipe Action
- */
-export type SwipeAction = 'like' | 'pass' | 'super';
+import type { SwipeRepository, SwipeAction } from '../domain/DiscoveryPorts';
 
 /** Valid swipe actions — pure TS replacement for convex/values schema */
 const VALID_SWIPE_ACTIONS: ReadonlySet<string> = new Set(['like', 'pass', 'super']);
@@ -30,7 +27,43 @@ export class SwipeError extends Error {
 }
 
 /**
- * Pure Domain Logic for processing a swipe using Effect
+ * Use case for processing a swipe with persistence
+ */
+export class ProcessSwipe {
+  constructor(private readonly swipeRepo: SwipeRepository) { }
+
+  execute(input: ProcessSwipeInput): Effect.Effect<ProcessSwipeInput, SwipeError> {
+    return Effect.gen(this, function* (_) {
+      if (!input.userId) {
+        return yield* _(Effect.fail(new SwipeError('UserId is required')));
+      }
+      if (!input.productId) {
+        return yield* _(Effect.fail(new SwipeError('ProductId is required')));
+      }
+      if (!isValidSwipeAction(input.action)) {
+        return yield* _(Effect.fail(new SwipeError(`Invalid action: ${input.action}`)));
+      }
+
+      yield* _(
+        Effect.tryPromise({
+          try: () =>
+            this.swipeRepo.recordSwipe(
+              input.userId,
+              input.productId,
+              input.action,
+              input.timestamp,
+            ),
+          catch: () => new SwipeError('Failed to record swipe'),
+        }),
+      );
+
+      return input;
+    });
+  }
+}
+
+/**
+ * @deprecated Use ProcessSwipe class instead
  */
 export const processSwipe = (
   input: ProcessSwipeInput,
@@ -42,8 +75,5 @@ export const processSwipe = (
     if (!input.productId) {
       yield* _(Effect.fail(new SwipeError('ProductId is required')));
     }
-
-    // Potential for more complex logic here (weighting, notifications, etc)
-    // For now, we just validate and return
     return input;
   });

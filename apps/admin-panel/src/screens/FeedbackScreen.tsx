@@ -1,7 +1,6 @@
-import { Id, api } from '@app/convex';
+import { useAdminFeedback, useUpdateFeedbackStatus, useReplyToFeedback, useCurrentUser } from '@app/infrastructure';
 import { Button, useToast } from '@app/ui-kit';
 import { Search, X, Send, ChevronDown } from '@tamagui/lucide-icons';
-import { usePaginatedQuery, useMutation, useQuery } from 'convex/react';
 import React, { useState } from 'react';
 import {
     YStack,
@@ -43,24 +42,16 @@ export function FeedbackScreen() {
     const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
     const [replyMessage, setReplyMessage] = useState('');
 
-    const feedbackList = usePaginatedQuery(
-        api.feedback.list,
-        {
-            status: statusFilter || undefined,
-            search: searchQuery || undefined
-        },
-        { initialNumItems: 50 }
-    );
-
-    const updateStatus = useMutation(api.feedback.updateStatus);
-    const reply = useMutation(api.feedback.reply);
-    const currentUser = useQuery(api.users.currentUser);
+    const { results: feedback, status, loadMore } = useAdminFeedback(20);
+    const updateStatus = useUpdateFeedbackStatus();
+    const reply = useReplyToFeedback();
+    const currentUser = useCurrentUser();
     const isCoreAdmin = currentUser?.isCoreAdmin;
 
     const handleReply = async () => {
         if (!replyMessage.trim() || !selectedFeedback) return;
         try {
-            await reply({ id: selectedFeedback._id as Id<'feedback'>, message: replyMessage }); // convex ID casting if needed, but safer
+            await reply({ id: selectedFeedback._id, message: replyMessage });
             showToast({ title: 'Reply Sent', message: 'Reply sent successfully.', variant: 'success' });
             setReplyMessage('');
         } catch (error) {
@@ -71,7 +62,7 @@ export function FeedbackScreen() {
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
-            await updateStatus({ id: id as Id<'feedback'>, status: newStatus });
+            await updateStatus({ id: id, status: newStatus });
             showToast({ title: 'Status Updated', message: `Status changed to ${newStatus}.`, variant: 'success' });
             if (selectedFeedback && selectedFeedback._id === id) {
                 setSelectedFeedback({ ...selectedFeedback, status: newStatus });
@@ -140,7 +131,7 @@ export function FeedbackScreen() {
                 backgroundColor="$background"
                 overflow="hidden"
             >
-                {feedbackList.status === 'LoadingFirstPage' ? (
+                {status === 'LoadingFirstPage' ? (
                     <YStack flex={1} alignItems="center" justifyContent="center" padding="$8">
                         <Spinner size="large" />
                         <Text marginTop="$3" opacity={0.6}>Loading feedback...</Text>
@@ -150,14 +141,14 @@ export function FeedbackScreen() {
                         onScroll={({ nativeEvent }) => {
                             const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
                             const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 50;
-                            if (isCloseToBottom && feedbackList.status === "CanLoadMore") {
-                                feedbackList.loadMore(50);
+                            if (isCloseToBottom && status === "CanLoadMore") {
+                                loadMore(50);
                             }
                         }}
                         scrollEventThrottle={400}
                     >
                         <Accordion type="multiple">
-                            {feedbackList.results.map((item: Feedback) => (
+                            {feedback.map((item: Feedback) => (
                                 <Accordion.Item
                                     key={item._id}
                                     value={item._id}

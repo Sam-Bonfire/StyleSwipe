@@ -72,7 +72,7 @@ yarn-error.*
 .cache/
 docs/design-inspirations/appflow.mp4
 docs/design-inspirations/videos
-
+docs/Plan-*.md
 
 # Windows Zone Identifier
 *:Zone.Identifier

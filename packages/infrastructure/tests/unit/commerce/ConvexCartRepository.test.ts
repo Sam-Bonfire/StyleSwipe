@@ -1,7 +1,7 @@
 import { Cart, CartItem } from '@app/core';
 import { describe, it, expect, beforeEach, mock } from 'bun:test';
 
-import { ConvexCartRepository } from '../../../src/commerce/ConvexCartRepository';
+import { ConvexCartRepository } from '../../../src/convex/repositories/ConvexCartRepository';
 
 // Mock ConvexClient with typed method signatures
 function createMockClient() {

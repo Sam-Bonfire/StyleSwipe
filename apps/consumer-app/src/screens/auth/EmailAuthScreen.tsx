@@ -1,6 +1,5 @@
-import { api } from '@app/convex';
+import { useGetOrCreateUser } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
 import { YStack, Input, Text, H2, XStack } from 'tamagui';
@@ -15,7 +14,7 @@ export function EmailAuthScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const getOrCreateUser = useMutation(api.users.getOrCreateUser);
+  const getOrCreateUser = useGetOrCreateUser();
 
   const handleSubmit = async () => {
     setLoading(true);

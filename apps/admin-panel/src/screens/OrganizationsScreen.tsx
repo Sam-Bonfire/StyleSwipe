@@ -1,8 +1,7 @@
-import { api } from '@app/convex';
+import { useOrganizationsWithMembers, useSearchOrganizations } from '@app/infrastructure';
 import { Button, SearchBar, useToast } from '@app/ui-kit';
 import { Building2, Users, ChevronDown, Edit3, Crown, AlertCircle } from '@tamagui/lucide-icons';
-import { usePaginatedQuery, useQuery } from 'convex/react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     YStack,
     Text,
@@ -29,32 +28,16 @@ export function OrganizationsScreen() {
     const [selectedOrg, setSelectedOrg] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const allOrgs = usePaginatedQuery(
-        api.organizationAdmin.listOrganizationsWithMembers,
-        {},
-        { initialNumItems: 50 }
-    );
+    const { results: orgs, status, loadMore } = useOrganizationsWithMembers(50);
+    const searchResults = useSearchOrganizations(debouncedSearch || '');
 
-    const searchResults = useQuery(
-        api.organizationAdmin.searchOrganizations,
-        debouncedSearch ? {
-            searchTerm: debouncedSearch,
-            paginationOpts: { numItems: 50, cursor: null }
-        } : 'skip'
-    );
+    // Note: useUpdateOrganization is likely a hook returning a mutation function.
+    // If it's a direct mutation wrapper, we use it as is.
+    // If the hook implementation was: const useUpdateOrganization = () => useMutation(api.admin.updateOrganization);
+    // Then usage is `const updateOrg = useUpdateOrganization(); updateOrg(...)`
 
-    useEffect(() => {
-        if (searchResults === null) {
-            showToast({
-                variant: 'error',
-                title: 'Search Error',
-                message: 'Failed to search organizations. Please try again.',
-            });
-        }
-    }, [searchResults, showToast]);
-
-    const displayResults = debouncedSearch ? (searchResults?.page || []) : (allOrgs.results || []);
-    const isLoading = allOrgs.status === 'LoadingFirstPage';
+    const displayResults = debouncedSearch ? (searchResults?.results || []) : (orgs || []);
+    const isLoading = status === 'LoadingFirstPage';
 
     return (
         <ScrollView flex={1} showsVerticalScrollIndicator={false}>
@@ -233,9 +216,9 @@ export function OrganizationsScreen() {
                             ))}
                         </Accordion>
 
-                        {allOrgs.status === 'CanLoadMore' && !debouncedSearch ? (
+                        {status === 'CanLoadMore' && !debouncedSearch ? (
                             <XStack padding="$3" justifyContent="center" borderTopWidth={1} borderColor="$borderColor">
-                                <Button variant="secondary" onPress={() => allOrgs.loadMore(20)}>
+                                <Button variant="secondary" onPress={() => loadMore(20)}>
                                     Load More Organizations
                                 </Button>
                             </XStack>
@@ -258,7 +241,7 @@ export function OrganizationsScreen() {
                     />
                 )}
 
-                {!isLoading && displayResults.length === 0 ? (
+                {!isLoading && (!displayResults || displayResults.length === 0) ? (
                     <YStack alignItems="center" padding="$8" gap="$3">
                         <YStack
                             width={64}

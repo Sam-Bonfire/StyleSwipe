@@ -1,70 +1,37 @@
-import { api } from '@app/convex';
-import { Cart, ManageCart, PriceEstimator } from '@app/core';
-import { ConvexCartRepository } from '@app/infrastructure';
+import { PriceEstimator } from '@app/core';
+import { useCurrentUser, useCart, useUpdateCartQuantity, useRemoveFromCart } from '@app/infrastructure';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
-import { ConvexClient } from 'convex/browser';
-import { useConvex, useQuery } from 'convex/react';
-import { Effect } from 'effect';
-import React, { useEffect, useState, useMemo } from 'react';
+import React from 'react';
 import { YStack, ScrollView, Text } from 'tamagui';
 
 export const CartScreen = () => {
-  const convex = useConvex();
-  // In real app, might need user ID from specific auth hook or query
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const user = useCurrentUser();
+  const userId = user?._id ?? undefined;
 
-  // Initialize dependencies
-  const manageCart = useMemo(() => {
-    // Cast to unknown first to avoid incompatibility between ConvexReactClient and ConvexClient types
-    const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
-    return new ManageCart(repo);
-  }, [convex]);
-
-  const user = useQuery(api.users.currentUser);
-  const userId = user?._id ?? undefined; // Undefined while loading or not auth
-
-  const loadCart = async () => {
-    // Skip if no user
-    if (!userId) return;
-
-    setIsLoading(true);
-    try {
-      const c = await Effect.runPromise(manageCart.getCart(userId));
-      setCart(c);
-    } catch (e) {
-      console.error('Failed to load cart', e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (userId) {
-      loadCart();
-    }
-  }, [userId]);
+  const cart = useCart(userId);
+  const updateQuantity = useUpdateCartQuantity();
+  const removeFromCart = useRemoveFromCart();
 
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
+    if (!userId) return;
     try {
-      const updated = await Effect.runPromise(manageCart.updateQuantity(userId, productId, quantity));
-      setCart(updated);
+      await updateQuantity(userId, productId, quantity);
     } catch (e) {
       console.error('Failed to update quantity', e);
     }
   };
 
   const handleRemove = async (productId: string) => {
+    if (!userId) return;
     try {
-      const updated = await Effect.runPromise(manageCart.removeFromCart(userId, productId));
-      setCart(updated);
+      await removeFromCart(userId, productId);
     } catch (e) {
       console.error('Failed to remove item', e);
     }
   };
 
-  if (isLoading && !cart) {
+  if (userId && cart === undefined) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center">
         <Text>Loading Bag...</Text>
@@ -98,7 +65,7 @@ export const CartScreen = () => {
           {cart.items.map((item) => (
             <CartItemComponent
               key={item.productId}
-              imageUrl="https://placehold.co/100x120" // Placeholder, in real app get from Catalog lookup
+              imageUrl="https://placehold.co/100x120" // Placeholder
               brand={item.attributes['brand'] || 'Brand'}
               title={`Product ${item.productId}`} // Placeholder
               price={item.price}

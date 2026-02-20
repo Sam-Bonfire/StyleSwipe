@@ -5,7 +5,7 @@
 // =============================================================================
 
 import type { LogRepository } from '@app/core';
-import type { LogEntry, LogLevel } from '@app/core';
+import type { LogEntry, LogLevel, PaginationOpts, PaginatedResult } from '@app/core';
 // import type { Id } from '@convex-dataModel';
 
 import { api } from '@app/convex';
@@ -34,14 +34,14 @@ export class ConvexLogRepository implements LogRepository {
       level,
       limit,
     });
-    return docs.map((doc: any) => this.mapToEntity(doc));
+    return docs.map((doc: Record<string, unknown>) => this.mapToEntity(doc));
   }
 
   async findByTraceId(traceId: string): Promise<LogEntry[]> {
     const docs = await this.client.query(api.logs.getByTraceId, {
       traceId,
     });
-    return docs.map((doc: any) => this.mapToEntity(doc));
+    return docs.map((doc: Record<string, unknown>) => this.mapToEntity(doc));
   }
 
   async findByUserId(userId: string, limit = 100): Promise<LogEntry[]> {
@@ -49,13 +49,24 @@ export class ConvexLogRepository implements LogRepository {
       userId,
       limit,
     });
-    return docs.map((doc: any) => this.mapToEntity(doc));
+    return docs.map((doc: Record<string, unknown>) => this.mapToEntity(doc));
   }
 
   async deleteOlderThan(timestamp: number): Promise<number> {
     return await this.client.mutation(api.logs.deleteOlderThan, {
       timestamp,
     });
+  }
+
+  async list(paginationOpts: PaginationOpts): Promise<PaginatedResult<LogEntry>> {
+    const result = await this.client.query(api.logs.getLogs, {
+      paginationOpts,
+    });
+    return {
+      page: result.page.map((doc: Record<string, unknown>) => this.mapToEntity(doc)),
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   }
 
   private mapToEntity(doc: Record<string, unknown>): LogEntry {

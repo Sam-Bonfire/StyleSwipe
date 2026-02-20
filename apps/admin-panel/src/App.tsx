@@ -1,8 +1,7 @@
 import 'react-native-gesture-handler';
-import { api } from '@app/convex';
+import { useCurrentUser, ConvexReactClient } from '@app/infrastructure';
 import { Button, StyleSwipeProvider } from '@app/ui-kit';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
-import { ConvexReactClient, useQuery } from 'convex/react';
 import React, { useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -26,8 +25,7 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
 
 
 function Main() {
-  // Use Convex Query to drive auth state, matching consumer-app pattern
-  const user = useQuery(api.users.currentUser);
+  const user = useCurrentUser();
   const [activePage, setActivePage] = useState<'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs'>('overview');
 
 

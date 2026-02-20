@@ -1,9 +1,9 @@
 import 'react-native-gesture-handler';
-import { api } from '@app/convex';
+import { useCurrentUser } from '@app/infrastructure';
+import { ConvexReactClient } from '@app/infrastructure';
 import { StyleSwipeProvider } from '@app/ui-kit';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ConvexReactClient, useQuery } from 'convex/react';
 import React from 'react';
 import { YStack, Spinner } from 'tamagui';
 
@@ -26,7 +26,7 @@ import { logger } from './lib/logger';
 
 
 function NavigationGuard() {
-  const user = useQuery(api.users.currentUser);
+  const user = useCurrentUser();
 
   // Sync User ID with Logger
   React.useEffect(() => {

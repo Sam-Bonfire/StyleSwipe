@@ -1,28 +1,25 @@
-import { Id, api } from '@app/convex';
-import { SearchProducts } from '@app/core';
-import { Product } from '@app/core';
+import { Product, SearchProducts } from '@app/core';
+import { useRecordProductView, ConvexProductSearchRepository, useConvexClient } from '@app/infrastructure';
 import { ProductTile, Button } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from '@tamagui/lucide-icons';
-import { useConvex, useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState, useEffect, useMemo } from 'react';
 import { SafeAreaView, FlatList } from 'react-native';
 import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
 
-import { ConvexProductAdapter } from '../../infrastructure/adapters/ConvexProductAdapter';
 import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
 
 export function SearchScreen() {
-  const convex = useConvex();
+  const convex = useConvexClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
-  const recordView = useMutation(api.discovery.recordProductView);
+  const recordView = useRecordProductView();
 
   // Dependencies
   const useCase = useMemo(() => {
     const embedder = new OnnxEmbedder();
-    const repo = new ConvexProductAdapter(convex);
+    const repo = new ConvexProductSearchRepository(convex);
     return new SearchProducts(embedder, repo);
   }, [convex]);
 
@@ -77,9 +74,7 @@ export function SearchScreen() {
   };
 
   const handleProductPress = (productId: string) => {
-    // Record view event
-    // Record view event
-    recordView({ productId: productId as Id<'products'> });
+    recordView({ productId });
     // Navigate to details
     navigation.navigate('ProductDetail', { productId });
   };

@@ -1,8 +1,7 @@
-import { api } from '@app/convex';
+import { useCurrentUser, useCreateFeedback, useGenerateUploadUrl, useMyFeedback } from '@app/infrastructure';
 import { Button, useToast, TopBarIconButton } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronDown, Check, Upload, File, ChevronLeft } from '@tamagui/lucide-icons';
-import { useMutation, useQuery } from 'convex/react';
 import * as DocumentPicker from 'expo-document-picker';
 import { useState } from 'react';
 import { SafeAreaView, ScrollView } from 'react-native';
@@ -11,10 +10,10 @@ import { YStack, Text, TextArea, Select, Sheet, Adapt, Label, XStack, Spinner } 
 export function FeedbackScreen() {
     const navigation = useNavigation();
     const { showToast } = useToast();
-    const createFeedback = useMutation(api.feedback.create);
-    const generateUploadUrl = useMutation(api.feedback.generateUploadUrl);
-    const user = useQuery(api.users.currentUser);
-    const myFeedback = useQuery(api.feedback.listByUser) || [];
+    const createFeedback = useCreateFeedback();
+    const generateUploadUrl = useGenerateUploadUrl();
+    const user = useCurrentUser();
+    const myFeedback = useMyFeedback() || [];
 
     const [type, setType] = useState('bug');
     const [message, setMessage] = useState('');

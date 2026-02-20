@@ -1,7 +1,6 @@
-import { api } from '@app/convex';
 import { initializeStyleProfile, getOnboardingQuestions, OnboardingQuestion } from '@app/core';
+import { useUpdateStyleProfile } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
@@ -14,7 +13,7 @@ export function OnboardingScreen() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const questions = Effect.runSync(getOnboardingQuestions()) as OnboardingQuestion[];
 
-  const updateStyleProfile = useMutation(api.users.updateStyleProfile);
+  const updateStyleProfile = useUpdateStyleProfile();
 
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;

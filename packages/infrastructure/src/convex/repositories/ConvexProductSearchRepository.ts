@@ -3,7 +3,7 @@ import { ProductSearchRepository, SearchResult, SearchError, Vector384 } from '@
 import { ConvexReactClient } from 'convex/react';
 import { Effect } from 'effect';
 
-export class ConvexProductAdapter implements ProductSearchRepository {
+export class ConvexProductSearchRepository implements ProductSearchRepository {
   constructor(private convex: ConvexReactClient) { }
 
   search(vector: Vector384, limit: number): Effect.Effect<SearchResult, SearchError> {
@@ -12,7 +12,7 @@ export class ConvexProductAdapter implements ProductSearchRepository {
         const result = await this.convex.action(api.search.searchProducts, { vector, limit });
         // Map Convex result to Domain result
         return {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           products: result.products.map((p: any) => ({
             id: p._id,
             title: p.title,

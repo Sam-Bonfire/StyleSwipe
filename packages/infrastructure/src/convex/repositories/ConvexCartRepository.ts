@@ -3,6 +3,8 @@ import { Cart, CartItem, CartRepository } from '@app/core';
 import { ConvexClient } from 'convex/browser';
 import { GenericId } from 'convex/values';
 
+import { CartMapper } from '../mappers/CartMapper';
+
 interface ConvexCartItem {
   productId: string;
   quantity: number;
@@ -33,11 +35,7 @@ export class ConvexCartRepository implements CartRepository {
 
     if (!cartData) return null;
 
-    const items = cartData.items.map(
-      (i) => new CartItem(i.productId, i.quantity, i.price, i.attributes || {}),
-    );
-
-    return new Cart(cartData.userId, items);
+    return CartMapper.toDomain(cartData);
   }
 
   async clear(userId: string): Promise<void> {

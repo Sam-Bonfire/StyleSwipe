@@ -20,6 +20,14 @@ import type {
   Product,
   PartnerSync,
   PartnerSyncStatus,
+  Feedback,
+  FeedbackStatus,
+  ScrapingJob,
+  ScrapeJobType,
+  ScraperMode,
+  AdminStats,
+  PaginationOpts,
+  PaginatedResult,
 } from './types';
 
 // -----------------------------------------------------------------------------
@@ -131,6 +139,7 @@ export interface LogRepository {
   findByTraceId(traceId: string): Promise<LogEntry[]>;
   findByUserId(userId: string, limit?: number): Promise<LogEntry[]>;
   deleteOlderThan(timestamp: number): Promise<number>;
+  list(paginationOpts: PaginationOpts): Promise<PaginatedResult<LogEntry>>;
 }
 
 /**
@@ -166,6 +175,7 @@ export interface ProductRepository {
     limit?: number,
     filters?: { category?: string; brand?: string },
   ): Promise<Product[]>;
+  getLatest(limit: number): Promise<Product[]>;
   create(product: Omit<Product, 'id'>): Promise<Product>;
   update(id: string, data: Partial<Omit<Product, 'id'>>): Promise<Product>;
   updateEmbedding(id: string, embedding: number[]): Promise<Product>;
@@ -190,6 +200,68 @@ export interface PartnerSyncRepository {
   updateStatus(id: string, status: PartnerSyncStatus): Promise<PartnerSync>;
   delete(id: string): Promise<void>;
   deleteExpired(): Promise<number>;
+}
+
+// -----------------------------------------------------------------------------
+// SUPPORT CONTEXT PORTS
+// -----------------------------------------------------------------------------
+
+/**
+ * Feedback repository port
+ */
+export interface FeedbackRepository {
+  create(feedback: Omit<Feedback, 'id' | 'replies' | 'status' | 'updatedAt' | 'createdAt'>): Promise<Feedback>;
+  findById(id: string): Promise<Feedback | null>;
+  listByUser(userId: string): Promise<Feedback[]>;
+  list(paginationOpts: PaginationOpts): Promise<PaginatedResult<Feedback>>;
+  updateStatus(id: string, status: FeedbackStatus): Promise<void>;
+  addReply(id: string, adminId: string, message: string): Promise<void>;
+  generateUploadUrl(): Promise<string>;
+}
+
+// -----------------------------------------------------------------------------
+// ADMIN CONTEXT PORTS
+// -----------------------------------------------------------------------------
+
+/**
+ * Admin dashboard repository port
+ */
+export interface AdminRepository {
+  getStats(): Promise<AdminStats>;
+  getScrapedProducts(paginationOpts: PaginationOpts): Promise<PaginatedResult<Product>>;
+  searchProducts(query: string, paginationOpts: PaginationOpts): Promise<PaginatedResult<Product>>;
+  retriggerScrape(productId: string): Promise<void>;
+}
+
+/**
+ * Organization admin repository port (admin-level operations)
+ */
+export interface OrganizationAdminRepository {
+  listOrganizationsWithMembers(paginationOpts: PaginationOpts): Promise<PaginatedResult<Organization & { members: Member[] }>>;
+  searchOrganizations(query: string, paginationOpts: PaginationOpts): Promise<PaginatedResult<Organization>>;
+  updateOrganization(id: string, data: Partial<Organization>): Promise<Organization>;
+  listUsersWithOrgs(paginationOpts: PaginationOpts): Promise<PaginatedResult<User & { organizations: Organization[] }>>;
+  searchUsers(query: string, paginationOpts: PaginationOpts): Promise<PaginatedResult<User>>;
+  updateUserDetails(id: string, data: Partial<User>): Promise<User>;
+}
+
+// -----------------------------------------------------------------------------
+// SCRAPER CONTEXT PORTS
+// -----------------------------------------------------------------------------
+
+/**
+ * Scraper repository port
+ */
+export interface ScraperRepository {
+  listJobs(paginationOpts: PaginationOpts): Promise<PaginatedResult<ScrapingJob>>;
+  createJob(input: {
+    type: ScrapeJobType;
+    query: string;
+    maxPages?: number;
+    startPage?: number;
+    scraperMode?: ScraperMode;
+  }): Promise<ScrapingJob>;
+  getJobById(id: string): Promise<ScrapingJob | null>;
 }
 
 // -----------------------------------------------------------------------------
@@ -261,4 +333,8 @@ export interface Repositories {
   events: EventRepository;
   products: ProductRepository;
   partnerSync: PartnerSyncRepository;
+  feedback: FeedbackRepository;
+  admin: AdminRepository;
+  organizationAdmin: OrganizationAdminRepository;
+  scraper: ScraperRepository;
 }

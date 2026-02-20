@@ -1,12 +1,9 @@
-import { api } from '@app/convex';
-import { ManageCart, Address, PriceEstimator } from '@app/core';
-import { ConvexCartRepository, ConvexEventRepository } from '@app/infrastructure';
+import { Address, PriceEstimator } from '@app/core';
+import { useCurrentUser, useCart, useClearCart, ConvexEventRepository } from '@app/infrastructure';
+import { ConvexClient, useConvexClient } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
-import { ConvexClient } from 'convex/browser';
-import { useConvex, useQuery } from 'convex/react';
-import { Effect } from 'effect';
 import React, { useState, useMemo } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
@@ -14,16 +11,17 @@ import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CheckoutScreen = ({ navigation }: any) => {
-  const convex = useConvex();
+  const convex = useConvexClient();
   const [step, setStep] = useState<'ADDRESS' | 'PAYMENT' | 'CONFIRMATION'>('ADDRESS');
   const [address, setAddress] = useState<Address | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
 
-  const manageCart = useMemo(() => {
-    const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
-    return new ManageCart(repo);
-  }, [convex]);
+  const user = useCurrentUser();
+  const userId = user?._id ?? undefined;
+
+  const cart = useCart(userId);
+  const clearCart = useClearCart();
 
   const eventRepo = useMemo(() => {
     return new ConvexEventRepository(convex as unknown as ConvexClient);
@@ -34,16 +32,11 @@ export const CheckoutScreen = ({ navigation }: any) => {
     setStep('PAYMENT');
   };
 
-  // Resolved: Use api.users.currentUser to get the authenticated user
-  const user = useQuery(api.users.currentUser);
-  const userId = user?._id ?? undefined;
-
   const handlePlaceOrder = async () => {
     if (!address || !userId) return;
     setIsProcessing(true);
     try {
-      // 1. Get current cart
-      const cart = await Effect.runPromise(manageCart.getCart(userId));
+      // 1. Get current cart (already have it via hook!)
       if (!cart) throw new Error('No cart found');
 
       // 2. Log Checkout Event (replacing Order creation)
@@ -64,7 +57,7 @@ export const CheckoutScreen = ({ navigation }: any) => {
       setOrderId(newOrderId);
 
       // 4. Clear cart
-      await Effect.runPromise(manageCart.clearCart(userId));
+      await clearCart(userId);
 
       setStep('CONFIRMATION');
     } catch (e) {

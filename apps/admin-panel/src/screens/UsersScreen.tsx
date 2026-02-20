@@ -1,8 +1,7 @@
-import { api } from '@app/convex';
+import { useUsersWithOrgs, useSearchUsers } from '@app/infrastructure';
 import { Button, SearchBar, useToast } from '@app/ui-kit';
 import { Users, Mail, Building2, ChevronDown, Edit3, Shield, AlertCircle } from '@tamagui/lucide-icons';
-import { usePaginatedQuery, useQuery } from 'convex/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     YStack,
     Text,
@@ -12,8 +11,6 @@ import {
     ScrollView,
     Avatar,
     styled,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    Card,
     Accordion,
     Square,
 } from 'tamagui';
@@ -32,32 +29,11 @@ export function UsersScreen() {
     const [selectedUser, setSelectedUser] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const allUsers = usePaginatedQuery(
-        api.organizationAdmin.listUsersWithOrgs,
-        {},
-        { initialNumItems: 50 }
-    );
+    const { results: users, status, loadMore } = useUsersWithOrgs(50);
+    const searchResults = useSearchUsers(debouncedSearch || '');
 
-    const searchResults = useQuery(
-        api.organizationAdmin.searchUsers,
-        debouncedSearch ? {
-            searchTerm: debouncedSearch,
-            paginationOpts: { numItems: 50, cursor: null }
-        } : 'skip'
-    );
-
-    useEffect(() => {
-        if (searchResults === null) {
-            showToast({
-                variant: 'error',
-                title: 'Search Error',
-                message: 'Failed to search users. Please try again.',
-            });
-        }
-    }, [searchResults, showToast]);
-
-    const displayResults = debouncedSearch ? (searchResults?.page || []) : (allUsers.results || []);
-    const isLoading = allUsers.status === 'LoadingFirstPage';
+    const displayResults = debouncedSearch ? (searchResults?.results || []) : (users || []);
+    const isLoading = status === 'LoadingFirstPage';
 
     return (
         <ScrollView flex={1} showsVerticalScrollIndicator={false}>
@@ -222,9 +198,9 @@ export function UsersScreen() {
                             ))}
                         </Accordion>
 
-                        {allUsers.status === 'CanLoadMore' && !debouncedSearch ? (
+                        {status === 'CanLoadMore' && !debouncedSearch ? (
                             <XStack padding="$3" justifyContent="center" borderTopWidth={1} borderColor="$borderColor">
-                                <Button variant="secondary" onPress={() => allUsers.loadMore(20)}>
+                                <Button variant="secondary" onPress={() => loadMore(20)}>
                                     Load More Users
                                 </Button>
                             </XStack>
@@ -232,7 +208,7 @@ export function UsersScreen() {
                     </YStack>
                 ) : null}
 
-                {!isLoading && displayResults.length === 0 ? (
+                {!isLoading && (!displayResults || displayResults.length === 0) ? (
                     <YStack alignItems="center" padding="$8" gap="$3">
                         <YStack
                             width={64}

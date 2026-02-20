@@ -8,13 +8,17 @@ import type { Repositories } from '@app/core';
 import { ConvexClient } from 'convex/browser';
 
 import { ConvexAccountRepository } from './repositories/AccountRepository';
+import { ConvexAdminRepository } from './repositories/AdminRepository';
 import { ConvexEventRepository } from './repositories/EventRepository';
 import { ConvexFeatureFlagRepository } from './repositories/FeatureFlagRepository';
+import { ConvexFeedbackRepository } from './repositories/FeedbackRepository';
 import { ConvexLogRepository } from './repositories/LogRepository';
 import { ConvexMemberRepository } from './repositories/MemberRepository';
+import { ConvexOrganizationAdminRepository } from './repositories/OrganizationAdminRepository';
 import { ConvexOrganizationRepository } from './repositories/OrganizationRepository';
 import { ConvexPartnerSyncRepository } from './repositories/PartnerSyncRepository';
 import { ConvexProductRepository } from './repositories/ProductRepository';
+import { ConvexScraperRepository } from './repositories/ScraperRepository';
 import { ConvexSessionRepository } from './repositories/SessionRepository';
 import { ConvexUserRepository } from './repositories/UserRepository';
 import { ConvexVerificationRepository } from './repositories/VerificationRepository';
@@ -39,6 +43,10 @@ export function createConvexRepositories(convexUrl: string): Repositories {
     events: new ConvexEventRepository(client),
     products: new ConvexProductRepository(client),
     partnerSync: new ConvexPartnerSyncRepository(client),
+    feedback: new ConvexFeedbackRepository(client),
+    admin: new ConvexAdminRepository(client),
+    organizationAdmin: new ConvexOrganizationAdminRepository(client),
+    scraper: new ConvexScraperRepository(client),
   };
 }
 
@@ -59,5 +67,9 @@ export function createConvexRepositoriesWithClient(client: ConvexClient): Reposi
     events: new ConvexEventRepository(client),
     products: new ConvexProductRepository(client),
     partnerSync: new ConvexPartnerSyncRepository(client),
+    feedback: new ConvexFeedbackRepository(client),
+    admin: new ConvexAdminRepository(client),
+    organizationAdmin: new ConvexOrganizationAdminRepository(client),
+    scraper: new ConvexScraperRepository(client),
   };
 }

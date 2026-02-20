@@ -6,11 +6,10 @@
  * - Plus, Bell (with badge), Bag (with badge) on the right
  */
 
-import { api } from '@app/convex';
+import { useCurrentUser, useCart } from '@app/infrastructure';
 import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
 import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
-import { useQuery } from 'convex/react';
 import React from 'react';
 
 import { AppLogo } from './AppLogo';
@@ -21,10 +20,10 @@ export const HomeHeader = () => {
   const { showToast } = useToast();
 
   // Fetch User & Cart
-  const user = useQuery(api.users.currentUser);
+  const user = useCurrentUser();
   const userId = user?._id;
 
-  const cart = useQuery(api.cart.getCart, userId ? { userId } : 'skip');
+  const cart = useCart(userId);
 
   // Dynamic Counts
   const notificationCount = 0; // No notifications system yet

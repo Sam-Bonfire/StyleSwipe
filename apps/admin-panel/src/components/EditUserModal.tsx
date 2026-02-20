@@ -1,6 +1,5 @@
-import { api } from '@app/convex';
+import { useUpdateUserDetails } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import { Dialog, YStack, XStack, Input, Label } from 'tamagui';
 
@@ -20,15 +19,17 @@ export function EditUserModal({ user, open, onOpenChange, onSuccess }: EditUserM
     const [email, setEmail] = useState(user.email);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const updateUser = useMutation(api.organizationAdmin.updateUserDetails);
+    const updateUser = useUpdateUserDetails();
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             await updateUser({
-                userId: user._id,
-                name,
-                email,
+                id: user._id,
+                details: {
+                    name,
+                    email,
+                },
             });
             onSuccess?.();
             onOpenChange(false);
