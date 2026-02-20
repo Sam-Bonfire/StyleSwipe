@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 
@@ -73,13 +74,15 @@ export const updateUserDetails = mutation({
     userId: v.string(),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
+    image: v.optional(v.string()),
   },
-  handler: async (ctx, { userId, name, email }) => {
+  handler: async (ctx, { userId, name, email, image }) => {
     await requireCoreAdmin(ctx);
 
     const updates: any = {};
     if (name !== undefined) updates.name = name;
     if (email !== undefined) updates.email = email;
+    if (image !== undefined) updates.image = image;
     if (Object.keys(updates).length > 0) {
       updates.updatedAt = Date.now();
       await ctx.runMutation(components.auth.api.updateOne, {
@@ -146,7 +149,7 @@ export const listOrganizationsWithMembers = query({
 export const getOrganizationMembers = query({
   args: {
     organizationId: v.string(),
-    paginationOpts: paginationOptsValidator
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     await requireCoreAdmin(ctx);
@@ -338,26 +341,27 @@ export const deleteCustomRole = mutation({
  */
 export const searchUsers = query({
   args: {
-    searchTerm: v.string(),
+    query: v.string(),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     await requireCoreAdmin(ctx);
 
-    if (!args.searchTerm || args.searchTerm.trim() === '') {
+    if (!args.query || args.query.trim() === '') {
       return { page: [], isDone: true, continueCursor: '' };
     }
 
-    const searchLower = args.searchTerm.toLowerCase();
+    const searchLower = args.query.toLowerCase();
     const usersRes = await ctx.runQuery(components.auth.api.findMany, {
       model: 'users',
       where: [],
       paginationOpts: { numItems: 100, cursor: null },
     });
 
-    const filteredUsers = usersRes.page.filter((user: any) =>
-      user.name?.toLowerCase().includes(searchLower) ||
-      user.email?.toLowerCase().includes(searchLower)
+    const filteredUsers = usersRes.page.filter(
+      (user: any) =>
+        user.name?.toLowerCase().includes(searchLower) ||
+        user.email?.toLowerCase().includes(searchLower),
     );
 
     const usersWithMemberships = await Promise.all(
@@ -391,26 +395,27 @@ export const searchUsers = query({
  */
 export const searchOrganizations = query({
   args: {
-    searchTerm: v.string(),
+    query: v.string(),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     await requireCoreAdmin(ctx);
 
-    if (!args.searchTerm || args.searchTerm.trim() === '') {
+    if (!args.query || args.query.trim() === '') {
       return { page: [], isDone: true, continueCursor: '' };
     }
 
-    const searchLower = args.searchTerm.toLowerCase();
+    const searchLower = args.query.toLowerCase();
     const orgsRes = await ctx.runQuery(components.auth.api.findMany, {
       model: 'organizations',
       where: [],
       paginationOpts: { numItems: 100, cursor: null },
     });
 
-    const filteredOrgs = orgsRes.page.filter((org: any) =>
-      org.name?.toLowerCase().includes(searchLower) ||
-      org.slug?.toLowerCase().includes(searchLower)
+    const filteredOrgs = orgsRes.page.filter(
+      (org: any) =>
+        org.name?.toLowerCase().includes(searchLower) ||
+        org.slug?.toLowerCase().includes(searchLower),
     );
 
     const orgsWithDetails = await Promise.all(
@@ -438,24 +443,26 @@ export const searchOrganizations = query({
  */
 export const updateOrganization = mutation({
   args: {
-    organizationId: v.string(),
+    id: v.string(),
     name: v.optional(v.string()),
     slug: v.optional(v.string()),
+    logo: v.optional(v.string()),
     metadata: v.optional(v.string()),
   },
-  handler: async (ctx, { organizationId, name, slug, metadata }) => {
+  handler: async (ctx, { id, name, slug, logo, metadata }) => {
     await requireCoreAdmin(ctx);
 
     const updates: any = {};
     if (name !== undefined) updates.name = name;
     if (slug !== undefined) updates.slug = slug;
+    if (logo !== undefined) updates.logo = logo;
     if (metadata !== undefined) updates.metadata = metadata;
 
     if (Object.keys(updates).length > 0) {
       await ctx.runMutation(components.auth.api.updateOne, {
         input: {
           model: 'organizations',
-          where: [{ field: '_id', operator: 'eq', value: organizationId }],
+          where: [{ field: '_id', operator: 'eq', value: id }],
           update: updates,
         },
       });

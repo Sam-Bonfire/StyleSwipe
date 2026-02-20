@@ -1,11 +1,9 @@
 import { Effect } from 'effect';
 
-import type { AdminRepository } from '../../../shared/domain/ports';
 import type { AdminStats, PaginationOpts, PaginatedResult, Product } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { AdminRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class AdminDashboardError extends Error {
     readonly _tag = 'AdminDashboardError' as const;
@@ -15,48 +13,33 @@ export class AdminDashboardError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Manage Admin Dashboard
-// -----------------------------------------------------------------------------
+export const getStats = (): Effect.Effect<AdminStats, AdminDashboardError | RepositoryError, AdminRepository> =>
+    Effect.gen(function* (_) {
+        const admin = yield* _(AdminRepository);
+        return yield* _(admin.getStats());
+    });
 
-/**
- * Admin dashboard operations: stats, product browsing, re-scraping.
- */
-export class ManageAdminDashboard {
-    constructor(private readonly admin: AdminRepository) { }
+export const getScrapedProducts = (
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<Product>, AdminDashboardError | RepositoryError, AdminRepository> =>
+    Effect.gen(function* (_) {
+        const admin = yield* _(AdminRepository);
+        return yield* _(admin.getScrapedProducts(paginationOpts));
+    });
 
-    getStats(): Effect.Effect<AdminStats, AdminDashboardError> {
-        return Effect.tryPromise({
-            try: () => this.admin.getStats(),
-            catch: () => new AdminDashboardError('Failed to fetch admin stats'),
-        });
-    }
+export const searchProducts = (
+    query: string,
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<Product>, AdminDashboardError | RepositoryError, AdminRepository> =>
+    Effect.gen(function* (_) {
+        const admin = yield* _(AdminRepository);
+        return yield* _(admin.searchProducts(query, paginationOpts));
+    });
 
-    getScrapedProducts(
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<Product>, AdminDashboardError> {
-        return Effect.tryPromise({
-            try: () => this.admin.getScrapedProducts(paginationOpts),
-            catch: () => new AdminDashboardError('Failed to fetch scraped products'),
-        });
-    }
-
-    searchProducts(
-        query: string,
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<Product>, AdminDashboardError> {
-        return Effect.tryPromise({
-            try: () => this.admin.searchProducts(query, paginationOpts),
-            catch: () => new AdminDashboardError('Failed to search products'),
-        });
-    }
-
-    retriggerScrape(
-        productId: string,
-    ): Effect.Effect<void, AdminDashboardError> {
-        return Effect.tryPromise({
-            try: () => this.admin.retriggerScrape(productId),
-            catch: () => new AdminDashboardError('Failed to retrigger scrape'),
-        });
-    }
-}
+export const retriggerScrape = (
+    productId: string,
+): Effect.Effect<void, AdminDashboardError | RepositoryError, AdminRepository> =>
+    Effect.gen(function* (_) {
+        const admin = yield* _(AdminRepository);
+        yield* _(admin.retriggerScrape(productId));
+    });

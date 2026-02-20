@@ -1,4 +1,4 @@
-import { initializeStyleProfile, getOnboardingQuestions, OnboardingQuestion } from '@app/core';
+import { InitializeStyleProfile, GetOnboardingQuestions } from '@app/core';
 import { useUpdateStyleProfile } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
 import { Effect } from 'effect';
@@ -11,7 +11,7 @@ import { generateEmbedding } from '../../infrastructure/InferenceEngine';
 export function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const questions = Effect.runSync(getOnboardingQuestions()) as OnboardingQuestion[];
+  const questions = Effect.runSync(GetOnboardingQuestions.getOnboardingQuestions());
 
   const updateStyleProfile = useUpdateStyleProfile();
 
@@ -32,7 +32,7 @@ export function OnboardingScreen() {
       setIsGenerating(true);
       try {
         // Initialize profile
-        const styleProfile = initializeStyleProfile(answers);
+        const styleProfile = Effect.runSync(InitializeStyleProfile.initializeStyleProfile(answers));
 
         // ---------------------------------------------------------
         // REAL ONBOARDING VECTORIZATION

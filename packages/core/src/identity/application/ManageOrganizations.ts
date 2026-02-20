@@ -1,6 +1,5 @@
 import { Effect } from 'effect';
 
-import type { OrganizationAdminRepository } from '../../../shared/domain/ports';
 import type {
     Organization,
     Member,
@@ -9,9 +8,8 @@ import type {
     PaginatedResult,
 } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { OrganizationAdminRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class OrganizationAdminError extends Error {
     readonly _tag = 'OrganizationAdminError' as const;
@@ -21,71 +19,54 @@ export class OrganizationAdminError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Manage Organizations (Admin)
-// -----------------------------------------------------------------------------
+export const listWithMembers = (
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<Organization & { members: Member[] }>, OrganizationAdminError | RepositoryError, OrganizationAdminRepository> =>
+    Effect.gen(function* (_) {
+        const orgAdmin = yield* _(OrganizationAdminRepository);
+        return yield* _(orgAdmin.listOrganizationsWithMembers(paginationOpts));
+    });
 
-/**
- * Admin-level organization and user management operations.
- */
-export class ManageOrganizations {
-    constructor(private readonly orgAdmin: OrganizationAdminRepository) { }
+export const searchOrganizations = (
+    query: string,
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<Organization>, OrganizationAdminError | RepositoryError, OrganizationAdminRepository> =>
+    Effect.gen(function* (_) {
+        const orgAdmin = yield* _(OrganizationAdminRepository);
+        return yield* _(orgAdmin.searchOrganizations(query, paginationOpts));
+    });
 
-    listWithMembers(
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<Organization & { members: Member[] }>, OrganizationAdminError> {
-        return Effect.tryPromise({
-            try: () => this.orgAdmin.listOrganizationsWithMembers(paginationOpts),
-            catch: () => new OrganizationAdminError('Failed to list organizations'),
-        });
-    }
+export const updateOrganization = (
+    id: string,
+    data: Partial<Organization>,
+): Effect.Effect<Organization, OrganizationAdminError | RepositoryError, OrganizationAdminRepository> =>
+    Effect.gen(function* (_) {
+        const orgAdmin = yield* _(OrganizationAdminRepository);
+        return yield* _(orgAdmin.updateOrganization(id, data));
+    });
 
-    searchOrganizations(
-        query: string,
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<Organization>, OrganizationAdminError> {
-        return Effect.tryPromise({
-            try: () => this.orgAdmin.searchOrganizations(query, paginationOpts),
-            catch: () => new OrganizationAdminError('Failed to search organizations'),
-        });
-    }
+export const listUsers = (
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<User & { organizations: Organization[] }>, OrganizationAdminError | RepositoryError, OrganizationAdminRepository> =>
+    Effect.gen(function* (_) {
+        const orgAdmin = yield* _(OrganizationAdminRepository);
+        return yield* _(orgAdmin.listUsersWithOrgs(paginationOpts));
+    });
 
-    updateOrganization(
-        id: string,
-        data: Partial<Organization>,
-    ): Effect.Effect<Organization, OrganizationAdminError> {
-        return Effect.tryPromise({
-            try: () => this.orgAdmin.updateOrganization(id, data),
-            catch: () => new OrganizationAdminError('Failed to update organization'),
-        });
-    }
+export const searchUsers = (
+    query: string,
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<User>, OrganizationAdminError | RepositoryError, OrganizationAdminRepository> =>
+    Effect.gen(function* (_) {
+        const orgAdmin = yield* _(OrganizationAdminRepository);
+        return yield* _(orgAdmin.searchUsers(query, paginationOpts));
+    });
 
-    listUsers(
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<User & { organizations: Organization[] }>, OrganizationAdminError> {
-        return Effect.tryPromise({
-            try: () => this.orgAdmin.listUsersWithOrgs(paginationOpts),
-            catch: () => new OrganizationAdminError('Failed to list users'),
-        });
-    }
-
-    searchUsers(
-        query: string,
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<User>, OrganizationAdminError> {
-        return Effect.tryPromise({
-            try: () => this.orgAdmin.searchUsers(query, paginationOpts),
-            catch: () => new OrganizationAdminError('Failed to search users'),
-        });
-    }
-
-    updateUserDetails(
-        id: string,
-        data: Partial<User>,
-    ): Effect.Effect<User, OrganizationAdminError> {
-        return Effect.tryPromise({
-            try: () => this.orgAdmin.updateUserDetails(id, data),
-            catch: () => new OrganizationAdminError('Failed to update user details'),
-        });
-    }
-}
+export const updateUserDetails = (
+    id: string,
+    data: Partial<User>,
+): Effect.Effect<User, OrganizationAdminError | RepositoryError, OrganizationAdminRepository> =>
+    Effect.gen(function* (_) {
+        const orgAdmin = yield* _(OrganizationAdminRepository);
+        return yield* _(orgAdmin.updateUserDetails(id, data));
+    });

@@ -1,6 +1,5 @@
 import { Effect } from 'effect';
 
-import type { ScraperRepository } from '../../../shared/domain/ports';
 import type {
     PaginationOpts,
     PaginatedResult,
@@ -9,9 +8,8 @@ import type {
     ScraperMode,
 } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { ScraperRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class ScrapingJobError extends Error {
     readonly _tag = 'ScrapingJobError' as const;
@@ -21,10 +19,6 @@ export class ScrapingJobError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Manage Scraping Jobs
-// -----------------------------------------------------------------------------
-
 export interface CreateJobInput {
     type: ScrapeJobType;
     query: string;
@@ -33,35 +27,21 @@ export interface CreateJobInput {
     scraperMode?: ScraperMode;
 }
 
-/**
- * Admin operations for managing scraping jobs.
- */
-export class ManageScrapingJobs {
-    constructor(private readonly scraper: ScraperRepository) { }
+export const listJobs = (
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<ScrapingJob>, ScrapingJobError | RepositoryError, ScraperRepository> =>
+    Effect.gen(function* (_) {
+        const scraper = yield* _(ScraperRepository);
+        return yield* _(scraper.listJobs(paginationOpts));
+    });
 
-    list(
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<ScrapingJob>, ScrapingJobError> {
-        return Effect.tryPromise({
-            try: () => this.scraper.listJobs(paginationOpts),
-            catch: () => new ScrapingJobError('Failed to list scraping jobs'),
-        });
-    }
-
-    create(
-        input: CreateJobInput,
-    ): Effect.Effect<ScrapingJob, ScrapingJobError> {
-        return Effect.gen(this, function* (_) {
-            if (!input.query.trim()) {
-                return yield* _(Effect.fail(new ScrapingJobError('Query is required')));
-            }
-
-            return yield* _(
-                Effect.tryPromise({
-                    try: () => this.scraper.createJob(input),
-                    catch: () => new ScrapingJobError('Failed to create scraping job'),
-                }),
-            );
-        });
-    }
-}
+export const createJob = (
+    input: CreateJobInput,
+): Effect.Effect<ScrapingJob, ScrapingJobError | RepositoryError, ScraperRepository> =>
+    Effect.gen(function* (_) {
+        if (!input.query.trim()) {
+            return yield* _(Effect.fail(new ScrapingJobError('Query is required')));
+        }
+        const scraper = yield* _(ScraperRepository);
+        return yield* _(scraper.createJob(input));
+    });

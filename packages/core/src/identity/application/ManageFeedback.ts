@@ -1,11 +1,9 @@
 import { Effect } from 'effect';
 
-import type { FeedbackRepository } from '../../../shared/domain/ports';
 import type { Feedback, FeedbackType } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { FeedbackRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class FeedbackError extends Error {
     readonly _tag = 'FeedbackError' as const;
@@ -14,10 +12,6 @@ export class FeedbackError extends Error {
         this.name = 'FeedbackError';
     }
 }
-
-// -----------------------------------------------------------------------------
-// USE CASE: Manage Feedback (User-side)
-// -----------------------------------------------------------------------------
 
 export interface SubmitFeedbackInput {
     userId: string;
@@ -28,39 +22,23 @@ export interface SubmitFeedbackInput {
     attachment?: string;
 }
 
-/**
- * User-side feedback operations:
- * Submit new feedback and view own feedback history.
- */
-export class ManageFeedback {
-    constructor(private readonly repo: FeedbackRepository) { }
+export const submit = (input: SubmitFeedbackInput): Effect.Effect<Feedback, FeedbackError | RepositoryError, FeedbackRepository> =>
+    Effect.gen(function* (_) {
+        if (!input.message.trim()) {
+            return yield* _(Effect.fail(new FeedbackError('Feedback message is required')));
+        }
+        const repo = yield* _(FeedbackRepository);
+        return yield* _(repo.create(input));
+    });
 
-    submit(input: SubmitFeedbackInput): Effect.Effect<Feedback, FeedbackError> {
-        return Effect.gen(this, function* (_) {
-            if (!input.message.trim()) {
-                return yield* _(Effect.fail(new FeedbackError('Feedback message is required')));
-            }
+export const getMyFeedback = (userId: string): Effect.Effect<Feedback[], FeedbackError | RepositoryError, FeedbackRepository> =>
+    Effect.gen(function* (_) {
+        const repo = yield* _(FeedbackRepository);
+        return yield* _(repo.listByUser(userId));
+    });
 
-            return yield* _(
-                Effect.tryPromise({
-                    try: () => this.repo.create(input),
-                    catch: () => new FeedbackError('Failed to submit feedback'),
-                }),
-            );
-        });
-    }
-
-    getMyFeedback(userId: string): Effect.Effect<Feedback[], FeedbackError> {
-        return Effect.tryPromise({
-            try: () => this.repo.listByUser(userId),
-            catch: () => new FeedbackError('Failed to fetch feedback'),
-        });
-    }
-
-    generateUploadUrl(): Effect.Effect<string, FeedbackError> {
-        return Effect.tryPromise({
-            try: () => this.repo.generateUploadUrl(),
-            catch: () => new FeedbackError('Failed to generate upload URL'),
-        });
-    }
-}
+export const generateUploadUrl = (): Effect.Effect<string, FeedbackError | RepositoryError, FeedbackRepository> =>
+    Effect.gen(function* (_) {
+        const repo = yield* _(FeedbackRepository);
+        return yield* _(repo.generateUploadUrl());
+    });

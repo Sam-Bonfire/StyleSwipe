@@ -1,11 +1,9 @@
 import { Effect } from 'effect';
 
-import type { ProductRepository } from '../../../shared/domain/ports';
 import type { Product } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { ProductRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class CatalogError extends Error {
     readonly _tag = 'CatalogError' as const;
@@ -15,38 +13,23 @@ export class CatalogError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Browse Catalog
-// -----------------------------------------------------------------------------
+export const getLatest = (limit: number): Effect.Effect<Product[], CatalogError | RepositoryError, ProductRepository> =>
+    Effect.gen(function* (_) {
+        const products = yield* _(ProductRepository);
+        return yield* _(products.getLatest(limit));
+    });
 
-/**
- * Read use case for browsing the product catalog.
- * Abstracts queries so screens don't call Convex directly.
- */
-export class BrowseCatalog {
-    constructor(private readonly products: ProductRepository) { }
+export const getByCategory = (
+    category: string,
+    limit?: number,
+): Effect.Effect<Product[], CatalogError | RepositoryError, ProductRepository> =>
+    Effect.gen(function* (_) {
+        const products = yield* _(ProductRepository);
+        return yield* _(products.findByCategory(category, limit));
+    });
 
-    getLatest(limit: number): Effect.Effect<Product[], CatalogError> {
-        return Effect.tryPromise({
-            try: () => this.products.getLatest(limit),
-            catch: () => new CatalogError('Failed to fetch latest products'),
-        });
-    }
-
-    getByCategory(
-        category: string,
-        limit?: number,
-    ): Effect.Effect<Product[], CatalogError> {
-        return Effect.tryPromise({
-            try: () => this.products.findByCategory(category, limit),
-            catch: () => new CatalogError(`Failed to fetch products for category: ${category}`),
-        });
-    }
-
-    getById(id: string): Effect.Effect<Product | null, CatalogError> {
-        return Effect.tryPromise({
-            try: () => this.products.findById(id),
-            catch: () => new CatalogError(`Failed to fetch product: ${id}`),
-        });
-    }
-}
+export const getById = (id: string): Effect.Effect<Product | null, CatalogError | RepositoryError, ProductRepository> =>
+    Effect.gen(function* (_) {
+        const products = yield* _(ProductRepository);
+        return yield* _(products.findById(id));
+    });

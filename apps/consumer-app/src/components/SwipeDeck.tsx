@@ -1,4 +1,4 @@
-import { useVectorFeed, useProcessSwipe } from '@app/infrastructure';
+import { useVectorFeed, useProcessSwipe, useCurrentUser } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { useNavigation } from '@react-navigation/native';
@@ -23,6 +23,7 @@ export function SwipeDeck() {
   const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
+  const user = useCurrentUser();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
 
@@ -82,7 +83,7 @@ export function SwipeDeck() {
     try {
       // 1. Process Online via use case (validates + persists)
       await processSwipe({
-        userId: '', // Will be resolved by the mutation on the server
+        userId: user?._id || '', 
         productId: item._id,
         action: action,
         timestamp: Date.now(),

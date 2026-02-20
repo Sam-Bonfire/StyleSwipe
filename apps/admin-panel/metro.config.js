@@ -21,18 +21,27 @@ config.resolver.unstable_enableSymlinks = true;
 config.resolver.unstable_enablePackageExports = true;
 
 // 4. Force map subpaths that Metro struggles to resolve in monorepos
-config.resolver.extraNodeModules = {
-  'better-auth': path.resolve(workspaceRoot, 'node_modules/better-auth'),
-  'better-auth/client': path.resolve(
-    workspaceRoot,
-    'node_modules/better-auth/dist/client/index.mjs',
-  ),
-  'better-auth/plugins': path.resolve(
-    workspaceRoot,
-    'node_modules/better-auth/dist/plugins/index.mjs',
-  ),
+const sharedModules = [
+  'react',
+  'react-dom',
+  'react-native',
+  'react-native-web',
+  'convex',
+  'tamagui',
+  'effect',
+  'better-auth',
+];
 
-};
+config.resolver.extraNodeModules = sharedModules.reduce((acc, name) => {
+  acc[name] = path.resolve(workspaceRoot, 'node_modules', name);
+  return acc;
+}, {});
+
+// Add workspace aliases
+config.resolver.extraNodeModules['@app/core'] = path.resolve(workspaceRoot, 'packages/core/src');
+config.resolver.extraNodeModules['@app/convex'] = path.resolve(workspaceRoot, 'packages/convex/convex');
+
+config.resolver.disableHierarchicalLookup = false;
 
 const { withTamagui } = require('@tamagui/metro-plugin');
 

@@ -8,7 +8,7 @@ import { ConvexClient } from 'convex/browser';
 import { usePaginatedQuery, useConvex } from 'convex/react';
 import { Effect } from 'effect';
 
-import { ConvexOrganizationAdminRepository } from '../../convex/repositories';
+import { createOrganizationAdminRepositoryLayer } from '../../convex';
 
 // ---------------------------------------------------------------------------
 // ORGANIZATIONS
@@ -33,10 +33,11 @@ export function useSearchOrganizations(query: string, initialNumItems: number = 
  */
 export function useUpdateOrganization() {
     const convex = useConvex();
-    const repo = new ConvexOrganizationAdminRepository(convex as unknown as ConvexClient);
-    const useCase = new ManageOrganizations(repo);
-     
-    return (args: { id: string; data: any }) => Effect.runPromise(useCase.updateOrganization(args.id, args.data));
+    return (args: { id: string; data: any }) => {
+        const program = ManageOrganizations.updateOrganization(args.id, args.data);
+        const layer = createOrganizationAdminRepositoryLayer(convex as unknown as ConvexClient);
+        return Effect.runPromise(program.pipe(Effect.provide(layer)));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -62,8 +63,9 @@ export function useSearchUsers(query: string, initialNumItems: number = 20) {
  */
 export function useUpdateUserDetails() {
     const convex = useConvex();
-    const repo = new ConvexOrganizationAdminRepository(convex as unknown as ConvexClient);
-    const useCase = new ManageOrganizations(repo);
-     
-    return (args: { id: string; details: any }) => Effect.runPromise(useCase.updateUserDetails(args.id, args.details));
+    return (args: { id: string; details: any }) => {
+        const program = ManageOrganizations.updateUserDetails(args.id, args.details);
+        const layer = createOrganizationAdminRepositoryLayer(convex as unknown as ConvexClient);
+        return Effect.runPromise(program.pipe(Effect.provide(layer)));
+    }
 }

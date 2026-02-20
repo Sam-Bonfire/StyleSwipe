@@ -2,10 +2,6 @@ import { Effect } from 'effect';
 
 import { TaggingService, type TaggerResult } from '../domain/TaggingService';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
-
 export class TaggingError extends Error {
     readonly _tag = 'TaggingError' as const;
     constructor(message: string) {
@@ -14,29 +10,18 @@ export class TaggingError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Tag Product
-// -----------------------------------------------------------------------------
+const taggingService = new TaggingService();
 
-/**
- * Generates tags for a product based on its textual description.
- * Pure domain logic — no persistence dependency.
- */
-export class TagProduct {
-    private readonly taggingService = new TaggingService();
+export const execute = (
+    text: string,
+    rawCategory?: string,
+): Effect.Effect<TaggerResult, TaggingError> =>
+    Effect.gen(function* (_) {
+        if (!text || text.trim().length === 0) {
+            return yield* _(
+                Effect.fail(new TaggingError('Product text is required for tagging')),
+            );
+        }
 
-    execute(
-        text: string,
-        rawCategory?: string,
-    ): Effect.Effect<TaggerResult, TaggingError> {
-        return Effect.gen(this, function* (_) {
-            if (!text || text.trim().length === 0) {
-                return yield* _(
-                    Effect.fail(new TaggingError('Product text is required for tagging')),
-                );
-            }
-
-            return this.taggingService.generateTags(text, rawCategory);
-        });
-    }
-}
+        return taggingService.generateTags(text, rawCategory);
+    });

@@ -1,11 +1,9 @@
 import { Effect } from 'effect';
 
 import type { Product } from '../../../shared/domain/types';
-import type { RecommendationService } from '../domain/DiscoveryPorts';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { RepositoryError } from '../../../shared/domain/errors';
+import { RecommendationService } from '../application/DiscoveryPorts';
 
 export class RecommendationError extends Error {
     readonly _tag = 'RecommendationError' as const;
@@ -15,25 +13,10 @@ export class RecommendationError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Get Recommendations
-// -----------------------------------------------------------------------------
-
-/**
- * Retrieves AI-powered product recommendations for a user.
- */
-export class GetRecommendations {
-    constructor(
-        private readonly recommendations: RecommendationService,
-    ) { }
-
-    getVectorFeed(
-        userId: string,
-        limit: number,
-    ): Effect.Effect<Product[], RecommendationError> {
-        return Effect.tryPromise({
-            try: () => this.recommendations.getVectorFeed(userId, limit),
-            catch: () => new RecommendationError('Failed to get vector feed'),
-        });
-    }
-}
+export const getVectorFeed = (
+    userId: string,
+    limit: number,
+): Effect.Effect<Product[], RecommendationError | RepositoryError, RecommendationService> => Effect.gen(function* (_) {
+    const recommendations = yield* _(RecommendationService);
+    return yield* _(recommendations.getVectorFeed(userId, limit));
+});

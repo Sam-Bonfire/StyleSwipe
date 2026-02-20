@@ -1,6 +1,5 @@
 import { Effect } from 'effect';
 
-import type { FeedbackRepository } from '../../../shared/domain/ports';
 import type {
     Feedback,
     FeedbackStatus,
@@ -8,9 +7,8 @@ import type {
     PaginatedResult,
 } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { FeedbackRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class AdminFeedbackError extends Error {
     readonly _tag = 'AdminFeedbackError' as const;
@@ -20,52 +18,32 @@ export class AdminFeedbackError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Manage Admin Feedback
-// -----------------------------------------------------------------------------
+export const list = (
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<Feedback>, AdminFeedbackError | RepositoryError, FeedbackRepository> =>
+    Effect.gen(function* (_) {
+        const repo = yield* _(FeedbackRepository);
+        return yield* _(repo.list(paginationOpts));
+    });
 
-/**
- * Admin-side feedback management:
- * List all feedback, update status, and reply to users.
- */
-export class ManageAdminFeedback {
-    constructor(private readonly repo: FeedbackRepository) { }
+export const updateStatus = (
+    id: string,
+    status: FeedbackStatus,
+): Effect.Effect<void, AdminFeedbackError | RepositoryError, FeedbackRepository> =>
+    Effect.gen(function* (_) {
+        const repo = yield* _(FeedbackRepository);
+        yield* _(repo.updateStatus(id, status));
+    });
 
-    list(
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<Feedback>, AdminFeedbackError> {
-        return Effect.tryPromise({
-            try: () => this.repo.list(paginationOpts),
-            catch: () => new AdminFeedbackError('Failed to list feedback'),
-        });
-    }
-
-    updateStatus(
-        id: string,
-        status: FeedbackStatus,
-    ): Effect.Effect<void, AdminFeedbackError> {
-        return Effect.tryPromise({
-            try: () => this.repo.updateStatus(id, status),
-            catch: () => new AdminFeedbackError('Failed to update feedback status'),
-        });
-    }
-
-    reply(
-        id: string,
-        adminId: string,
-        message: string,
-    ): Effect.Effect<void, AdminFeedbackError> {
-        return Effect.gen(this, function* (_) {
-            if (!message.trim()) {
-                return yield* _(Effect.fail(new AdminFeedbackError('Reply message is required')));
-            }
-
-            yield* _(
-                Effect.tryPromise({
-                    try: () => this.repo.addReply(id, adminId, message),
-                    catch: () => new AdminFeedbackError('Failed to reply to feedback'),
-                }),
-            );
-        });
-    }
-}
+export const reply = (
+    id: string,
+    adminId: string,
+    message: string,
+): Effect.Effect<void, AdminFeedbackError | RepositoryError, FeedbackRepository> =>
+    Effect.gen(function* (_) {
+        if (!message.trim()) {
+            return yield* _(Effect.fail(new AdminFeedbackError('Reply message is required')));
+        }
+        const repo = yield* _(FeedbackRepository);
+        yield* _(repo.addReply(id, adminId, message));
+    });

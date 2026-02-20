@@ -9,7 +9,8 @@ import { ConvexClient } from 'convex/browser';
 import { useQuery, usePaginatedQuery, useConvex } from 'convex/react';
 import { Effect } from 'effect';
 
-import { ConvexAdminRepository, ConvexFeedbackRepository } from '../../convex/repositories';
+import { createAdminRepositoryLayer } from '../../convex/repositories/AdminRepository';
+import { createFeedbackRepositoryLayer } from '../../convex/repositories/FeedbackRepository';
 
 // ---------------------------------------------------------------------------
 // DASHBOARD
@@ -45,13 +46,11 @@ export function useSearchProducts(query: string | undefined) {
  */
 export function useRetriggerScrape() {
     const convex = useConvex();
-    const repo = new ConvexAdminRepository(convex as unknown as ConvexClient);
-    const useCase = new ManageAdminDashboard(repo);
-    // The old mutation took { url: string }, but the useCase takes productId. 
-    // Is url actually productId? Let's assume the argument being passed acts as the identifier.
-    // wait, ManageAdminDashboard.retriggerScrape(productId: string).
-    // so we map { url } -> url.
-    return (args: { url: string }) => Effect.runPromise(useCase.retriggerScrape(args.url));
+    return (args: { url: string }) => {
+        const program = ManageAdminDashboard.retriggerScrape(args.url);
+        const layer = createAdminRepositoryLayer(convex as unknown as ConvexClient);
+        return Effect.runPromise(program.pipe(Effect.provide(layer as any)) as any);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -81,9 +80,11 @@ export function useAdminFeedback(initialNumItems: number = 20) {
  */
 export function useUpdateFeedbackStatus() {
     const convex = useConvex();
-    const repo = new ConvexFeedbackRepository(convex as unknown as ConvexClient);
-    const useCase = new ManageAdminFeedback(repo);
-    return (args: { id: string; status: string }) => Effect.runPromise(useCase.updateStatus(args.id, args.status as FeedbackStatus));
+    return (args: { id: string; status: string }) => {
+        const program = ManageAdminFeedback.updateStatus(args.id, args.status as FeedbackStatus);
+        const layer = createFeedbackRepositoryLayer(convex as unknown as ConvexClient);
+        return Effect.runPromise(program.pipe(Effect.provide(layer as any)) as any);
+    }
 }
 
 /**
@@ -91,9 +92,9 @@ export function useUpdateFeedbackStatus() {
  */
 export function useReplyToFeedback() {
     const convex = useConvex();
-    const repo = new ConvexFeedbackRepository(convex as unknown as ConvexClient);
-    const useCase = new ManageAdminFeedback(repo);
-    // AdminId can be left empty if the backend picks it up from the auth token, else we can pass it.
-    // The previous mutation took { id, message }.
-    return (args: { id: string; message: string; adminId?: string }) => Effect.runPromise(useCase.reply(args.id, args.adminId || '', args.message));
+    return (args: { id: string; message: string; adminId?: string }) => {
+        const program = ManageAdminFeedback.reply(args.id, args.adminId || '', args.message);
+        const layer = createFeedbackRepositoryLayer(convex as unknown as ConvexClient);
+        return Effect.runPromise(program.pipe(Effect.provide(layer as any)) as any);
+    }
 }

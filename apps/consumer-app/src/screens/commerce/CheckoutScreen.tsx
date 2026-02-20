@@ -1,12 +1,12 @@
-import { Address, PriceEstimator } from '@app/core';
-import { useCurrentUser, useCart, useClearCart, ConvexEventRepository } from '@app/infrastructure';
+import { Address, PriceEstimator, EventRepository } from '@app/core';
+import { useCurrentUser, useCart, useClearCart, createEventRepositoryLayer } from '@app/infrastructure';
 import { ConvexClient, useConvexClient } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
-import React, { useState, useMemo } from 'react';
+import { Effect } from 'effect';
+import React, { useState } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
-
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,10 +23,6 @@ export const CheckoutScreen = ({ navigation }: any) => {
   const cart = useCart(userId);
   const clearCart = useClearCart();
 
-  const eventRepo = useMemo(() => {
-    return new ConvexEventRepository(convex as unknown as ConvexClient);
-  }, [convex]);
-
   const handleAddressSubmit = (addr: Address) => {
     setAddress(addr);
     setStep('PAYMENT');
@@ -39,18 +35,25 @@ export const CheckoutScreen = ({ navigation }: any) => {
       // 1. Get current cart (already have it via hook!)
       if (!cart) throw new Error('No cart found');
 
-      // 2. Log Checkout Event (replacing Order creation)
-      await eventRepo.create({
-        type: 'checkout_initiated',
-        userId: userId,
-        timestamp: Date.now(),
-        isSampled: true,
-        metadata: {
-          cartItems: cart.items.length,
-          total: PriceEstimator.estimate(cart).total,
-          address,
-        },
-      });
+      const eventLayer = createEventRepositoryLayer(convex as unknown as ConvexClient);
+      await Effect.runPromise(
+        Effect.gen(function* (_) {
+          const repo = yield* _(EventRepository);
+          return yield* _(
+            repo.create({
+              type: 'checkout_initiated',
+              userId: userId,
+              timestamp: Date.now(),
+              isSampled: true,
+              metadata: {
+                cartItems: cart.items.length,
+                total: PriceEstimator.estimate(cart).total,
+                address,
+              },
+            }),
+          );
+        }).pipe(Effect.provide(eventLayer)),
+      );
 
       // 3. Generate a fake Order ID for display
       const newOrderId = `ORD-${Date.now()}`;

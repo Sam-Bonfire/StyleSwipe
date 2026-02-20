@@ -3,20 +3,19 @@
  * Lightweight REST API for submitting jobs and monitoring status
  */
 
-import type { Queue, ScrapedProduct } from '@app/core';
-
-import { ConvexHttpClient } from 'convex/browser';
-import { Hono, type Context } from 'hono';
-import { cors } from 'hono/cors';
-
 import type { Id } from '@app/convex';
+import type { QueueService, ScrapedProduct } from '@app/core';
 
 import { api } from '@app/convex';
+import { ConvexHttpClient } from 'convex/browser';
+import { Effect } from 'effect';
+import { Hono, type Context } from 'hono';
+import { cors } from 'hono/cors';
 
 export interface ServerConfig {
   convexUrl: string;
   port: number;
-  queue: Queue<ScrapedProduct>;
+  queue: QueueService<ScrapedProduct>;
 }
 
 export function createServer(config: ServerConfig) {
@@ -93,7 +92,7 @@ export function createServer(config: ServerConfig) {
   // Queue status
   app.get('/api/queue/status', async (c: Context) => {
     try {
-      const size = await config.queue.size();
+      const size = await Effect.runPromise(config.queue.size());
       return c.json({
         queueSize: size,
         timestamp: Date.now(),

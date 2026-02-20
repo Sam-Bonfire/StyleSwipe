@@ -1,4 +1,6 @@
-import { ManageScrapingJobs, CreateJobInput } from '@app/core';
+import type { ScrapeJobType, ScraperMode } from '@app/core';
+
+import { ManageScrapingJobs } from '@app/core';
 import { ConvexClient } from 'convex/browser';
 /**
  * Scraper admin hooks
@@ -6,14 +8,16 @@ import { ConvexClient } from 'convex/browser';
 import { useConvex } from 'convex/react';
 import { Effect } from 'effect';
 
-import { ConvexScraperRepository } from '../../convex/repositories';
+import { createScraperRepositoryLayer } from '../../convex';
 
 /**
  * Write — create a new scraping job.
  */
 export function useCreateScrapingJob() {
     const convex = useConvex();
-    const repo = new ConvexScraperRepository(convex as unknown as ConvexClient);
-    const useCase = new ManageScrapingJobs(repo);
-    return (input: CreateJobInput) => Effect.runPromise(useCase.create(input));
+    return (input: { type: ScrapeJobType; query: string; maxPages?: number; startPage?: number; scraperMode?: ScraperMode; }) => {
+        const program = ManageScrapingJobs.createJob(input);
+        const layer = createScraperRepositoryLayer(convex as unknown as ConvexClient);
+        return Effect.runPromise(program.pipe(Effect.provide(layer)));
+    }
 }

@@ -1,149 +1,170 @@
-// =============================================================================
-// CONVEX PRODUCT REPOSITORY ADAPTER
-// Implements ProductRepository port for Convex backend with vector search
-// =============================================================================
-
 import type { Id } from '@app/convex';
-import type { ProductRepository } from '@app/core';
 import type { Product, ProductAttributes } from '@app/core';
 
 import { api } from '@app/convex';
+import { ProductRepository, RepositoryError } from '@app/core';
 import { ConvexClient } from 'convex/browser';
+import { Layer, Effect } from 'effect';
 
 /**
  * Convex implementation of ProductRepository port
  * Includes vector similarity search for Discovery Mode
  */
-export class ConvexProductRepository implements ProductRepository {
-  constructor(private client: ConvexClient) { }
 
-  async findById(id: string): Promise<Product | null> {
-    const doc = await this.client.query(api.products.getById, {
-      id: id as Id<'products'>,
-    });
-    return doc ? this.mapToEntity(doc) : null;
-  }
 
-  async findByCategory(category: string, limit = 50): Promise<Product[]> {
-    const docs = await this.client.query(api.products.getByCategory, {
-      category,
-      limit,
-    });
-    return docs.map((doc) => this.mapToEntity(doc));
-  }
-
-  async findByCategoryAndPrice(
-    category: string,
-    minPrice: number,
-    maxPrice: number,
-    limit = 50,
-  ): Promise<Product[]> {
-    const docs = await this.client.query(api.products.getByCategoryAndPrice, {
-      category,
-      minPrice,
-      maxPrice,
-      limit,
-    });
-    return docs.map((doc) => this.mapToEntity(doc));
-  }
-
-  async findByBrand(brand: string, limit = 50): Promise<Product[]> {
-    const docs = await this.client.query(api.products.getByBrand, {
-      brand,
-      limit,
-    });
-    return docs.map((doc) => this.mapToEntity(doc));
-  }
-
-  async searchByTitle(
-    query: string,
-    filters?: { brand?: string; category?: string },
-  ): Promise<Product[]> {
-    const docs = await this.client.query(api.products.searchByTitle, {
-      query,
-      brand: filters?.brand,
-      category: filters?.category,
-    });
-    return docs.map((doc) => this.mapToEntity(doc));
-  }
-
-  async findSimilar(
-    embedding: number[],
-    limit = 10,
-    filters?: { category?: string; brand?: string },
-  ): Promise<Product[]> {
-    const docs = await this.client.action(api.products.findSimilar, {
-      embedding,
-      limit,
-      category: filters?.category,
-      brand: filters?.brand,
-    });
-    return docs.map((doc) => this.mapToEntity(doc));
-  }
-
-  async create(product: Omit<Product, 'id'>): Promise<Product> {
-    const id = await this.client.mutation(api.products.create, {
-      brand: product.brand,
-      title: product.title,
-      price: product.price,
-      mrp: product.mrp,
-      category: product.category,
-      images: product.images,
-      attributes: product.attributes,
-      embedding: product.embedding,
-      meta: product.meta,
-      updatedAt: product.updatedAt ?? Date.now(),
-    });
-    return { ...product, id: id as string };
-  }
-
-  async update(id: string, data: Partial<Omit<Product, 'id'>>): Promise<Product> {
-    await this.client.mutation(api.products.update, {
-      id: id as Id<'products'>,
-      ...data,
-      updatedAt: Date.now(),
-    });
-    const updated = await this.findById(id);
-    if (!updated) throw new Error(`Product ${id} not found after update`);
-    return updated;
-  }
-
-  async updateEmbedding(id: string, embedding: number[]): Promise<Product> {
-    await this.client.mutation(api.products.updateEmbedding, {
-      id: id as Id<'products'>,
-      embedding,
-    });
-    const updated = await this.findById(id);
-    if (!updated) throw new Error(`Product ${id} not found after update`);
-    return updated;
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.client.mutation(api.products.remove, {
-      id: id as Id<'products'>,
-    });
-  }
-
-  async getLatest(limit: number): Promise<Product[]> {
-    const docs = await this.client.query(api.products.getLatest, { limit });
-    return docs.map((doc) => this.mapToEntity(doc));
-  }
-
-  // Map Convex document to domain entity
-  private mapToEntity(doc: Record<string, unknown>): Product {
+const mapToEntity = (doc: Record<string, unknown>): Product => {
     return {
-      id: (doc._id as string) || '',
-      brand: (doc.brand as string) || '',
-      title: (doc.title as string) || '',
-      price: (doc.price as number) || 0,
-      mrp: (doc.mrp as number) || 0,
-      category: (doc.category as string) || '',
-      images: (doc.images as string[]) || [],
-      attributes: doc.attributes as ProductAttributes | undefined,
-      embedding: doc.embedding as number[] | undefined,
-      meta: doc.meta as Record<string, unknown> | undefined,
-      createdAt: (doc.createdAt as number) || (doc._creationTime as number),
-      updatedAt: (doc.updatedAt as number) || (doc._creationTime as number),
-    };
-  }
-}
+  id: (doc._id as string) || '',
+  brand: (doc.brand as string) || '',
+  title: (doc.title as string) || '',
+  price: (doc.price as number) || 0,
+  mrp: (doc.mrp as number) || 0,
+  category: (doc.category as string) || '',
+  images: (doc.images as string[]) || [],
+  attributes: doc.attributes as ProductAttributes | undefined,
+  embedding: doc.embedding as number[] | undefined,
+  meta: doc.meta as Record<string, unknown> | undefined,
+  createdAt: (doc.createdAt as number) || (doc._creationTime as number),
+  updatedAt: (doc.updatedAt as number) || (doc._creationTime as number),
+};
+};
+
+
+export const createProductRepositoryLayer = (client: ConvexClient) => Layer.succeed(
+    ProductRepository,
+    ProductRepository.of({
+
+    findById: (id: string) => Effect.tryPromise({
+      try: async () => {
+          const doc = await client.query(api.products.getById, { id: id as Id<'products'> });
+          return doc ? mapToEntity(doc) : null;
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    findByCategory: (category: string, limit = 50) => Effect.tryPromise({
+      try: async () => {
+          const docs = await client.query(api.products.getByCategory, {
+  category,
+  limit,
+});
+return docs.map((doc) => mapToEntity(doc));
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    findByCategoryAndPrice: (category: string, minPrice: number, maxPrice: number, limit = 50) => Effect.tryPromise({
+      try: async () => {
+          const docs = await client.query(api.products.getByCategoryAndPrice, {
+  category,
+  minPrice,
+  maxPrice,
+  limit,
+});
+return docs.map((doc) => mapToEntity(doc));
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    findByBrand: (brand: string, limit = 50) => Effect.tryPromise({
+      try: async () => {
+          const docs = await client.query(api.products.getByBrand, {
+  brand,
+  limit,
+});
+return docs.map((doc) => mapToEntity(doc));
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    searchByTitle: (query: string, filters?: { brand?: string; category?: string }) => Effect.tryPromise({
+      try: async () => {
+          const docs = await client.query(api.products.searchByTitle, {
+  query,
+  brand: filters?.brand,
+  category: filters?.category,
+});
+return docs.map((doc) => mapToEntity(doc));
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    findSimilar: (embedding: number[], limit = 10, filters?: { category?: string; brand?: string }) => Effect.tryPromise({
+      try: async () => {
+          const docs = await client.action(api.products.findSimilar, {
+  embedding,
+  limit,
+  category: filters?.category,
+  brand: filters?.brand,
+});
+return docs.map((doc) => mapToEntity(doc));
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    create: (product: Omit<Product, 'id'>) => Effect.tryPromise({
+      try: async () => {
+          const id = await client.mutation(api.products.create, {
+  brand: product.brand,
+  title: product.title,
+  price: product.price,
+  mrp: product.mrp,
+  category: product.category,
+  images: product.images,
+  attributes: product.attributes,
+  embedding: product.embedding,
+  meta: product.meta,
+  updatedAt: product.updatedAt ?? Date.now(),
+});
+return { ...product, id: id as string };
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    update: (id: string, data: Partial<Omit<Product, 'id'>>) => Effect.tryPromise({
+      try: async () => {
+          await client.mutation(api.products.update, {
+              id: id as Id<'products'>,
+              ...data,
+              updatedAt: Date.now(),
+          });
+          const doc = await client.query(api.products.getById, { id: id as Id<'products'> });
+          if (!doc) throw new Error(`Product ${id} not found after update`);
+          return mapToEntity(doc);
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    updateEmbedding: (id: string, embedding: number[]) => Effect.tryPromise({
+      try: async () => {
+          await client.mutation(api.products.updateEmbedding, {
+              id: id as Id<'products'>,
+              embedding,
+          });
+          const doc = await client.query(api.products.getById, { id: id as Id<'products'> });
+          if (!doc) throw new Error(`Product ${id} not found after update`);
+          return mapToEntity(doc);
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    delete: (id: string) => Effect.tryPromise({
+      try: async () => {
+          await client.mutation(api.products.remove, {
+  id: id as Id<'products'>,
+});
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    getLatest: (limit: number) => Effect.tryPromise({
+      try: async () => {
+          const docs = await client.query(api.products.getLatest, { limit });
+return docs.map((doc) => mapToEntity(doc));
+      },
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    })
+);
+

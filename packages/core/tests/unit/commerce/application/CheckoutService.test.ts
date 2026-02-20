@@ -1,17 +1,18 @@
+import * as CheckoutService from '@app/core';
+import { Cart, CartItem, type Address } from '@app/core';
 import { describe, it, expect, mock } from 'bun:test';
-import { Effect, Exit } from 'effect';
+import { Effect, Exit, Layer } from 'effect';
 
-import { CheckoutService } from '../../../../src/commerce/application/CheckoutService';
-import { Cart, CartItem } from '../../../../src/commerce/domain/Cart';
-import { Address } from '../../../../src/commerce/domain/Order';
+import { OrderRepository } from '../../../../src/commerce/application/CheckoutService';
 
 describe('CheckoutService', () => {
   it('should create an order from a cart', async () => {
-    const mockRepo = {
-      save: mock(() => Promise.resolve()),
-      findById: mock(() => Promise.resolve(null)),
-    };
-    const service = new CheckoutService(mockRepo);
+    const repoMock = OrderRepository.of({
+      save: mock(() => Effect.succeed(undefined)),
+      findById: mock(() => Effect.succeed(null)),
+    });
+    
+    const layer = Layer.succeed(OrderRepository, repoMock);
 
     const cart = new Cart('user-1');
     cart.addItem(new CartItem('prod-1', 1, 1000, { brand: 'Test' }));
@@ -26,20 +27,22 @@ describe('CheckoutService', () => {
     };
 
     const order = await Effect.runPromise(
-      service.createOrderFromCart(cart, address, () => 'order-123'),
+      CheckoutService.createOrderFromCart(cart, address, () => 'order-123').pipe(Effect.provide(layer))
     );
 
     expect(order.id).toBe('order-123');
     expect(order.totalAmount).toBeGreaterThan(1000); // Including tax/shipping
-    expect(mockRepo.save).toHaveBeenCalledTimes(1);
+    expect(repoMock.save).toHaveBeenCalledTimes(1);
   });
 
   it('should fail with EmptyCartError on empty cart', async () => {
-    const mockRepo = {
-      save: mock(() => Promise.resolve()),
-      findById: mock(() => Promise.resolve(null)),
-    };
-    const service = new CheckoutService(mockRepo);
+    const repoMock = OrderRepository.of({
+      save: mock(() => Effect.succeed(undefined)),
+      findById: mock(() => Effect.succeed(null)),
+    });
+    
+    const layer = Layer.succeed(OrderRepository, repoMock);
+    
     const cart = new Cart('user-1'); // Empty
     const address: Address = {
       fullName: 'Sam Altman',
@@ -51,7 +54,7 @@ describe('CheckoutService', () => {
     };
 
     const exit = await Effect.runPromiseExit(
-      service.createOrderFromCart(cart, address, () => '1'),
+      CheckoutService.createOrderFromCart(cart, address, () => '1').pipe(Effect.provide(layer))
     );
 
     expect(Exit.isFailure(exit)).toBe(true);

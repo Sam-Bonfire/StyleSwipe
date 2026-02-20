@@ -1,11 +1,9 @@
 import { Effect } from 'effect';
 
-import type { UserRepository } from '../../../shared/domain/ports';
 import type { User, StyleProfile } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { UserRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class ProfileError extends Error {
     readonly _tag = 'ProfileError' as const;
@@ -15,40 +13,26 @@ export class ProfileError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Manage User Profile
-// -----------------------------------------------------------------------------
+export const getCurrentUser = (userId: string): Effect.Effect<User | null, ProfileError | RepositoryError, UserRepository> =>
+    Effect.gen(function* (_) {
+        const users = yield* _(UserRepository);
+        return yield* _(users.findById(userId));
+    });
 
-/**
- * Operations for managing user profile data.
- */
-export class ManageUserProfile {
-    constructor(private readonly users: UserRepository) { }
+export const updateProfile = (
+    userId: string,
+    data: Partial<Omit<User, 'id'>>,
+): Effect.Effect<User, ProfileError | RepositoryError, UserRepository> =>
+    Effect.gen(function* (_) {
+        const users = yield* _(UserRepository);
+        return yield* _(users.update(userId, data));
+    });
 
-    getCurrentUser(userId: string): Effect.Effect<User | null, ProfileError> {
-        return Effect.tryPromise({
-            try: () => this.users.findById(userId),
-            catch: () => new ProfileError('Failed to fetch user profile'),
-        });
-    }
-
-    updateProfile(
-        userId: string,
-        data: Partial<Omit<User, 'id'>>,
-    ): Effect.Effect<User, ProfileError> {
-        return Effect.tryPromise({
-            try: () => this.users.update(userId, data),
-            catch: () => new ProfileError('Failed to update user profile'),
-        });
-    }
-
-    updateStyleProfile(
-        userId: string,
-        profile: StyleProfile,
-    ): Effect.Effect<User, ProfileError> {
-        return Effect.tryPromise({
-            try: () => this.users.updateStyleProfile(userId, profile),
-            catch: () => new ProfileError('Failed to update style profile'),
-        });
-    }
-}
+export const updateStyleProfile = (
+    userId: string,
+    profile: StyleProfile,
+): Effect.Effect<User, ProfileError | RepositoryError, UserRepository> =>
+    Effect.gen(function* (_) {
+        const users = yield* _(UserRepository);
+        return yield* _(users.updateStyleProfile(userId, profile));
+    });

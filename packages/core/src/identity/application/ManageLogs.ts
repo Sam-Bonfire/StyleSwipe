@@ -1,11 +1,9 @@
 import { Effect } from 'effect';
 
-import type { LogRepository } from '../../../shared/domain/ports';
 import type { LogEntry, PaginationOpts, PaginatedResult } from '../../../shared/domain/types';
 
-// -----------------------------------------------------------------------------
-// TAGGED ERRORS
-// -----------------------------------------------------------------------------
+import { LogRepository } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
 
 export class LogViewError extends Error {
     readonly _tag = 'LogViewError' as const;
@@ -15,22 +13,10 @@ export class LogViewError extends Error {
     }
 }
 
-// -----------------------------------------------------------------------------
-// USE CASE: Manage Logs
-// -----------------------------------------------------------------------------
-
-/**
- * Admin use case for viewing logs.
- */
-export class ManageLogs {
-    constructor(private readonly logs: LogRepository) { }
-
-    list(
-        paginationOpts: PaginationOpts,
-    ): Effect.Effect<PaginatedResult<LogEntry>, LogViewError> {
-        return Effect.tryPromise({
-            try: () => this.logs.list(paginationOpts),
-            catch: () => new LogViewError('Failed to fetch logs'),
-        });
-    }
-}
+export const list = (
+    paginationOpts: PaginationOpts,
+): Effect.Effect<PaginatedResult<LogEntry>, LogViewError | RepositoryError, LogRepository> =>
+    Effect.gen(function* (_) {
+        const logs = yield* _(LogRepository);
+        return yield* _(logs.list(paginationOpts));
+    });

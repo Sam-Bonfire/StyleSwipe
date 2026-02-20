@@ -1,6 +1,7 @@
-import type { Queue, ScrapedProduct } from '@app/core';
+import type { QueueService, ScrapedProduct } from '@app/core';
 
 import { describe, expect, test, mock, beforeEach, afterEach } from 'bun:test';
+import { Effect } from 'effect';
 
 import { ScraperWorker } from '../../src/workers/ScraperWorker';
 
@@ -53,16 +54,17 @@ mock.module('../../src/scrapers/MyntraScraper', () => ({
 
 describe('ScraperWorker', () => {
   let worker: ScraperWorker;
-  let mockQueue: Queue<ScrapedProduct>;
+  let mockQueue: QueueService<ScrapedProduct>;
 
   beforeEach(() => {
     mockQueue = {
-      push: mock(() => Promise.resolve('id')),
-      pushBatch: mock(() => Promise.resolve(['id'])),
-      size: mock(() => Promise.resolve(0)),
-      isEmpty: mock(() => Promise.resolve(true)),
-      clear: mock(() => Promise.resolve()),
-    } as unknown as Queue<ScrapedProduct>;
+      push: mock(() => Effect.succeed('id')),
+      pushBatch: mock(() => Effect.succeed(['id'])),
+      pull: mock(() => Effect.succeed([])),
+      complete: mock(() => Effect.succeed(undefined)),
+      fail: mock(() => Effect.succeed(undefined)),
+      size: mock(() => Effect.succeed(0)),
+    } as unknown as QueueService<ScrapedProduct>;
 
     worker = new ScraperWorker({
       convexUrl: 'https://test.convex.cloud',
@@ -100,6 +102,7 @@ describe('ScraperWorker', () => {
         query: 'http://test.com/p1',
         status: 'pending',
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any);
     mockQuery.mockResolvedValue([]); // Subsequent calls empty
 

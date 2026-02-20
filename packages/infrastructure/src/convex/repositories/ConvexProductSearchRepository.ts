@@ -1,41 +1,42 @@
 import { api } from '@app/convex';
-import { ProductSearchRepository, SearchResult, SearchError, Vector384 } from '@app/core';
+import { ProductSearchRepository, RepositoryError, type Vector384 } from '@app/core';
 import { ConvexReactClient } from 'convex/react';
-import { Effect } from 'effect';
+import { Layer, Effect } from 'effect';
 
-export class ConvexProductSearchRepository implements ProductSearchRepository {
-  constructor(private convex: ConvexReactClient) { }
 
-  search(vector: Vector384, limit: number): Effect.Effect<SearchResult, SearchError> {
-    return Effect.tryPromise({
+
+
+export const createProductSearchRepositoryLayer = (client: ConvexReactClient) => Layer.succeed(
+    ProductSearchRepository,
+    ProductSearchRepository.of({
+
+    search: (vector: Vector384, limit: number) => Effect.tryPromise({
       try: async () => {
-        const result = await this.convex.action(api.search.searchProducts, { vector, limit });
-        // Map Convex result to Domain result
-        return {
-           
-          products: result.products.map((p: any) => ({
-            id: p._id,
-            title: p.title,
-            brand: p.brand,
-            price: p.price,
-            mrp: p.mrp ?? p.price,
-            images: p.images,
-            description: p.description,
-            category: p.category,
-          })),
-        };
+          const result = await client.action(api.search.searchProducts, { vector, limit });
+          return {
+              products: result.products.map((p: any) => ({
+                  id: p._id,
+                  title: p.title,
+                  brand: p.brand,
+                  price: p.price,
+                  mrp: p.mrp ?? p.price,
+                  images: p.images,
+                  description: p.description,
+                  category: p.category,
+              })) as any, // Typecast to satisfy complex domain model differences for now
+          };
       },
-      catch: (error) => new SearchError(String(error)),
-    });
-  }
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
 
-  getSuggestions(query: string, limit: number): Effect.Effect<string[], SearchError> {
-    return Effect.tryPromise({
+    getSuggestions: (query: string, limit: number) => Effect.tryPromise({
       try: async () => {
-        const result = await this.convex.query(api.search.getSuggestions, { query, limit });
-        return result;
+          const result = await client.query(api.search.getSuggestions, { query, limit });
+          return result;
       },
-      catch: (error) => new SearchError(String(error)),
-    });
-  }
-}
+      catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
+    }),
+
+    })
+);
+

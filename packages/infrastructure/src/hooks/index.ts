@@ -4,15 +4,21 @@
 // =============================================================================
 
 export * from './useConvexClient';
-export { useCurrentUser, useGetOrCreateUser } from './useAuth';
+export { useCurrentUser, useGetOrCreateUser, useAuthActions } from './useAuth';
 export { useLatestProducts, useProduct } from './useProducts';
 export {
-    useRecentlyViewed,
-    useRecordProductView,
-    useVectorFeed,
-    useProcessSwipe,
+  useRecentlyViewed,
+  useRecordProductView,
+  useVectorFeed,
+  useProcessSwipe,
 } from './useDiscovery';
-export { useCart, useAddToCart, useRemoveFromCart, useUpdateCartQuantity, useClearCart } from './useCart';
+export {
+  useCart,
+  useAddToCart,
+  useRemoveFromCart,
+  useUpdateCartQuantity,
+  useClearCart,
+} from './useCart';
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile } from './useUsers';
 export { useSearch } from './useSearch';
