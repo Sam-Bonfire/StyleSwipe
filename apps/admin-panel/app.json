@@ -3,6 +3,7 @@
     "name": "StyleSwipe Admin",
     "slug": "admin-panel",
     "version": "1.0.0",
+    "scheme": "styleswipe-admin",
     "icon": "../../assets/favicon/favicon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -25,7 +26,11 @@
     },
     "web": {
       "favicon": "../../assets/favicon/favicon.png",
+      "output": "static",
       "bundler": "metro"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

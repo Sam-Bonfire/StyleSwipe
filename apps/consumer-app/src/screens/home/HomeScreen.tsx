@@ -4,7 +4,7 @@ import {
   useVectorFeed,
   useRecordProductView,
 } from '@app/infrastructure';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { ScrollView } from 'react-native';
 import { YStack } from 'tamagui';
@@ -13,8 +13,7 @@ import { ProductCarousel } from '../../components/ProductCarousel';
 import { SectionHeader } from '../../components/SectionHeader';
 
 export function HomeScreen() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
   const [recommended, setRecommended] = React.useState<Record<string, unknown>[] | undefined>(
     undefined,
   );
@@ -45,7 +44,7 @@ export function HomeScreen() {
     // Record view event
     recordView({ productId });
     // Navigate to details
-    navigation.navigate('ProductDetail', { productId });
+    router.push({ pathname: '/(app)/product/[id]', params: { id: productId } });
   };
 
   return (

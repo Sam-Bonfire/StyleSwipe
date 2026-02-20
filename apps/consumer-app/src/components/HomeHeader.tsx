@@ -8,15 +8,14 @@
 
 import { useCurrentUser, useCart } from '@app/infrastructure';
 import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
 import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 
 import { AppLogo } from './AppLogo';
 
 export const HomeHeader = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
   const { showToast } = useToast();
 
   // Fetch User & Cart
@@ -45,7 +44,7 @@ export const HomeHeader = () => {
     // Navigate to Main with activeTab 'cart' to switch tabs
     // Note: Since we are already in Main, this might need a specific handling if Main doesn't listen to params update while mounted.
     // But we implemented useEffect in MainScreen to listen to params, so this works.
-    navigation.navigate('Main', { activeTab: 'cart' });
+    router.push('/(app)/(tabs)/cart');
   };
 
   return (

@@ -5,12 +5,13 @@ import { Button } from '@app/ui-kit';
 import { AddressForm } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
 import { Effect } from 'effect';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { YStack, Text, XStack, ScrollView } from 'tamagui';
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const CheckoutScreen = ({ navigation }: any) => {
+export const CheckoutScreen = () => {
+  const router = useRouter();
   const convex = useConvexClient();
   const [step, setStep] = useState<'ADDRESS' | 'PAYMENT' | 'CONFIRMATION'>('ADDRESS');
   const [address, setAddress] = useState<Address | null>(null);
@@ -108,7 +109,7 @@ export const CheckoutScreen = ({ navigation }: any) => {
           marginTop="$6"
           backgroundColor="$primary"
           color="white"
-          onPress={() => navigation.navigate('Discovery')}
+          onPress={() => router.push('/(app)/(tabs)/discover')}
         >
           Continue Shopping
         </Button>

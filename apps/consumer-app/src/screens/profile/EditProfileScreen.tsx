@@ -1,13 +1,13 @@
 import { useCurrentUser, useUpdateUser } from '@app/infrastructure';
 import { Button, useToast, TopBarIconButton } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
 
 export function EditProfileScreen() {
-    const navigation = useNavigation();
+    const router = useRouter();
     const { showToast } = useToast();
     const user = useCurrentUser();
     const updateUser = useUpdateUser();
@@ -33,7 +33,7 @@ export function EditProfileScreen() {
                 phoneNumber,
             });
             showToast({ title: 'Profile Updated', message: 'Your profile has been updated successfully.', variant: 'success' });
-            navigation.goBack();
+            router.back();
         } catch (error) {
             console.error(error);
             showToast({ title: 'Error', message: 'Failed to update profile.', variant: 'error' });
@@ -54,7 +54,7 @@ export function EditProfileScreen() {
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <XStack alignItems="center" space="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
                 <TopBarIconButton
-                    onPress={() => navigation.goBack()}
+                    onPress={() => router.back()}
                     backgroundColor="$background"
                     shadowColor="$shadowColor"
                     shadowRadius={4}
@@ -85,7 +85,7 @@ export function EditProfileScreen() {
                     <Button onPress={handleSave} disabled={isSaving}>
                         {isSaving ? <Spinner color="white" /> : 'Save Changes'}
                     </Button>
-                    <Button variant="ghost" onPress={() => navigation.goBack()} disabled={isSaving}>
+                    <Button variant="ghost" onPress={() => router.back()} disabled={isSaving}>
                         Discard Changes
                     </Button>
                 </YStack>

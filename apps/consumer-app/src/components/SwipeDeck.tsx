@@ -1,7 +1,7 @@
 import { useVectorFeed, useProcessSwipe, useCurrentUser } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { YStack, H2, H3 } from 'tamagui';
@@ -24,8 +24,7 @@ export function SwipeDeck() {
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
   const user = useCurrentUser();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +71,7 @@ export function SwipeDeck() {
 
   const handleSwipe = async (item: SwipeDeckProduct, direction: 'left' | 'right' | 'up' | 'down') => {
     if (direction === 'down') {
-      navigation.navigate('ProductDetail', { productId: item._id });
+      router.push({ pathname: '/(app)/product/[id]', params: { id: item._id } });
       return;
     }
 
@@ -126,7 +125,7 @@ export function SwipeDeck() {
             brand={item.brand || 'Unknown'}
             width="100%"
             height="100%"
-            onPress={() => navigation.navigate('ProductDetail', { productId: item._id })}
+            onPress={() => router.push({ pathname: '/(app)/product/[id]', params: { id: item._id } })}
           />
         );
       }}

@@ -1,6 +1,6 @@
 import { useCurrentUser } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, Text, Avatar, XStack } from 'tamagui';
@@ -8,8 +8,7 @@ import { YStack, Text, Avatar, XStack } from 'tamagui';
 import { authAdapter } from '../../lib/auth';
 
 export function ProfileScreen() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
   const user = useCurrentUser();
 
   const handleLogout = async () => {
@@ -35,8 +34,8 @@ export function ProfileScreen() {
         )}
 
         <YStack space="$4" marginTop="$4">
-          <Button variant="outlined" onPress={() => navigation.navigate('EditProfile')}>Edit Profile</Button>
-          <Button variant="outlined" onPress={() => navigation.navigate('Feedback')}>Give Feedback</Button>
+          <Button variant="outlined" onPress={() => router.push('/(app)/edit-profile')}>Edit Profile</Button>
+          <Button variant="outlined" onPress={() => router.push('/(app)/feedback')}>Give Feedback</Button>
           <Button color="$error" variant="ghost" onPress={handleLogout}>
             Sign Out
           </Button>

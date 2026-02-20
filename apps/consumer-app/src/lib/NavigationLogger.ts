@@ -1,21 +1,26 @@
-import { NavigationContainerRef } from '@react-navigation/native';
+import { usePathname } from 'expo-router';
+import { useEffect, useRef } from 'react';
 
 import { logger } from './logger';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const navigationRef: React.RefObject<NavigationContainerRef<any>> = { current: null };
+/**
+ * Hook to log navigation state changes using Expo Router's pathname.
+ * Call this in the root layout to track screen views.
+ */
+export function useNavigationLogger() {
+  const pathname = usePathname();
+  const previousPathname = useRef<string | null>(null);
 
-export const onNavigationStateChange = () => {
-    const currentRouteName = navigationRef.current?.getCurrentRoute()?.name;
-
-    if (currentRouteName) {
-        logger.addBreadcrumb({
-            category: 'navigation',
-            message: `Navigated to ${currentRouteName}`,
-            data: {
-                route: currentRouteName,
-            },
-        });
-        // logger.info(`Screen View: ${currentRouteName}`, { screen: currentRouteName });
+  useEffect(() => {
+    if (pathname && pathname !== previousPathname.current) {
+      previousPathname.current = pathname;
+      logger.addBreadcrumb({
+        category: 'navigation',
+        message: `Navigated to ${pathname}`,
+        data: {
+          route: pathname,
+        },
+      });
     }
-};
+  }, [pathname]);
+}

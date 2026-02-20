@@ -1,5 +1,5 @@
 import { Button } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
 import { YStack, Input, Text, H2 } from 'tamagui';
@@ -9,14 +9,13 @@ import { authAdapter } from '../../lib/auth';
 export function PhoneAuthScreen() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const handleSendCode = async () => {
     setLoading(true);
     try {
       await authAdapter.signInWithPhone(phone);
-      navigation.navigate('OTP', { phone });
+      router.push({ pathname: '/(auth)/otp', params: { phone } });
     } catch (e) {
       console.error(e);
       Alert.alert('Error', 'Failed to send OTP. Please check your number.');

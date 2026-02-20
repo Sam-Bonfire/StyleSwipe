@@ -3,6 +3,7 @@
     "name": "consumer-app",
     "slug": "consumer-app",
     "version": "1.0.0",
+    "scheme": "styleswipe",
     "orientation": "portrait",
     "icon": "../../assets/favicon/favicon.png",
     "userInterfaceStyle": "light",
@@ -25,7 +26,12 @@
       }
     },
     "web": {
-      "favicon": "../../assets/favicon/favicon.png"
-    }
+      "favicon": "../../assets/favicon/favicon.png",
+      "output": "static",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
