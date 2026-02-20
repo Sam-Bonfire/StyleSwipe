@@ -40,6 +40,7 @@ export default tseslint.config(
   {
     /* Targeting core domain logic for strict hexagonal enforcement */
     files: ['packages/core/**/*.ts', 'packages/infrastructure/**/*.ts'],
+    ignores: ['packages/core/src/index.ts'],
     rules: {
       'hexagonal-architecture/enforce': ['error'],
       '@typescript-eslint/no-explicit-any': 'off',
@@ -48,6 +49,7 @@ export default tseslint.config(
   {
     /* CORE PURITY: Block infrastructure imports in domain layer */
     files: ['packages/core/**/*.ts'],
+    ignores: ['packages/core/src/index.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -70,6 +72,18 @@ export default tseslint.config(
               message: 'Core must be pure TS. Tamagui belongs in packages/ui-kit.',
             },
           ],
+        },
+      ],
+      /* EFFECT ENFORCEMENT: Ban imperative error patterns in core */
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ThrowStatement',
+          message: 'Use Effect.fail(new TaggedError(...)) instead of throw. Core must use Effect for error handling.',
+        },
+        {
+          selector: 'TryStatement',
+          message: 'Use Effect.catchTag or Effect.catchAll instead of try/catch. Core must use Effect for error handling.',
         },
       ],
     },
@@ -113,6 +127,7 @@ export default tseslint.config(
       '**/.turbo/',
       '**/.graphite/',
       '**/convex/_generated/',
+      '**/metro.config.js',
     ],
   },
 );

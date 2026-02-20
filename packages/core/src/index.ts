@@ -1,4 +1,4 @@
-/* eslint-disable hexagonal-architecture/enforce */
+ 
 // Shared Domain Types & Ports
 export * from '../shared/domain/types';
 export * from '../shared/domain/errors';
