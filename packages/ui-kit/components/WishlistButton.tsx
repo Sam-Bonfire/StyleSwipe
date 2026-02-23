@@ -23,12 +23,12 @@ export const WishlistButton = React.forwardRef<HTMLButtonElement, WishlistButton
         variant="ghost"
         backgroundColor="$surface"
         // Override standard sizes to match original design (32px)
-        width={32}
-        height={32}
-        minWidth={32}
-        maxWidth={32}
-        minHeight={32}
-        maxHeight={32}
+        width="$4"
+        height="$4"
+        minWidth="$4"
+        maxWidth="$4"
+        minHeight="$4"
+        maxHeight="$4"
         padding={0}
         aspectRatio={1}
         onPress={(e) => {

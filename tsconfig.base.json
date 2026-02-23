@@ -26,6 +26,14 @@
         "noImplicitAny": false,
         "allowSyntheticDefaultImports": true,
         "composite": true,
+        "baseUrl": ".",
+        "paths": {
+            "@app/core": ["packages/core/src"],
+            "@app/infrastructure": ["packages/infrastructure/src"],
+            "@app/ui-kit": ["packages/ui-kit"],
+            "@app/convex": ["packages/convex/convex"],
+            "@app/logger": ["packages/logger/src"]
+        },
         "declaration": true,
         "declarationMap": true
     },

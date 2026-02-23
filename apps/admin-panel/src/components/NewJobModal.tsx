@@ -1,6 +1,5 @@
-import { api } from '@app/convex';
+import { useCreateScrapingJob } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import { Dialog, YStack, XStack, Text, Input, Label, Button as TButton } from 'tamagui';
 
@@ -13,7 +12,7 @@ type JobType = 'category' | 'search' | 'single';
 type ScraperMode = 'API' | 'BROWSER';
 
 export function NewJobModal({ open, onClose }: NewJobModalProps) {
-  const createJob = useMutation(api.scraper.createJob);
+  const createJob = useCreateScrapingJob();
 
   const [query, setQuery] = useState('');
   const [type, setType] = useState<JobType>('category');

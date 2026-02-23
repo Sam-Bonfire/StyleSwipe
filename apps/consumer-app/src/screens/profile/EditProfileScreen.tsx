@@ -1,8 +1,7 @@
-import { api } from '@app/convex';
+import { useCurrentUser, useUpdateUser } from '@app/infrastructure';
 import { Button, useToast, TopBarIconButton } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
-import { useMutation, useQuery } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
@@ -10,8 +9,8 @@ import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
 export function EditProfileScreen() {
     const navigation = useNavigation();
     const { showToast } = useToast();
-    const user = useQuery(api.users.currentUser);
-    const updateUser = useMutation(api.users.update);
+    const user = useCurrentUser();
+    const updateUser = useUpdateUser();
 
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');

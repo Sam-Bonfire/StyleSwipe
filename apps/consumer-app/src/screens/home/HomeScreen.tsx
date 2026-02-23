@@ -1,6 +1,10 @@
-import { Id, api } from '@app/convex';
+import {
+  useLatestProducts,
+  useRecentlyViewed,
+  useVectorFeed,
+  useRecordProductView,
+} from '@app/infrastructure';
 import { useNavigation } from '@react-navigation/native';
-import { useQuery, useMutation, useAction } from 'convex/react';
 import React from 'react';
 import { ScrollView } from 'react-native';
 import { YStack } from 'tamagui';
@@ -16,11 +20,11 @@ export function HomeScreen() {
   );
 
   // Data Fetching
-  const latestProducts = useQuery(api.products.getLatest, { limit: 10 });
-  const recentlyViewed = useQuery(api.discovery.getRecentlyViewed, { limit: 10 });
+  const latestProducts = useLatestProducts(10);
+  const recentlyViewed = useRecentlyViewed(10);
 
   // Recommendations (Action)
-  const getVectorFeed = useAction(api.recommendations.getVectorFeed);
+  const getVectorFeed = useVectorFeed();
 
   React.useEffect(() => {
     async function fetchRecommendations() {
@@ -35,12 +39,11 @@ export function HomeScreen() {
     fetchRecommendations();
   }, [getVectorFeed]);
 
-  const recordView = useMutation(api.discovery.recordProductView);
+  const recordView = useRecordProductView();
 
   const handleProductPress = (productId: string) => {
     // Record view event
-    // Record view event
-    recordView({ productId: productId as Id<'products'> });
+    recordView({ productId });
     // Navigate to details
     navigation.navigate('ProductDetail', { productId });
   };

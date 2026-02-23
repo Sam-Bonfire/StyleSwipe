@@ -4,24 +4,25 @@
  * Runs in parallel with ScraperWorker
  */
 
-import type { Queue, ScrapedProduct } from '@app/core';
-
-import { EmbedderAdapter, formatProductForEmbedding } from '@app/infrastructure';
-import { ConvexHttpClient } from 'convex/browser';
+import type { QueueService, ScrapedProduct } from '@app/core';
 
 import { api } from '@app/convex';
+import { Embedder } from '@app/core';
+import { EmbedderLive, formatProductForEmbedding } from '@app/infrastructure';
+import { ConvexHttpClient } from 'convex/browser';
+import { Effect, Context } from 'effect';
 
 export interface VectorizationWorkerConfig {
   convexUrl: string;
   pollIntervalMs?: number;
   batchSize?: number;
-  queue: Queue<ScrapedProduct>;
+  queue: QueueService<ScrapedProduct>;
 }
 
 export class VectorizationWorker {
   private client: ConvexHttpClient;
-  private embedder: EmbedderAdapter | null = null;
-  private queue: Queue<ScrapedProduct>;
+  private embedder: Context.Tag.Service<Embedder> | null = null;
+  private queue: QueueService<ScrapedProduct>;
   private pollInterval: number;
   private batchSize: number;
   private running = false;
@@ -36,15 +37,12 @@ export class VectorizationWorker {
   async start(): Promise<void> {
     console.log('[VectorizationWorker] Starting...');
 
-    // Initialize embedder (loads model)
+    // Initialize embedder (replaces OOP Singleton with Effect Layer resolution)
     console.log('[VectorizationWorker] Loading embedding model...');
     try {
-      this.embedder = await EmbedderAdapter.getInstance((progress) => {
-        if (progress.status === 'progress') {
-          const pct = Math.round((progress.loaded / progress.total) * 100);
-          console.log(`[VectorizationWorker] Model loading: ${pct}% (${progress.file})`);
-        }
-      });
+      // We resolve the Embedder service from the Live layer
+      this.embedder = await Effect.runPromise(Embedder.pipe(Effect.provide(EmbedderLive)));
+
       console.log('[VectorizationWorker] Model loaded.');
     } catch (error) {
       console.error(
@@ -79,7 +77,7 @@ export class VectorizationWorker {
 
   private async processBatch(): Promise<void> {
     // Pull items from queue
-    const items = await this.queue.pull(this.batchSize);
+    const items = await Effect.runPromise(this.queue.pull(this.batchSize));
 
     if (items.length === 0) {
       return;
@@ -90,10 +88,12 @@ export class VectorizationWorker {
     for (const item of items) {
       try {
         await this.processProduct(item.id, item.data);
-        await this.queue.complete(item.id);
+        await Effect.runPromise(this.queue.complete(item.id));
       } catch (error) {
         console.error(`[VectorizationWorker] Failed to process ${item.id}:`, error);
-        await this.queue.fail(item.id, error instanceof Error ? error.message : 'Unknown error');
+        await Effect.runPromise(
+          this.queue.fail(item.id, error instanceof Error ? error.message : 'Unknown error'),
+        );
       }
     }
     console.log(`[VectorizationWorker] Completed batch of ${items.length} products`);
@@ -113,7 +113,7 @@ export class VectorizationWorker {
     });
 
     // Generate embedding
-    const embedding = await this.embedder.generateEmbedding(text);
+    const embedding = await Effect.runPromise(this.embedder.generateEmbedding(text));
     // Save to Convex using service endpoint (no auth required)
     await this.client.mutation(api.scraper.serviceSaveProduct, {
       externalId: product.externalId,

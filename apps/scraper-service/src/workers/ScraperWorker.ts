@@ -5,10 +5,11 @@
  */
 
 import type { Id } from '@app/convex';
-import type { Queue, ScrapedProduct } from '@app/core';
+import type { QueueService, ScrapedProduct } from '@app/core';
 
 import { api } from '@app/convex';
 import { ConvexHttpClient } from 'convex/browser';
+import { Effect } from 'effect';
 
 import { MyntraAPIScraper } from '../scrapers/MyntraAPIScraper';
 import { MyntraScraper } from '../scrapers/MyntraScraper';
@@ -16,14 +17,14 @@ import { MyntraScraper } from '../scrapers/MyntraScraper';
 export interface ScraperWorkerConfig {
   convexUrl: string;
   pollIntervalMs?: number;
-  queue: Queue<ScrapedProduct>;
+  queue: QueueService<ScrapedProduct>;
 }
 
 export class ScraperWorker {
   private client: ConvexHttpClient;
   private apiScraper: MyntraAPIScraper;
   private browserScraper: MyntraScraper;
-  private queue: Queue<ScrapedProduct>;
+  private queue: QueueService<ScrapedProduct>;
   private pollInterval: number;
   private running = false;
   private browserInitialized = false;
@@ -47,7 +48,10 @@ export class ScraperWorker {
         await this.browserScraper.init();
         this.browserInitialized = true;
       } catch (e) {
-        console.error('[ScraperWorker] Failed to initialize browser (likely missing binary in optimized image):', e);
+        console.error(
+          '[ScraperWorker] Failed to initialize browser (likely missing binary in optimized image):',
+          e,
+        );
       }
     }
 
@@ -109,12 +113,17 @@ export class ScraperWorker {
 
       if (useBrowser) {
         if (!this.browserInitialized) {
-          console.log('[ScraperWorker] Job requests BROWSER but it is not initialized. Attempting lazy init...');
+          console.log(
+            '[ScraperWorker] Job requests BROWSER but it is not initialized. Attempting lazy init...',
+          );
           try {
             await this.browserScraper.init();
             this.browserInitialized = true;
           } catch (e) {
-            console.error('[ScraperWorker] Lazy init failed (missing binary?). Falling back to API scraper.', e);
+            console.error(
+              '[ScraperWorker] Lazy init failed (missing binary?). Falling back to API scraper.',
+              e,
+            );
             // Fallback to API if browser fails
             scraper = this.apiScraper;
           }
@@ -156,7 +165,7 @@ export class ScraperWorker {
       // Push products to queue for vectorization
       if (products.length > 0) {
         console.log(`[ScraperWorker] Pushing ${products.length} products to queue`);
-        await this.queue.pushBatch(products);
+        await Effect.runPromise(this.queue.pushBatch(products));
 
         await this.client.mutation(api.scraper.serviceUpdateJobStatus, {
           jobId: job._id as Id<'scrape_jobs'>,

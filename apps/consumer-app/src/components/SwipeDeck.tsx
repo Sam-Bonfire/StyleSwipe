@@ -1,8 +1,7 @@
-import { Id, api } from '@app/convex';
+import { useVectorFeed, useProcessSwipe, useCurrentUser } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { useNavigation } from '@react-navigation/native';
-import { useAction, useMutation } from 'convex/react';
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { YStack, H2, H3 } from 'tamagui';
@@ -22,8 +21,9 @@ interface SwipeDeckProduct {
 
 export function SwipeDeck() {
   const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
-  const getVectorFeed = useAction(api.recommendations.getVectorFeed);
-  const swipeMutation = useMutation(api.discovery.processSwipe);
+  const getVectorFeed = useVectorFeed();
+  const processSwipe = useProcessSwipe();
+  const user = useCurrentUser();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
 
@@ -81,11 +81,12 @@ export function SwipeDeck() {
     if (direction === 'up') action = 'super';
 
     try {
-      // 1. Process Online (Real-time update)
-      // Error handling inside try/catch to ensure we still buffer if offline
-      await swipeMutation({
-        productId: item._id as Id<'products'>,
+      // 1. Process Online via use case (validates + persists)
+      await processSwipe({
+        userId: user?._id || '', 
+        productId: item._id,
         action: action,
+        timestamp: Date.now(),
       });
       console.log(`Synced ${action} for ${item.title} to Convex.`);
 

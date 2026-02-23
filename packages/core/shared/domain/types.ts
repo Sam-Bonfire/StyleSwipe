@@ -325,13 +325,125 @@ export interface QueueItem<T = unknown> {
 }
 
 // -----------------------------------------------------------------------------
+// SUPPORT CONTEXT
+// -----------------------------------------------------------------------------
+
+/**
+ * Feedback reply from admin
+ */
+export interface FeedbackReply {
+  adminId: string;
+  message: string;
+  timestamp: number;
+}
+
+/**
+ * Feedback status
+ */
+export type FeedbackStatus = 'open' | 'read' | 'replied' | 'resolved';
+
+/**
+ * Feedback type
+ */
+export type FeedbackType = 'Bug' | 'Feature' | 'Improvement' | 'Other';
+
+/**
+ * User feedback entity
+ */
+export interface Feedback {
+  id: string;
+  userId: string;
+  name: string;
+  contact: string;
+  type: FeedbackType;
+  message: string;
+  attachment?: string;
+  status: FeedbackStatus;
+  replies: FeedbackReply[];
+  updatedAt: number;
+  createdAt: number;
+}
+
+// -----------------------------------------------------------------------------
+// SCRAPING CONTEXT
+// -----------------------------------------------------------------------------
+
+/**
+ * Scraping job type
+ */
+export type ScrapeJobType = 'category' | 'search' | 'single';
+
+/**
+ * Scraping job status
+ */
+export type ScrapeJobStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+/**
+ * Scraper mode
+ */
+export type ScraperMode = 'API' | 'BROWSER';
+
+/**
+ * Scraping job entity
+ */
+export interface ScrapingJob {
+  id: string;
+  type: ScrapeJobType;
+  query: string;
+  status: ScrapeJobStatus;
+  maxPages?: number;
+  startPage?: number;
+  scraperMode?: ScraperMode;
+  productsFound?: number;
+  errorMessage?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+// -----------------------------------------------------------------------------
+// ADMIN CONTEXT
+// -----------------------------------------------------------------------------
+
+/**
+ * Admin dashboard statistics
+ */
+export interface AdminStats {
+  totalProducts: number;
+  totalUsers: number;
+  totalOrganizations: number;
+  totalFeedback: number;
+  recentSignups: number;
+}
+
+// -----------------------------------------------------------------------------
+// PAGINATION
+// -----------------------------------------------------------------------------
+
+/**
+ * Pagination options
+ */
+export interface PaginationOpts {
+  numItems: number;
+  cursor: string | null;
+}
+
+/**
+ * Paginated result wrapper
+ */
+export interface PaginatedResult<T> {
+  page: T[];
+  isDone: boolean;
+  continueCursor: string;
+}
+
+// -----------------------------------------------------------------------------
 // UTILITY TYPES
 // -----------------------------------------------------------------------------
 
 /**
- * Generic ID type for Convex document references
+ * Generic entity identifier
  */
-export type DocumentId<T extends string = string> = string & { __tableName: T };
+export type EntityId = string;
 
 /**
  * Timestamp in Unix milliseconds

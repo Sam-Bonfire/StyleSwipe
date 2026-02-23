@@ -1,7 +1,6 @@
-import { api } from '@app/convex';
+import { useCurrentUser } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
-import { useQuery } from 'convex/react';
 import React from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, Text, Avatar, XStack } from 'tamagui';
@@ -11,7 +10,7 @@ import { authAdapter } from '../../lib/auth';
 export function ProfileScreen() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
-  const user = useQuery(api.users.currentUser);
+  const user = useCurrentUser();
 
   const handleLogout = async () => {
     await authAdapter.signOut();

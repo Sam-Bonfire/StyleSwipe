@@ -1,7 +1,6 @@
-import { api } from '@app/convex';
-import { initializeStyleProfile, getOnboardingQuestions, OnboardingQuestion } from '@app/core';
+import { InitializeStyleProfile, GetOnboardingQuestions } from '@app/core';
+import { useUpdateStyleProfile } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
@@ -12,9 +11,9 @@ import { generateEmbedding } from '../../infrastructure/InferenceEngine';
 export function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const questions = Effect.runSync(getOnboardingQuestions()) as OnboardingQuestion[];
+  const questions = Effect.runSync(GetOnboardingQuestions.getOnboardingQuestions());
 
-  const updateStyleProfile = useMutation(api.users.updateStyleProfile);
+  const updateStyleProfile = useUpdateStyleProfile();
 
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;
@@ -33,7 +32,7 @@ export function OnboardingScreen() {
       setIsGenerating(true);
       try {
         // Initialize profile
-        const styleProfile = initializeStyleProfile(answers);
+        const styleProfile = Effect.runSync(InitializeStyleProfile.initializeStyleProfile(answers));
 
         // ---------------------------------------------------------
         // REAL ONBOARDING VECTORIZATION

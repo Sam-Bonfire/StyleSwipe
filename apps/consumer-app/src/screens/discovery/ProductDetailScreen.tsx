@@ -1,16 +1,12 @@
-import { api } from '@app/convex';
-import { Id } from '@app/convex';
-import { ManageCart, CartItem } from '@app/core';
-import { ConvexCartRepository } from '@app/infrastructure';
+
+import { CartItem } from '@app/core';
+import { useCurrentUser, useProduct, useAddToCart } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
-import { ConvexClient } from 'convex/browser';
-import { useConvex, useQuery } from 'convex/react';
-import { Effect } from 'effect';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
 
@@ -29,7 +25,6 @@ export function ProductDetailScreen() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
   const theme = useTheme();
-  const convex = useConvex();
   const { height: windowHeight } = useWindowDimensions();
 
   const { productId } = route?.params || { productId: 'prod-1' };
@@ -37,21 +32,16 @@ export function ProductDetailScreen() {
   // FETCH REAL DATA
   // We cast productId to any because navigation params are strings, but Convex expects Id<"products">
   // In a real app, we'd validate this.
-  const productData = useQuery(api.products.get, { id: productId as Id<'products'> });
+  const productData = useProduct(productId);
 
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string[]>>({});
   const [showSizeError, setShowSizeError] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const manageCart = useMemo(() => {
-    const repo = new ConvexCartRepository(convex as unknown as ConvexClient);
-    return new ManageCart(repo);
-  }, [convex]);
+  const addToCart = useAddToCart();
 
-  // Resolved: Use api.users.currentUser to get the authenticated user
-  // Must be at the top level to avoid Rules of Hooks violation
-  const user = useQuery(api.users.currentUser);
+  const user = useCurrentUser();
   const userId = user?._id ?? undefined;
 
   // -------------------------------------------------------------------------
@@ -190,7 +180,7 @@ export function ProductDetailScreen() {
         size: selectedSize,
         color: 'Black',
       });
-      await Effect.runPromise(manageCart.addToCart(userId, item));
+      await addToCart(userId, item);
       setIsAdded(true);
       Alert.alert('Success', 'Added to cart!');
     } catch (e) {

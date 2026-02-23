@@ -1,112 +1,62 @@
 import { Effect } from 'effect';
 
+import { RepositoryError } from '../../../shared/domain/errors';
 import { Cart, CartItem } from '../domain/Cart';
-import { CartRepository } from '../domain/CartRepository';
-import { CartNotFoundError, RepositoryError } from '../domain/errors';
+import { CartNotFoundError } from '../domain/errors';
+import { CartRepository } from './CartRepository';
 
-export class ManageCart {
-  constructor(private repo: CartRepository) { }
+export const addToCart = (
+  userId: string,
+  item: CartItem
+): Effect.Effect<Cart, RepositoryError, CartRepository> =>
+  Effect.gen(function* (_) {
+    const repo = yield* _(CartRepository);
+    const existing = yield* _(repo.findByUserId(userId));
+    const cart = existing ?? new Cart(userId);
+    cart.addItem(item);
+    yield* _(repo.save(cart));
+    return cart;
+  });
 
-  addToCart(
-    userId: string,
-    item: CartItem,
-  ): Effect.Effect<Cart, RepositoryError> {
-    return Effect.gen(this, function* (_) {
-      const existing = yield* _(
-        Effect.tryPromise({
-          try: () => this.repo.findByUserId(userId),
-          catch: (e) => new RepositoryError('findByUserId', e),
-        }),
-      );
+export const removeFromCart = (
+  userId: string,
+  productId: string
+): Effect.Effect<Cart, CartNotFoundError | RepositoryError, CartRepository> =>
+  Effect.gen(function* (_) {
+    const repo = yield* _(CartRepository);
+    const cart = yield* _(repo.findByUserId(userId));
+    if (!cart) {
+      return yield* _(Effect.fail(new CartNotFoundError(userId)));
+    }
+    cart.removeItem(productId);
+    yield* _(repo.save(cart));
+    return cart;
+  });
 
-      const cart = existing ?? new Cart(userId);
-      cart.addItem(item);
+export const updateQuantity = (
+  userId: string,
+  productId: string,
+  quantity: number
+): Effect.Effect<Cart, CartNotFoundError | RepositoryError, CartRepository> =>
+  Effect.gen(function* (_) {
+    const repo = yield* _(CartRepository);
+    const cart = yield* _(repo.findByUserId(userId));
+    if (!cart) {
+      return yield* _(Effect.fail(new CartNotFoundError(userId)));
+    }
+    cart.updateItemQuantity(productId, quantity);
+    yield* _(repo.save(cart));
+    return cart;
+  });
 
-      yield* _(
-        Effect.tryPromise({
-          try: () => this.repo.save(cart),
-          catch: (e) => new RepositoryError('save', e),
-        }),
-      );
+export const getCart = (userId: string): Effect.Effect<Cart | null, RepositoryError, CartRepository> =>
+  Effect.gen(function* (_) {
+    const repo = yield* _(CartRepository);
+    return yield* _(repo.findByUserId(userId));
+  });
 
-      return cart;
-    });
-  }
-
-  removeFromCart(
-    userId: string,
-    productId: string,
-  ): Effect.Effect<Cart, CartNotFoundError | RepositoryError> {
-    return Effect.gen(this, function* (_) {
-      const cart = yield* _(
-        Effect.tryPromise({
-          try: () => this.repo.findByUserId(userId),
-          catch: (e) => new RepositoryError('findByUserId', e),
-        }),
-      );
-
-      if (!cart) {
-        return yield* _(Effect.fail(new CartNotFoundError(userId)));
-      }
-
-      cart.removeItem(productId);
-
-      yield* _(
-        Effect.tryPromise({
-          try: () => this.repo.save(cart),
-          catch: (e) => new RepositoryError('save', e),
-        }),
-      );
-
-      return cart;
-    });
-  }
-
-  updateQuantity(
-    userId: string,
-    productId: string,
-    quantity: number,
-  ): Effect.Effect<Cart, CartNotFoundError | RepositoryError> {
-    return Effect.gen(this, function* (_) {
-      const cart = yield* _(
-        Effect.tryPromise({
-          try: () => this.repo.findByUserId(userId),
-          catch: (e) => new RepositoryError('findByUserId', e),
-        }),
-      );
-
-      if (!cart) {
-        return yield* _(Effect.fail(new CartNotFoundError(userId)));
-      }
-
-      cart.updateItemQuantity(productId, quantity);
-
-      yield* _(
-        Effect.tryPromise({
-          try: () => this.repo.save(cart),
-          catch: (e) => new RepositoryError('save', e),
-        }),
-      );
-
-      return cart;
-    });
-  }
-
-  getCart(
-    userId: string,
-  ): Effect.Effect<Cart | null, RepositoryError> {
-    return Effect.tryPromise({
-      try: () => this.repo.findByUserId(userId),
-      catch: (e) => new RepositoryError('findByUserId', e),
-    });
-  }
-
-  clearCart(
-    userId: string,
-  ): Effect.Effect<void, RepositoryError> {
-    return Effect.tryPromise({
-      try: () => this.repo.clear(userId),
-      catch: (e) => new RepositoryError('clear', e),
-    });
-  }
-}
+export const clearCart = (userId: string): Effect.Effect<void, RepositoryError, CartRepository> =>
+  Effect.gen(function* (_) {
+    const repo = yield* _(CartRepository);
+    return yield* _(repo.clear(userId));
+  });

@@ -1,9 +1,7 @@
-import { api } from '@app/convex';
+import { useScrapingJobs } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
-import { useToast } from '@app/ui-kit';
-import { ChevronDown, Clock, Package, Hash, Cpu, FileStack, AlertCircle } from '@tamagui/lucide-icons';
-import { usePaginatedQuery } from 'convex/react';
-import React, { useState, useEffect } from 'react';
+import { ChevronDown, Clock, Package, Hash, Cpu, FileStack } from '@tamagui/lucide-icons';
+import React, { useState } from 'react';
 import {
   YStack,
   Text,
@@ -18,38 +16,110 @@ import {
 
 import { NewJobModal } from '../components/NewJobModal';
 
-interface ScrapeJob {
-  _id: string;
-  type: string;
-  query: string;
-  status: string;
-  createdAt: number;
-  updatedAt: number;
-  productsFound?: number;
-  errorMessage?: string;
-  maxPages?: number;
-  startPage?: number;
-  scraperMode?: string;
+// Helper Functions & Components
+function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString();
 }
 
-export function JobsScreen() {
-  const jobs = usePaginatedQuery(api.admin.getScrapingJobs, {}, { initialNumItems: 20 });
-  const [modalOpen, setModalOpen] = useState(false);
-  const { showToast } = useToast();
-
-  // Handle query errors
-  useEffect(() => {
-    if (jobs?.results === null) {
-      showToast({
-        variant: 'error',
-        title: 'Failed to Load Jobs',
-        message: 'Unable to fetch scraping jobs. Please refresh the page.',
-      });
-    }
-  }, [jobs, showToast]);
+function JobTypeBadge({ type }: { type: string }) {
+  const colors: Record<string, string> = {
+    category: '$blue10', // Fixed color token
+    search: '$yellow10',
+    single: '$gray10',
+  };
 
   return (
-    <YStack gap="$4" flex={1}>
+    <XStack
+      backgroundColor={(colors[type] || '$gray10') as ColorTokens}
+      paddingHorizontal="$2"
+      paddingVertical="$1"
+      borderRadius="$2"
+    >
+      <Text fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
+        {type}
+      </Text>
+    </XStack>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  icon,
+  mono = false,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+  mono?: boolean;
+  highlight?: boolean;
+}) {
+  return (
+    <XStack justifyContent="space-between" alignItems="center">
+      <XStack gap="$2" alignItems="center">
+        {icon}
+        <Text fontSize="$2" color="$textSecondary">
+          {label}
+        </Text>
+      </XStack>
+      <Text
+        fontSize="$2"
+        fontFamily={mono ? '$mono' : '$body'}
+        fontWeight={highlight ? '600' : '400'}
+        color={highlight ? '$primary' : '$color'}
+      >
+        {value}
+      </Text>
+    </XStack>
+  );
+}
+
+function StatusChip({ status }: { status: string }) {
+  const config: Record<string, { bg: string; text: string }> = {
+    completed: { bg: '$success', text: 'Completed' },
+    processing: { bg: '$blue10', text: 'Running' },
+    pending: { bg: '$yellow10', text: 'Pending' },
+    failed: { bg: '$error', text: 'Failed' },
+  };
+
+  const { bg, text } = config[status] || { bg: '$gray10', text: status };
+
+  return (
+    <XStack
+      backgroundColor={bg as ColorTokens}
+      paddingHorizontal="$2"
+      paddingVertical="$1"
+      borderRadius="$2"
+      alignItems="center"
+    >
+      <Text fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
+        {text}
+      </Text>
+    </XStack>
+  );
+}
+
+// Main Component
+export function JobsScreen() {
+  const { results: jobs, status, loadMore } = useScrapingJobs(20);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Loading State
+  const isLoading = status === 'LoadingFirstPage';
+
+  return (
+    <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
         <YStack>
           <H3>Scraping Jobs</H3>
@@ -66,25 +136,18 @@ export function JobsScreen() {
         flex={1}
         backgroundColor="$background"
         overflow="hidden"
+        borderRadius="$4"
+        borderWidth={1}
+        borderColor="$borderColor"
       >
-        {!jobs || jobs.status === 'LoadingFirstPage' ? (
+        {isLoading ? (
           <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
             <Spinner size="large" color="$primary" />
             <Text marginTop="$3" color="$textSecondary">
               Loading jobs...
             </Text>
           </YStack>
-        ) : jobs.results === null ? (
-          <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
-            <AlertCircle size={48} color="$error" />
-            <Text marginTop="$3" fontSize="$5" fontWeight="600" color="$color">
-              Failed to Load Jobs
-            </Text>
-            <Text marginTop="$1" color="$textSecondary" textAlign="center">
-              There was an error loading the scraping jobs
-            </Text>
-          </YStack>
-        ) : jobs.results.length === 0 ? (
+        ) : !jobs || jobs.length === 0 ? (
           <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
             <FileStack size={48} color="$neutral400" />
             <Text marginTop="$3" fontSize="$5" fontWeight="600">
@@ -97,7 +160,7 @@ export function JobsScreen() {
         ) : (
           <ScrollView>
             <Accordion type="multiple">
-              {jobs.results.map((job: ScrapeJob) => (
+              {jobs.map((job) => (
                 <Accordion.Item
                   key={job._id}
                   value={job._id}
@@ -162,7 +225,7 @@ export function JobsScreen() {
                       animation="quick"
                       paddingHorizontal="$4"
                       paddingVertical="$3"
-                      backgroundColor="$neutral50"
+                      backgroundColor="$backgroundHover"
                     >
                       <XStack gap="$6" flexWrap="wrap">
                         <YStack gap="$3" flex={1} minWidth={200}>
@@ -187,12 +250,10 @@ export function JobsScreen() {
                             value={job.scraperMode || 'API'}
                           />
                           {job.type === 'category' && (
-                            <>
-                              <DetailRow
-                                label="Page Range"
-                                value={`${job.startPage || 1} - ${(job.startPage || 1) + (job.maxPages || 5) - 1}`}
-                              />
-                            </>
+                            <DetailRow
+                              label="Page Range"
+                              value={`${job.startPage || 1} - ${(job.startPage || 1) + (job.maxPages || 5) - 1}`}
+                            />
                           )}
                         </YStack>
                         <YStack gap="$3" flex={1} minWidth={200}>
@@ -227,7 +288,7 @@ export function JobsScreen() {
                         <YStack
                           marginTop="$3"
                           padding="$3"
-                          backgroundColor="$errorLight"
+                          backgroundColor={"$red10" as ColorTokens}
                           borderRadius="$2"
                         >
                           <Text fontSize="$2" fontWeight="600" color="$error">
@@ -243,9 +304,9 @@ export function JobsScreen() {
                 </Accordion.Item>
               ))}
             </Accordion>
-            {jobs.status === 'CanLoadMore' && (
+            {status === 'CanLoadMore' && (
               <XStack padding="$4" justifyContent="center">
-                <Button variant="secondary" onPress={() => jobs.loadMore(10)}>
+                <Button variant="outlined" onPress={() => loadMore(10)}>
                   Load More Jobs
                 </Button>
               </XStack>
@@ -254,98 +315,5 @@ export function JobsScreen() {
         )}
       </YStack>
     </YStack>
-  );
-}
-
-function formatRelativeTime(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString();
-}
-
-function JobTypeBadge({ type }: { type: string }) {
-  const colors: Record<string, ColorTokens> = {
-    category: '$info',
-    search: '$warning',
-    single: '$neutral400',
-  };
-
-  return (
-    <XStack
-      backgroundColor={colors[type] || '$neutral400'}
-      paddingHorizontal="$2"
-      paddingVertical="$1"
-      borderRadius="$2"
-    >
-      <Text fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
-        {type}
-      </Text>
-    </XStack>
-  );
-}
-
-function DetailRow({
-  label,
-  value,
-  icon,
-  mono = false,
-  highlight = false,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-  mono?: boolean;
-  highlight?: boolean;
-}) {
-  return (
-    <XStack justifyContent="space-between" alignItems="center">
-      <XStack gap="$2" alignItems="center">
-        {icon}
-        <Text fontSize="$2" color="$textSecondary">
-          {label}
-        </Text>
-      </XStack>
-      <Text
-        fontSize="$2"
-        fontFamily={mono ? '$mono' : '$body'}
-        fontWeight={highlight ? '600' : '400'}
-        color={highlight ? '$primary' : '$textPrimary'}
-      >
-        {value}
-      </Text>
-    </XStack>
-  );
-}
-
-function StatusChip({ status }: { status: string }) {
-  const config: Record<string, { bg: ColorTokens; text: string }> = {
-    completed: { bg: '$success', text: 'Completed' },
-    processing: { bg: '$info', text: 'Running' },
-    pending: { bg: '$warning', text: 'Pending' },
-    failed: { bg: '$error', text: 'Failed' },
-  };
-
-  const { bg, text } = config[status] || { bg: '$neutral400', text: status };
-
-  return (
-    <XStack
-      backgroundColor={bg}
-      paddingHorizontal="$2"
-      paddingVertical="$1"
-      borderRadius="$2"
-      alignItems="center"
-    >
-      <Text fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
-        {text}
-      </Text>
-    </XStack>
   );
 }

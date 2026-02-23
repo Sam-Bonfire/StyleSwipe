@@ -1,41 +1,31 @@
 import { Effect } from 'effect';
 
-import {
-  Embedder,
-  ProductSearchRepository,
-  SearchResult,
-  EmbeddingError,
-  SearchError,
-} from '../domain/ports';
+import { Embedder } from '../../../shared/application/ports';
+import { RepositoryError } from '../../../shared/domain/errors';
+import { ProductSearchRepository, SearchResult, SearchError } from './DiscoveryPorts';
 
-export class SearchProducts {
-  constructor(
-    private readonly embedder: Embedder,
-    private readonly repo: ProductSearchRepository,
-  ) {}
+export const execute = (
+  query: string,
+  limit: number = 10,
+): Effect.Effect<SearchResult, SearchError | RepositoryError, Embedder | ProductSearchRepository> =>
+  Effect.gen(function* (_) {
+    if (query.length < 3) {
+      return { products: [] };
+    }
 
-  execute(
-    query: string,
-    limit: number = 10,
-  ): Effect.Effect<SearchResult, EmbeddingError | SearchError | Error> {
-    return Effect.gen(this, function* (_) {
-      if (query.length < 3) {
-        // Return empty if too short, or could error.
-        // For this requirement, we assume UI handles debounce/min-length, but domain should enforce valid invocation.
-        return { products: [] };
-      }
+    const embedder = yield* _(Embedder);
+    const repo = yield* _(ProductSearchRepository);
 
-      const vector = yield* _(this.embedder.generate(query));
-      const results = yield* _(this.repo.search(vector, limit));
+    const vector = yield* _(embedder.generateEmbedding(query));
+    const results = yield* _(repo.search(vector, limit));
 
-      return results;
-    });
-  }
+    return results;
+  });
 
-  getSuggestions(query: string, limit: number = 3): Effect.Effect<string[], SearchError | Error> {
-    return Effect.gen(this, function* (_) {
-      if (query.length < 1) return [];
-      return yield* _(this.repo.getSuggestions(query, limit));
-    });
-  }
-}
+export const getSuggestions = (query: string, limit: number = 3): Effect.Effect<string[], SearchError | RepositoryError, ProductSearchRepository> =>
+  Effect.gen(function* (_) {
+    if (query.length < 1) return [];
+    
+    const repo = yield* _(ProductSearchRepository);
+    return yield* _(repo.getSuggestions(query, limit));
+  });

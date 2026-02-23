@@ -1,6 +1,5 @@
-import { api } from '@app/convex';
+import { useUpdateOrganization } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
-import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import { Dialog, YStack, XStack, Text, Input, Label } from 'tamagui';
 
@@ -20,15 +19,17 @@ export function EditOrganizationModal({ organization, open, onOpenChange, onSucc
     const [slug, setSlug] = useState(organization.slug);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const updateOrganization = useMutation(api.organizationAdmin.updateOrganization);
+    const updateOrganization = useUpdateOrganization();
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
             await updateOrganization({
-                organizationId: organization._id,
-                name,
-                slug,
+                id: organization._id,
+                data: {
+                    name,
+                    slug,
+                }
             });
             onSuccess?.();
             onOpenChange(false);

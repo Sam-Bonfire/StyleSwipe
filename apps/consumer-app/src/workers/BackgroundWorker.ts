@@ -1,5 +1,5 @@
 import { applyDisplacement, Vector384 } from '@app/core';
-import { ConvexHttpClient } from 'convex/browser';
+import { ConvexHttpClient } from '@app/infrastructure';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as Battery from 'expo-battery';
 import * as TaskManager from 'expo-task-manager';

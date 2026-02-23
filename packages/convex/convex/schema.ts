@@ -83,6 +83,7 @@ const logs = defineTable({
   sessionId: v.optional(v.string()), // Session ID for correlation
   app: v.optional(v.string()), // 'consumer-app', 'admin-panel'
   timestamp: v.number(),
+  error: v.optional(v.any()),
 
   // Smart Context
   device: v.optional(

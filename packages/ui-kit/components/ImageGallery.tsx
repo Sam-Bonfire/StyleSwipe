@@ -61,10 +61,10 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
         {images.map((_, index) => (
           <Stack
             key={index}
-            width={8}
-            height={8}
-            borderRadius={4}
-            backgroundColor={index === activeIndex ? '#007AFF' : '#E5E5EA'}
+            width="$1"
+            height="$1"
+            borderRadius="$full"
+            backgroundColor={index === activeIndex ? '$primary' : '$neutral300'}
             opacity={index === activeIndex ? 1 : 0.5}
           />
         ))}

@@ -40,6 +40,7 @@ export default tseslint.config(
   {
     /* Targeting core domain logic for strict hexagonal enforcement */
     files: ['packages/core/**/*.ts', 'packages/infrastructure/**/*.ts'],
+    ignores: ['packages/core/src/index.ts'],
     rules: {
       'hexagonal-architecture/enforce': ['error'],
       '@typescript-eslint/no-explicit-any': 'off',
@@ -48,6 +49,7 @@ export default tseslint.config(
   {
     /* CORE PURITY: Block infrastructure imports in domain layer */
     files: ['packages/core/**/*.ts'],
+    ignores: ['packages/core/src/index.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -72,6 +74,18 @@ export default tseslint.config(
           ],
         },
       ],
+      /* EFFECT ENFORCEMENT: Ban imperative error patterns in core */
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ThrowStatement',
+          message: 'Use Effect.fail(new TaggedError(...)) instead of throw. Core must use Effect for error handling.',
+        },
+        {
+          selector: 'TryStatement',
+          message: 'Use Effect.catchTag or Effect.catchAll instead of try/catch. Core must use Effect for error handling.',
+        },
+      ],
     },
   },
   {
@@ -83,6 +97,28 @@ export default tseslint.config(
     },
   },
   {
+    /* APPS - UI Adapter Layer: Block direct infrastructure imports */
+    files: ['apps/**/*.tsx', 'apps/**/*.ts'],
+    ignores: ['apps/scraper-service/**'], // Scraper service is a backend service, effectively infra
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['convex/react', 'convex/browser'],
+              message: 'Violation of Hexagonal Architecture. UI adapters must use @app/infrastructure hooks, not direct Convex bindings.',
+            },
+            {
+              group: ['@app/convex'],
+              message: 'Violation of Hexagonal Architecture. UI adapters must use @app/infrastructure hooks, not direct Convex bindings.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       '**/node_modules/',
       '**/dist/',
@@ -91,6 +127,7 @@ export default tseslint.config(
       '**/.turbo/',
       '**/.graphite/',
       '**/convex/_generated/',
+      '**/metro.config.js',
     ],
   },
 );

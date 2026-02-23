@@ -1,13 +1,17 @@
-import { Embedder, EmbeddingError, Vector384 } from '@app/core';
+import { RepositoryError } from '@app/core';
 import { Effect } from 'effect';
 
 import { generateEmbedding } from '../InferenceEngine';
 
-export class OnnxEmbedder implements Embedder {
-  generate(text: string): Effect.Effect<Vector384, EmbeddingError> {
+export class OnnxEmbedder {
+  generateEmbedding(text: string): Effect.Effect<number[], RepositoryError> {
     return Effect.tryPromise({
       try: () => generateEmbedding(text),
-      catch: (error) => new EmbeddingError(String(error)),
+      catch: (error) => new RepositoryError('generateEmbedding', error),
     });
+  }
+
+  getDimensions(): Effect.Effect<number, never> {
+    return Effect.succeed(384);
   }
 }

@@ -1,29 +1,40 @@
-/* eslint-disable hexagonal-architecture/enforce */
-// Catalog
-export * from './catalog/domain/TaggingService';
-
-// Identity
-// export * from './identity/User'; // Duplicated in shared/domain/types
-// export * from "./identity/domain/StyleProfile"; // Duplicated in shared/domain/types
-export * from './identity/domain/StyleDNA';
-export * from './identity/application/InitializeStyleProfile';
-export * from './identity/application/GetOnboardingQuestions';
-
+ 
 // Shared Domain Types & Ports
 export * from '../shared/domain/types';
-export * from '../shared/domain/ports';
+export * from '../shared/domain/errors';
+export * from '../shared/application/ports';
+
+// Catalog
+export * from './catalog/domain/TaggingService';
+export * as TagProduct from './catalog/application/TagProduct';
+export * as BrowseCatalog from './catalog/application/BrowseCatalog';
+export * as ManageAdminDashboard from './catalog/application/ManageAdminDashboard';
+export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
+
+// Identity
+export * from './identity/domain/StyleDNA';
+export * as InitializeStyleProfile from './identity/application/InitializeStyleProfile';
+export * as GetOnboardingQuestions from './identity/application/GetOnboardingQuestions';
+export * as ManageFeedback from './identity/application/ManageFeedback';
+export * as ManageUserProfile from './identity/application/ManageUserProfile';
+export * as ManageOrganizations from './identity/application/ManageOrganizations';
+export * as ManageLogs from './identity/application/ManageLogs';
+export * as ManageAdminFeedback from './identity/application/ManageAdminFeedback';
+export * as IdentityUseCases from './identity/application/IdentityUseCases';
 
 // Commerce
 export * from './commerce/domain/Cart';
-export * from './commerce/domain/CartRepository';
+export * from './commerce/application/CartRepository';
+export * from './commerce/application/CheckoutService';
 export * from './commerce/domain/PriceEstimator';
 export * from './commerce/domain/Order';
 export * from './commerce/domain/errors';
-export * from './commerce/application/ManageCart';
-export * from './commerce/application/CheckoutService';
+export * as ManageCart from './commerce/application/ManageCart';
+export * as CheckoutService from './commerce/application/CheckoutService';
 
 // Discovery
-export { EmbeddingError, SearchError } from './discovery/domain/ports';
-export type { SearchResult, Embedder, ProductSearchRepository } from './discovery/domain/ports';
-export * from './discovery/application/SearchProducts';
-export * from './discovery/application/ProcessSwipe';
+export * from './discovery/application/DiscoveryPorts';
+export * as SearchProducts from './discovery/application/SearchProducts';
+export * as ProcessSwipe from './discovery/application/ProcessSwipe';
+export * as RecordInteraction from './discovery/application/RecordInteraction';
+export * as GetRecommendations from './discovery/application/GetRecommendations';

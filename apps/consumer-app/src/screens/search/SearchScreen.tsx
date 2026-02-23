@@ -1,30 +1,20 @@
-import { Id, api } from '@app/convex';
-import { SearchProducts } from '@app/core';
-import { Product } from '@app/core';
+import { Product, SearchProducts, Embedder } from '@app/core';
+import { useRecordProductView, createProductSearchRepositoryLayer, useConvexClient } from '@app/infrastructure';
 import { ProductTile, Button } from '@app/ui-kit';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from '@tamagui/lucide-icons';
-import { useConvex, useMutation } from 'convex/react';
-import { Effect } from 'effect';
-import React, { useState, useEffect, useMemo } from 'react';
+import { Effect, Layer } from 'effect';
+import { useState, useEffect } from 'react';
 import { SafeAreaView, FlatList } from 'react-native';
 import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
 
-import { ConvexProductAdapter } from '../../infrastructure/adapters/ConvexProductAdapter';
 import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
 
 export function SearchScreen() {
-  const convex = useConvex();
+  const convex = useConvexClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navigation = useNavigation<any>();
-  const recordView = useMutation(api.discovery.recordProductView);
-
-  // Dependencies
-  const useCase = useMemo(() => {
-    const embedder = new OnnxEmbedder();
-    const repo = new ConvexProductAdapter(convex);
-    return new SearchProducts(embedder, repo);
-  }, [convex]);
+  const recordView = useRecordProductView();
 
   // State
   const [query, setQuery] = useState('');
@@ -54,10 +44,16 @@ export function SearchScreen() {
   const performSearch = async (text: string) => {
     setLoading(true);
     try {
+      const embedderLayer = Layer.succeed(Embedder, Embedder.of(new OnnxEmbedder()));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const repoLayer = createProductSearchRepositoryLayer(convex as any);
+      const layer = Layer.merge(embedderLayer, repoLayer);
+
       await Effect.runPromise(
-        useCase
-          .execute(text, 10)
-          .pipe(Effect.tap((result) => Effect.sync(() => setResults(result.products)))),
+        SearchProducts.execute(text, 10).pipe(
+          Effect.tap((result) => Effect.sync(() => setResults(result.products))),
+          Effect.provide(layer),
+        ),
       );
     } catch (e) {
       console.error('Search failed', e);
@@ -68,8 +64,13 @@ export function SearchScreen() {
 
   const fetchSuggestions = async (text: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const repoLayer = createProductSearchRepositoryLayer(convex as any);
       await Effect.runPromise(
-        useCase.getSuggestions(text).pipe(Effect.tap((s) => Effect.sync(() => setSuggestions(s)))),
+        SearchProducts.getSuggestions(text).pipe(
+          Effect.tap((s: string[]) => Effect.sync(() => setSuggestions(s))),
+          Effect.provide(repoLayer),
+        ),
       );
     } catch (e) {
       console.error('Suggestions failed', e);
@@ -77,9 +78,7 @@ export function SearchScreen() {
   };
 
   const handleProductPress = (productId: string) => {
-    // Record view event
-    // Record view event
-    recordView({ productId: productId as Id<'products'> });
+    recordView({ productId });
     // Navigate to details
     navigation.navigate('ProductDetail', { productId });
   };

@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'bun:test';
-import { Effect, Exit, Cause, Option } from 'effect';
+import { SwipeRepository } from '@app/core';
+import { ProcessSwipe } from '@app/core';
+import { describe, expect, it } from 'bun:test';
+import { Effect, Exit, Cause, Option, Layer } from 'effect';
 
-import type { ProcessSwipeInput } from '../../../../src/discovery/application/ProcessSwipe';
-
-import { processSwipe, SwipeError } from '../../../../src/discovery/application/ProcessSwipe';
+const { processSwipe, SwipeError } = ProcessSwipe;
+type ProcessSwipeInput = ProcessSwipe.ProcessSwipeInput;
 
 describe('ProcessSwipe', () => {
     const validInput: ProcessSwipeInput = {
@@ -13,26 +14,34 @@ describe('ProcessSwipe', () => {
         timestamp: Date.now(),
     };
 
+    const mockLayer = Layer.succeed(
+        SwipeRepository,
+        SwipeRepository.of({
+            recordSwipe: () => Effect.succeed(undefined),
+            getSwipesByUser: () => Effect.succeed([]),
+        })
+    );
+
     it('should succeed with valid input', async () => {
-        const result = await Effect.runPromise(processSwipe(validInput));
+        const result = await Effect.runPromise(processSwipe(validInput).pipe(Effect.provide(mockLayer)));
         expect(result).toEqual(validInput);
     });
 
     it('should accept "pass" action', async () => {
-        const input = { ...validInput, action: 'pass' as const };
-        const result = await Effect.runPromise(processSwipe(input));
+        const input: ProcessSwipeInput = { ...validInput, action: 'pass' as const };
+        const result = await Effect.runPromise(processSwipe(input).pipe(Effect.provide(mockLayer)));
         expect(result.action).toBe('pass');
     });
 
     it('should accept "super" action', async () => {
-        const input = { ...validInput, action: 'super' as const };
-        const result = await Effect.runPromise(processSwipe(input));
+        const input: ProcessSwipeInput = { ...validInput, action: 'super' as const };
+        const result = await Effect.runPromise(processSwipe(input).pipe(Effect.provide(mockLayer)));
         expect(result.action).toBe('super');
     });
 
     it('should fail with empty userId', async () => {
-        const input = { ...validInput, userId: '' };
-        const exit = await Effect.runPromiseExit(processSwipe(input));
+        const input: ProcessSwipeInput = { ...validInput, userId: '' };
+        const exit = await Effect.runPromiseExit(processSwipe(input).pipe(Effect.provide(mockLayer)));
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
             const failure = Cause.failureOption(exit.cause);
@@ -45,8 +54,8 @@ describe('ProcessSwipe', () => {
     });
 
     it('should fail with empty productId', async () => {
-        const input = { ...validInput, productId: '' };
-        const exit = await Effect.runPromiseExit(processSwipe(input));
+        const input: ProcessSwipeInput = { ...validInput, productId: '' };
+        const exit = await Effect.runPromiseExit(processSwipe(input).pipe(Effect.provide(mockLayer)));
         expect(Exit.isFailure(exit)).toBe(true);
         if (Exit.isFailure(exit)) {
             const failure = Cause.failureOption(exit.cause);
@@ -60,8 +69,8 @@ describe('ProcessSwipe', () => {
 
     it('should preserve timestamp in output', async () => {
         const ts = 1700000000000;
-        const input = { ...validInput, timestamp: ts };
-        const result = await Effect.runPromise(processSwipe(input));
+        const input: ProcessSwipeInput = { ...validInput, timestamp: ts };
+        const result = await Effect.runPromise(processSwipe(input).pipe(Effect.provide(mockLayer)));
         expect(result.timestamp).toBe(ts);
     });
 });

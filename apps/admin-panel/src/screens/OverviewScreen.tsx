@@ -1,7 +1,6 @@
-import { api } from '@app/convex';
+import { useAdminStats } from '@app/infrastructure';
 import { useToast } from '@app/ui-kit';
 import { Users, Package, Activity, TrendingUp, Clock, AlertCircle } from '@tamagui/lucide-icons';
-import { useQuery } from 'convex/react';
 import React, { useEffect } from 'react';
 import { YStack, Text, Card, XStack, H2, H3, Spinner, styled, Avatar, ScrollView } from 'tamagui';
 
@@ -55,7 +54,7 @@ const ActivityItem = styled(XStack, {
 });
 
 export function OverviewScreen() {
-  const stats = useQuery(api.admin.getStats);
+  const stats = useAdminStats();
   const { showToast } = useToast();
 
   // Handle query errors with toast
