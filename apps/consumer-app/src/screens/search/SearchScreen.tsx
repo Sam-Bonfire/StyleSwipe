@@ -1,9 +1,9 @@
 import { Product, SearchProducts, Embedder } from '@app/core';
 import { useRecordProductView, createProductSearchRepositoryLayer, useConvexClient } from '@app/infrastructure';
 import { ProductTile, Button } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
 import { Search } from '@tamagui/lucide-icons';
 import { Effect, Layer } from 'effect';
+import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { SafeAreaView, FlatList } from 'react-native';
 import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
@@ -12,8 +12,7 @@ import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
 
 export function SearchScreen() {
   const convex = useConvexClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
   const recordView = useRecordProductView();
 
   // State
@@ -80,7 +79,7 @@ export function SearchScreen() {
   const handleProductPress = (productId: string) => {
     recordView({ productId });
     // Navigate to details
-    navigation.navigate('ProductDetail', { productId });
+    router.push({ pathname: '/(app)/product/[id]', params: { id: productId } });
   };
 
   const renderItem = ({ item }: { item: Product }) => {

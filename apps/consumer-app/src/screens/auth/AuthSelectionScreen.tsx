@@ -1,13 +1,12 @@
 import { Button } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { YStack, Text, XStack, Image } from 'tamagui';
 
 import logo from '../../../../../assets/logo/logo.png';
 
 export function AuthSelectionScreen() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   return (
     <YStack flex={1} padding="$6" backgroundColor="$background">
@@ -38,11 +37,11 @@ export function AuthSelectionScreen() {
 
       {/* Actions and EULA - Anchored to the bottom */}
       <YStack gap="$1">
-        <Button variant="primary" size="large" onPress={() => navigation.navigate('PhoneAuth')}>
+        <Button variant="primary" size="large" onPress={() => router.push('/(auth)/phone')}>
           Continue with Phone
         </Button>
 
-        <Button variant="ghost" size="large" onPress={() => navigation.navigate('EmailAuth')}>
+        <Button variant="ghost" size="large" onPress={() => router.push('/(auth)/email')}>
           Continue with Email
         </Button>
 

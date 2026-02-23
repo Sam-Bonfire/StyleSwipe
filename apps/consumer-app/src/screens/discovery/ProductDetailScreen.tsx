@@ -4,30 +4,21 @@ import { useCurrentUser, useProduct, useAddToCart } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { ChevronLeft } from '@tamagui/lucide-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
 import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
-
-type ProductDetailParams = {
-  params: {
-    productId: string;
-  }
-};
 
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
   // -------------------------------------------------------------------------
   // 1. Hooks & State
   // -------------------------------------------------------------------------
-  const route = useRoute<RouteProp<ProductDetailParams, 'params'>>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const navigation = useNavigation<any>();
+  const { id: productId } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const theme = useTheme();
   const { height: windowHeight } = useWindowDimensions();
-
-  const { productId } = route?.params || { productId: 'prod-1' };
 
   // FETCH REAL DATA
   // We cast productId to any because navigation params are strings, but Convex expects Id<"products">
@@ -78,7 +69,7 @@ export function ProductDetailScreen() {
         <Text fontSize="$6" color="$textSecondary">
           Product not found
         </Text>
-        <Button variant="ghost" onPress={() => navigation.goBack()} marginTop="$4">
+        <Button variant="ghost" onPress={() => router.back()} marginTop="$4">
           Go Back
         </Button>
       </View>
@@ -154,7 +145,7 @@ export function ProductDetailScreen() {
   const handleAddToCart = async () => {
     if (isAdded) {
       // Navigate to the Main screen and switch to the 'cart' tab to show nav bars
-      navigation.navigate('Main', { activeTab: 'cart' });
+      router.push('/(app)/(tabs)/cart');
       return;
     }
 
@@ -306,7 +297,7 @@ export function ProductDetailScreen() {
       {/* 3. Floating UI: Back Button */}
       <View style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
         <TopBarIconButton
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
           backgroundColor="$background"
 
           shadowColor="$shadowColor"

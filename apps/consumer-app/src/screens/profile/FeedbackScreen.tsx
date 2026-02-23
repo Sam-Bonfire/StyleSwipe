@@ -1,14 +1,14 @@
 import { useCurrentUser, useCreateFeedback, useGenerateUploadUrl, useMyFeedback } from '@app/infrastructure';
 import { Button, useToast, TopBarIconButton } from '@app/ui-kit';
-import { useNavigation } from '@react-navigation/native';
 import { ChevronDown, Check, Upload, File, ChevronLeft } from '@tamagui/lucide-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { SafeAreaView, ScrollView } from 'react-native';
 import { YStack, Text, TextArea, Select, Sheet, Adapt, Label, XStack, Spinner } from 'tamagui';
 
 export function FeedbackScreen() {
-    const navigation = useNavigation();
+    const router = useRouter();
     const { showToast } = useToast();
     const createFeedback = useCreateFeedback();
     const generateUploadUrl = useGenerateUploadUrl();
@@ -81,7 +81,7 @@ export function FeedbackScreen() {
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <XStack alignItems="center" space="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
                 <TopBarIconButton
-                    onPress={() => navigation.goBack()}
+                    onPress={() => router.back()}
                     backgroundColor="$background"
                     shadowColor="$shadowColor"
                     shadowRadius={4}
