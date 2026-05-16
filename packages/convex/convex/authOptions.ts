@@ -7,7 +7,7 @@ import { ac, owner, admin, member } from './auth/permissions';
 
 export const getBaseAuthOptions = (): Omit<BetterAuthOptions, 'database'> => {
   return {
-    baseURL: 'http://localhost:3211',
+    baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3211',
     trustedOrigins: [
       'http://localhost:8081',
       'http://127.0.0.1:8081',

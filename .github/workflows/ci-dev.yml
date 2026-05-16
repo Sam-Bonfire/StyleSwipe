@@ -14,53 +14,36 @@ env:
 
 jobs:
   setup:
-    needs: []
-    runs-on: docker
+    runs-on: ubuntu-latest
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Turbo Cache
-        uses: https://github.com/actions/cache@v3
+        uses: actions/cache@v3
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - uses: https://github.com/jdx/mise-action@v2
-        with:
-          install: false
-      - name: Install dependencies (Anonymous)
-        run: |
-          unset GITHUB_TOKEN
-          unset GH_TOKEN
-          unset GITHUB_API_TOKEN
-          mise install
+      - uses: jdx/mise-action@v2
       - run: bun install
       - name: Run Verifications
         run: bunx turbo run lint typecheck test
 
   build-docker:
     needs: [setup]
-    runs-on: docker
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [admin-panel, consumer-app, scraper-service]
+        app: [scraper-service]
     steps:
-      - uses: https://github.com/actions/checkout@v4
-      
-      - name: Install Docker CLI
-        run: |
-          apt-get update && apt-get install -y curl iproute2 jq
-          curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-27.5.1.tgz \
-            | tar xz --strip-components=1 -C /usr/local/bin docker/docker
+      - uses: actions/checkout@v4
 
-      - name: Configure Docker Host
-        run: |
-          # Job containers run inside DinD — reach the daemon via gateway IP
-          GATEWAY=$(ip route | grep default | awk '{print $3}')
-          echo "DOCKER_HOST=tcp://${GATEWAY}:2375" >> $GITHUB_ENV
-
-      - name: Login to Registry
-        run: echo "${{ secrets.CI_TOKEN }}" | docker login git.yomite.in -u ${{ github.actor }} --password-stdin
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate env file
         run: |
@@ -68,8 +51,7 @@ jobs:
 
       - name: Build and Push
         run: |
-          REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-          TAG_BASE="git.yomite.in/${REPO}/${{ matrix.app }}"
+          TAG_BASE="ghcr.io/${{ github.repository_owner }}/${{ matrix.app }}"
           docker build -f apps/${{ matrix.app }}/Dockerfile \
             -t "${TAG_BASE}:dev-latest" \
             -t "${TAG_BASE}:dev-${{ github.sha }}" \
@@ -81,56 +63,79 @@ jobs:
 
   build-extension:
     needs: [setup]
-    runs-on: docker
+    runs-on: ubuntu-latest
     steps:
-      - uses: https://github.com/actions/checkout@v4
-      - uses: https://github.com/jdx/mise-action@v2
-        with:
-          install: false
-      - name: Install dependencies (Anonymous)
-        run: |
-          unset GITHUB_TOKEN
-          unset GH_TOKEN
-          unset GITHUB_API_TOKEN
-          mise install
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
       - run: bun install
       - name: Build Extension
         working-directory: apps/browser-extension
         run: bun run build
-      
-      - name: Install Zip
-        run: apt-get update && apt-get install -y zip
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
         run: zip -r extension-dev-${{ github.sha }}.zip .
       - name: Upload Extension Artifact
-        uses: https://github.com/actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: browser-extension-dev-${{ github.sha }}
           path: apps/browser-extension/dist/extension-dev-${{ github.sha }}.zip
           retention-days: 5
 
-  deploy:
-    runs-on: docker
+  deploy-staging:
+    runs-on: ubuntu-latest
     needs: [build-docker, build-extension]
     steps:
-      - name: Deploy to Staging
-        run: echo "Deploying to Staging... Success"
+      - uses: actions/checkout@v4
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+      - run: bun install
+
+      - name: Build SPAs
+        run: bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
+
+      - name: Deploy Admin Panel to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: styleswipe-admin-panel
+          directory: apps/admin-panel/dist
+          branch: staging
+
+      - name: Deploy Consumer App to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: styleswipe-consumer-app
+          directory: apps/consumer-app/dist
+          branch: staging
+
+      - name: Deploy Convex (Preview)
+        run: bunx convex deploy --preview
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
   promote:
-    runs-on: docker
-    needs: [deploy]
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.CI_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       
       - name: Merge dev to main
         run: |
-          git config --global user.name "CI Bot"
-          git config --global user.email "ci-bot@yomite.in"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout main
           git merge origin/dev
           git push origin main

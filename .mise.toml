@@ -1,6 +1,7 @@
 [tools]
 bun = "1.2.23"
 node = "lts"
+python = "3.12"
 "npm:@withgraphite/graphite-cli" = "latest"
 hurl = "7.1.0"
 
@@ -58,11 +59,11 @@ run = "turbo run test"
 
 [tasks.submit]
 description = "Submit current stack to GitHub using Graphite"
-run = "sh bin/submit.sh"
+run = "bash bin/submit.sh"
 
 [tasks.release]
 description = "Run release process"
-run = "sh bin/release.sh"
+run = "bash bin/release.sh"
 
 [tasks.sync]
 description = "Sync Graphite stack"
@@ -98,7 +99,7 @@ usage = """
 arg "<type>" help="Task type (feat, fix, refactor, chore)"
 arg "<title>..." help="Brief title of the task"
 """
-run = 'sh bin/task-start.sh "$usage_type" "$usage_title"'
+run = 'bash bin/task-start.sh "$usage_type" "$usage_title"'
 
 [tasks.snap]
 description = "Create a project snapshot"
@@ -108,15 +109,8 @@ arg "<title>..." help="Brief title"
 flag "-d --description <text>" help="Optional detailed description"
 flag "-t --ticket <id>" help="Optional ticket ID"
 """
-run = 'sh bin/snapshot.sh "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
+run = 'bash bin/snapshot.sh "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
 
 [tasks.clean]
 description = "Cleanup all node_modules, .turbo, and build artifacts"
-run = """
-find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
-find . -name ".turbo" -type d -prune -exec rm -rf '{}' +
-find . -name "dist" -type d -prune -exec rm -rf '{}' +
-find . -name ".expo" -type d -prune -exec rm -rf '{}' +
-find . -name "build" -type d -prune -exec rm -rf '{}' +
-echo "Cleanup complete. Run 'bun install' to restore dependencies."
-"""
+run = "bash bin/clean.sh"
