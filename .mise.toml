@@ -59,11 +59,11 @@ run = "turbo run test"
 
 [tasks.submit]
 description = "Submit current stack to GitHub using Graphite"
-run = "bash bin/submit.sh"
+run = "bun bin/dispatch.js submit"
 
 [tasks.release]
 description = "Run release process"
-run = "bash bin/release.sh"
+run = "bun bin/dispatch.js release"
 
 [tasks.sync]
 description = "Sync Graphite stack"
@@ -99,7 +99,7 @@ usage = """
 arg "<type>" help="Task type (feat, fix, refactor, chore)"
 arg "<title>..." help="Brief title of the task"
 """
-run = 'bash bin/task-start.sh "$usage_type" "$usage_title"'
+run = 'bun bin/dispatch.js task-start "$usage_type" "$usage_title"'
 
 [tasks.snap]
 description = "Create a project snapshot"
@@ -109,8 +109,8 @@ arg "<title>..." help="Brief title"
 flag "-d --description <text>" help="Optional detailed description"
 flag "-t --ticket <id>" help="Optional ticket ID"
 """
-run = 'bash bin/snapshot.sh "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
+run = 'bun bin/dispatch.js snapshot "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
 
 [tasks.clean]
 description = "Cleanup all node_modules, .turbo, and build artifacts"
-run = "bash bin/clean.sh"
+run = "bun bin/dispatch.js clean"
