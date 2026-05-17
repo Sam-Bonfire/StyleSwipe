@@ -14,66 +14,48 @@ env:
 
 jobs:
   setup:
-    needs: []
-    runs-on: docker
+    runs-on: ubuntu-latest
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Turbo Cache
-        uses: https://github.com/actions/cache@v3
+        uses: actions/cache@v3
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - uses: https://github.com/jdx/mise-action@v2
-        with:
-          install: false
-      - name: Install dependencies (Anonymous)
-        run: |
-          unset GITHUB_TOKEN
-          unset GH_TOKEN
-          unset GITHUB_API_TOKEN
-          mise install
+      - uses: jdx/mise-action@v2
       - run: bun install
       - name: Run Verifications
         run: bunx turbo run lint typecheck test
 
   release:
     needs: [setup]
-    runs-on: docker
+    runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.version.outputs.VERSION }}
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.CI_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Turbo Cache
-        uses: https://github.com/actions/cache@v3
+        uses: actions/cache@v3
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
 
-      - uses: https://github.com/jdx/mise-action@v2
-        with:
-          install: false
-      - name: Install dependencies (Anonymous)
-        run: |
-          unset GITHUB_TOKEN
-          unset GH_TOKEN
-          unset GITHUB_API_TOKEN
-          mise install
-
+      - uses: jdx/mise-action@v2
       - run: bun install
 
       - name: Version and Tag
         id: version
         run: |
-          git config user.name "CI Bot"
-          git config user.email "ci-bot@yomite.in"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           
           # Run changeset version to bump versions and update changelogs
           bun changeset version
@@ -101,44 +83,35 @@ jobs:
             echo "VERSION=none" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Forgejo Release
+      - name: Create GitHub Release
         if: steps.version.outputs.VERSION != 'none'
-        uses: https://gitea.com/actions/release-action@v1
+        uses: softprops/action-gh-release@v2
         with:
-          api_key: ${{ secrets.CI_TOKEN }}
-          files: |
-            CHANGELOG.md
-          name: Release ${{ steps.version.outputs.VERSION }}
           tag_name: v${{ steps.version.outputs.VERSION }}
+          name: Release ${{ steps.version.outputs.VERSION }}
           body_path: CHANGELOG.md
+          files: CHANGELOG.md
           draft: false
           prerelease: false
 
   build-push-docker:
     needs: [release]
     if: needs.release.outputs.new_version != 'none'
-    runs-on: docker
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [admin-panel, consumer-app, scraper-service]
+        app: [scraper-service]
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: v${{ needs.release.outputs.new_version }}
 
-      - name: Install Docker CLI
-        run: |
-          apt-get update && apt-get install -y curl iproute2
-          curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-27.5.1.tgz \
-            | tar xz --strip-components=1 -C /usr/local/bin docker/docker
-
-      - name: Configure Docker Host
-        run: |
-          GATEWAY=$(ip route | grep default | awk '{print $3}')
-          echo "DOCKER_HOST=tcp://${GATEWAY}:2375" >> $GITHUB_ENV
-
-      - name: Login to Registry
-        run: echo "${{ secrets.CI_TOKEN }}" | docker login git.yomite.in -u ${{ github.actor }} --password-stdin
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate env file
         run: |
@@ -146,8 +119,7 @@ jobs:
 
       - name: Build and Push
         run: |
-          REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-          TAG_BASE="git.yomite.in/${REPO}/${{ matrix.app }}"
+          TAG_BASE="ghcr.io/${{ github.repository_owner }}/${{ matrix.app }}"
           docker build -f apps/${{ matrix.app }}/Dockerfile \
             -t "${TAG_BASE}:latest" \
             -t "${TAG_BASE}:${{ needs.release.outputs.new_version }}" \
@@ -158,37 +130,67 @@ jobs:
   build-publish-extension:
     needs: [release]
     if: needs.release.outputs.new_version != 'none'
-    runs-on: docker
+    runs-on: ubuntu-latest
     steps:
-      - uses: https://github.com/actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: v${{ needs.release.outputs.new_version }}
-      - uses: https://github.com/jdx/mise-action@v2
-        with:
-          install: false
-      - name: Install dependencies (Anonymous)
-        run: |
-          unset GITHUB_TOKEN
-          unset GH_TOKEN
-          unset GITHUB_API_TOKEN
-          mise install
+      - uses: jdx/mise-action@v2
       - run: bun install
       - name: Build Extension
         working-directory: apps/browser-extension
         run: bun run build
-
-      - name: Install Zip
-        run: apt-get update && apt-get install -y zip
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
         run: zip -r extension-v${{ needs.release.outputs.new_version }}.zip .
       
       - name: Upload to Release
-        uses: https://gitea.com/actions/release-action@v1
+        uses: softprops/action-gh-release@v2
         with:
-          api_key: ${{ secrets.CI_TOKEN }}
-          files: apps/browser-extension/dist/extension-v${{ needs.release.outputs.new_version }}.zip
-          name: Release ${{ needs.release.outputs.new_version }}
           tag_name: v${{ needs.release.outputs.new_version }}
-          edit: true
+          files: apps/browser-extension/dist/extension-v${{ needs.release.outputs.new_version }}.zip
+
+  deploy-production:
+    needs: [release]
+    if: needs.release.outputs.new_version != 'none'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_version }}
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+      - run: bun install
+
+      - name: Build SPAs
+        run: bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
+
+      - name: Deploy Admin Panel to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: styleswipe-admin-panel
+          directory: apps/admin-panel/dist
+          branch: main
+
+      - name: Deploy Consumer App to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: styleswipe-consumer-app
+          directory: apps/consumer-app/dist
+          branch: main
+
+      - name: Deploy Convex (Production)
+        run: bunx convex deploy
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

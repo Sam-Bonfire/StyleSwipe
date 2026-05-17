@@ -11,8 +11,8 @@
 import type * as accounts from "../accounts.js";
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
-import type * as auth_permissions from "../auth/permissions.js";
 import type * as authOptions from "../authOptions.js";
+import type * as auth_permissions from "../auth/permissions.js";
 import type * as cart from "../cart.js";
 import type * as debug from "../debug.js";
 import type * as discovery from "../discovery.js";
@@ -48,8 +48,8 @@ declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
   admin: typeof admin;
   auth: typeof auth;
-  "auth/permissions": typeof auth_permissions;
   authOptions: typeof authOptions;
+  "auth/permissions": typeof auth_permissions;
   cart: typeof cart;
   debug: typeof debug;
   discovery: typeof discovery;
