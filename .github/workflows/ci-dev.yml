@@ -51,7 +51,8 @@ jobs:
 
       - name: Build and Push
         run: |
-          TAG_BASE="ghcr.io/${{ github.repository_owner }}/${{ matrix.app }}"
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
           docker build -f apps/${{ matrix.app }}/Dockerfile \
             -t "${TAG_BASE}:dev-latest" \
             -t "${TAG_BASE}:dev-${{ github.sha }}" \
