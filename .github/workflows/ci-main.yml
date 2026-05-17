@@ -169,6 +169,11 @@ jobs:
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
       - run: bun install
+
+      - name: Generate env file
+        run: |
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
+
       - name: Build SPAs
         run: bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
 
