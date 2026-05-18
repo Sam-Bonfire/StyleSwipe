@@ -6,8 +6,29 @@
 // Convex Adapters
 export * from './convex';
 
-export { ConvexReactClient } from 'convex/react';
-export { ConvexClient, ConvexHttpClient } from 'convex/browser';
+import { ConvexReactClient as BaseConvexReactClient } from 'convex/react';
+import { ConvexClient as BaseConvexClient, ConvexHttpClient as BaseConvexHttpClient } from 'convex/browser';
+
+export class ConvexReactClient extends BaseConvexReactClient {
+  constructor(url: string, options?: any) {
+    const sanitizedUrl = typeof url === 'string' ? url.replace(/\/+$/, '') : url;
+    super(sanitizedUrl, options);
+  }
+}
+
+export class ConvexClient extends BaseConvexClient {
+  constructor(url: string, options?: any) {
+    const sanitizedUrl = typeof url === 'string' ? url.replace(/\/+$/, '') : url;
+    super(sanitizedUrl, options);
+  }
+}
+
+export class ConvexHttpClient extends BaseConvexHttpClient {
+  constructor(url: string) {
+    const sanitizedUrl = typeof url === 'string' ? url.replace(/\/+$/, '') : url;
+    super(sanitizedUrl);
+  }
+}
 
 // Auth Adapter
 export * from './auth/AuthAdapter';
