@@ -59,11 +59,11 @@ run = "turbo run test"
 
 [tasks.submit]
 description = "Submit current stack to GitHub using Graphite"
-run = "bun bin/dispatch.js submit"
+run = "bun bin/submit.ts"
 
 [tasks.release]
 description = "Run release process"
-run = "bun bin/dispatch.js release"
+run = "bun bin/release.ts"
 
 [tasks.sync]
 description = "Sync Graphite stack"
@@ -79,7 +79,11 @@ run = "prettier --write ."
 
 [tasks."build:extension"]
 description = "Build the Browser Extension"
-run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/browser-extension build"
+run = "bun run --env-file=.env --env-file=.env.local --filter @app/browser-extension build"
+
+[tasks."build:spas"]
+description = "Build all SPAs (Admin and Consumer) with target environment variables loaded"
+run = "bun run --env-file=.env --env-file=.env.local bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app"
 
 [tasks."typecheck:ui"]
 description = "Typecheck only the UI Kit"
@@ -99,7 +103,7 @@ usage = """
 arg "<type>" help="Task type (feat, fix, refactor, chore)"
 arg "<title>..." help="Brief title of the task"
 """
-run = 'bun bin/dispatch.js task-start "$usage_type" "$usage_title"'
+run = 'bun bin/task-start.ts "$usage_type" "$usage_title"'
 
 [tasks.snap]
 description = "Create a project snapshot"
@@ -109,8 +113,8 @@ arg "<title>..." help="Brief title"
 flag "-d --description <text>" help="Optional detailed description"
 flag "-t --ticket <id>" help="Optional ticket ID"
 """
-run = 'bun bin/dispatch.js snapshot "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
+run = 'bun bin/snapshot.ts "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
 
 [tasks.clean]
 description = "Cleanup all node_modules, .turbo, and build artifacts"
-run = "bun bin/dispatch.js clean"
+run = "bun bin/clean.ts"
