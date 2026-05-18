@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "🔍 Running pre-commit validations (ESLint)..."
+
+# Run ESLint via turbo
+bun run lint
+LINT_EXIT_CODE=$?
+
+if [ $LINT_EXIT_CODE -ne 0 ]; then
+  echo "❌ pre-commit check failed: Lint errors found! Please fix them before committing."
+  exit $LINT_EXIT_CODE
+fi
+
+echo "✅ pre-commit checks passed successfully!"
+exit 0

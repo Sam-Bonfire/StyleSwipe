@@ -1,0 +1,30 @@
+#!/bin/sh
+
+echo "🚀 Running pre-push validations (Lint, Typecheck & Tests)..."
+
+# 1. Run ESLint
+echo "👉 Verifying Lint..."
+bun run lint
+if [ $? -ne 0 ]; then
+  echo "❌ pre-push check failed: Lint errors found! Please resolve them before pushing."
+  exit 1
+fi
+
+# 2. Run TypeScript Typecheck
+echo "👉 Verifying TypeScript Typecheck..."
+bun run typecheck
+if [ $? -ne 0 ]; then
+  echo "❌ pre-push check failed: TypeScript type errors found! Please resolve them before pushing."
+  exit 1
+fi
+
+# 3. Run Unit Tests
+echo "👉 Running Unit Tests..."
+bun run test
+if [ $? -ne 0 ]; then
+  echo "❌ pre-push check failed: Some tests failed! Please resolve them before pushing."
+  exit 1
+fi
+
+echo "✅ All pre-push checks passed successfully! Safe to push."
+exit 0
