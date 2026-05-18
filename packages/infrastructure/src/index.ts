@@ -6,8 +6,8 @@
 // Convex Adapters
 export * from './convex';
 
-import { ConvexReactClient as BaseConvexReactClient } from 'convex/react';
 import { ConvexClient as BaseConvexClient, ConvexHttpClient as BaseConvexHttpClient } from 'convex/browser';
+import { ConvexReactClient as BaseConvexReactClient } from 'convex/react';
 
 export class ConvexReactClient extends BaseConvexReactClient {
   constructor(url: string, options?: any) {
