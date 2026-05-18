@@ -16,6 +16,9 @@ export const getBaseAuthOptions = (): Omit<BetterAuthOptions, 'database'> => {
       'http://localhost:5173',
       'http://127.0.0.1:5173',
       'chrome-extension://*',
+      ...(process.env.TRUSTED_ORIGINS
+        ? process.env.TRUSTED_ORIGINS.split(',').map((origin) => origin.trim())
+        : []),
     ],
     advanced: {
       defaultCookieAttributes: {
