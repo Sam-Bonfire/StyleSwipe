@@ -156,6 +156,7 @@ jobs:
     needs: [release]
     if: needs.release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
         with:
@@ -172,10 +173,12 @@ jobs:
 
       - name: Generate env file
         run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.production
 
       - name: Build SPAs
-        run: bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
+        run: bun run --env-file=.env --env-file=.env.production bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
+        env:
+          APP_ENV: production
 
       - name: Upload Admin Panel Artifact
         uses: actions/upload-artifact@v4
@@ -195,6 +198,7 @@ jobs:
     needs: [release, build-push-docker, build-publish-extension, build-spas]
     if: needs.release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
         with:
