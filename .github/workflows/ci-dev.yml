@@ -11,6 +11,7 @@ permissions:
 
 env:
   TURBO_CACHE_DIR: .turbo
+  MISE_TRUSTED_CONFIG_PATHS: '/'
 
 jobs:
   setup:
