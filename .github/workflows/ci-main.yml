@@ -26,6 +26,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+      - run: mise trust
       - run: bun install
       - name: Run Verifications
         run: bunx turbo run lint typecheck test
@@ -50,6 +51,7 @@ jobs:
             turbo-${{ runner.os }}-
 
       - uses: jdx/mise-action@v2
+      - run: mise trust
       - run: bun install
 
       - name: Version and Tag
@@ -138,6 +140,7 @@ jobs:
         with:
           ref: v${{ needs.release.outputs.new_version }}
       - uses: jdx/mise-action@v2
+      - run: mise trust
       - run: bun install
       - name: Build Extension
         working-directory: apps/browser-extension
@@ -170,6 +173,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+      - run: mise trust
       - run: bun install
 
       - name: Generate env file
@@ -212,6 +216,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+      - run: mise trust
       - run: bun install
 
       - name: Download Admin Panel Artifact
