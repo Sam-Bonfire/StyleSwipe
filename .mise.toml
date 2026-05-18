@@ -1,9 +1,7 @@
 [tools]
 bun = "1.2.23"
 node = "lts"
-python = "3.12"
 "npm:@withgraphite/graphite-cli" = "latest"
-hurl = "7.1.0"
 
 [tasks.dev]
 description = "Start all development services (Convex, Consumer, Admin, Scraper)"
