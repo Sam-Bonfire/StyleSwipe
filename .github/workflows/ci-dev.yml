@@ -169,6 +169,7 @@ jobs:
 
       - name: Deploy Convex (Preview)
         run: bunx convex deploy
+        working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 

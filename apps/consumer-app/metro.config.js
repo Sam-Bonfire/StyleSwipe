@@ -76,6 +76,16 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
+// 6. Preserve class/function names to prevent "Module implementation must be a class" errors on web production builds
+config.transformer.minifierConfig = {
+  keep_classnames: true,
+  keep_fnames: true,
+  mangle: {
+    keep_classnames: true,
+    keep_fnames: true,
+  },
+};
+
 const { withTamagui } = require('@tamagui/metro-plugin');
 
 module.exports = withTamagui(config, {

@@ -14,7 +14,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "NODE_OPTIONS='--max-old-space-size=4096' turbo run lint",
     "test": "turbo run test",
-    "prepare": "git config core.hooksPath .githooks"
+    "prepare": "bun bin/setup-hooks.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
