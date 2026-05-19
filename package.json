@@ -36,7 +36,11 @@
   "overrides": {
     "fsevents": "npm:empty-npm-package@1.0.0",
     "@react-navigation/native": "7.1.28",
-    "@react-navigation/core": "7.14.0"
+    "@react-navigation/core": "7.14.0",
+    "detect-libc": "^2.0.3",
+    "@xenova/transformers": {
+      "sharp": "^0.33.5"
+    }
   },
   "resolutions": {
     "fsevents": "npm:empty-npm-package@1.0.0",
@@ -45,6 +49,8 @@
     "eslint": "^9.0.0",
     "esbuild": "0.25.0",
     "sharp": "^0.33.5",
+    "@xenova/transformers/sharp": "^0.33.5",
+    "detect-libc": "^2.0.3",
     "@typescript-eslint/parser": "^8.0.0",
     "@typescript-eslint/utils": "^8.0.0",
     "@react-navigation/native": "7.1.28",

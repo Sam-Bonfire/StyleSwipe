@@ -22,6 +22,31 @@ import Animated, {
 } from 'react-native-reanimated';
 import { styled, GetProps, Stack, YStack, Text } from 'tamagui';
 
+// Safe polyfill for Pointer Events capture/release DOMExceptions on Web browsers
+if (typeof window !== 'undefined' && typeof Element !== 'undefined') {
+  if (Element.prototype.releasePointerCapture) {
+    const originalRelease = Element.prototype.releasePointerCapture;
+    Element.prototype.releasePointerCapture = function (pointerId) {
+      try {
+        originalRelease.call(this, pointerId);
+      } catch {
+        // Silence invalid pointer capture release errors safely on Web
+      }
+    };
+  }
+  if (Element.prototype.setPointerCapture) {
+    const originalSet = Element.prototype.setPointerCapture;
+    Element.prototype.setPointerCapture = function (pointerId) {
+      try {
+        originalSet.call(this, pointerId);
+      } catch {
+        // Silence invalid pointer capture set errors safely on Web
+      }
+    };
+  }
+}
+
+
 const StackContainer = styled(YStack, {
   name: 'SwipeCardStack',
   flex: 1,
@@ -121,19 +146,6 @@ const AnimatedCard = React.forwardRef(
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
 
-    // Physical slot positions
-    const slotScale = useSharedValue(isTop ? 1 : cardScale - index * 0.05);
-    const slotYOffset = useSharedValue(isTop ? 0 : index * cardOffset);
-
-    // Sync prop changes (promotion) with spring
-    useEffect(() => {
-      const targetScale = isTop ? 1 : cardScale - index * 0.05;
-      const targetY = isTop ? 0 : index * cardOffset;
-
-      slotScale.value = withSpring(targetScale, SPRING_CONFIG);
-      slotYOffset.value = withSpring(targetY, SPRING_CONFIG);
-    }, [index, isTop, cardScale, cardOffset]);
-
     // Sync local movement to shared values if top card
     useAnimatedReaction(
       () => ({ x: translateX.value, y: translateY.value, active: isTop }),
@@ -220,7 +232,7 @@ const AnimatedCard = React.forwardRef(
         }
         if (onSwipeEnd) runOnJS(onSwipeEnd)();
       },
-    });
+    }, [isTop, handleSwipeCompletion, onSwipeStart, onSwipeEnd]);
 
     const animatedStyle = useAnimatedStyle(() => {
       const rotate = isTop
@@ -230,16 +242,19 @@ const AnimatedCard = React.forwardRef(
       const maxInteraction = Math.max(Math.abs(sharedX.value), Math.abs(sharedY.value));
       const progress = interpolate(maxInteraction, [0, SWIPE_THRESHOLD], [0, 1], Extrapolate.CLAMP);
 
-      // Simple drift calculation
+      // Current base position values
+      const curScale = isTop ? 1.0 : cardScale - index * 0.05;
+      const curY = isTop ? 0 : index * cardOffset;
+
+      // Target position values (once swiped away)
       const nextIdx = index - 1;
       const effNextIdx = nextIdx < 0 ? 0 : nextIdx;
-      const curScale = isTop ? 1 : cardScale - index * 0.05;
-      const nxtScale = cardScale - effNextIdx * 0.05;
-      const sDrift = isTop ? 0 : (nxtScale - curScale) * progress;
-
-      const curY = isTop ? 0 : index * cardOffset;
+      const nxtScale = effNextIdx === 0 ? 1.0 : cardScale - effNextIdx * 0.05;
       const nxtY = effNextIdx * cardOffset;
-      const yDrift = isTop ? 0 : (nxtY - curY) * progress;
+
+      // Pure layout interpolation: transition seamlessly under top card dragging
+      const interpolatedScale = interpolate(progress, [0, 1], [curScale, nxtScale]);
+      const interpolatedY = interpolate(progress, [0, 1], [curY, nxtY]);
 
       return {
         position: 'absolute' as const,
@@ -247,9 +262,9 @@ const AnimatedCard = React.forwardRef(
         height: '100%',
         transform: [
           { translateX: translateX.value },
-          { translateY: translateY.value + slotYOffset.value + yDrift },
+          { translateY: translateY.value + interpolatedY },
           { rotate: `${rotate}deg` },
-          { scale: slotScale.value + sDrift },
+          { scale: interpolatedScale },
         ] as any,
         zIndex: 100 - index,
       };
@@ -269,7 +284,11 @@ const AnimatedCard = React.forwardRef(
 
     return (
       <Animated.View style={animatedStyle}>
-        <PanGestureHandler onGestureEvent={gestureHandler} enabled={isTop}>
+        <PanGestureHandler
+          onGestureEvent={gestureHandler}
+          onHandlerStateChange={gestureHandler}
+          enabled={isTop}
+        >
           <Animated.View style={{ width: '100%', height: '100%' }}>
             <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
               {renderCard(item, index)}
@@ -334,14 +353,19 @@ export function SwipeCardStack<T>({
 
   const handleSwipe = useCallback(
     (item: T, direction: SwipeDirection) => {
-      // RESET sharedX/Y immediately to stop drift calculation for the next card
-      sharedX.value = 0;
-      sharedY.value = 0;
       onSwipe(item, direction);
       setCurrentIndex((prev) => prev + 1);
     },
-    [onSwipe, sharedX, sharedY],
+    [onSwipe],
   );
+
+  // Sync reset of shared animation values with the commit of the index promotion.
+  // This prevents the underlying card from dropping its active layout drift
+  // during the 1-2 frame asynchronous lag while React commits the index update.
+  useEffect(() => {
+    sharedX.value = 0;
+    sharedY.value = 0;
+  }, [currentIndex, sharedX, sharedY]);
 
   const visibleData = data.slice(currentIndex, currentIndex + visibleCards);
   const topCardRef = useRef<{ swipe: (dir: SwipeDirection) => void }>(null);
