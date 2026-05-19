@@ -324,6 +324,26 @@ const feedback = defineTable({
     filterFields: ['status', 'type', 'userId'],
   });
 
+// Separate table for product embeddings (Widen-Migrate-Narrow Pattern)
+const product_embeddings = defineTable({
+  productId: v.id('products'),
+  embeddingVersions: v.object({
+    v1: v.optional(v.array(v.float64())), // BGE-Small (384-dim)
+  }),
+  category: v.string(),
+  gender: v.optional(v.union(v.literal('men'), v.literal('women'), v.literal('unisex'))),
+  priceTier: v.optional(
+    v.union(v.literal('budget'), v.literal('mid'), v.literal('premium'), v.literal('luxury')),
+  ),
+  updatedAt: v.number(),
+})
+  .index('by_productId', ['productId'])
+  .vectorIndex('by_embedding_v1', {
+    vectorField: 'embeddingVersions.v1',
+    dimensions: 384,
+    filterFields: ['category', 'gender', 'priceTier'],
+  });
+
 // =============================================================================
 // SCHEMA EXPORT
 // =============================================================================
@@ -339,6 +359,7 @@ export default defineSchema({
 
   // Catalog Context
   products,
+  product_embeddings,
   categories,
 
   // Discovery Context

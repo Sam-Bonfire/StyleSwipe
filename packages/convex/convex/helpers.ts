@@ -7,7 +7,7 @@ export const getProductsByIds = query({
     },
     handler: async (ctx, args) => {
         if (args.ids.length === 0) return [];
-        return await ctx.db
+        const products = await ctx.db
             .query('products')
             .filter((q) =>
                 args.ids.length === 1
@@ -15,5 +15,19 @@ export const getProductsByIds = query({
                     : q.or(...args.ids.map((id) => q.eq(q.field('_id'), id)))
             )
             .collect();
+
+        return products.map((p) => {
+            if (!p) return p;
+            const { embedding, embeddingVersions, meta, ...rest } = p;
+            let cleanMeta = meta;
+            if (meta && meta.rawAttributes !== undefined) {
+                const { rawAttributes, ...otherMeta } = meta;
+                cleanMeta = otherMeta;
+            }
+            return {
+                ...rest,
+                ...(cleanMeta ? { meta: cleanMeta } : {}),
+            };
+        });
     },
 });

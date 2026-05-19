@@ -3,10 +3,24 @@ import { v } from 'convex/values';
 import { query, mutation, action } from './_generated/server';
 import { api } from './_generated/api';
 
+function projectProduct(p: any) {
+  if (!p) return p;
+  const { embedding, embeddingVersions, meta, ...rest } = p;
+  let cleanMeta = meta;
+  if (meta && meta.rawAttributes !== undefined) {
+    const { rawAttributes, ...otherMeta } = meta;
+    cleanMeta = otherMeta;
+  }
+  return {
+    ...rest,
+    ...(cleanMeta ? { meta: cleanMeta } : {}),
+  };
+}
+
 export const getById = query({
   args: { id: v.id('products') },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    return projectProduct(await ctx.db.get(args.id));
   },
 });
 
@@ -15,10 +29,11 @@ export const get = getById;
 export const getByCategory = query({
   args: { category: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const products = await ctx.db
       .query('products')
       .withIndex('by_category', (q) => q.eq('category', args.category))
       .take(args.limit ?? 50);
+    return products.map(projectProduct);
   },
 });
 
@@ -30,22 +45,24 @@ export const getByCategoryAndPrice = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const products = await ctx.db
       .query('products')
       .withIndex('by_category_price', (q) =>
         q.eq('category', args.category).gte('price', args.minPrice).lte('price', args.maxPrice),
       )
       .take(args.limit ?? 50);
+    return products.map(projectProduct);
   },
 });
 
 export const getByBrand = query({
   args: { brand: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const products = await ctx.db
       .query('products')
       .withIndex('by_brand', (q) => q.eq('brand', args.brand))
       .take(args.limit ?? 50);
+    return products.map(projectProduct);
   },
 });
 
@@ -67,7 +84,8 @@ export const searchByTitle = query({
       q = q.filter((q) => q.eq(q.field('category'), args.category));
     }
 
-    return await q.take(10);
+    const products = await q.take(10);
+    return products.map(projectProduct);
   },
 });
 
@@ -189,6 +207,7 @@ export const getLatest = query({
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 10;
-    return await ctx.db.query('products').order('desc').take(limit);
+    const products = await ctx.db.query('products').order('desc').take(limit);
+    return products.map(projectProduct);
   },
 });
