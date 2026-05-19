@@ -60,6 +60,32 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
+          # Check if there are any changeset files (excluding config.json)
+          CHANGESET_COUNT=$(find .changeset -name "*.md" 2>/dev/null | wc -l)
+          if [ "$CHANGESET_COUNT" -eq 0 ]; then
+            echo "⚠️ No changesets found. Generating a default automated patch changeset..."
+            
+            # Create a unique filename for the automated changeset
+            CHANGESET_FILE=".changeset/automated-patch-$(date +%s).md"
+            
+            cat << EOF > "$CHANGESET_FILE"
+---
+"@app/admin-panel": patch
+"@app/browser-extension": patch
+"@app/consumer-app": patch
+"@app/convex": patch
+"@app/core": patch
+"@app/infrastructure": patch
+"@app/logger": patch
+"@app/scraper-service": patch
+"@app/ui-kit": patch
+---
+
+Automated patch release for latest main commits
+EOF
+            echo "✅ Created automated changeset: $CHANGESET_FILE"
+          fi
+          
           # Run changeset version to bump versions and update changelogs
           bun changeset version
           
