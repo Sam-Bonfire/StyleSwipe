@@ -6,9 +6,12 @@ function runConvex(func: string, jsonArgs?: any) {
     cmdArgs.push(JSON.stringify(jsonArgs));
   }
   
-  const result = spawnSync("npx", cmdArgs, { encoding: "utf8" });
+  const result = spawnSync("npx", cmdArgs, { 
+    encoding: "utf8",
+    cwd: "c:\\Users\\Sam\\Consusson\\Projects\\StyleSwipe\\packages\\convex"
+  });
   if (result.status !== 0) {
-    throw new Error(`Convex execution failed: ${result.stderr}`);
+    throw new Error(`Convex execution failed: ${result.stderr || result.stdout}`);
   }
   return JSON.parse(result.stdout.trim());
 }
@@ -18,25 +21,33 @@ async function main() {
   
   let migratedCount = 0;
   let iteration = 1;
+  let cursor: number | undefined = undefined;
   
   while (true) {
-    console.log(`\n🔍 [Iteration ${iteration}] Querying for unmigrated product embeddings...`);
-    const unmigrated = runConvex("migrations:getUnmigratedProducts");
+    console.log(`\n🔍 [Iteration ${iteration}] Executing migrateBatch...`);
+    const result = runConvex("migrations:migrateBatch", { 
+      cursor, 
+      limit: 50 
+    });
     
-    if (!unmigrated || unmigrated.length === 0) {
-      console.log("🎉 Parity check complete! No unmigrated product embeddings remain.");
+    const { count, lastCursor, evaluated } = result;
+    
+    if (count > 0) {
+      migratedCount += count;
+      console.log(`✅ Successfully backfilled ${count} products in this batch (Total: ${migratedCount})`);
+    } else {
+      console.log(`ℹ️ Evaluated ${evaluated} products, 0 backfilled.`);
+    }
+    
+    if (evaluated === 0 || lastCursor === undefined) {
+      console.log("🎉 Complete! Reached the end of the catalog.");
       break;
     }
     
-    console.log(`📦 Found ${unmigrated.length} unmigrated products. Executing migrateBatch...`);
-    runConvex("migrations:migrateBatch", { batch: unmigrated });
-    
-    migratedCount += unmigrated.length;
-    console.log(`✅ Successfully backfilled ${unmigrated.length} products (Total: ${migratedCount})`);
-    
+    cursor = lastCursor;
     iteration++;
     // Sleep briefly to respect database load limits
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
   
   console.log(`\n🎉 Success! Backfilled a total of ${migratedCount} vector embeddings to the product_embeddings table!`);

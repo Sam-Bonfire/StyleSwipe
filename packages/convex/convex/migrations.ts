@@ -1,4 +1,4 @@
-import { internalMutation, internalQuery } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
 const BATCH_SIZE = 50;
@@ -7,16 +7,23 @@ const BATCH_SIZE = 50;
  * Migration Step 1: Batch-fetch products that have an embedding on the main table
  * but haven't been copied to the separate product_embeddings table yet.
  */
-export const getUnmigratedProducts = internalQuery({
-  handler: async (ctx) => {
-    // Get products with embeddings on the product record
-    // We take a small batch to respect execution and memory limits
-    const products = await ctx.db.query('products').order('desc').take(250);
+export const getUnmigratedProducts = query({
+  args: {
+    cursor: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db.query('products');
+    if (args.cursor !== undefined) {
+      const cursorVal = args.cursor;
+      query = query.filter((q) => q.gt(q.field('_creationTime'), cursorVal));
+    }
+    const products = await query.take(150);
     
     const unmigrated: any[] = [];
+    let lastCursor: number | undefined = args.cursor;
     for (const p of products) {
+      lastCursor = p._creationTime;
       if (p.embedding || p.embeddingVersions?.v1) {
-        // Check if already copied to the split table
         const embDoc = await ctx.db
           .query('product_embeddings')
           .withIndex('by_productId', (q) => q.eq('productId', p._id))
@@ -28,34 +35,51 @@ export const getUnmigratedProducts = internalQuery({
         }
       }
     }
-    return unmigrated;
+    return { unmigrated, lastCursor, evaluated: products.length };
   },
 });
 
-/**
- * Migration Step 2: Internal mutation to migrate a batch of product embeddings
- */
-export const migrateBatch = internalMutation({
+export const migrateBatch = mutation({
   args: {
-    batch: v.array(v.any()),
+    cursor: v.optional(v.number()),
+    limit: v.number(),
   },
   handler: async (ctx, args) => {
-    for (const p of args.batch) {
-      const activeEmbedding = p.embedding || p.embeddingVersions?.v1;
-      if (!activeEmbedding) continue;
-
-      // Copy embedding and metadata to separate table
-      await ctx.db.insert('product_embeddings', {
-        productId: p._id,
-        embeddingVersions: {
-          v1: activeEmbedding,
-        },
-        category: p.category,
-        gender: p.gender,
-        priceTier: p.priceTier,
-        updatedAt: Date.now(),
-      });
+    let query = ctx.db.query('products');
+    if (args.cursor !== undefined) {
+      const cursorVal = args.cursor;
+      query = query.filter((q) => q.gt(q.field('_creationTime'), cursorVal));
     }
+    const products = await query.take(150);
+    
+    let count = 0;
+    let lastCursor: number | undefined = args.cursor;
+    for (const p of products) {
+      lastCursor = p._creationTime;
+      if (p.embedding || p.embeddingVersions?.v1) {
+        const embDoc = await ctx.db
+          .query('product_embeddings')
+          .withIndex('by_productId', (q) => q.eq('productId', p._id))
+          .first();
+          
+        if (!embDoc) {
+          const activeEmbedding = p.embedding || p.embeddingVersions?.v1;
+          await ctx.db.insert('product_embeddings', {
+            productId: p._id,
+            embeddingVersions: {
+              v1: activeEmbedding,
+            },
+            category: p.category,
+            gender: p.gender,
+            priceTier: p.priceTier,
+            updatedAt: Date.now(),
+          });
+          count++;
+          if (count >= args.limit) break;
+        }
+      }
+    }
+    return { count, lastCursor, evaluated: products.length };
   },
 });
 
@@ -63,7 +87,7 @@ export const migrateBatch = internalMutation({
  * Migration Step 3: Run final cleanup batch to delete legacy embeddings from products
  * and reclaim database storage space! Supports a strict `dryRun` flag.
  */
-export const purgeLegacyEmbeddings = internalMutation({
+export const purgeLegacyEmbeddings = mutation({
   args: {
     limit: v.number(),
     dryRun: v.boolean(),
