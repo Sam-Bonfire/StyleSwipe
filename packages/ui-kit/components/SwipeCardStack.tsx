@@ -220,7 +220,7 @@ const AnimatedCard = React.forwardRef(
         }
         if (onSwipeEnd) runOnJS(onSwipeEnd)();
       },
-    });
+    }, [isTop, handleSwipeCompletion, onSwipeStart, onSwipeEnd]);
 
     const animatedStyle = useAnimatedStyle(() => {
       const rotate = isTop
@@ -269,7 +269,11 @@ const AnimatedCard = React.forwardRef(
 
     return (
       <Animated.View style={animatedStyle}>
-        <PanGestureHandler onGestureEvent={gestureHandler} enabled={isTop}>
+        <PanGestureHandler
+          onGestureEvent={gestureHandler}
+          onHandlerStateChange={gestureHandler}
+          enabled={isTop}
+        >
           <Animated.View style={{ width: '100%', height: '100%' }}>
             <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
               {renderCard(item, index)}
