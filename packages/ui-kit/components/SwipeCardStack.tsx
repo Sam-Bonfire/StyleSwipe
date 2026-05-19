@@ -22,6 +22,31 @@ import Animated, {
 } from 'react-native-reanimated';
 import { styled, GetProps, Stack, YStack, Text } from 'tamagui';
 
+// Safe polyfill for Pointer Events capture/release DOMExceptions on Web browsers
+if (typeof window !== 'undefined' && typeof Element !== 'undefined') {
+  if (Element.prototype.releasePointerCapture) {
+    const originalRelease = Element.prototype.releasePointerCapture;
+    Element.prototype.releasePointerCapture = function (pointerId) {
+      try {
+        originalRelease.call(this, pointerId);
+      } catch {
+        // Silence invalid pointer capture release errors safely on Web
+      }
+    };
+  }
+  if (Element.prototype.setPointerCapture) {
+    const originalSet = Element.prototype.setPointerCapture;
+    Element.prototype.setPointerCapture = function (pointerId) {
+      try {
+        originalSet.call(this, pointerId);
+      } catch {
+        // Silence invalid pointer capture set errors safely on Web
+      }
+    };
+  }
+}
+
+
 const StackContainer = styled(YStack, {
   name: 'SwipeCardStack',
   flex: 1,
