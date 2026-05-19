@@ -25,6 +25,7 @@ import type * as index from "../index.js";
 import type * as init from "../init.js";
 import type * as logs from "../logs.js";
 import type * as members from "../members.js";
+import type * as migrations from "../migrations.js";
 import type * as organizationAdmin from "../organizationAdmin.js";
 import type * as organizations from "../organizations.js";
 import type * as partnerSync from "../partnerSync.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   init: typeof init;
   logs: typeof logs;
   members: typeof members;
+  migrations: typeof migrations;
   organizationAdmin: typeof organizationAdmin;
   organizations: typeof organizations;
   partnerSync: typeof partnerSync;

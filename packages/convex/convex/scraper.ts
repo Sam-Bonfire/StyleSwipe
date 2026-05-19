@@ -188,6 +188,15 @@ async function promoteInternal(
         : data.analytics.subCategory.typeName || data.analytics.subCategory.name || '';
   }
 
+  const rawImages: string[] = isMapped
+    ? (Array.isArray(data.images) ? data.images : [])
+    : data.media?.albums?.flatMap((album: { images?: { src: string }[] }) =>
+      album.images?.map((img) => img.src),
+    ) || [];
+  const uniqueImages = Array.from(new Set(rawImages.filter((img) => typeof img === 'string')));
+
+  const activeEmbedding = embeddingOverride || data.embedding || undefined;
+
   const productFields = {
     brand: isMapped ? data.brand || '' : data.brand?.name || '',
     title: isMapped ? data.title || '' : data.name || '',
@@ -196,13 +205,7 @@ async function promoteInternal(
     category: category,
     masterCategory: masterCategory,
     subCategory: subCategory,
-    images: isMapped
-      ? Array.isArray(data.images)
-        ? data.images
-        : []
-      : data.media?.albums?.flatMap((album: { images?: { src: string }[] }) =>
-        album.images?.map((img) => img.src),
-      ) || [],
+    images: uniqueImages,
     description: isMapped
       ? data.description || ''
       : data.description || data.productDetails?.description || '',
@@ -221,7 +224,7 @@ async function promoteInternal(
           ? 'premium'
           : 'luxury') as 'budget' | 'mid' | 'premium' | 'luxury',
     onSale: price < (isMapped ? data.mrp || 0 : data.price?.mrp || 0),
-    embedding: embeddingOverride || data.embedding || undefined, // Use override first, then fallback to data (legacy)
+    embedding: activeEmbedding, // Use override first, then fallback to data (legacy)
     attributes: isMapped
       ? {
         ...(data.attributes || {}),
@@ -249,7 +252,6 @@ async function promoteInternal(
       scrapedAt: scraped.lastScrapedAt,
       originalUrl: scraped.url,
       externalId: scraped.externalId,
-      rawAttributes: data.attributes,
     },
     externalId: scraped.externalId, // Top-level for indexing
     updatedAt: Date.now(),
@@ -273,6 +275,7 @@ async function promoteInternal(
       .first();
   }
 
+  let productId: Id<'products'>;
   if (existingProduct) {
     // If updating without new embedding, preserve old one?
     // No, current logic overwrites. If embeddingOverride is undefined, productFields.embedding is undefined.
@@ -281,11 +284,37 @@ async function promoteInternal(
     // Convex patch: undefined fields in object are NOT updated. explicit null deletes.
     // productFields.embedding is undefined if missing. So it won't overwrite existing embedding in DB. Good.
     await ctx.db.patch(existingProduct._id, productFields);
+    productId = existingProduct._id;
   } else {
-    await ctx.db.insert('products', {
+    productId = await ctx.db.insert('products', {
       ...productFields,
       // createdAt removed as it is auto-handled by system _creationTime or not needed
     });
+  }
+
+  // Dual-Write to the product_embeddings table
+  if (activeEmbedding) {
+    const existingEmbedding = await ctx.db
+      .query('product_embeddings')
+      .withIndex('by_productId', (q) => q.eq('productId', productId))
+      .first();
+
+    const embeddingFields = {
+      productId,
+      embeddingVersions: {
+        v1: activeEmbedding,
+      },
+      category: productFields.category,
+      gender: productFields.gender,
+      priceTier: productFields.priceTier,
+      updatedAt: Date.now(),
+    };
+
+    if (existingEmbedding) {
+      await ctx.db.patch(existingEmbedding._id, embeddingFields);
+    } else {
+      await ctx.db.insert('product_embeddings', embeddingFields);
+    }
   }
 }
 
