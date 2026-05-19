@@ -3,6 +3,10 @@ bun = "1.2.23"
 node = "lts"
 "npm:@withgraphite/graphite-cli" = "latest"
 
+[tasks.killports]
+description = "Kill any orphaned processes running on local dev ports (8081, 8082, 3001)"
+run = "bun bin/kill-ports.ts"
+
 [tasks.dev]
 description = "Start all development services (Convex, Consumer, Admin, Scraper)"
 depends = ["dev:convex", "dev:consumer:run", "dev:admin:run", "dev:scraper:run"]
@@ -17,7 +21,7 @@ depends = ["dev:convex", "dev:consumer:run"]
 
 [tasks."dev:consumer:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/consumer-app dev"
+run = "bun run --env-file=.env --env-file=.env.local --filter @app/consumer-app dev"
 
 [tasks."dev:consumer:web"]
 description = "Start Consumer App for Web (with Convex)"
@@ -25,7 +29,7 @@ depends = ["dev:convex", "dev:consumer:web:run"]
 
 [tasks."dev:consumer:web:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/consumer-app web"
+run = "bun run --env-file=.env --env-file=.env.local --filter @app/consumer-app web"
 
 [tasks."dev:admin"]
 description = "Start Admin Panel (with Convex)"
@@ -33,7 +37,7 @@ depends = ["dev:convex", "dev:admin:run"]
 
 [tasks."dev:admin:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.${APP_ENV:-local} --filter @app/admin-panel dev"
+run = "bun run --env-file=.env --env-file=.env.local --filter @app/admin-panel dev"
 
 [tasks."dev:scraper"]
 description = "Start Scraper Service (with Convex)"
@@ -41,7 +45,7 @@ depends = ["dev:convex", "dev:scraper:run"]
 
 [tasks."dev:scraper:run"]
 hide = true
-run = "bun run --env-file=.env.local --filter @app/scraper-service start -- --daemon"
+run = "bun run --env-file=.env --env-file=.env.local --filter @app/scraper-service start -- --daemon"
 
 [tasks.typecheck]
 description = "Run TypeScript type checking across the entire monorepo"
