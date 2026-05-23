@@ -1,7 +1,7 @@
 
 import { CartItem } from '@app/core';
 import { useCurrentUser, useProduct, useAddToCart } from '@app/infrastructure';
-import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button } from '@app/ui-kit';
+import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
 import { ChevronLeft } from '@tamagui/lucide-icons';
@@ -18,7 +18,9 @@ export function ProductDetailScreen() {
   const { id: productId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const theme = useTheme();
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const galleryHeight = windowWidth / 0.7;
+  const sizeSelectorYRef = React.useRef(0);
 
   // FETCH REAL DATA
   // We cast productId to any because navigation params are strings, but Convex expects Id<"products">
@@ -34,6 +36,7 @@ export function ProductDetailScreen() {
 
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
+  const scrollViewRef = React.useRef<ScrollView>(null);
 
   // -------------------------------------------------------------------------
   // 2. Data Mapping
@@ -69,7 +72,17 @@ export function ProductDetailScreen() {
         <Text fontSize="$6" color="$textSecondary">
           Product not found
         </Text>
-        <Button variant="ghost" onPress={() => router.back()} marginTop="$4">
+        <Button
+          variant="ghost"
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(app)/(tabs)');
+            }
+          }}
+          marginTop="$4"
+        >
           Go Back
         </Button>
       </View>
@@ -83,27 +96,91 @@ export function ProductDetailScreen() {
   const displayAttributes: Record<string, string> = Object.entries(rawAttributes).reduce(
     (acc, [key, value]) => {
       if (key === 'size') return acc; // Skip size as key, handled separately in selector
+      if (key === 'inventoryInfo') return acc; // Skip complex inventoryInfo array, handled separately below
+
+      // Filter out empty values (empty strings, null, undefined)
+      if (value === null || value === undefined || value === '') {
+        return acc;
+      }
+
       if (typeof value === 'string' || typeof value === 'number') {
         acc[key] = String(value);
       } else if (Array.isArray(value)) {
-        acc[key] = value.join(', ');
+        const cleanArr = value.filter(val => val !== null && val !== undefined && val !== '');
+        if (cleanArr.length > 0) {
+          acc[key] = cleanArr.join(', ');
+        }
       }
       return acc;
     },
     {} as Record<string, string>,
   );
 
-  // Ensure core fields exist for consistent UI if needed, though UI maps dynamically now.
-  // We don't enforce strict shape here to allow flexibility.
+  // Helper to generate dynamic description if core description is blank
+  const getFallbackDescription = (data: typeof productData) => {
+    const brand = data.brand || '';
+    const raw = data.raw || {};
+    const additionalInfo = raw.additionalInfo || '';
+    const gender = raw.gender || data.gender || '';
+    const color = data.attributes?.color || raw.primaryColour || '';
+    const category = data.category || '';
+
+    const parts: string[] = [];
+
+    if (brand) {
+      parts.push(`Experience premium fashion by ${brand}.`);
+    }
+
+    if (additionalInfo) {
+      parts.push(`This product features a beautifully designed ${additionalInfo.toLowerCase()} style, perfect for elevated styling.`);
+    } else if (category) {
+      parts.push(`This high-quality ${category.toLowerCase()} is designed to be a versatile and stylish addition to your wardrobe.`);
+    }
+
+    const details: string[] = [];
+    if (gender) {
+      details.push(`tailored specifically for ${gender.toLowerCase()}`);
+    }
+    if (color) {
+      details.push(`available in a stunning ${color.toLowerCase()} hue`);
+    }
+
+    if (details.length > 0) {
+      parts.push(`It is ${details.join(' and ')}.`);
+    } else {
+      parts.push('Curated with care to ensure both exceptional comfort and durability.');
+    }
+
+    return parts.join(' ');
+  };
+
+  interface InventoryItem {
+    available: boolean;
+    brandSizeLabel: string;
+    inventory: number;
+    label: string;
+    skuId: number;
+  }
+
+  // Human-readable size-level stock availability
+  const inventorySizes = Array.isArray(rawAttributes.inventoryInfo)
+    ? (rawAttributes.inventoryInfo as unknown as InventoryItem[])
+        .filter((item: InventoryItem) => item.available && item.inventory > 0)
+        .map((item: InventoryItem) => item.label)
+    : [];
+
+  const stockStatus = inventorySizes.length > 0
+    ? `In Stock (${inventorySizes.join(', ')})`
+    : 'Out of Stock';
 
   const product = {
-    id: productData._id,
+    id: productData._id || productData.id || productData.externalId || productId || '',
     brand: productData.brand,
     title: productData.title,
     price: productData.price,
     originalPrice: productData.mrp,
     description:
-      productData.description || `Experience premium quality with the ${productData.title}.`,
+      productData.description || getFallbackDescription(productData),
     rating: productData.rating || 4.5,
     reviewCount: productData.reviewCount || 128,
     platform: productData.platform || 'StyleSwipe Verified',
@@ -113,9 +190,8 @@ export function ProductDetailScreen() {
         : ['https://placehold.co/400x500/png?text=No+Image'],
     availableSizes: Array.isArray(rawAttributes.size) ? rawAttributes.size : ['S', 'M', 'L', 'XL'],
     attributes: {
-      material: 'N/A', // Defaults
-      fit: 'Regular',
       ...displayAttributes,
+      ...(inventorySizes.length > 0 ? { inventoryInfo: stockStatus } : {}),
     },
   };
 
@@ -153,6 +229,9 @@ export function ProductDetailScreen() {
 
     if (!selectedSize) {
       setShowSizeError(true);
+      // Smoothly scroll the ScrollView exactly to the Size Selector Y offset so the red error message is immediately visible to the user
+      const scrollY = Math.max(0, galleryHeight + sizeSelectorYRef.current - 40);
+      scrollViewRef.current?.scrollTo({ y: scrollY, animated: true });
       return;
     }
 
@@ -189,6 +268,7 @@ export function ProductDetailScreen() {
   return (
     <View style={{ height: windowHeight, backgroundColor: theme.background.val }}>
       <ScrollView
+        ref={scrollViewRef}
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={true}
@@ -230,10 +310,52 @@ export function ProductDetailScreen() {
             </Text>
           </XStack>
 
+          {/* Highlights Badges */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
+            style={{ marginVertical: 4 }}
+          >
+            {productData.raw?.season && (
+              <CategoryChip
+                label={`${productData.raw.season} Collection`}
+                size="small"
+                selected={false}
+              />
+            )}
+            {productData.raw?.isFastFashion && (
+              <CategoryChip
+                label="Trending"
+                size="small"
+                selected={true}
+              />
+            )}
+            {product.platform && (
+              <CategoryChip
+                label={product.platform}
+                size="small"
+                selected={false}
+              />
+            )}
+            {rawAttributes.subCategory && (
+              <CategoryChip
+                label={String(rawAttributes.subCategory)}
+                size="small"
+                selected={false}
+              />
+            )}
+          </ScrollView>
+
           <Separator marginVertical="$4" borderColor="$borderColor" />
 
           {/* Size Selector */}
-          <YStack marginBottom="$4">
+          <YStack
+            marginBottom="$4"
+            onLayout={(event) => {
+              sizeSelectorYRef.current = event.nativeEvent.layout.y;
+            }}
+          >
             <SizeChipGroup
               fields={[sizeField]}
               selectedSizes={selectedSizes}
@@ -263,33 +385,48 @@ export function ProductDetailScreen() {
             Product Details
           </Text>
           <YStack gap="$2" flexWrap="wrap">
-            {Object.entries(product.attributes).map(([key, value]) => (
-              <XStack
-                key={key}
-                alignItems="flex-start"
-                backgroundColor="$surface"
-                padding="$3"
-                borderRadius="$3"
-                borderColor="$borderColor"
-                borderWidth={1}
-              >
-                <Stack width="35%" flexShrink={0}>
-                  <Text
-                    fontSize="$3"
-                    color="$textSecondary"
-                    textTransform="capitalize"
-                    fontWeight="500"
-                  >
-                    {key}
-                  </Text>
-                </Stack>
-                <Stack flex={1} paddingLeft="$2">
-                  <Text fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">
-                    {value}
-                  </Text>
-                </Stack>
-              </XStack>
-            ))}
+            {Object.entries(product.attributes).map(([key, value]) => {
+              const formatAttributeKey = (k: string) => {
+                const keyMap: Record<string, string> = {
+                  masterCategory: 'Category',
+                  subCategory: 'Sub Category',
+                  inventoryInfo: 'Stock Status',
+                  care: 'Care Instructions',
+                };
+                if (keyMap[k]) return keyMap[k];
+                return k
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/^./, (str) => str.toUpperCase())
+                  .trim();
+              };
+
+              return (
+                <XStack
+                  key={key}
+                  alignItems="center"
+                  backgroundColor="$surface"
+                  padding="$3"
+                  borderRadius="$3"
+                  borderColor="$borderColor"
+                  borderWidth={1}
+                >
+                  <Stack width="35%" flexShrink={0}>
+                    <Text
+                      fontSize="$3"
+                      color="$textSecondary"
+                      fontWeight="500"
+                    >
+                      {formatAttributeKey(key)}
+                    </Text>
+                  </Stack>
+                  <Stack flex={1} paddingLeft="$2">
+                    <Text fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">
+                      {value}
+                    </Text>
+                  </Stack>
+                </XStack>
+              );
+            })}
           </YStack>
         </YStack>
       </ScrollView>
@@ -297,7 +434,13 @@ export function ProductDetailScreen() {
       {/* 3. Floating UI: Back Button */}
       <View style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
         <TopBarIconButton
-          onPress={() => router.back()}
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(app)/(tabs)');
+            }
+          }}
           backgroundColor="$background"
 
           shadowColor="$shadowColor"
