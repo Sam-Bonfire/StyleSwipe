@@ -68,21 +68,20 @@ jobs:
             # Create a unique filename for the automated changeset
             CHANGESET_FILE=".changeset/automated-patch-$(date +%s).md"
             
-            cat << 'EOF' | sed 's/^[ \t]*//' > "$CHANGESET_FILE"
-            ---
-            "@app/admin-panel": patch
-            "@app/browser-extension": patch
-            "@app/consumer-app": patch
-            "@app/convex": patch
-            "@app/core": patch
-            "@app/infrastructure": patch
-            "@app/logger": patch
-            "@app/scraper-service": patch
-            "@app/ui-kit": patch
-            ---
-
-            Automated patch release for latest main commits
-            EOF
+            printf "%s\n" \
+              "---" \
+              '"@app/admin-panel": patch' \
+              '"@app/browser-extension": patch' \
+              '"@app/consumer-app": patch' \
+              '"@app/convex": patch' \
+              '"@app/core": patch' \
+              '"@app/infrastructure": patch' \
+              '"@app/logger": patch' \
+              '"@app/scraper-service": patch' \
+              '"@app/ui-kit": patch' \
+              "---" \
+              "" \
+              "Automated patch release for latest main commits" > "$CHANGESET_FILE"
             echo "✅ Created automated changeset: $CHANGESET_FILE"
           fi
           
