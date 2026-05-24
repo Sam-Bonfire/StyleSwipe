@@ -20,3 +20,11 @@ export function useLatestProducts(limit: number = 10) {
 export function useProduct(id: string | undefined) {
     return useQuery(api.products.get, id ? { id: id as Id<'products'> } : 'skip');
 }
+
+/**
+ * Fetches multiple products by their IDs.
+ */
+export function useProductsByIds(ids: string[]) {
+    return useQuery(api.helpers.getProductsByIds, { ids: ids as Id<'products'>[] });
+}
+

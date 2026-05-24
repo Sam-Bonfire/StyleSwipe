@@ -12,7 +12,7 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 // Helper to get style profile
 const getStyleProfile = async (ctx: MutationCtx, userId: string) => {
   return await ctx.db
-    .query('styleProfiles')
+    .query('style_profiles')
     .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
 };
@@ -202,7 +202,7 @@ export const processSwipe = mutation({
               lastUpdated: Date.now(),
             });
           } else {
-            await ctx.db.insert('styleProfiles', {
+            await ctx.db.insert('style_profiles', {
               userId: userId,
               ...newProfile,
               lastUpdated: Date.now(),

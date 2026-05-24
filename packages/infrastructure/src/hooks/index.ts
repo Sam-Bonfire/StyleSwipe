@@ -5,7 +5,7 @@
 
 export * from './useConvexClient';
 export { useCurrentUser, useGetOrCreateUser, useAuthActions } from './useAuth';
-export { useLatestProducts, useProduct } from './useProducts';
+export { useLatestProducts, useProduct, useProductsByIds } from './useProducts';
 export {
   useRecentlyViewed,
   useRecordProductView,
@@ -22,6 +22,7 @@ export {
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile } from './useUsers';
 export { useSearch } from './useSearch';
+export { useSystemBoard, useTrackPurchaseClick } from './useBoards';
 
 // =============================================================================
 // ADMIN HOOKS (use in apps/admin-panel)

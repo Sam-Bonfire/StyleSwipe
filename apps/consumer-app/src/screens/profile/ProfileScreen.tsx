@@ -35,6 +35,7 @@ export function ProfileScreen() {
 
         <YStack space="$4" marginTop="$4">
           <Button variant="outlined" onPress={() => router.push('/(app)/edit-profile')}>Edit Profile</Button>
+          <Button variant="outlined" onPress={() => router.push('/(app)/orders')}>Your Orders</Button>
           <Button variant="outlined" onPress={() => router.push('/(app)/feedback')}>Give Feedback</Button>
           <Button color="$error" variant="ghost" onPress={handleLogout}>
             Sign Out

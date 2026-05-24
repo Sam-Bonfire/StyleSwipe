@@ -31,7 +31,7 @@ export const createPartnerSyncRepositoryLayer = (client: ConvexClient) => Layer.
 
     findById: (id: string) => Effect.tryPromise({
       try: async () => {
-          const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partnerSync'> });
+          const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partner_sync'> });
           return doc ? mapToEntity(doc) : null;
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
@@ -96,12 +96,12 @@ return { ...sync, id: id as string };
     update: (id: string, data: Partial<Omit<PartnerSync, 'id'>>) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.partnerSync.update, {
-              id: id as Id<'partnerSync'>,
+              id: id as Id<'partner_sync'>,
               ...data,
               initiatorId: data.initiatorId,
               partnerId: data.partnerId,
           } as any);
-          const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partnerSync'> });
+          const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partner_sync'> });
           if (!doc) throw new Error(`PartnerSync ${id} not found after update`);
           return mapToEntity(doc);
       },
@@ -111,10 +111,10 @@ return { ...sync, id: id as string };
     updateStatus: (id: string, status: PartnerSyncStatus) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.partnerSync.updateStatus, {
-              id: id as Id<'partnerSync'>,
+              id: id as Id<'partner_sync'>,
               status,
           } as any);
-          const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partnerSync'> });
+          const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partner_sync'> });
           if (!doc) throw new Error(`PartnerSync ${id} not found after update`);
           return mapToEntity(doc);
       },
@@ -124,7 +124,7 @@ return { ...sync, id: id as string };
     delete: (id: string) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.partnerSync.remove, {
-  id: id as Id<'partnerSync'>,
+  id: id as Id<'partner_sync'>,
 } as any);
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
