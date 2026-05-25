@@ -138,8 +138,12 @@ export function OrdersScreen() {
 
                   <Separator borderColor="$borderColor" />
 
-                  <XStack justifyContent="space-between" alignItems="center">
-                    <YStack>
+                  <XStack
+                    justifyContent="space-between"
+                    alignItems="center"
+                    $xs={{ flexDirection: 'column', gap: '$3', alignItems: 'stretch' }}
+                  >
+                    <YStack $xs={{ alignItems: 'flex-start' }}>
                       <Text fontSize="$1" color="$textTertiary">
                         CHECKOUT INITIATED
                       </Text>
@@ -154,6 +158,7 @@ export function OrdersScreen() {
                       borderRadius="$2"
                       onPress={() => handleBuyAgain(originalUrl)}
                       icon={ExternalLink}
+                      $xs={{ width: '100%' }}
                     >
                       <Text color="white" fontWeight="600" fontSize="$2">
                         Buy Again on {platform}
