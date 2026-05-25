@@ -191,7 +191,7 @@ export const CartScreen = () => {
                     : 'Original Store';
 
                   return (
-                    <XStack
+                    <YStack
                       key={item.productId}
                       backgroundColor="$surface"
                       padding="$3"
@@ -199,25 +199,26 @@ export const CartScreen = () => {
                       gap="$3"
                       borderWidth={1}
                       borderColor="$borderColor"
-                      alignItems="center"
                     >
-                      <Image source={{ uri: imageUrl }} width={60} height={75} borderRadius="$2" resizeMode="cover" />
-                      <YStack flex={1} gap="$1">
-                        <Text fontSize="$2" fontWeight="600" textTransform="uppercase" color="$textPrimary">
-                          {brand}
-                        </Text>
-                        <Text fontSize="$3" numberOfLines={1} color="$textSecondary">
-                          {title}
-                        </Text>
-                        <Text fontSize="$3" fontWeight="bold" color="$primary">
-                          {new Intl.NumberFormat('en-IN', {
-                            style: 'currency',
-                            currency: 'INR',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          }).format(item.price)}
-                        </Text>
-                      </YStack>
+                      <XStack gap="$3" alignItems="center">
+                        <Image source={{ uri: imageUrl }} width={60} height={75} borderRadius="$2" resizeMode="cover" />
+                        <YStack flex={1} gap="$1">
+                          <Text fontSize="$2" fontWeight="600" textTransform="uppercase" color="$textPrimary">
+                            {brand}
+                          </Text>
+                          <Text fontSize="$3" numberOfLines={2} color="$textSecondary">
+                            {title}
+                          </Text>
+                          <Text fontSize="$3" fontWeight="bold" color="$primary">
+                            {new Intl.NumberFormat('en-IN', {
+                              style: 'currency',
+                              currency: 'INR',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(item.price)}
+                          </Text>
+                        </YStack>
+                      </XStack>
 
                       <Button
                         backgroundColor="$primary"
@@ -225,12 +226,13 @@ export const CartScreen = () => {
                         borderRadius="$2"
                         onPress={() => handleRedirect(item.productId, originalUrl)}
                         icon={ExternalLink}
+                        width="100%"
                       >
                         <Text color="white" fontWeight="600" fontSize="$2">
                           Buy on {platform}
                         </Text>
                       </Button>
-                    </XStack>
+                    </YStack>
                   );
                 })}
               </YStack>
