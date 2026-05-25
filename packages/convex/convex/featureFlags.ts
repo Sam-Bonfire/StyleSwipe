@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { query, mutation } from './_generated/server';
 
 export const getById = query({
-  args: { id: v.id('featureFlags') },
+  args: { id: v.id('feature_flags') },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
   },
@@ -16,7 +16,7 @@ export const getByEnvName = query({
   },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query('featureFlags')
+      .query('feature_flags')
       .withIndex('by_env_name', (q) => q.eq('environment', args.environment).eq('name', args.name))
       .first();
   },
@@ -28,7 +28,7 @@ export const getByEnvironment = query({
   },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query('featureFlags')
+      .query('feature_flags')
       .withIndex('by_env_name', (q) => q.eq('environment', args.environment))
       .collect();
   },
@@ -56,13 +56,13 @@ export const create = mutation({
     updatedAt: v.number(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('featureFlags', args);
+    return await ctx.db.insert('feature_flags', args);
   },
 });
 
 export const update = mutation({
   args: {
-    id: v.id('featureFlags'),
+    id: v.id('feature_flags'),
     name: v.optional(v.string()),
     environment: v.optional(v.union(v.literal('dev'), v.literal('staging'), v.literal('prod'))),
     isEnabled: v.optional(v.boolean()),
@@ -89,7 +89,7 @@ export const update = mutation({
 });
 
 export const remove = mutation({
-  args: { id: v.id('featureFlags') },
+  args: { id: v.id('feature_flags') },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
   },

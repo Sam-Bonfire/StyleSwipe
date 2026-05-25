@@ -30,7 +30,7 @@ export const createFeatureFlagRepositoryLayer = (client: ConvexClient) => Layer.
 
     findById: (id: string) => Effect.tryPromise({
       try: async () => {
-          const doc = await client.query(api.featureFlags.getById, { id: id as Id<'featureFlags'> });
+          const doc = await client.query(api.featureFlags.getById, { id: id as Id<'feature_flags'> });
           return doc ? mapToEntity(doc) : null;
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
@@ -75,11 +75,11 @@ return { ...flag, id: id as string };
     update: (id: string, data: Partial<Omit<FeatureFlag, 'id'>>) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.featureFlags.update, {
-              id: id as Id<'featureFlags'>,
+              id: id as Id<'feature_flags'>,
               ...data,
               updatedAt: Date.now(),
           });
-          const doc = await client.query(api.featureFlags.getById, { id: id as Id<'featureFlags'> });
+          const doc = await client.query(api.featureFlags.getById, { id: id as Id<'feature_flags'> });
           if (!doc) throw new Error(`FeatureFlag ${id} not found after update`);
           return mapToEntity(doc);
       },
@@ -89,7 +89,7 @@ return { ...flag, id: id as string };
     delete: (id: string) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.featureFlags.remove, {
-  id: id as Id<'featureFlags'>,
+  id: id as Id<'feature_flags'>,
 });
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)

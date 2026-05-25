@@ -9,7 +9,7 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 // Helper to get style profile
 const getStyleProfile = async (ctx: any, userId: string) => {
   return await ctx.db
-    .query('styleProfiles')
+    .query('style_profiles')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
     .first();
 };
@@ -108,14 +108,14 @@ export const syncBatch = mutation({
     // 2. Insert Summary
     if (args.summary) {
       const existing = await ctx.db
-        .query('weeklySummaries')
+        .query('weekly_summaries')
         .withIndex('by_user_period', (q) =>
           q.eq('userId', realUserId).eq('period', args.summary!.period),
         )
         .first();
 
       if (!existing) {
-        await ctx.db.insert('weeklySummaries', {
+        await ctx.db.insert('weekly_summaries', {
           userId: realUserId,
           ...args.summary,
         });
@@ -151,7 +151,7 @@ export const syncBatch = mutation({
       if (currentProfileDoc) {
         await ctx.db.patch(currentProfileDoc._id, updates);
       } else {
-        await ctx.db.insert('styleProfiles', {
+        await ctx.db.insert('style_profiles', {
           userId: realUserId,
           ...currentProfile,
           ...updates,

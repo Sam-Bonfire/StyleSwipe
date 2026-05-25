@@ -18,7 +18,7 @@ import { v } from 'convex/values';
 
 // Separate table for StyleSwipe custom user data (Join Table Pattern)
 // PRD Ref: [cite: 112-135] - Style DNA
-const styleProfiles = defineTable({
+const style_profiles = defineTable({
   userId: v.string(), // Foreign key to users table (Better Auth uses string IDs)
 
   gender: v.union(v.literal('men'), v.literal('women'), v.literal('both')),
@@ -51,7 +51,7 @@ const styleProfiles = defineTable({
 // -----------------------------------------------------------------------------
 
 // Feature flag system with A/B testing support
-const featureFlags = defineTable({
+const feature_flags = defineTable({
   name: v.string(),
   description: v.optional(v.string()),
   isEnabled: v.boolean(),
@@ -208,7 +208,7 @@ const categories = defineTable({
 // -----------------------------------------------------------------------------
 
 // PRD Ref: [cite: 151-155, 172-173] - Partner Sync sessions
-const partnerSync = defineTable({
+const partner_sync = defineTable({
   initiatorId: v.string(), // Foreign key to users
   partnerId: v.optional(v.string()), // Foreign key to users
   inviteCode: v.string(), // Shareable invite code
@@ -233,7 +233,7 @@ const swipes = defineTable({
   .index('by_user_product', ['userId', 'productId']);
 
 // PRD Ref: [cite: 3.1] - Weekly Semantic Summaries
-const weeklySummaries = defineTable({
+const weekly_summaries = defineTable({
   userId: v.string(), // Foreign key to users
   period: v.string(), // "2026-W04"
   granularity: v.string(), // "8bit" or "float32"
@@ -259,6 +259,25 @@ const carts = defineTable({
   ),
   updatedAt: v.number(),
 }).index('by_user', ['userId']);
+
+const boards = defineTable({
+  userId: v.string(),
+  name: v.string(),
+  slug: v.string(),
+  isSystem: v.optional(v.boolean()),
+  items: v.array(
+    v.object({
+      productId: v.id('products'),
+      addedAt: v.number(),
+    }),
+  ),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_user_slug', ['userId', 'slug'])
+  .index('by_user_system', ['userId', 'isSystem']);
+
 
 // -----------------------------------------------------------------------------
 // SCRAPER CONTEXT - Data Ingestion
@@ -350,10 +369,10 @@ const product_embeddings = defineTable({
 
 export default defineSchema({
   // StyleSwipe Custom Tables
-  styleProfiles,
+  style_profiles,
 
   // Governance Context
-  featureFlags,
+  feature_flags,
   logs,
   events,
 
@@ -363,12 +382,13 @@ export default defineSchema({
   categories,
 
   // Discovery Context
-  partnerSync,
+  partner_sync,
   swipes,
-  weeklySummaries,
+  weekly_summaries,
 
   // Commerce Context
   carts,
+  boards,
 
   // Scraper Context
   scraped_products,

@@ -11,7 +11,7 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
  */
 const getStyleProfileInternal = async (ctx: any, userId: string) => {
   return await ctx.db
-    .query('styleProfiles')
+    .query('style_profiles')
     .withIndex('by_user', (q: any) => q.eq('userId', userId))
     .first();
 };
@@ -221,7 +221,7 @@ export const create = mutation({
     });
 
     if (styleProfile) {
-      await ctx.db.insert('styleProfiles', {
+      await ctx.db.insert('style_profiles', {
         userId: userId as string,
         ...styleProfile,
         lastUpdated: Date.now(),
@@ -275,7 +275,7 @@ export const update = mutation({
       if (existing) {
         await ctx.db.patch(existing._id, { ...styleProfile, lastUpdated: Date.now() });
       } else {
-        await ctx.db.insert('styleProfiles', {
+        await ctx.db.insert('style_profiles', {
           userId: id,
           ...styleProfile,
           lastUpdated: Date.now(),
@@ -318,7 +318,7 @@ export const updateStyleProfile = mutation({
         lastUpdated: Date.now(),
       });
     } else {
-      await ctx.db.insert('styleProfiles', {
+      await ctx.db.insert('style_profiles', {
         userId: userId,
         ...args.styleProfile,
         lastUpdated: Date.now(),
