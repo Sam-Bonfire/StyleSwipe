@@ -9,6 +9,8 @@ interface ProductCarouselProps {
   isLoading: boolean;
   onProductPress: (id: string) => void;
   emptyMessage?: string;
+  wishlistedIds?: Set<string>;
+  onWishlistToggle?: (productId: string) => void;
 }
 
 export const ProductCarousel = ({
@@ -16,6 +18,8 @@ export const ProductCarousel = ({
   isLoading,
   onProductPress,
   emptyMessage = 'No items found',
+  wishlistedIds,
+  onWishlistToggle,
 }: ProductCarouselProps) => {
   if (isLoading) {
     return (
@@ -48,6 +52,8 @@ export const ProductCarousel = ({
           brand={product.brand}
           price={product.price}
           originalPrice={product.mrp}
+          isWishlisted={wishlistedIds?.has(product._id)}
+          onWishlistToggle={() => onWishlistToggle?.(product._id)}
           imageUrl={
             product.images && product.images[0] ? product.images[0] : 'https://placehold.co/200x300'
           }

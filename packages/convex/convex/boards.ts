@@ -159,3 +159,131 @@ export const getSystemBoard = query({
     };
   },
 });
+
+/**
+ * mutation to toggle a product inside the user's Wishlist system board.
+ * If the item is already present, it is removed; otherwise, it is added.
+ */
+export const toggleWishlist = mutation({
+  args: {
+    userId: v.string(),
+    productId: v.id('products'),
+  },
+  handler: async (ctx, args) => {
+    const timestamp = Date.now();
+    const existingBoard = await ctx.db
+      .query('boards')
+      .withIndex('by_user_slug', (q) => q.eq('userId', args.userId).eq('slug', 'wishlist'))
+      .unique();
+
+    if (existingBoard) {
+      const alreadyPresent = existingBoard.items.some((item) => item.productId === args.productId);
+      if (alreadyPresent) {
+        // Remove from wishlist
+        const updatedItems = existingBoard.items.filter((item) => item.productId !== args.productId);
+        await ctx.db.patch(existingBoard._id, {
+          items: updatedItems,
+          updatedAt: timestamp,
+        });
+        return { isWishlisted: false };
+      } else {
+        // Add to wishlist
+        const updatedItems = [...existingBoard.items, { productId: args.productId, addedAt: timestamp }];
+        await ctx.db.patch(existingBoard._id, {
+          items: updatedItems,
+          updatedAt: timestamp,
+        });
+        return { isWishlisted: true };
+      }
+    } else {
+      // Create new wishlist system board
+      await ctx.db.insert('boards', {
+        userId: args.userId,
+        name: 'Wishlist',
+        slug: 'wishlist',
+        isSystem: true,
+        items: [{ productId: args.productId, addedAt: timestamp }],
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+      return { isWishlisted: true };
+    }
+  },
+});
+
+/**
+ * query to fetch the user's populated Wishlist system board items in reverse chronological order.
+ */
+export const getWishlist = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const board = await ctx.db
+      .query('boards')
+      .withIndex('by_user_slug', (q) => q.eq('userId', args.userId).eq('slug', 'wishlist'))
+      .unique();
+
+    if (!board || board.items.length === 0) {
+      return {
+        items: [],
+      };
+    }
+
+    // Sort items in reverse chronological order (most recently wishlisted first)
+    const sortedItems = [...board.items].sort((a, b) => b.addedAt - a.addedAt);
+
+    // Resolve full product documents
+    const productIds = sortedItems.map((item) => item.productId);
+
+    // Batch query all products
+    const productsDocs = await ctx.db
+      .query('products')
+      .filter((q) =>
+        productIds.length === 1
+          ? q.eq(q.field('_id'), productIds[0])
+          : q.or(...productIds.map((id) => q.eq(q.field('_id'), id)))
+      )
+      .collect();
+
+    // Map by ID for quick O(1) resolution
+    const productsMap = new Map(productsDocs.map((p) => [p._id, p]));
+
+    const populatedItems = sortedItems
+      .map((item) => {
+        const product = productsMap.get(item.productId);
+        if (!product) return null;
+
+        // Strip embedding fields to optimize response payloads (matches projectProduct pattern)
+        const { embedding, embeddingVersions, meta, ...rest } = product;
+
+        let cleanMeta = meta;
+        if (meta && meta.rawAttributes !== undefined) {
+          const { rawAttributes, ...otherMeta } = meta;
+          cleanMeta = otherMeta;
+        }
+
+        return {
+          productId: item.productId,
+          addedAt: item.addedAt,
+          product: {
+            ...rest,
+            ...(cleanMeta ? { meta: cleanMeta } : {}),
+          },
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      _id: board._id,
+      _creationTime: board._creationTime,
+      userId: board.userId,
+      name: board.name,
+      slug: board.slug,
+      isSystem: board.isSystem,
+      items: populatedItems,
+      createdAt: board.createdAt,
+      updatedAt: board.updatedAt,
+    };
+  },
+});
