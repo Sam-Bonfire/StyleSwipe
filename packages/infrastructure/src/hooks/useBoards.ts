@@ -31,3 +31,32 @@ export function useTrackPurchaseClick() {
     [mutation]
   );
 }
+
+/**
+ * Hook to retrieve the user's "Wishlist" system board with fully populated products.
+ */
+export function useWishlist(userId: string | undefined) {
+  const data = useQuery(api.boards.getWishlist, userId ? { userId } : 'skip');
+
+  return React.useMemo(() => {
+    if (data === undefined) return undefined;
+    return data;
+  }, [data]);
+}
+
+/**
+ * Hook to trigger the toggleWishlist mutation.
+ */
+export function useToggleWishlist() {
+  const mutation = useMutation(api.boards.toggleWishlist);
+
+  return React.useCallback(
+    async (userId: string, productId: string) => {
+      return await mutation({
+        userId,
+        productId: productId as Id<'products'>,
+      });
+    },
+    [mutation]
+  );
+}

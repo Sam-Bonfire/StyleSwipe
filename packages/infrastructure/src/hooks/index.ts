@@ -22,7 +22,7 @@ export {
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile } from './useUsers';
 export { useSearch } from './useSearch';
-export { useSystemBoard, useTrackPurchaseClick } from './useBoards';
+export { useSystemBoard, useTrackPurchaseClick, useWishlist, useToggleWishlist } from './useBoards';
 
 // =============================================================================
 // ADMIN HOOKS (use in apps/admin-panel)

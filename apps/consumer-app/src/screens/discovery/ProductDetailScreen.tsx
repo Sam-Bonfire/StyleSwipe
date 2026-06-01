@@ -1,10 +1,10 @@
 
 import { CartItem } from '@app/core';
-import { useCurrentUser, useProduct, useAddToCart } from '@app/infrastructure';
+import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlist } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { ChevronLeft } from '@tamagui/lucide-icons';
+import { ChevronLeft, Heart } from '@tamagui/lucide-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
@@ -37,6 +37,26 @@ export function ProductDetailScreen() {
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
   const scrollViewRef = React.useRef<ScrollView>(null);
+
+  const wishlist = useWishlist(userId);
+  const toggleWishlist = useToggleWishlist();
+
+  const isWishlisted = React.useMemo(() => {
+    if (!wishlist || !wishlist.items) return false;
+    return wishlist.items.some((item) => item.productId === productId);
+  }, [wishlist, productId]);
+
+  const handleWishlistToggle = async () => {
+    if (!userId) {
+      Alert.alert('Authentication Required', 'Please log in to wishlist items.');
+      return;
+    }
+    try {
+      await toggleWishlist(userId, productId);
+    } catch (e) {
+      console.error('Failed to toggle wishlist:', e);
+    }
+  };
 
   // -------------------------------------------------------------------------
   // 2. Data Mapping
@@ -448,6 +468,23 @@ export function ProductDetailScreen() {
           shadowOpacity={0.1}
         >
           <ChevronLeft size={24} color="$textPrimary" />
+        </TopBarIconButton>
+      </View>
+
+      {/* Floating UI: Wishlist Button */}
+      <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 100 }}>
+        <TopBarIconButton
+          onPress={handleWishlistToggle}
+          backgroundColor="$background"
+          shadowColor="$shadowColor"
+          shadowRadius={4}
+          shadowOpacity={0.1}
+        >
+          <Heart
+            size={24}
+            color={isWishlisted ? '$primary' : '$textPrimary'}
+            fill={isWishlisted ? '$primary' : 'transparent'}
+          />
         </TopBarIconButton>
       </View>
 
