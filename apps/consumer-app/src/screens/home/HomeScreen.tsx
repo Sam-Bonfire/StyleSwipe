@@ -3,6 +3,9 @@ import {
   useRecentlyViewed,
   useVectorFeed,
   useRecordProductView,
+  useCurrentUser,
+  useWishlist,
+  useToggleWishlist,
 } from '@app/infrastructure';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -18,12 +21,34 @@ export function HomeScreen() {
     undefined,
   );
 
+  const user = useCurrentUser();
+  const userId = user?._id ?? undefined;
+
   // Data Fetching
   const latestProducts = useLatestProducts(10);
   const recentlyViewed = useRecentlyViewed(10);
+  const wishlist = useWishlist(userId);
+  const toggleWishlist = useToggleWishlist();
 
   // Recommendations (Action)
   const getVectorFeed = useVectorFeed();
+
+  const wishlistedIds = React.useMemo(() => {
+    if (!wishlist || !wishlist.items) return new Set<string>();
+    return new Set<string>(wishlist.items.map((i) => i.productId));
+  }, [wishlist]);
+
+  const handleWishlistToggle = React.useCallback(
+    async (productId: string) => {
+      if (!userId) return;
+      try {
+        await toggleWishlist(userId, productId);
+      } catch (e) {
+        console.error('Failed to toggle wishlist:', e);
+      }
+    },
+    [userId, toggleWishlist]
+  );
 
   React.useEffect(() => {
     async function fetchRecommendations() {
@@ -62,6 +87,8 @@ export function HomeScreen() {
               data={latestProducts}
               isLoading={latestProducts === undefined}
               onProductPress={handleProductPress}
+              wishlistedIds={wishlistedIds}
+              onWishlistToggle={handleWishlistToggle}
             />
           </YStack>
 
@@ -75,6 +102,8 @@ export function HomeScreen() {
                 isLoading={recentlyViewed === undefined}
                 onProductPress={handleProductPress}
                 emptyMessage="Items you view will appear here"
+                wishlistedIds={wishlistedIds}
+                onWishlistToggle={handleWishlistToggle}
               />
             </YStack>
           )}
@@ -86,6 +115,8 @@ export function HomeScreen() {
               data={recommended}
               isLoading={recommended === undefined}
               onProductPress={handleProductPress}
+              wishlistedIds={wishlistedIds}
+              onWishlistToggle={handleWishlistToggle}
             />
           </YStack>
         </YStack>
