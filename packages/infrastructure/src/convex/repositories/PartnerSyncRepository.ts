@@ -69,10 +69,10 @@ return (docs as any[]).map((doc: any) => mapToEntity(doc));
 
     findActiveByUser: (userId: string) => Effect.tryPromise({
       try: async () => {
-          const doc = await client.query(api.partnerSync.getActiveByUser, {
+          const docs = await client.query(api.partnerSync.getActiveByUser, {
   userId,
 });
-return doc ? mapToEntity(doc) : null;
+return (docs as any[]).map((doc: any) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
