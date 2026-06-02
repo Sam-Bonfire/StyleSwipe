@@ -4,9 +4,7 @@ import { CompleteOnboarding } from '@app/core';
 import { useMutation } from 'convex/react';
 import { Effect, Layer } from 'effect';
 
-import { generateEmbedding } from '../InferenceEngine';
-
-export function useCompleteOnboarding() {
+export function useCompleteOnboarding(generateEmbedding: (text: string) => Promise<number[]>) {
   const updateStyleProfileMutation = useMutation(api.users.updateStyleProfile);
 
   return async (userId: string, answers: Record<string, string>) => {
@@ -17,15 +15,15 @@ export function useCompleteOnboarding() {
         updateStyleProfile: (id, profile) =>
           Effect.tryPromise({
             try: () => updateStyleProfileMutation({ styleProfile: profile as any }),
-            catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
+            catch: (e) => new RepositoryError('updateStyleProfile', e),
           }),
         // Stubs for the rest of UserRepository since CompleteOnboarding doesn't use them
-        findById: () => Effect.fail(new RepositoryError('Not implemented')),
-        findByEmail: () => Effect.fail(new RepositoryError('Not implemented')),
-        findByPhone: () => Effect.fail(new RepositoryError('Not implemented')),
-        create: () => Effect.fail(new RepositoryError('Not implemented')),
-        update: () => Effect.fail(new RepositoryError('Not implemented')),
-        delete: () => Effect.fail(new RepositoryError('Not implemented')),
+        findById: () => Effect.fail(new RepositoryError('findById', new Error('Not implemented'))),
+        findByEmail: () => Effect.fail(new RepositoryError('findByEmail', new Error('Not implemented'))),
+        findByPhone: () => Effect.fail(new RepositoryError('findByPhone', new Error('Not implemented'))),
+        create: () => Effect.fail(new RepositoryError('create', new Error('Not implemented'))),
+        update: () => Effect.fail(new RepositoryError('update', new Error('Not implemented'))),
+        delete: () => Effect.fail(new RepositoryError('delete', new Error('Not implemented'))),
       }),
     );
 
@@ -36,7 +34,7 @@ export function useCompleteOnboarding() {
         generateEmbedding: (text) =>
           Effect.tryPromise({
             try: () => generateEmbedding(text),
-            catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
+            catch: (e) => new RepositoryError('generateEmbedding', e),
           }),
         getDimensions: () => Effect.succeed(384),
       }),

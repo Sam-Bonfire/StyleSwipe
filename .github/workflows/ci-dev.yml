@@ -141,6 +141,9 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: mise trust
       - run: bun install
+      - name: Extract App Version
+        id: version
+        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Setup Expo and EAS
         uses: expo/expo-github-action@v8
         with:
@@ -152,6 +155,7 @@ jobs:
         working-directory: apps/consumer-app
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+          APP_VERSION: ${{ env.APP_VERSION }}
 
       - name: Distribute Android via Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -173,6 +177,7 @@ jobs:
         working-directory: apps/consumer-app
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+          APP_VERSION: ${{ env.APP_VERSION }}
 
       - name: Distribute iOS via Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1

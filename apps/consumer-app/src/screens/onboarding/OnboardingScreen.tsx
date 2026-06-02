@@ -5,13 +5,16 @@ import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, XStack, H1, H2, Text, Progress, Spinner } from 'tamagui';
+
+import { generateEmbedding } from '../../infrastructure/InferenceEngine';
+
 export function OnboardingScreen() {
   const user = useCurrentUser();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const questions = Effect.runSync(GetOnboardingQuestions.getOnboardingQuestions());
 
-  const completeOnboarding = useCompleteOnboarding();
+  const completeOnboarding = useCompleteOnboarding(generateEmbedding);
   const { trackEvent } = useAnalytics();
 
   React.useEffect(() => {

@@ -1,15 +1,13 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const packageJson = require('./package.json');
-
+const appVersion = process.env.APP_VERSION || '1.0.0';
 const buildNumber = process.env.GITHUB_RUN_NUMBER || '1';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "StyleSwipe",
   slug: "consumer-app",
-  version: packageJson.version,
+  version: appVersion,
   scheme: "styleswipe",
   orientation: "portrait",
   icon: "../../assets/favicon/favicon.png",
