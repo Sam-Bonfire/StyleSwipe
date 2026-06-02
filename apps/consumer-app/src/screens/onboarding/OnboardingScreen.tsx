@@ -1,19 +1,17 @@
-import { InitializeStyleProfile, GetOnboardingQuestions } from '@app/core';
-import { useUpdateStyleProfile, useAnalytics } from '@app/infrastructure';
+import { GetOnboardingQuestions } from '@app/core';
+import { useAnalytics, useCompleteOnboarding, useCurrentUser } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, XStack, H1, H2, Text, Progress, Spinner } from 'tamagui';
-
-import { generateEmbedding } from '../../infrastructure/InferenceEngine';
-
 export function OnboardingScreen() {
+  const user = useCurrentUser();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const questions = Effect.runSync(GetOnboardingQuestions.getOnboardingQuestions());
 
-  const updateStyleProfile = useUpdateStyleProfile();
+  const completeOnboarding = useCompleteOnboarding();
   const { trackEvent } = useAnalytics();
 
   React.useEffect(() => {
@@ -43,20 +41,10 @@ export function OnboardingScreen() {
       // Final step
       setIsGenerating(true);
       try {
-        // Initialize profile
-        const styleProfile = Effect.runSync(InitializeStyleProfile.initializeStyleProfile(answers));
-
-        // ---------------------------------------------------------
-        // REAL ONBOARDING VECTORIZATION
-        // ---------------------------------------------------------
-        // If model is not ready, this might take a moment to download/load
-        const semanticDescription = Object.entries(answers)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join('. ');
-
-        const vector = await generateEmbedding(semanticDescription);
-        styleProfile.preferenceVector = vector;
-        await updateStyleProfile({ styleProfile });
+        // Execute the Hexagonal Use Case
+        if (user?._id) {
+          await completeOnboarding(user._id, answers);
+        }
         
         trackEvent('onboarding_completed', { answers }, { variant: 'onboarding_v1' });
         // NavigationGuard handles transition
