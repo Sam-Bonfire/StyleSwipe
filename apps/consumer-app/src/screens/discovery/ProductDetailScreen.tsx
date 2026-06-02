@@ -4,7 +4,7 @@ import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlis
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { ChevronLeft, Heart } from '@tamagui/lucide-icons';
+import { ChevronLeft, Heart, ShieldCheck, Truck, ArrowLeftRight } from '@tamagui/lucide-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
@@ -371,6 +371,22 @@ export function ProductDetailScreen() {
           </ScrollView>
 
           <Separator marginVertical="$4" borderColor="$borderColor" />
+
+          {/* Trust UI Markers */}
+          <XStack justifyContent="space-between" paddingVertical="$2" marginBottom="$4" backgroundColor="$surface" borderRadius="$3" padding="$3" borderColor="$borderColor" borderWidth={1}>
+            <YStack alignItems="center" gap="$1" flex={1}>
+              <ShieldCheck size={20} color="$primary" />
+              <Text fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">100% Authentic</Text>
+            </YStack>
+            <YStack alignItems="center" gap="$1" flex={1}>
+              <Truck size={20} color="$primary" />
+              <Text fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">Free Delivery</Text>
+            </YStack>
+            <YStack alignItems="center" gap="$1" flex={1}>
+              <ArrowLeftRight size={20} color="$primary" />
+              <Text fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">Easy Returns</Text>
+            </YStack>
+          </XStack>
 
           {/* Size Selector */}
           <YStack
