@@ -20,3 +20,11 @@ export const getVectorFeed = (
     const recommendations = yield* _(RecommendationService);
     return yield* _(recommendations.getVectorFeed(userId, limit));
 });
+
+export const getCalibrationFeed = (
+    userId: string,
+    limit: number,
+): Effect.Effect<Product[], RecommendationError | RepositoryError, RecommendationService> => Effect.gen(function* (_) {
+    const recommendations = yield* _(RecommendationService);
+    return yield* _(recommendations.getCalibrationFeed(userId, limit));
+});
