@@ -17,7 +17,7 @@ export function OnboardingScreen() {
   const { trackEvent } = useAnalytics();
 
   React.useEffect(() => {
-    trackEvent('onboarding_started');
+    trackEvent('onboarding_started', undefined, { variant: 'onboarding_v1' });
   }, []);
 
   const currentQuestion = questions[step];
@@ -35,7 +35,7 @@ export function OnboardingScreen() {
       totalSteps: questions.length,
       questionId: currentQuestion.id,
       selectedOption: answers[currentQuestion.id]
-    });
+    }, { variant: 'onboarding_v1' });
 
     if (step < questions.length - 1) {
       setStep(step + 1);
@@ -58,7 +58,7 @@ export function OnboardingScreen() {
         styleProfile.preferenceVector = vector;
         await updateStyleProfile({ styleProfile });
         
-        trackEvent('onboarding_completed', { answers });
+        trackEvent('onboarding_completed', { answers }, { variant: 'onboarding_v1' });
         // NavigationGuard handles transition
       } catch (e) {
         console.error('Failed to save onboarding', e);

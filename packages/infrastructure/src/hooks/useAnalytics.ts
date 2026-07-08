@@ -1,13 +1,16 @@
 import { api } from '@app/convex';
 import { EventRepository, RepositoryError } from '@app/core';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { Effect, Layer } from 'effect';
 
 export function useAnalytics() {
   const trackEventMutation = useMutation(api.events.track);
 
-  const trackEvent = async (type: string, metadata?: any) => {
-    // 1. Create the repository layer connecting the port to Convex
+  const trackEvent = async (
+    type: string,
+    metadata?: any,
+    options?: { variant?: string; productId?: string }
+  ) => {
     const layer = Layer.succeed(
       EventRepository,
       EventRepository.of({
@@ -33,13 +36,14 @@ export function useAnalytics() {
       }),
     );
 
-    // 2. Simple program to execute the creation
     const program = Effect.gen(function* (_) {
       const repo = yield* _(EventRepository);
       return yield* _(repo.create({
         type,
         isSampled: true,
         metadata,
+        variant: options?.variant,
+        productId: options?.productId,
         timestamp: Date.now(),
       }));
     });
@@ -53,4 +57,16 @@ export function useAnalytics() {
   };
 
   return { trackEvent };
+}
+
+export function useAvailableVariants() {
+  return useQuery(api.events.getAvailableVariants);
+}
+
+export function useFunnelMetrics(timeRange: '7_days' | '30_days' | 'all_time', variant: string) {
+  return useQuery(api.events.getFunnelMetrics, { timeRange, variant });
+}
+
+export function useMacroFunnelMetrics(timeRange: '7_days' | '30_days' | 'all_time', variant: string) {
+  return useQuery(api.events.getMacroFunnelMetrics, { timeRange, variant });
 }
