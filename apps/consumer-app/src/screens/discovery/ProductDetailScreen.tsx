@@ -4,7 +4,7 @@ import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlis
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { ChevronLeft, Heart } from '@tamagui/lucide-icons';
+import { ChevronLeft, Heart, ShieldCheck, Truck, ArrowLeftRight, Leaf, TrendingUp, MapPin } from '@tamagui/lucide-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
@@ -210,6 +210,7 @@ export function ProductDetailScreen() {
         ? productData.images
         : ['https://placehold.co/400x500/png?text=No+Image'],
     availableSizes: Array.isArray(rawAttributes.size) ? rawAttributes.size : ['S', 'M', 'L', 'XL'],
+    trustBadges: productData.trustBadges || [],
     attributes: {
       ...displayAttributes,
       ...(inventorySizes.length > 0 ? { inventoryInfo: stockStatus } : {}),
@@ -371,6 +372,34 @@ export function ProductDetailScreen() {
           </ScrollView>
 
           <Separator marginVertical="$4" borderColor="$borderColor" />
+
+          {/* Trust UI Markers */}
+          {product.trustBadges && product.trustBadges.length > 0 && (
+            <XStack justifyContent="space-between" paddingVertical="$2" marginBottom="$4" backgroundColor="$surface" borderRadius="$3" padding="$3" borderColor="$borderColor" borderWidth={1}>
+              {product.trustBadges.slice(0, 3).map((badgeStr: string) => {
+                const config: Record<string, { icon: React.ElementType, label: string }> = {
+                  authentic: { icon: ShieldCheck, label: '100% Authentic' },
+                  free_delivery: { icon: Truck, label: 'Free Delivery' },
+                  easy_returns: { icon: ArrowLeftRight, label: 'Easy Returns' },
+                  sustainable: { icon: Leaf, label: 'Sustainable' },
+                  top_seller: { icon: TrendingUp, label: 'Top Seller' },
+                  vegan: { icon: Leaf, label: 'Vegan' },
+                  locally_sourced: { icon: MapPin, label: 'Locally Sourced' }
+                };
+                
+                const badgeConfig = config[badgeStr];
+                if (!badgeConfig) return null;
+                const Icon = badgeConfig.icon;
+                
+                return (
+                  <YStack key={badgeStr} alignItems="center" gap="$1" flex={1}>
+                    <Icon size={20} color="$primary" />
+                    <Text fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">{badgeConfig.label}</Text>
+                  </YStack>
+                );
+              })}
+            </XStack>
+          )}
 
           {/* Size Selector */}
           <YStack

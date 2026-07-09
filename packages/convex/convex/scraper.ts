@@ -257,6 +257,40 @@ async function promoteInternal(
     updatedAt: Date.now(),
   };
 
+  // ==========================================
+  // DYNAMIC TRUST BADGE GENERATION (1 & 2)
+  // ==========================================
+  const badges: string[] = ['authentic']; // Base guarantee
+  const descString = productFields.description.toLowerCase();
+  const attrsString = JSON.stringify(productFields.attributes).toLowerCase();
+  const fullText = `${descString} ${attrsString}`;
+
+  // 1. Rule-Based Extraction
+  if (fullText.includes('sustainable') || fullText.includes('recycled') || fullText.includes('organic cotton') || fullText.includes('eco-friendly')) {
+    badges.push('sustainable');
+  }
+  if (fullText.includes('vegan') || fullText.includes('faux leather') || fullText.includes('cruelty-free')) {
+    badges.push('vegan');
+  }
+  if (fullText.includes('locally sourced') || fullText.includes('made in usa') || fullText.includes('made locally')) {
+    badges.push('locally_sourced');
+  }
+  if (productFields.reviewCount && productFields.reviewCount > 500 && productFields.rating && productFields.rating > 4.5) {
+    badges.push('top_seller');
+  }
+
+  // 2. Explicit Metadata Mapping
+  if (fullText.includes('free delivery') || data.shippingCost === 0) {
+    badges.push('free_delivery');
+  }
+  if (fullText.includes('returnable') || fullText.includes('easy returns') || fullText.includes('14 day returns') || data.isReturnable) {
+    badges.push('easy_returns');
+  }
+
+  const uniqueBadges = Array.from(new Set(badges));
+  // Add to product fields
+  (productFields as any).trustBadges = uniqueBadges;
+
   // Removed categoryId lookup - field no longer in schema
 
   let existingProduct: Doc<'products'> | null = null;

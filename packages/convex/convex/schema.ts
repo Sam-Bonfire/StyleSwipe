@@ -168,6 +168,7 @@ const products = defineTable({
   ),
   meta: v.optional(v.any()), // Flexible field for scraper extra data
   externalId: v.optional(v.string()), // Generalized from Myntra ID for multi-platform support
+  trustBadges: v.optional(v.array(v.string())), // Dynamic trust indicators like 'authentic', 'sustainable'
   updatedAt: v.optional(v.number()),
 })
   .index('by_externalId', ['externalId'])
