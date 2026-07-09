@@ -126,9 +126,72 @@ jobs:
           path: apps/consumer-app/dist
           retention-days: 5
 
+  build-mobile:
+    needs: [setup]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+      - run: mise trust
+      - run: bun install
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Build Android APK (Local)
+        run: eas build --platform android --local --non-interactive --profile preview --output build/app.apk
+        working-directory: apps/consumer-app
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+
+      - name: Distribute Android via Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: testers
+          file: apps/consumer-app/build/app.apk
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-android-preview-${{ github.sha }}
+          path: apps/consumer-app/build/app.apk
+          retention-days: 5
+
+      - name: Build iOS IPA (Local)
+        run: eas build --platform ios --local --non-interactive --profile preview --output build/app.ipa
+        working-directory: apps/consumer-app
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+
+      - name: Distribute iOS via Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_IOS }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: testers
+          file: apps/consumer-app/build/app.ipa
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-ios-preview-${{ github.sha }}
+          path: apps/consumer-app/build/app.ipa
+          retention-days: 5
+
   deploy-staging:
     runs-on: ubuntu-latest
-    needs: [build-docker, build-extension, build-spas]
+    needs: [build-docker, build-extension, build-spas, build-mobile]
     environment: staging
     steps:
       - uses: actions/checkout@v4

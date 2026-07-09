@@ -224,8 +224,58 @@ jobs:
           path: apps/consumer-app/dist
           retention-days: 5
 
+  build-mobile:
+    needs: [release]
+    if: needs.release.outputs.new_version != 'none'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_version }}
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+      - run: mise trust
+      - run: bun install
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Build Android AAB (Local)
+        run: eas build --platform android --local --non-interactive --profile production --output build/app.aab
+        working-directory: apps/consumer-app
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-android-prod-${{ needs.release.outputs.new_version }}
+          path: apps/consumer-app/build/app.aab
+          retention-days: 5
+
+      - name: Build iOS IPA (Local)
+        run: eas build --platform ios --local --non-interactive --profile production --output build/app.ipa
+        working-directory: apps/consumer-app
+        env:
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-ios-prod-${{ needs.release.outputs.new_version }}
+          path: apps/consumer-app/build/app.ipa
+          retention-days: 5
+
   deploy-production:
-    needs: [release, build-push-docker, build-publish-extension, build-spas]
+    needs: [release, build-push-docker, build-publish-extension, build-spas, build-mobile]
     if: needs.release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
     environment: production
