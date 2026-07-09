@@ -21,6 +21,7 @@ export {
 } from './useCart';
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile } from './useUsers';
+export * from './useAnalytics';
 export { useSearch } from './useSearch';
 export { useSystemBoard, useTrackPurchaseClick, useWishlist, useToggleWishlist } from './useBoards';
 

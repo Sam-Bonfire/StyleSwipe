@@ -6,6 +6,7 @@ import {
   useCurrentUser,
   useWishlist,
   useToggleWishlist,
+  useAnalytics,
 } from '@app/infrastructure';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -64,10 +65,13 @@ export function HomeScreen() {
   }, [getVectorFeed]);
 
   const recordView = useRecordProductView();
+  const { trackEvent } = useAnalytics();
 
   const handleProductPress = (productId: string) => {
     // Record view event
     recordView({ productId });
+    trackEvent('product_viewed', undefined, { variant: 'macro_v1', productId });
+    
     // Navigate to details
     router.push({ pathname: '/(app)/product/[id]', params: { id: productId } });
   };

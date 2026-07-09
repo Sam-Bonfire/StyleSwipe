@@ -1,5 +1,5 @@
 import { applyDisplacement, type Vector384 } from '@app/core';
-import { useVectorFeed, useProcessSwipe, useCurrentUser } from '@app/infrastructure';
+import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
 import { useRouter } from 'expo-router';
@@ -27,6 +27,7 @@ export function SwipeDeck() {
   const processSwipe = useProcessSwipe();
   const user = useCurrentUser();
   const router = useRouter();
+  const { trackEvent } = useAnalytics();
 
   const [error, setError] = useState<string | null>(null);
 
@@ -111,6 +112,8 @@ export function SwipeDeck() {
       });
 
       console.log(`Swiped ${direction} on ${item.title}`);
+      
+      trackEvent('product_swiped', { action }, { variant: 'macro_v1', productId: item._id });
     } catch (e) {
       console.warn('Swipe mutation failed (offline?), buffered locally.', e);
     }

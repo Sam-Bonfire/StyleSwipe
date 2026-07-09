@@ -1,5 +1,5 @@
 import { InitializeStyleProfile, GetOnboardingQuestions } from '@app/core';
-import { useUpdateStyleProfile } from '@app/infrastructure';
+import { useUpdateStyleProfile, useAnalytics } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
@@ -14,6 +14,11 @@ export function OnboardingScreen() {
   const questions = Effect.runSync(GetOnboardingQuestions.getOnboardingQuestions());
 
   const updateStyleProfile = useUpdateStyleProfile();
+  const { trackEvent } = useAnalytics();
+
+  React.useEffect(() => {
+    trackEvent('onboarding_started', undefined, { variant: 'onboarding_v1' });
+  }, []);
 
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;
@@ -25,6 +30,13 @@ export function OnboardingScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleNext = async () => {
+    trackEvent('onboarding_step_completed', { 
+      step: step + 1,
+      totalSteps: questions.length,
+      questionId: currentQuestion.id,
+      selectedOption: answers[currentQuestion.id]
+    }, { variant: 'onboarding_v1' });
+
     if (step < questions.length - 1) {
       setStep(step + 1);
     } else {
@@ -45,6 +57,8 @@ export function OnboardingScreen() {
         const vector = await generateEmbedding(semanticDescription);
         styleProfile.preferenceVector = vector;
         await updateStyleProfile({ styleProfile });
+        
+        trackEvent('onboarding_completed', { answers }, { variant: 'onboarding_v1' });
         // NavigationGuard handles transition
       } catch (e) {
         console.error('Failed to save onboarding', e);

@@ -10,10 +10,10 @@ const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.litera
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 // Helper to get style profile
-const getStyleProfile = async (ctx: MutationCtx, userId: string) => {
+const getStyleProfile = async (ctx: any, userId: string) => {
   return await ctx.db
     .query('style_profiles')
-    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .withIndex('by_user', (q: any) => q.eq('userId', userId))
     .first();
 };
 
