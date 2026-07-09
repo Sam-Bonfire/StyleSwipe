@@ -313,7 +313,7 @@ export class PartnerSyncRepository extends Context.Tag('PartnerSyncRepository')<
     readonly findByPartner: (partnerId: string) => Effect.Effect<PartnerSync[], RepositoryError>;
     readonly findActiveByUser: (
       userId: string,
-    ) => Effect.Effect<PartnerSync | null, RepositoryError>;
+    ) => Effect.Effect<PartnerSync[], RepositoryError>;
     readonly create: (sync: Omit<PartnerSync, 'id'>) => Effect.Effect<PartnerSync, RepositoryError>;
     readonly update: (
       id: string,

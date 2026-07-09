@@ -73,6 +73,7 @@ export class RecommendationService extends Context.Tag('RecommendationService')<
     readonly getVectorFeed: (
       userId: string,
       limit: number,
+      overrideVector?: number[],
     ) => Effect.Effect<Product[], RepositoryError>;
     readonly getCalibrationFeed: (
       userId: string,

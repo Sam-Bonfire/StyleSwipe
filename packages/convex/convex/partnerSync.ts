@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 
 import { query, mutation } from './_generated/server';
+import { components } from './_generated/api';
 
 export const getById = query({
   args: { id: v.id('partner_sync') },
@@ -20,7 +21,7 @@ export const getByInviteCode = query({
 });
 
 export const getByInitiator = query({
-  args: { initiatorId: v.id('users') },
+  args: { initiatorId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query('partner_sync')
@@ -30,7 +31,7 @@ export const getByInitiator = query({
 });
 
 export const getByPartner = query({
-  args: { partnerId: v.id('users') },
+  args: { partnerId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query('partner_sync')
@@ -40,7 +41,7 @@ export const getByPartner = query({
 });
 
 export const getActiveByUser = query({
-  args: { userId: v.id('users') },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
     // Complex query not supported by index directly.
     // We look up by initiator and partner and filter.
@@ -52,22 +53,48 @@ export const getActiveByUser = query({
       .query('partner_sync')
       .withIndex('by_initiator', (q) => q.eq('initiatorId', args.userId))
       .filter((q) => q.eq(q.field('status'), 'active'))
-      .first();
-    if (asInitiator) return asInitiator;
+      .collect();
 
     const asPartner = await ctx.db
       .query('partner_sync')
       .withIndex('by_partner', (q) => q.eq('partnerId', args.userId))
       .filter((q) => q.eq(q.field('status'), 'active'))
-      .first();
-    return asPartner;
+      .collect();
+      
+    const sessions = [...asInitiator, ...asPartner];
+    
+    // Enrich with partner details
+    return await Promise.all(
+      sessions.map(async (session) => {
+        const otherUserId = session.initiatorId === args.userId ? session.partnerId : session.initiatorId;
+        if (!otherUserId) return session;
+
+        try {
+          const users = await ctx.runQuery(components.auth.api.findMany, {
+            model: 'users',
+            where: [{ field: '_id', operator: 'eq' as any, value: otherUserId }],
+            paginationOpts: { numItems: 1, cursor: null },
+          });
+          const otherUser = users.page[0];
+          
+          return {
+            ...session,
+            partnerName: otherUser?.name || 'Partner',
+            partnerImage: otherUser?.image,
+          };
+        } catch (e) {
+          // Fallback if auth component is not reachable or errors
+          return session;
+        }
+      })
+    );
   },
 });
 
 export const create = mutation({
   args: {
-    initiatorId: v.id('users'),
-    partnerId: v.optional(v.id('users')),
+    initiatorId: v.string(),
+    partnerId: v.optional(v.string()),
     inviteCode: v.string(),
     status: v.union(v.literal('pending'), v.literal('active'), v.literal('expired')),
     expiresAt: v.number(),
@@ -82,8 +109,8 @@ export const create = mutation({
 export const update = mutation({
   args: {
     id: v.id('partner_sync'),
-    initiatorId: v.optional(v.id('users')),
-    partnerId: v.optional(v.id('users')),
+    initiatorId: v.optional(v.string()),
+    partnerId: v.optional(v.string()),
     inviteCode: v.optional(v.string()),
     status: v.optional(v.union(v.literal('pending'), v.literal('active'), v.literal('expired'))),
     expiresAt: v.optional(v.number()),
