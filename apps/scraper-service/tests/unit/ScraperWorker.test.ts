@@ -1,6 +1,6 @@
 import type { QueueService, ScrapedProduct } from '@app/core';
 
-import { describe, expect, test, mock, beforeEach, afterEach } from 'bun:test';
+import { describe, expect, test, mock, beforeEach, afterEach, spyOn, type Mock } from 'bun:test';
 import { Effect } from 'effect';
 
 import { ScraperWorker } from '../../src/workers/ScraperWorker';
@@ -16,41 +16,22 @@ mock.module('convex/browser', () => ({
   },
 }));
 
-// Mock Scrapers to avoid actual scraping
-const mockInit = mock(() => Promise.resolve());
-const mockClose = mock(() => Promise.resolve());
-const mockScrapeProduct = mock(() =>
-  Promise.resolve({
+import { MyntraAPIScraper } from '../../src/scrapers/MyntraAPIScraper';
+import { MyntraScraper } from '../../src/scrapers/MyntraScraper';
+
+// Mock Scrapers using spyOn later to avoid actual scraping without leaking across files
+const mockScrapeProductResponse = {
+  externalId: '123',
+  title: 'Test Product',
+  url: 'http://test.com',
+} as ScrapedProduct;
+
+const mockScrapeCategoryResponse = [
+  {
     externalId: '123',
     title: 'Test Product',
-    url: 'http://test.com',
-  } as ScrapedProduct),
-);
-const mockScrapeCategory = mock(() =>
-  Promise.resolve([
-    {
-      externalId: '123',
-      title: 'Test Product',
-    },
-  ] as ScrapedProduct[]),
-);
-
-mock.module('../../src/scrapers/MyntraAPIScraper', () => ({
-  MyntraAPIScraper: class {
-    init = mockInit;
-    close = mockClose;
-    scrapeProduct = mockScrapeProduct;
-    scrapeCategory = mockScrapeCategory;
   },
-}));
-mock.module('../../src/scrapers/MyntraScraper', () => ({
-  MyntraScraper: class {
-    init = mockInit;
-    close = mockClose;
-    scrapeProduct = mockScrapeProduct;
-    scrapeCategory = mockScrapeCategory;
-  },
-}));
+] as ScrapedProduct[];
 
 describe('ScraperWorker', () => {
   let worker: ScraperWorker;
@@ -75,10 +56,21 @@ describe('ScraperWorker', () => {
     // Reset mocks
     mockQuery.mockClear();
     mockMutation.mockClear();
+
+    spyOn(MyntraAPIScraper.prototype, 'init').mockImplementation(() => Promise.resolve());
+    spyOn(MyntraAPIScraper.prototype, 'close').mockImplementation(() => Promise.resolve());
+    spyOn(MyntraAPIScraper.prototype, 'scrapeProduct').mockImplementation(() => Promise.resolve(mockScrapeProductResponse));
+    spyOn(MyntraAPIScraper.prototype, 'scrapeCategory').mockImplementation(() => Promise.resolve(mockScrapeCategoryResponse));
+
+    spyOn(MyntraScraper.prototype, 'init').mockImplementation(() => Promise.resolve());
+    spyOn(MyntraScraper.prototype, 'close').mockImplementation(() => Promise.resolve());
+    spyOn(MyntraScraper.prototype, 'scrapeProduct').mockImplementation(() => Promise.resolve(mockScrapeProductResponse));
+    spyOn(MyntraScraper.prototype, 'scrapeCategory').mockImplementation(() => Promise.resolve(mockScrapeCategoryResponse));
   });
 
   afterEach(async () => {
     await worker.stop();
+    mock.restore();
   });
 
   test('should initialize successfully', async () => {
@@ -90,7 +82,7 @@ describe('ScraperWorker', () => {
     await worker.stop();
     await startPromise;
 
-    expect(mockInit).toHaveBeenCalled();
+    expect(MyntraAPIScraper.prototype.init).toHaveBeenCalled();
   });
 
   test('should poll for jobs', async () => {
@@ -113,7 +105,7 @@ describe('ScraperWorker', () => {
 
     expect(mockQuery).toHaveBeenCalled();
     // Should have scraped
-    expect(mockScrapeProduct).toHaveBeenCalled();
+    expect(MyntraAPIScraper.prototype.scrapeProduct).toHaveBeenCalled();
     // Should have pushed to queue
     expect(mockQueue.pushBatch).toHaveBeenCalled();
     // Should have updated status
