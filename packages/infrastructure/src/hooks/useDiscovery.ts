@@ -18,6 +18,10 @@ export function useVectorFeed() {
   return useAction(api.recommendations.getVectorFeed);
 }
 
+export function useCalibrationFeed(limit: number = 10) {
+  return useQuery(api.discovery.getCalibrationFeed, { limit });
+}
+
 export function useProcessSwipe() {
   const swipeMutation = useMutation(api.discovery.processSwipe);
 
@@ -27,9 +31,9 @@ export function useProcessSwipe() {
     const layer = Layer.succeed(
       SwipeRepository,
       SwipeRepository.of({
-        recordSwipe: (userId, productId, action: SwipeAction) =>
+        recordSwipe: (userId, productId, action: SwipeAction, timestamp, newPreferenceVector) =>
           Effect.tryPromise({
-            try: () => swipeMutation({ productId: productId as any, action }),
+            try: () => swipeMutation({ productId: productId as any, action, newPreferenceVector }),
             catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
           }),
         getSwipesByUser: () => Effect.succeed([]),

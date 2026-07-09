@@ -11,7 +11,7 @@ export const getVectorFeed = action({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       // Return public/trending products if not logged in
-      return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
+      return await ctx.runQuery(api.discovery.getCalibrationFeed, { limit: args.limit });
     }
 
     // 1. Get User Profile & Vector
@@ -23,7 +23,7 @@ export const getVectorFeed = action({
 
     if (!user || !user.styleProfile?.preferenceVector) {
       // Fallback: No vector found, return standard discovery feed
-      return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
+      return await ctx.runQuery(api.discovery.getCalibrationFeed, { limit: args.limit });
     }
 
     const { preferenceVector } = user.styleProfile;
@@ -70,7 +70,7 @@ export const getVectorFeed = action({
     // return the standard discovery feed (recent items)
     if (products.length === 0) {
       console.log('Vector search returned 0 items, falling back to discovery feed.');
-      return await ctx.runQuery(api.discovery.getDiscoveryFeed, { limit: args.limit });
+      return await ctx.runQuery(api.discovery.getCalibrationFeed, { limit: args.limit });
     }
 
     return products;
