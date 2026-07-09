@@ -6,6 +6,7 @@ import {
   useRemoveFromCart,
   useTrackPurchaseClick,
   useProductsByIds,
+  useAnalytics,
 } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
@@ -25,6 +26,7 @@ export const CartScreen = () => {
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
   const trackPurchaseClick = useTrackPurchaseClick();
+  const { trackEvent } = useAnalytics();
 
   // Fetch full product items to display real images and fetch original checkout links
   const productIds = React.useMemo(() => cart?.items.map((i) => i.productId) ?? [], [cart?.items]);
@@ -57,6 +59,8 @@ export const CartScreen = () => {
     if (!userId) return;
     try {
       await trackPurchaseClick(userId, productId);
+      trackEvent('checkout_initiated', undefined, { variant: 'macro_v1', productId });
+      
       if (originalUrl) {
         await Linking.openURL(originalUrl);
       }

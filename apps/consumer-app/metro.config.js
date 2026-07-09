@@ -92,4 +92,5 @@ module.exports = withTamagui(config, {
   components: ['tamagui', '@app/ui-kit'],
   config: './tamagui.config.ts',
   outputCSS: './tamagui.css',
+  disableExtraction: process.env.NODE_ENV === 'development',
 });

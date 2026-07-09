@@ -1,6 +1,6 @@
 
 import { CartItem } from '@app/core';
-import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlist } from '@app/infrastructure';
+import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlist, useAnalytics } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
@@ -33,6 +33,7 @@ export function ProductDetailScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const addToCart = useAddToCart();
+  const { trackEvent } = useAnalytics();
 
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
@@ -271,6 +272,8 @@ export function ProductDetailScreen() {
         color: 'Black',
       });
       await addToCart(userId, item);
+      trackEvent('added_to_cart', undefined, { variant: 'macro_v1', productId: product.id });
+      
       setIsAdded(true);
       Alert.alert('Success', 'Added to cart!');
     } catch (e) {
