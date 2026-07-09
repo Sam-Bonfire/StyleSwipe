@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 
 import { components } from './_generated/api';
 import { Id } from './_generated/dataModel';
-import { MutationCtx, mutation, query } from './_generated/server';
+import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
 
 /** Swipe action validator — defined here in infrastructure, not in core */
 const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.literal('super'));
