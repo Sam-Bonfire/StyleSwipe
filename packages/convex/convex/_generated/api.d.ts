@@ -13,6 +13,7 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as authOptions from "../authOptions.js";
 import type * as auth_permissions from "../auth/permissions.js";
+import type * as backfillTrustBadges from "../backfillTrustBadges.js";
 import type * as boards from "../boards.js";
 import type * as cart from "../cart.js";
 import type * as debug from "../debug.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authOptions: typeof authOptions;
   "auth/permissions": typeof auth_permissions;
+  backfillTrustBadges: typeof backfillTrustBadges;
   boards: typeof boards;
   cart: typeof cart;
   debug: typeof debug;
