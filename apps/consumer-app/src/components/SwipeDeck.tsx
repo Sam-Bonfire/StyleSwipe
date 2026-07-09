@@ -1,4 +1,4 @@
-import { applyDisplacement, type Vector384 } from '@app/core';
+import { type Vector384 } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
@@ -83,21 +83,14 @@ export function SwipeDeck() {
     if (direction === 'up') action = 'super';
 
     try {
-      let newPreferenceVector: Vector384 | undefined = undefined;
-      
-      if ((action === 'like' || action === 'super') && item.embedding) {
-        const currentVector = user?.styleProfile?.preferenceVector || Array(384).fill(0);
-        newPreferenceVector = applyDisplacement(currentVector, item.embedding, action);
-        console.log(`Calculated new vector locally (action: ${action})`);
-      }
-
       // 1. Process Online via use case (validates + persists)
       await processSwipe({
         userId: user?._id || '', 
         productId: item._id,
         action: action,
         timestamp: Date.now(),
-        newPreferenceVector,
+        userPreferenceVector: user?.styleProfile?.preferenceVector,
+        productEmbedding: item.embedding,
       });
       console.log(`Synced ${action} for ${item.title} to Convex.`);
 
