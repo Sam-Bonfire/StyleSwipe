@@ -253,6 +253,7 @@ jobs:
         working-directory: apps/consumer-app
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+          APP_VERSION: ${{ needs.release.outputs.new_version }}
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
@@ -266,6 +267,7 @@ jobs:
         working-directory: apps/consumer-app
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+          APP_VERSION: ${{ needs.release.outputs.new_version }}
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4

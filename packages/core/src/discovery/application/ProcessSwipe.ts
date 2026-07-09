@@ -1,6 +1,7 @@
 import { Effect } from 'effect';
 
 import { RepositoryError } from '../../../shared/domain/errors';
+import { applyDisplacement } from '../../identity/domain/StyleDNA';
 import { SwipeRepository, SwipeAction } from '../application/DiscoveryPorts';
 
 /** Valid swipe actions — pure TS replacement for convex/values schema */
@@ -14,7 +15,8 @@ export interface ProcessSwipeInput {
   productId: string;
   action: SwipeAction;
   timestamp: number;
-  newPreferenceVector?: number[];
+  userPreferenceVector?: number[];
+  productEmbedding?: number[];
 }
 
 export class SwipeError extends Error {
@@ -38,8 +40,14 @@ export const processSwipe = (
       return yield* _(Effect.fail(new SwipeError(`Invalid action: ${input.action}`)));
     }
 
+    let newPreferenceVector: number[] | undefined = undefined;
+    if ((input.action === 'like' || input.action === 'super') && input.productEmbedding) {
+      const currentVector = input.userPreferenceVector || Array(384).fill(0);
+      newPreferenceVector = applyDisplacement(currentVector, input.productEmbedding, input.action);
+    }
+
     const swipeRepo = yield* _(SwipeRepository);
-    yield* _(swipeRepo.recordSwipe(input.userId, input.productId, input.action, input.timestamp, input.newPreferenceVector));
+    yield* _(swipeRepo.recordSwipe(input.userId, input.productId, input.action, input.timestamp, newPreferenceVector));
 
     return input;
   });
