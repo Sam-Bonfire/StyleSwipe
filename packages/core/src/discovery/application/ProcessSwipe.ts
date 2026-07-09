@@ -14,6 +14,7 @@ export interface ProcessSwipeInput {
   productId: string;
   action: SwipeAction;
   timestamp: number;
+  newPreferenceVector?: number[];
 }
 
 export class SwipeError extends Error {
@@ -38,7 +39,7 @@ export const processSwipe = (
     }
 
     const swipeRepo = yield* _(SwipeRepository);
-    yield* _(swipeRepo.recordSwipe(input.userId, input.productId, input.action, input.timestamp));
+    yield* _(swipeRepo.recordSwipe(input.userId, input.productId, input.action, input.timestamp, input.newPreferenceVector));
 
     return input;
   });

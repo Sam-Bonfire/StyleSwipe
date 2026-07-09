@@ -18,7 +18,7 @@ export const getProductsByIds = query({
 
         return products.map((p) => {
             if (!p) return p;
-            const { embedding, embeddingVersions, meta, ...rest } = p;
+            const { embeddingVersions, meta, ...rest } = p;
             let cleanMeta = meta;
             if (meta && meta.rawAttributes !== undefined) {
                 const { rawAttributes, ...otherMeta } = meta;
