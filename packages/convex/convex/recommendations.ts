@@ -87,9 +87,9 @@ export const getVectorFeed = action({
       filter = (q: any) => q.eq('gender', gender);
     }
 
-    const results: { _id: string; _score: number }[] = await ctx.vectorSearch(
-      'products',
-      'by_embedding',
+    const results = await ctx.vectorSearch(
+      'product_embeddings',
+      'by_embedding_v1',
       {
         vector: preferenceVector,
         limit: Math.min(256, (args.limit || 10) + swipedIds.length),
@@ -97,12 +97,14 @@ export const getVectorFeed = action({
       },
     );
 
-    // 4. Filter & Hydrate
-    // Filter out swiped items
-    const filteredResults = results.filter((r) => !swipedIds.includes(r._id as any));
-
     // We only have the Ids and scores. Need to fetch full docs.
-    const productIds = filteredResults.slice(0, args.limit || 10).map((r) => r._id);
+    const allProductIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id as any) });
+
+    // Filter out swiped items
+    const filteredProductIds = allProductIds.filter((id) => !swipedIds.includes(id as any));
+
+    // Slice
+    const productIds = filteredProductIds.slice(0, args.limit || 10);
 
     // Bulk fetch details
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

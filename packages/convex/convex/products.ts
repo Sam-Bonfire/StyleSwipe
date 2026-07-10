@@ -117,10 +117,10 @@ export const findSimilar = action({
       };
     }
 
-    const results = await ctx.vectorSearch('products', 'by_embedding', searchOptions);
+    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', searchOptions);
 
     // Fetch full product details
-    const productIds = results.map((r) => r._id);
+    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id as any) });
     const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
 
     return products;
@@ -151,7 +151,7 @@ export const create = mutation({
         collection: v.optional(v.string()),
       }),
     ),
-    embedding: v.optional(v.array(v.float64())),
+
     meta: v.optional(v.any()), // Loose object
     // createdAt removed
     updatedAt: v.number(),
@@ -171,7 +171,7 @@ export const update = mutation({
     category: v.optional(v.string()),
     images: v.optional(v.array(v.string())),
     attributes: v.optional(v.any()), // Simplified for patch
-    embedding: v.optional(v.array(v.float64())),
+
     meta: v.optional(v.any()),
     updatedAt: v.number(),
   },
@@ -187,7 +187,10 @@ export const updateEmbedding = mutation({
     embedding: v.array(v.float64()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { embedding: args.embedding });
+    const existing = await ctx.db.query('product_embeddings').withIndex('by_productId', q => q.eq('productId', args.id)).first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { embeddingVersions: { v1: args.embedding }, updatedAt: Date.now() });
+    }
   },
 });
 

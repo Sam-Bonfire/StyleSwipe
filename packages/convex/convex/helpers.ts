@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
+import { Id } from './_generated/dataModel';
 
 export const getProductsByIds = query({
     args: {
@@ -18,7 +19,7 @@ export const getProductsByIds = query({
 
         return products.map((p) => {
             if (!p) return p;
-            const { embeddingVersions, meta, ...rest } = p;
+            const { meta, ...rest } = p;
             let cleanMeta = meta;
             if (meta && meta.rawAttributes !== undefined) {
                 const { rawAttributes, ...otherMeta } = meta;
@@ -29,5 +30,15 @@ export const getProductsByIds = query({
                 ...(cleanMeta ? { meta: cleanMeta } : {}),
             };
         });
+    },
+});
+
+export const getProductIdsFromEmbeddings = query({
+    args: {
+        ids: v.array(v.id('product_embeddings')),
+    },
+    handler: async (ctx, args) => {
+        const docs = await Promise.all(args.ids.map((id) => ctx.db.get(id)));
+        return docs.map((d) => d?.productId).filter((id): id is Id<'products'> => id !== undefined);
     },
 });

@@ -14,13 +14,13 @@ export const searchProducts = action({
     const { vector, limit = 10 } = args;
 
     // Perform vector search
-    const results = await ctx.vectorSearch('products', 'by_embedding', {
+    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', {
       vector,
       limit,
     });
 
     // Fetch full product details
-    const productIds = results.map((r) => r._id);
+    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id as any) });
     const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
 
     return { products };
