@@ -2,8 +2,9 @@ import { paginationOptsValidator, FunctionReference, RegisteredQuery } from 'con
 import { v } from 'convex/values';
 
 import { Doc, Id } from './_generated/dataModel';
-import { mutation, query } from './_generated/server';
+import { mutation, query, action } from './_generated/server';
 import { MutationCtx } from './_generated/server';
+import { api } from './_generated/api';
 import { requireCoreAdmin } from './permissions';
 
 export const createJob = mutation({
@@ -52,7 +53,7 @@ export const saveProduct = mutation({
   args: {
     externalId: v.string(),
     url: v.string(),
-    data: v.any(),
+    storageId: v.id('_storage'),
     embedding: v.optional(v.array(v.float64())),
   },
   handler: async (ctx, args) => {
@@ -66,7 +67,7 @@ export const saveBatch = mutation({
       v.object({
         externalId: v.string(),
         url: v.string(),
-        data: v.any(),
+        storageId: v.id('_storage'),
         embedding: v.optional(v.array(v.float64())),
       }),
     ),
@@ -80,7 +81,7 @@ export const saveBatch = mutation({
 
 async function saveInternal(
   ctx: MutationCtx,
-  args: { externalId: string; url: string; data: any; embedding?: number[] },
+  args: { externalId: string; url: string; storageId: Id<'_storage'>; embedding?: number[] },
 ) {
   const existing = await ctx.db
     .query('scraped_products')
@@ -88,14 +89,10 @@ async function saveInternal(
     .first();
 
   let scrapedId;
-  // Ensure embedding is NOT in the data object stored in scraped_products
-  const { embedding: _emb, ...cleanData } = args.data; // Try to strip if present in data
-  // Also strip from args.data if it was passed there?
-  // The worker might pass it in data OR separate. We'll rely on args.embedding.
 
   if (existing) {
     await ctx.db.patch(existing._id, {
-      data: cleanData, // Storing raw data without embedding
+      storageId: args.storageId,
       lastScrapedAt: Date.now(),
       status: 'active',
     });
@@ -104,26 +101,60 @@ async function saveInternal(
     scrapedId = await ctx.db.insert('scraped_products', {
       externalId: args.externalId,
       url: args.url,
-      data: cleanData,
+      storageId: args.storageId,
       lastScrapedAt: Date.now(),
       status: 'active',
     });
   }
 
-  // Auto-promote to catalog with the transient embedding
-  await promoteInternal(ctx, scrapedId, args.embedding);
+  // Auto-promote to catalog with the transient embedding via an action
+  await ctx.scheduler.runAfter(0, api.scraper.promoteToCatalogAction, { 
+    scrapedProductId: scrapedId, 
+    embeddingOverride: args.embedding 
+  });
 }
 
-// Internal helper for promotion to keep logic DRY
-async function promoteInternal(
-  ctx: MutationCtx,
-  scrapedProductId: Id<'scraped_products'>,
-  embeddingOverride?: number[],
-) {
-  const scraped = await ctx.db.get(scrapedProductId);
-  if (!scraped) return;
+export const getStorageId = query({
+  args: { scrapedProductId: v.id('scraped_products') },
+  handler: async (ctx, args) => {
+    const scraped = await ctx.db.get(args.scrapedProductId);
+    return scraped?.storageId;
+  }
+});
 
-  const data = scraped.data;
+export const promoteToCatalogAction = action({
+  args: {
+    scrapedProductId: v.id('scraped_products'),
+    embeddingOverride: v.optional(v.array(v.float64())),
+  },
+  handler: async (ctx, args) => {
+    const storageId = await ctx.runQuery(api.scraper.getStorageId, { scrapedProductId: args.scrapedProductId });
+    if (!storageId) return;
+
+    const fileBlob = await ctx.storage.get(storageId);
+    if (!fileBlob) return;
+    
+    const data = JSON.parse(await fileBlob.text());
+    
+    await ctx.runMutation(api.scraper.executePromotion, {
+      scrapedProductId: args.scrapedProductId,
+      data,
+      embeddingOverride: args.embeddingOverride,
+    });
+  }
+});
+
+export const executePromotion = mutation({
+  args: {
+    scrapedProductId: v.id('scraped_products'),
+    data: v.any(),
+    embeddingOverride: v.optional(v.array(v.float64())),
+  },
+  handler: async (ctx, args) => {
+    const { scrapedProductId, data, embeddingOverride } = args;
+    
+    const scraped = await ctx.db.get(scrapedProductId);
+    if (!scraped) return;
 
   // Check if it's already a mapped object from extension or raw pdpData
   const isMapped = !!data.externalId;
@@ -351,6 +382,7 @@ async function promoteInternal(
     }
   }
 }
+});
 
 export const getPendingJobs: RegisteredQuery<"public", any, any> = query({
   handler: async (ctx): Promise<any> => {
@@ -389,7 +421,9 @@ export const promoteToCatalog = mutation({
   },
   handler: async (ctx, args) => {
     await requireCoreAdmin(ctx);
-    await promoteInternal(ctx, args.scrapedProductId);
+    await ctx.scheduler.runAfter(0, api.scraper.promoteToCatalogAction, { 
+      scrapedProductId: args.scrapedProductId 
+    });
   },
 });
 
@@ -474,7 +508,7 @@ export const serviceSaveProduct = mutation({
   args: {
     externalId: v.string(),
     url: v.string(),
-    data: v.any(),
+    storageId: v.id('_storage'),
     embedding: v.optional(v.array(v.float64())),
   },
   handler: async (ctx, args) => {
@@ -492,7 +526,7 @@ export const serviceSaveBatch = mutation({
       v.object({
         externalId: v.string(),
         url: v.string(),
-        data: v.any(),
+        storageId: v.id('_storage'),
         embedding: v.optional(v.array(v.float64())),
       }),
     ),

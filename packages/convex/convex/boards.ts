@@ -34,36 +34,30 @@ export const trackPurchaseClick = mutation({
       .withIndex('by_user_system', (q) => q.eq('userId', args.userId).eq('isSystem', true))
       .unique();
 
+    let boardId = existingBoard?._id;
     if (existingBoard) {
-      // Check if product is already tracked to avoid duplicates in the same board
-      const alreadyPresent = existingBoard.items.some((item) => item.productId === args.productId);
-      if (!alreadyPresent) {
-        const updatedItems = [...existingBoard.items, { productId: args.productId, addedAt: timestamp }];
-        await ctx.db.patch(existingBoard._id, {
-          items: updatedItems,
-          updatedAt: timestamp,
-        });
+      const existingItem = await ctx.db
+        .query('board_items')
+        .withIndex('by_board_product', (q) => q.eq('boardId', existingBoard._id).eq('productId', args.productId))
+        .unique();
+        
+      if (existingItem) {
+        await ctx.db.patch(existingItem._id, { addedAt: timestamp });
       } else {
-        // Just update the addedAt timestamp to move it to the top
-        const updatedItems = existingBoard.items.map((item) =>
-          item.productId === args.productId ? { ...item, addedAt: timestamp } : item
-        );
-        await ctx.db.patch(existingBoard._id, {
-          items: updatedItems,
-          updatedAt: timestamp,
-        });
+        await ctx.db.insert('board_items', { boardId: existingBoard._id, productId: args.productId, addedAt: timestamp });
       }
+      await ctx.db.patch(existingBoard._id, { updatedAt: timestamp });
     } else {
       // Create the default "Your orders" board
-      await ctx.db.insert('boards', {
+      boardId = await ctx.db.insert('boards', {
         userId: args.userId,
         name: 'Your orders',
         slug: 'your-orders',
         isSystem: true,
-        items: [{ productId: args.productId, addedAt: timestamp }],
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+      await ctx.db.insert('board_items', { boardId, productId: args.productId, addedAt: timestamp });
     }
 
     // 3. Remove the item from the user's shopping cart
@@ -96,14 +90,21 @@ export const getSystemBoard = query({
       .withIndex('by_user_system', (q) => q.eq('userId', args.userId).eq('isSystem', true))
       .unique();
 
-    if (!board || board.items.length === 0) {
+    if (!board) {
       return {
         items: [],
       };
     }
 
+    const boardItems = await ctx.db
+      .query('board_items')
+      .withIndex('by_board', (q) => q.eq('boardId', board._id))
+      .collect();
+
+    if (boardItems.length === 0) return { items: [] };
+
     // Sort items in reverse chronological order (most recently clicked first)
-    const sortedItems = [...board.items].sort((a, b) => b.addedAt - a.addedAt);
+    const sortedItems = boardItems.sort((a, b) => b.addedAt - a.addedAt);
 
     // Resolve full product documents
     const productIds = sortedItems.map((item) => item.productId);
@@ -127,7 +128,7 @@ export const getSystemBoard = query({
         if (!product) return null;
 
         // Strip embedding fields to optimize response payloads (matches projectProduct pattern)
-        const { embedding, embeddingVersions, meta, ...rest } = product;
+        const { meta, ...rest } = product;
 
         let cleanMeta = meta;
         if (meta && meta.rawAttributes !== undefined) {
@@ -176,36 +177,35 @@ export const toggleWishlist = mutation({
       .withIndex('by_user_slug', (q) => q.eq('userId', args.userId).eq('slug', 'wishlist'))
       .unique();
 
+    let boardId = existingBoard?._id;
     if (existingBoard) {
-      const alreadyPresent = existingBoard.items.some((item) => item.productId === args.productId);
-      if (alreadyPresent) {
+      const existingItem = await ctx.db
+        .query('board_items')
+        .withIndex('by_board_product', (q) => q.eq('boardId', existingBoard._id).eq('productId', args.productId))
+        .unique();
+
+      if (existingItem) {
         // Remove from wishlist
-        const updatedItems = existingBoard.items.filter((item) => item.productId !== args.productId);
-        await ctx.db.patch(existingBoard._id, {
-          items: updatedItems,
-          updatedAt: timestamp,
-        });
+        await ctx.db.delete(existingItem._id);
+        await ctx.db.patch(existingBoard._id, { updatedAt: timestamp });
         return { isWishlisted: false };
       } else {
         // Add to wishlist
-        const updatedItems = [...existingBoard.items, { productId: args.productId, addedAt: timestamp }];
-        await ctx.db.patch(existingBoard._id, {
-          items: updatedItems,
-          updatedAt: timestamp,
-        });
+        await ctx.db.insert('board_items', { boardId: existingBoard._id, productId: args.productId, addedAt: timestamp });
+        await ctx.db.patch(existingBoard._id, { updatedAt: timestamp });
         return { isWishlisted: true };
       }
     } else {
       // Create new wishlist system board
-      await ctx.db.insert('boards', {
+      boardId = await ctx.db.insert('boards', {
         userId: args.userId,
         name: 'Wishlist',
         slug: 'wishlist',
         isSystem: true,
-        items: [{ productId: args.productId, addedAt: timestamp }],
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+      await ctx.db.insert('board_items', { boardId, productId: args.productId, addedAt: timestamp });
       return { isWishlisted: true };
     }
   },
@@ -224,14 +224,21 @@ export const getWishlist = query({
       .withIndex('by_user_slug', (q) => q.eq('userId', args.userId).eq('slug', 'wishlist'))
       .unique();
 
-    if (!board || board.items.length === 0) {
+    if (!board) {
       return {
         items: [],
       };
     }
 
+    const boardItems = await ctx.db
+      .query('board_items')
+      .withIndex('by_board', (q) => q.eq('boardId', board._id))
+      .collect();
+
+    if (boardItems.length === 0) return { items: [] };
+
     // Sort items in reverse chronological order (most recently wishlisted first)
-    const sortedItems = [...board.items].sort((a, b) => b.addedAt - a.addedAt);
+    const sortedItems = boardItems.sort((a, b) => b.addedAt - a.addedAt);
 
     // Resolve full product documents
     const productIds = sortedItems.map((item) => item.productId);
@@ -255,7 +262,7 @@ export const getWishlist = query({
         if (!product) return null;
 
         // Strip embedding fields to optimize response payloads (matches projectProduct pattern)
-        const { embedding, embeddingVersions, meta, ...rest } = product;
+        const { meta, ...rest } = product;
 
         let cleanMeta = meta;
         if (meta && meta.rawAttributes !== undefined) {
