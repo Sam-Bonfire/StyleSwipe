@@ -254,6 +254,7 @@ jobs:
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
           APP_VERSION: ${{ needs.release.outputs.new_version }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
@@ -268,6 +269,7 @@ jobs:
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
           APP_VERSION: ${{ needs.release.outputs.new_version }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
