@@ -13,7 +13,7 @@ export const authComponent = createClient(components.auth, {
 export const createAuthOptions = (ctx: MutationCtx) => {
   return {
     ...getBaseAuthOptions(),
-    database: authComponent.adapter(ctx),
+    database: authComponent.adapter(ctx as any /* better-auth generic types mismatch in monorepo */),
   };
 };
 
