@@ -26,17 +26,19 @@
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.2",
-    "@tamagui/core": "^1.0.0",
-    "@tamagui/linear-gradient": "^1.0.0",
-    "@tamagui/lucide-icons": "^1.0.0",
-    "@tamagui/shorthands": "^1.0.0",
-    "@tamagui/themes": "^1.0.0",
-    "expo-font": "^14.0.11",
-    "tamagui": "^1.0.0"
+    "@tamagui/animations-react-native": "^2.5.0",
+    "@tamagui/core": "^2.5.0",
+    "@tamagui/linear-gradient": "^2.5.0",
+    "@tamagui/lucide-icons": "2.0.0-rc.26-1773683384816",
+    "@tamagui/shorthands": "^2.5.0",
+    "@tamagui/themes": "^2.5.0",
+    "expo-font": "~57.0.0",
+    "react-native-gesture-handler": "~2.32.0",
+    "tamagui": "^2.5.0"
   },
   "peerDependencies": {
-    "react": "18.3.1",
-    "react-native": ">=0.72.0",
-    "react-native-reanimated": ">=3.0.0"
+    "react": "19.2.3",
+    "react-native": ">=0.86.0",
+    "react-native-reanimated": ">=4.0.0"
   }
 }

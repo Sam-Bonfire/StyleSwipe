@@ -6,7 +6,7 @@ import * as Linking from 'expo-linking';
 import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, Share, Alert, Platform, ScrollView } from 'react-native';
-import { YStack, XStack, Text, Stack as TStack, Image, styled } from 'tamagui';
+import { YStack, XStack, Text, Image, styled } from 'tamagui';
 
 import { BrandedQRCodeModal } from '../../components/BrandedQRCodeModal';
 
@@ -19,7 +19,7 @@ const DURATIONS: { value: Duration; label: string }[] = [
   { value: '24h', label: '24 hours' },
 ];
 
-const DurationChip = styled(TStack, {
+const DurationChip = styled(YStack, {
   name: 'DurationChip',
   paddingHorizontal: '$3',
   paddingVertical: '$2',
@@ -61,10 +61,10 @@ const DurationChipText = styled(Text, {
 });
 
 const FeatureRow = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
-  <XStack space="$3" alignItems="flex-start" marginBottom="$4">
-    <TStack padding="$3" backgroundColor="$backgroundHover" borderRadius="$full">
+  <XStack gap="$3" alignItems="flex-start" marginBottom="$4">
+    <YStack padding="$3" backgroundColor="$backgroundHover" borderRadius="$full">
       <Icon size={24} color="$primary" />
-    </TStack>
+    </YStack>
     <YStack flex={1}>
       <Text fontWeight="bold" fontSize="$4" color="$textPrimary">{title}</Text>
       <Text fontSize="$3" color="$textSecondary" marginTop="$1" lineHeight={20}>{description}</Text>
@@ -161,9 +161,9 @@ export function PartnerSyncSettingsScreen() {
         options={{ 
           title: 'Partner Sync',
           headerLeft: () => (
-            <TStack onPress={() => router.back()} padding="$2" marginLeft="$-2" cursor="pointer">
+            <YStack onPress={() => router.back()} padding="$2" marginLeft="$-2" cursor="pointer">
               <ChevronLeft size={24} color="$textPrimary" />
-            </TStack>
+            </YStack>
           )
         }} 
       />
@@ -172,7 +172,7 @@ export function PartnerSyncSettingsScreen() {
           
           {/* Hero Banner */}
           <YStack backgroundColor="$primary" paddingTop={Platform.OS === 'ios' ? 70 : 50} paddingBottom="$6" paddingHorizontal="$6" alignItems="center" justifyContent="center" position="relative">
-            <TStack 
+            <YStack 
               position="absolute" 
               top={Platform.OS === 'ios' ? 50 : 20} 
               left="$4" 
@@ -184,11 +184,11 @@ export function PartnerSyncSettingsScreen() {
               zIndex={10}
             >
               <ChevronLeft size={24} color="white" />
-            </TStack>
+            </YStack>
 
-            <TStack width={80} height={80} borderRadius="$full" backgroundColor="rgba(255,255,255,0.2)" alignItems="center" justifyContent="center" marginBottom="$4">
+            <YStack width={80} height={80} borderRadius="$full" backgroundColor="rgba(255,255,255,0.2)" alignItems="center" justifyContent="center" marginBottom="$4">
               <HeartHandshake size={40} color="white" />
-            </TStack>
+            </YStack>
             <Text fontFamily="$heading" fontSize="$6" fontWeight="bold" color="white" textAlign="center">
               Collaborative Shopping
             </Text>
@@ -197,14 +197,14 @@ export function PartnerSyncSettingsScreen() {
             </Text>
           </YStack>
 
-          <YStack padding="$4" space="$4" flex={1}>
+          <YStack padding="$4" gap="$4" flex={1}>
             
             {hasActiveSyncs && (
-              <YStack space="$4" marginBottom="$2">
-                 <XStack alignItems="center" space="$3">
-                   <TStack padding="$2" backgroundColor="$primaryLight" borderRadius="$full">
+              <YStack gap="$4" marginBottom="$2">
+                 <XStack alignItems="center" gap="$3">
+                   <YStack padding="$2" backgroundColor="$primaryLight" borderRadius="$full">
                      <Users size={24} color="$primary" />
-                   </TStack>
+                   </YStack>
                    <YStack flex={1}>
                      <Text fontWeight="bold" fontSize="$5" color="$primary">Active Sessions</Text>
                      <Text fontSize="$3" color="$textSecondary">Your feed is currently blended</Text>
@@ -212,8 +212,8 @@ export function PartnerSyncSettingsScreen() {
                  </XStack>
 
                  {activeSyncs.map(sync => (
-                   <YStack key={sync._id as string} backgroundColor="$surface" padding="$4" borderRadius="$4" borderWidth={1} borderColor="$primaryLight" space="$4">
-                     <XStack backgroundColor="$backgroundHover" padding="$3" borderRadius="$3" alignItems="center" space="$3">
+                   <YStack key={sync._id as string} backgroundColor="$surface" padding="$4" borderRadius="$4" borderWidth={1} borderColor="$primaryLight" gap="$4">
+                     <XStack backgroundColor="$backgroundHover" padding="$3" borderRadius="$3" alignItems="center" gap="$3">
                        <Image 
                          source={{ uri: (sync.partnerImage as string) || 'https://picsum.photos/40' }} 
                          width={40} 
@@ -273,7 +273,7 @@ export function PartnerSyncSettingsScreen() {
               </XStack>
 
               <Text fontWeight="bold" fontSize="$4" marginBottom="$3">2. Invite Partner</Text>
-              <XStack space="$3">
+              <XStack gap="$3">
                 <Button flex={1} variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
                   Share Link
                 </Button>

@@ -18,9 +18,9 @@ export function ProfileScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <YStack flex={1} padding="$4" space="$6">
+        <YStack flex={1} padding="$4" gap="$6">
           {user && (
-            <XStack alignItems="center" space="$4">
+            <XStack alignItems="center" gap="$4">
               <Avatar circular size="$10">
                 <Avatar.Image src={user.image} />
                 <Avatar.Fallback backgroundColor="$primary" />
@@ -34,7 +34,7 @@ export function ProfileScreen() {
             </XStack>
           )}
 
-          <YStack space="$4" marginTop="$4">
+          <YStack gap="$4" marginTop="$4">
             <Button variant="primary" onPress={() => router.push('/(app)/partner-sync')}>Partner Sync</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/edit-profile')}>Edit Profile</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/wishlist')}>My Wishlist</Button>

@@ -36,7 +36,7 @@ export default function PartnerSyncScreen() {
   if (Platform.OS === 'web') {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" space="$4">
+        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
           <H2>StyleSwipe Partner Sync</H2>
           <Text textAlign="center" color="$textSecondary">
             You've been invited to sync your style! Download the StyleSwipe app on iOS or Android to accept the invitation and start shopping together.
@@ -62,7 +62,7 @@ export default function PartnerSyncScreen() {
   if (syncDoc === null) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" space="$4">
+        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
           <H2>Invalid Link</H2>
           <Text textAlign="center" color="$textSecondary">
             This partner sync link is invalid or has expired.
@@ -78,7 +78,7 @@ export default function PartnerSyncScreen() {
   if (!user) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" space="$4">
+        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
           <H2>Style Sync</H2>
           <Text textAlign="center" color="$textSecondary">
             Sign in to accept this style sync request and start exploring outfits together!
@@ -94,7 +94,7 @@ export default function PartnerSyncScreen() {
   if (syncDoc.initiatorId === user._id) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" space="$4">
+        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
           <H2>Your Invite Link</H2>
           <Text textAlign="center" color="$textSecondary">
             Share this link with your partner so they can sync their style with yours!
@@ -110,7 +110,7 @@ export default function PartnerSyncScreen() {
   if (syncDoc.status === 'active') {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" space="$4">
+        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
           <H2>Already Synced!</H2>
           <Text textAlign="center" color="$textSecondary">
             You are already synced with this partner.
@@ -125,7 +125,7 @@ export default function PartnerSyncScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" space="$4">
+      <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
         <H2>Syncing...</H2>
         <ActivityIndicator size="large" color="#000" />
         {error && (

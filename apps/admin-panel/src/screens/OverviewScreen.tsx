@@ -6,12 +6,12 @@ import { YStack, Text, Card, XStack, H2, H3, Spinner, styled, Avatar, ScrollView
 
 const StatsCardStyled = styled(Card, {
   name: 'StatsCard',
-  bordered: true,
+  borderWidth: 1,
+  borderColor: '$borderColor',
   padding: '$5',
   minWidth: 250,
   flex: 1,
   backgroundColor: '$surface',
-  borderColor: '$borderColor',
   borderRadius: '$4',
 
   hoverStyle: {
@@ -21,8 +21,6 @@ const StatsCardStyled = styled(Card, {
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
   },
-
-  animation: 'quick',
 });
 
 const ActivityCard = styled(Card, {
@@ -32,7 +30,7 @@ const ActivityCard = styled(Card, {
   backgroundColor: '$surface',
   borderColor: '$borderColor',
   borderRadius: '$4',
-  bordered: true,
+  borderWidth: 1,
 
   hoverStyle: {
     borderColor: '$borderColorHover',
@@ -49,8 +47,6 @@ const ActivityItem = styled(XStack, {
   hoverStyle: {
     backgroundColor: '$backgroundHover',
   },
-
-  animation: 'quick',
 });
 
 export function OverviewScreen() {
@@ -109,15 +105,15 @@ export function OverviewScreen() {
 
   return (
     <ScrollView flex={1} showsVerticalScrollIndicator={false}>
-      <YStack space="$2" padding="$1" paddingBottom="$8">
-        <YStack space="$2" marginBottom="$2">
+      <YStack gap="$2" padding="$1" paddingBottom="$8">
+        <YStack gap="$2" marginBottom="$2">
           <H3 color="$color">Dashboard Overview</H3>
           <Text fontSize="$3" color="$color" opacity={0.6}>
             Monitor platform activity and key metrics
           </Text>
         </YStack>
 
-        <XStack space="$2" flexWrap="wrap">
+        <XStack gap="$2" flexWrap="wrap">
           <StatsCard
             title="Total Users"
             value={stats.totalUsers.toString()}
@@ -141,13 +137,13 @@ export function OverviewScreen() {
           />
         </XStack>
 
-        <XStack space="$2" marginTop="$2" flexWrap="wrap">
+        <XStack gap="$2" marginTop="$2" flexWrap="wrap">
           <ActivityCard>
             <XStack justifyContent="space-between" alignItems="center" marginBottom="$4">
               <H3 fontSize="$5" color="$color">Recent Activity</H3>
               <Clock size={20} color="$color" opacity={0.5} />
             </XStack>
-            <YStack space="$2">
+            <YStack gap="$2">
               {stats.recentUsers.length > 0 ? (
                 stats.recentUsers.map((u: { _id: string; name?: string; email?: string; image?: string }) => (
                   <ActivityItem key={u._id}>

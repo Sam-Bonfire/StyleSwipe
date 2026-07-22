@@ -86,13 +86,13 @@ export function FeedbackScreen() {
     return (
         <YStack flex={1} backgroundColor="$background">
             {/* Header Section */}
-            <YStack paddingHorizontal="$4" paddingTop="$4" paddingBottom="$2" space="$4" borderBottomWidth={1} borderColor="$borderColor">
+            <YStack paddingHorizontal="$4" paddingTop="$4" paddingBottom="$2" gap="$4" borderBottomWidth={1} borderColor="$borderColor">
                 <YStack>
                     <H3>Inbox</H3>
                     <Text fontSize="$3" opacity={0.6}>Manage user feedback and support</Text>
                 </YStack>
 
-                <XStack space="$3" alignItems="center">
+                <XStack gap="$3" alignItems="center">
                     <XStack flex={1} alignItems="center" backgroundColor="$backgroundHover" borderRadius="$4" paddingHorizontal="$3" height={40}>
                         <Search size={16} opacity={0.5} />
                         <Input
@@ -170,7 +170,7 @@ export function FeedbackScreen() {
                                     >
                                         {({ open }: { open: boolean }) => (
                                             <>
-                                                <XStack space="$4" flex={1} alignItems="flex-start">
+                                                <XStack gap="$4" flex={1} alignItems="flex-start">
                                                     <Avatar circular size="$4" backgroundColor="$backgroundHover">
                                                         <Avatar.Fallback backgroundColor="$infoLight" alignItems="center" justifyContent="center">
                                                             <Text fontSize="$3" fontWeight="bold" color="$info">
@@ -179,7 +179,7 @@ export function FeedbackScreen() {
                                                         </Avatar.Fallback>
                                                     </Avatar>
 
-                                                    <YStack flex={1} space="$1">
+                                                    <YStack flex={1} gap="$1">
                                                         <XStack justifyContent="space-between" alignItems="center">
                                                             <Text fontWeight="bold" fontSize="$4" color="$color">{item.name}</Text>
                                                             <Text fontSize="$2" opacity={0.5}>
@@ -187,7 +187,7 @@ export function FeedbackScreen() {
                                                             </Text>
                                                         </XStack>
 
-                                                        <XStack space="$2" alignItems="center">
+                                                        <XStack gap="$2" alignItems="center">
                                                             <Text fontSize="$2" fontWeight="600" opacity={0.6} textTransform="uppercase">{item.type}</Text>
                                                             <Circle size={6} backgroundColor={getStatusColor(item.status)} />
                                                             <Text fontSize="$2" fontWeight="600" color={getStatusColor(item.status)}>{item.status}</Text>
@@ -200,23 +200,23 @@ export function FeedbackScreen() {
                                                         )}
                                                     </YStack>
                                                 </XStack>
-                                                <Square animation="quick" rotate={open ? '180deg' : '0deg'} marginLeft="$3">
+                                                <Square rotate={open ? '180deg' : '0deg'} marginLeft="$3">
                                                     <ChevronDown size={20} color="$textSecondary" />
                                                 </Square>
                                             </>
                                         )}
                                     </Accordion.Trigger>
 
-                                    <Accordion.HeightAnimator animation="quick">
+                                    <Accordion.HeightAnimator>
                                         <Accordion.Content
-                                            animation="quick"
+                                           
                                             padding="$4"
                                             backgroundColor="$backgroundHover"
                                             overflow="hidden"
                                         >
-                                            <YStack space="$4">
-                                                <XStack justifyContent="space-between" flexWrap="wrap" space="$4">
-                                                    <YStack space="$2" flex={1} minWidth={200}>
+                                            <YStack gap="$4">
+                                                <XStack justifyContent="space-between" flexWrap="wrap" gap="$4">
+                                                    <YStack gap="$2" flex={1} minWidth={200}>
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Details</Text>
                                                         <XStack justifyContent="space-between">
                                                             <Text fontSize="$3" opacity={0.6}>Contact</Text>
@@ -228,9 +228,9 @@ export function FeedbackScreen() {
                                                         </XStack>
                                                     </YStack>
 
-                                                    <YStack space="$2" flex={1} minWidth={200}>
+                                                    <YStack gap="$2" flex={1} minWidth={200}>
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Status Control</Text>
-                                                        <XStack space="$2">
+                                                        <XStack gap="$2">
                                                             { }
                                                             {['Open', 'Read', 'Resolved'].map(s => (
                                                                 <Button
@@ -246,7 +246,7 @@ export function FeedbackScreen() {
                                                     </YStack>
                                                 </XStack>
 
-                                                <YStack space="$2">
+                                                <YStack gap="$2">
                                                     <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Message</Text>
                                                     <YStack padding="$4" backgroundColor="$backgroundPress" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                                                         <Text fontSize="$4" lineHeight={22}>{item.message}</Text>
@@ -254,10 +254,10 @@ export function FeedbackScreen() {
                                                 </YStack>
 
                                                 {item.replies && item.replies.length > 0 && (
-                                                    <YStack space="$2">
+                                                    <YStack gap="$2">
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">History</Text>
                                                         {item.replies.map((r, i) => (
-                                                            <XStack key={i} space="$3">
+                                                            <XStack key={i} gap="$3">
                                                                 <Avatar circular size="$2" backgroundColor="$neutral200" />
                                                                 <YStack flex={1} backgroundColor="$background" padding="$3" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                                                                     <Text fontSize="$3">{r.message}</Text>
@@ -271,9 +271,9 @@ export function FeedbackScreen() {
                                                 )}
 
                                                 {isCoreAdmin && (
-                                                    <YStack space="$2">
+                                                    <YStack gap="$2">
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Reply</Text>
-                                                        <XStack space="$2" alignItems="flex-end">
+                                                        <XStack gap="$2" alignItems="flex-end">
                                                             <TextArea
                                                                 flex={1}
                                                                 placeholder="Write a reply..."

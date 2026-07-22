@@ -95,11 +95,11 @@ export function LogsScreen() {
     const { results: logs, status, loadMore } = useLogs(50); // Note: filters not yet supported in useLogs hook, assuming useLogs handles basic listing for now.
 
     return (
-        <YStack flex={1} padding="$4" space="$4">
+        <YStack flex={1} padding="$4" gap="$4">
             {/* Filters Toolbar */}
             <YStack paddingHorizontal="$4" paddingVertical="$3" borderBottomWidth={1} borderColor="$borderColor">
-                <XStack space="$4" alignItems="center" flexWrap="wrap">
-                    <XStack alignItems="center" space="$2">
+                <XStack gap="$4" alignItems="center" flexWrap="wrap">
+                    <XStack alignItems="center" gap="$2">
                         <Filter size={16} />
                         <Text fontWeight="bold">Filters:</Text>
                     </XStack>
@@ -126,7 +126,7 @@ export function LogsScreen() {
                     </Select>
 
                     {/* User Filter */}
-                    <XStack alignItems="center" space="$2" borderColor="$borderColor" borderWidth={1} borderRadius="$4" paddingHorizontal="$2">
+                    <XStack alignItems="center" gap="$2" borderColor="$borderColor" borderWidth={1} borderRadius="$4" paddingHorizontal="$2">
                         <Search size={14} opacity={0.5} />
                         <Input
                             unstyled
@@ -139,7 +139,7 @@ export function LogsScreen() {
                         {filterUser.length > 0 && <Button size="small" circular icon={X} chromeless onPress={() => setFilterUser('')} />}
                     </XStack>
                     {/* Session Filter */}
-                    <XStack alignItems="center" space="$2" borderColor="$borderColor" borderWidth={1} borderRadius="$4" paddingHorizontal="$2">
+                    <XStack alignItems="center" gap="$2" borderColor="$borderColor" borderWidth={1} borderRadius="$4" paddingHorizontal="$2">
                         <Search size={14} opacity={0.5} />
                         <Input
                             unstyled
@@ -168,7 +168,7 @@ export function LogsScreen() {
                         <Text marginTop="$3" opacity={0.6}>Loading logs...</Text>
                     </YStack>
                 ) : logs.length === 0 ? (
-                    <YStack flex={1} alignItems="center" justifyContent="center" padding="$8" space="$3">
+                    <YStack flex={1} alignItems="center" justifyContent="center" padding="$8" gap="$3">
                         <Info size={48} opacity={0.2} />
                         <Text fontSize="$5" fontWeight="bold" opacity={0.5}>No logs found</Text>
                     </YStack>
@@ -206,7 +206,7 @@ export function LogsScreen() {
                                     >
                                         {({ open }: { open: boolean }) => (
                                             <>
-                                                <XStack space="$3" flex={1} alignItems="center">
+                                                <XStack gap="$3" flex={1} alignItems="center">
                                                     <Badge
                                                         width={60}
                                                         backgroundColor={
@@ -230,7 +230,7 @@ export function LogsScreen() {
                                                         {item.message}
                                                     </Text>
                                                     {!open && (
-                                                        <XStack space="$2">
+                                                        <XStack gap="$2">
                                                             {item.app && (
                                                                 <Badge backgroundColor="$neutral200">
                                                                     <Text fontSize="$1" opacity={0.6}>{item.app}</Text>
@@ -244,20 +244,20 @@ export function LogsScreen() {
                                                         </XStack>
                                                     )}
                                                 </XStack>
-                                                <Square animation="quick" rotate={open ? '180deg' : '0deg'} marginLeft="$3">
+                                                <Square rotate={open ? '180deg' : '0deg'} marginLeft="$3">
                                                     <ChevronDown size={18} color="$textSecondary" />
                                                 </Square>
                                             </>
                                         )}
                                     </Accordion.Trigger>
 
-                                    <Accordion.HeightAnimator animation="quick">
+                                    <Accordion.HeightAnimator>
                                         <Accordion.Content
-                                            animation="quick"
+                                           
                                             padding="$4"
                                             backgroundColor="$backgroundHover"
                                         >
-                                            <YStack space="$4">
+                                            <YStack gap="$4">
                                                 <XStack justifyContent="space-between" alignItems="center">
                                                     <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Log Entry Details</Text>
                                                     <Button
@@ -269,8 +269,8 @@ export function LogsScreen() {
                                                         View Full Log
                                                     </Button>
                                                 </XStack>
-                                                <XStack justifyContent="space-between" flexWrap="wrap" space="$6">
-                                                    <YStack space="$2" flex={1} minWidth={250}>
+                                                <XStack justifyContent="space-between" flexWrap="wrap" gap="$6">
+                                                    <YStack gap="$2" flex={1} minWidth={250}>
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Context</Text>
                                                         <DetailRow label="Trace ID" value={item.traceId} />
                                                         <DetailRow label="User ID" value={item.userId} />
@@ -279,7 +279,7 @@ export function LogsScreen() {
                                                     </YStack>
 
                                                     {item.device && (
-                                                        <YStack space="$2" flex={1} minWidth={250}>
+                                                        <YStack gap="$2" flex={1} minWidth={250}>
                                                             <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Device Info</Text>
                                                             <DetailRow label="Model" value={item.device.model} />
                                                             <DetailRow label="OS" value={item.device.osName && item.device.osVersion ? `${item.device.osName} ${item.device.osVersion}` : item.device.osName || item.device.osVersion} />
@@ -292,7 +292,7 @@ export function LogsScreen() {
                                                 </XStack>
 
                                                 {item.error && (
-                                                    <YStack space="$2">
+                                                    <YStack gap="$2">
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Error Details</Text>
                                                         <YStack padding="$3" backgroundColor="$background" borderRadius="$4" borderWidth={1} borderColor="$error">
                                                             <Text color="$error" fontSize="$3" fontFamily="$mono">
@@ -303,7 +303,7 @@ export function LogsScreen() {
                                                 )}
 
                                                 {item.context && (
-                                                    <YStack space="$2">
+                                                    <YStack gap="$2">
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Full Context</Text>
                                                         <YStack padding="$3" backgroundColor="$background" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                                                             <Text fontSize="$3" fontFamily="$mono">
@@ -314,11 +314,11 @@ export function LogsScreen() {
                                                 )}
 
                                                 {item.breadcrumbs && item.breadcrumbs.length > 0 && (
-                                                    <YStack space="$2">
+                                                    <YStack gap="$2">
                                                         <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Breadcrumbs</Text>
-                                                        <YStack space="$2" backgroundColor="$background" padding="$3" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
+                                                        <YStack gap="$2" backgroundColor="$background" padding="$3" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                                                             {item.breadcrumbs.map((crumb: { timestamp: number; category: string; message: string }, i: number) => (
-                                                                <XStack key={i} space="$3" alignItems="center">
+                                                                <XStack key={i} gap="$3" alignItems="center">
                                                                     <Text fontSize="$2" opacity={0.5} width={70}>{new Date(crumb.timestamp).toLocaleTimeString()}</Text>
                                                                     <Badge width={60} backgroundColor="$neutral200">
                                                                         <Text fontSize="$1" fontWeight="bold">{crumb.category}</Text>
@@ -349,7 +349,7 @@ export function LogsScreen() {
                     </Button>
                 }
             >
-                <YStack space="$4" maxHeight={500}>
+                <YStack gap="$4" maxHeight={500}>
                     <ScrollView>
                         <YStack padding="$3" backgroundColor="$backgroundPress" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                             <Text fontSize="$3" fontFamily="$mono">
@@ -366,7 +366,7 @@ export function LogsScreen() {
 function DetailRow({ label, value }: { label: string; value?: string | number | null }) {
     if (value === undefined || value === null) return null;
     return (
-        <XStack space="$2">
+        <XStack gap="$2">
             <Text fontSize="$2" fontWeight="600" width={100} color="$textSecondary">{label}:</Text>
             <Text fontSize="$2" flex={1}>{value}</Text>
         </XStack>

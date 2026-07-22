@@ -120,16 +120,16 @@ export function UsersScreen() {
                                                     ) : null}
                                                 </XStack>
 
-                                                <Square animation="quick" rotate={open ? '180deg' : '0deg'} marginLeft="$2">
+                                                <Square rotate={open ? '180deg' : '0deg'} marginLeft="$2">
                                                     <ChevronDown size={18} color="$color" opacity={0.5} />
                                                 </Square>
                                             </>
                                         )}
                                     </Accordion.Trigger>
 
-                                    <Accordion.HeightAnimator animation="quick">
+                                    <Accordion.HeightAnimator>
                                         <Accordion.Content
-                                            animation="quick"
+                                           
                                             paddingHorizontal="$4"
                                             paddingVertical="$3"
                                             backgroundColor="$backgroundHover"

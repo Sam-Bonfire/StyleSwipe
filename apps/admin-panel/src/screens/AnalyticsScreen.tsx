@@ -10,7 +10,7 @@ import {
 } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
-import { YStack, XStack, Text, H2, Card, Spinner, Select, Adapt, Sheet, Separator, Stack } from 'tamagui';
+import { YStack, XStack, Text, H2, Card, Spinner, Select, Adapt, Sheet, Separator } from 'tamagui';
 
 type TimeRange = '7_days' | '30_days' | 'all_time';
 
@@ -41,11 +41,11 @@ export function AnalyticsScreen() {
             <Sheet.Overlay />
           </Sheet>
         </Adapt>
-        <Select.Content zIndex={200000}>
-          <Select.ScrollUpButton alignItems="center" justifyContent="center" h="$3">
-            <YStack zIndex={10}><ChevronUp size={20} /></YStack>
-          </Select.ScrollUpButton>
-          <Select.Viewport minWidth={200}>
+        <Select.Content>
+                  <Select.ScrollUpButton alignItems="center" justifyContent="center" h="$3">
+                    <YStack><ChevronUp size={20} /></YStack>
+                  </Select.ScrollUpButton>
+                  <Select.Viewport minWidth={200}>
             <Select.Group>
               <Select.Label>Select Variant</Select.Label>
               {availableVariants.map((variant, index) => (
@@ -108,7 +108,7 @@ export function AnalyticsScreen() {
     }
 
     return (
-      <YStack space="$2" marginTop="$2">
+      <YStack gap="$2" marginTop="$2">
         <XStack backgroundColor="$backgroundHover" padding="$2" paddingHorizontal="$3" borderRadius="$3" alignItems="center" justifyContent="space-between" marginBottom="$1">
           <YStack>
             <Text color="$textSecondary" fontSize="$1" textTransform="uppercase" fontWeight="700" letterSpacing={1}>Overall Conversion</Text>
@@ -117,7 +117,7 @@ export function AnalyticsScreen() {
           <Activity size={20} color="$primary" opacity={0.5} />
         </XStack>
 
-        <YStack space="$1">
+        <YStack gap="$1">
           {visibleSteps.map((step, index) => {
             const widthPercent = (step.value / maxVal) * 100;
             const dropOff = index > 0 ? visibleSteps[index - 1].value - step.value : 0;
@@ -140,7 +140,7 @@ export function AnalyticsScreen() {
                 overflow="hidden"
                 position="relative"
               >
-                <Stack 
+                <YStack 
                   position="absolute" 
                   top={0} 
                   left={0} 
@@ -150,10 +150,10 @@ export function AnalyticsScreen() {
                   opacity={0.1} 
                 />
                 <XStack justifyContent="space-between" alignItems="center" zIndex={1}>
-                  <XStack space="$2" alignItems="center">
-                    <Stack backgroundColor="$surface" padding="$1.5" borderRadius="$2" borderWidth={1} borderColor="$borderColor">
+                  <XStack gap="$2" alignItems="center">
+                    <YStack backgroundColor="$surface" padding="$1.5" borderRadius="$2" borderWidth={1} borderColor="$borderColor">
                       <IconComponent size={14} color={isHighDropoff ? '$error' : '$primary'} />
-                    </Stack>
+                    </YStack>
                     <YStack>
                       <Text fontWeight="bold" fontSize="$2" color="$textPrimary" lineHeight="$2">{step.label}</Text>
                       {index > 0 && dropOff > 0 ? (
@@ -209,7 +209,7 @@ export function AnalyticsScreen() {
     }
 
     return (
-      <YStack space="$2" marginTop="$2">
+      <YStack gap="$2" marginTop="$2">
         <XStack backgroundColor="$backgroundHover" padding="$2" paddingHorizontal="$3" borderRadius="$3" alignItems="center" justifyContent="space-between" marginBottom="$1">
           <YStack>
             <Text color="$textSecondary" fontSize="$1" textTransform="uppercase" fontWeight="700" letterSpacing={1}>Full Journey Conversion</Text>
@@ -218,7 +218,7 @@ export function AnalyticsScreen() {
           <Activity size={20} color="$primary" opacity={0.5} />
         </XStack>
 
-        <YStack space="$1">
+        <YStack gap="$1">
           {macroSteps.map((step, index) => {
             const widthPercent = (step.value / maxVal) * 100;
             const dropOff = index > 0 ? macroSteps[index - 1].value - step.value : 0;
@@ -241,7 +241,7 @@ export function AnalyticsScreen() {
                 overflow="hidden"
                 position="relative"
               >
-                <Stack 
+                <YStack 
                   position="absolute" 
                   top={0} 
                   left={0} 
@@ -251,10 +251,10 @@ export function AnalyticsScreen() {
                   opacity={0.1} 
                 />
                 <XStack justifyContent="space-between" alignItems="center" zIndex={1}>
-                  <XStack space="$2" alignItems="center">
-                    <Stack backgroundColor="$surface" padding="$1.5" borderRadius="$2" borderWidth={1} borderColor="$borderColor">
+                  <XStack gap="$2" alignItems="center">
+                    <YStack backgroundColor="$surface" padding="$1.5" borderRadius="$2" borderWidth={1} borderColor="$borderColor">
                       <IconComponent size={14} color={isHighDropoff ? '$error' : '$primary'} />
-                    </Stack>
+                    </YStack>
                     <YStack>
                       <Text fontWeight="bold" fontSize="$2" color="$textPrimary" lineHeight="$2">{step.label}</Text>
                       {index > 0 && dropOff > 0 ? (
@@ -282,7 +282,7 @@ export function AnalyticsScreen() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: 'var(--background)' }}>
       {/* Full width container, no maxWidth constraints */}
-      <YStack padding="$4" space="$3" width="100%" paddingBottom="$8">
+      <YStack padding="$4" gap="$3" width="100%" paddingBottom="$8">
         
         {/* Header Section */}
         <XStack justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap="$4">
@@ -294,9 +294,9 @@ export function AnalyticsScreen() {
             </Text>
           </YStack>
 
-          <XStack space="$3" flexWrap="wrap" alignItems="center">
-            <YStack space="$1">
-              <Text fontSize="$1" fontWeight="600" color="$textTertiary" textTransform="uppercase" paddingLeft="$1">Time Range</Text>
+          <XStack gap="$3" flexWrap="wrap" alignItems="center">
+            <YStack gap="$1">
+                          <Text fontSize="$1" fontWeight="600" color="$textTertiary" textTransform="uppercase" paddingLeft="$1">Time Range</Text>
               <Select value={timeRange} onValueChange={(val) => setTimeRange(val as TimeRange)} disablePreventBodyScroll size="$2">
                 <Select.Trigger width={120} iconAfter={ChevronDown} backgroundColor="$surface" borderColor="$borderColor" paddingVertical={0}>
                   <Select.Value placeholder="Time Range" fontSize="$2" />
@@ -307,11 +307,11 @@ export function AnalyticsScreen() {
                     <Sheet.Overlay />
                   </Sheet>
                 </Adapt>
-                <Select.Content zIndex={200000}>
-                  <Select.ScrollUpButton alignItems="center" justifyContent="center" h="$3">
-                    <YStack zIndex={10}><ChevronUp size={20} /></YStack>
-                  </Select.ScrollUpButton>
-                  <Select.Viewport minWidth={150}>
+                <Select.Content>
+                                  <Select.ScrollUpButton alignItems="center" justifyContent="center" h="$3">
+                                    <YStack><ChevronUp size={20} /></YStack>
+                                  </Select.ScrollUpButton>
+                                  <Select.Viewport minWidth={150}>
                     <Select.Group>
                       <Select.Label>Time Range</Select.Label>
                       <Select.Item index={0} value="7_days">
@@ -343,11 +343,11 @@ export function AnalyticsScreen() {
         <XStack flexWrap="wrap" gap="$4" width="100%">
           
           {/* Onboarding Funnel Module */}
-          <YStack flex={1} minWidth={320} space="$2">
-            <Card backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$3" elevate>
-              <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$3" marginBottom="$1">
-                <YStack>
-                  <Text fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Onboarding</Text>
+          <YStack flex={1} minWidth={320} gap="$2">
+                      <Card backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$3">
+                                              <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$3" marginBottom="$1">
+                                                <YStack>
+                                                  <Text fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Onboarding</Text>
                   <Text color="$textSecondary" fontSize="$2">New user setup wizard</Text>
                 </YStack>
                 {renderVariantSelector(funnelVariant, setFunnelVariant, ['onboarding_v1'])}
@@ -357,11 +357,11 @@ export function AnalyticsScreen() {
           </YStack>
 
           {/* Macro Journey Module */}
-          <YStack flex={1} minWidth={320} space="$2">
-            <Card backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$3" elevate>
-              <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$3" marginBottom="$1">
-                <YStack>
-                  <Text fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Macro Journey</Text>
+          <YStack flex={1} minWidth={320} gap="$2">
+                      <Card backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$3">
+                                              <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$3" marginBottom="$1">
+                                                <YStack>
+                                                  <Text fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Macro Journey</Text>
                   <Text color="$textSecondary" fontSize="$2">Signup to checkout</Text>
                 </YStack>
                 {renderVariantSelector(macroVariant, setMacroVariant, ['macro_v1'])}
