@@ -23,6 +23,9 @@
         "typescript": "~5.9.3",
         "typescript-eslint": "^8.0.0",
       },
+      "optionalDependencies": {
+        "lightningcss-win32-x64-msvc": "1.33.0",
+      },
     },
     "apps/admin-panel": {
       "name": "@app/admin-panel",
