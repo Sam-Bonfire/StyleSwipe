@@ -22,12 +22,17 @@ jobs:
         id: convex
         run: |
           cd packages/convex
-          # Use --preview to deploy an ephemeral preview database for this PR
-          # The Convex CLI with --url-only will output just the URL. We capture it and export to GITHUB_ENV
-          PREVIEW_URL=$(bunx convex deploy --preview --url-only)
-          echo "CONVEX_URL=$PREVIEW_URL" >> $GITHUB_ENV
-          # Use the variable explicitly here so the seed runs against the preview env!
-          CONVEX_URL=$PREVIEW_URL bunx convex run seed:run
+          # Convex deploy automatically targets a preview if CONVEX_DEPLOY_KEY is a preview key
+          # If CONVEX_DEPLOY_KEY is set to a preview key, a preview deployment is automatically created.
+          # By using --cmd, Convex will automatically expose the generated URL inside the command
+          # We can use that command to export the URL to GITHUB_ENV so subsequent steps can use it.
+          # Also run the seed script locally pointing to the new preview.
+          #
+          # NOTE: bunx is not available globally without installation, so we use `bun run convex`.
+
+          bun run convex deploy \
+            --cmd-url-env-var-name "CONVEX_URL" \
+            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> $GITHUB_ENV && CONVEX_URL=$CONVEX_URL bun run convex run seed:run'
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
