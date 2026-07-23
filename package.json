@@ -54,7 +54,10 @@
     "@xenova/transformers/sharp": "^0.33.5",
     "detect-libc": "^2.0.3",
     "@typescript-eslint/parser": "^8.0.0",
-    "@typescript-eslint/utils": "^8.0.0"
+    "@typescript-eslint/utils": "^8.0.0",
+    "@tamagui/core": "2.5.0",
+    "tamagui": "2.5.0",
+    "@tamagui/lucide-icons": "2.0.0-rc.26-1773683384816"
   },
   "optionalDependencies": {
     "lightningcss-win32-x64-msvc": "1.33.0"
