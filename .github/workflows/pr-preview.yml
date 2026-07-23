@@ -1,0 +1,60 @@
+name: PR Preview Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  preview:
+    name: Preview Deploy & E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Tools (Mise)
+        uses: jdx/mise-action@v2
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Deploy Convex Preview
+        id: convex
+        run: |
+          cd packages/convex
+          # Use --preview to deploy an ephemeral preview database for this PR
+          # The Convex CLI with --url-only will output just the URL. We capture it and export to GITHUB_ENV
+          PREVIEW_URL=$(bunx convex deploy --preview --url-only)
+          echo "CONVEX_URL=$PREVIEW_URL" >> $GITHUB_ENV
+          # Use the variable explicitly here so the seed runs against the preview env!
+          CONVEX_URL=$PREVIEW_URL bunx convex run seed:run
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build Web Application
+        # We build the consumer app since the layout modification was there
+        run: |
+          cd apps/consumer-app
+          bun run build
+        env:
+          EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL: ${{ env.CONVEX_URL }}
+
+      - name: Deploy to Cloudflare Pages (Preview)
+        id: cloudflare
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: styleswipe-consumer-app
+          directory: apps/consumer-app/dist
+          # Deploying to a branch automatically creates a preview deployment in Cloudflare
+          branch: ${{ github.head_ref }}
+
+      - name: Run Playwright E2E Tests
+        run: bunx playwright test
+        env:
+          # Point the Playwright tests to the Cloudflare preview URL generated above
+          PREVIEW_URL: ${{ steps.cloudflare.outputs.url }}
