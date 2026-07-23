@@ -35,6 +35,16 @@ jobs:
           bun run convex deploy \
             --cmd-url-env-var-name "CONVEX_URL" \
             --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> $GITHUB_ENV && CONVEX_URL=$CONVEX_URL bun run convex run seed:run'
+
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Configure Convex Environment
+        run: |
+          cd packages/convex
+          # Set the BETTER_AUTH_URL dynamically to match the exact preview URL deployed above
+          bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }}
+          bun run convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
