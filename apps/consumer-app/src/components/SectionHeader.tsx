@@ -19,7 +19,7 @@ export const SectionHeader = ({ title, onSeeAll }: SectionHeaderProps) => {
         {title}
       </H3>
       {onSeeAll && (
-        <Button variant="ghost" size="small" onPress={onSeeAll} color="$primary" fontWeight="600">
+        <Button variant="ghost" size="small" onPress={onSeeAll}>
           See All
         </Button>
       )}

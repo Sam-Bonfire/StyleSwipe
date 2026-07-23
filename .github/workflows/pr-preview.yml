@@ -14,6 +14,8 @@ jobs:
 
       - name: Install Tools (Mise)
         uses: jdx/mise-action@v2
+        with:
+          install: true # Ensures tools in .mise.toml (like bun) are installed
 
       - name: Install Dependencies
         run: bun install

@@ -108,7 +108,6 @@ export const CheckoutScreen = () => {
         <Button
           marginTop="$6"
           backgroundColor="$primary"
-          color="white"
           onPress={() => router.push('/(app)/(tabs)/discover')}
         >
           Continue Shopping
