@@ -57,8 +57,13 @@
     "detect-libc": "^2.0.3",
     "@typescript-eslint/parser": "^8.0.0",
     "@typescript-eslint/utils": "^8.0.0",
-    "@tamagui/core": "2.0.0-rc.26-1773683384816",
-    "tamagui": "2.0.0-rc.26-1773683384816"
+    "@tamagui/core": "2.0.0-rc.26",
+    "tamagui": "2.0.0-rc.26",
+    "@tamagui/lucide-icons": "2.0.0-rc.26",
+    "@tamagui/animations-react-native": "2.0.0-rc.26",
+    "@tamagui/linear-gradient": "2.0.0-rc.26",
+    "@tamagui/shorthands": "2.0.0-rc.26",
+    "@tamagui/themes": "2.0.0-rc.26"
   },
   "optionalDependencies": {
     "lightningcss-win32-x64-msvc": "1.33.0"

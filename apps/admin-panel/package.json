@@ -20,7 +20,7 @@
     "@app/ui-kit": "workspace:*",
     "@convex-dev/better-auth": "^0.12.5",
     "@expo/metro-runtime": "~57.0.7",
-    "@tamagui/lucide-icons": "2.0.0-rc.26-1773683384816",
+    "@tamagui/lucide-icons": "2.0.0-rc.26",
     "expo": "~57.0.8",
     "expo-asset": "~57.0.7",
     "expo-constants": "~57.0.7",
@@ -39,7 +39,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~19.2.0",
-    "@tamagui/metro-plugin": "2.0.0-rc.26-1773683384816",
-    "tamagui": "2.0.0-rc.26-1773683384816"
+    "@tamagui/metro-plugin": "2.0.0-rc.26",
+    "tamagui": "2.0.0-rc.26"
   }
 }

@@ -40,28 +40,24 @@ jobs:
       - name: Configure and Seed Convex Environment
         run: |
           cd packages/convex
-          # Set the BETTER_AUTH_URL dynamically to match the exact preview URL deployed above
-          # CRITICAL: We MUST pass --url to ensure we are modifying the newly created preview environment
-          # and not accidentally overwriting the production environment variables!
-          bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }} --url ${{ env.CONVEX_URL }}
-          bun run convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }} --url ${{ env.CONVEX_URL }}
+          # Note: If CONVEX_DEPLOY_KEY is a preview key, `convex env set` will automatically target the preview.
+          # We cannot use `--url` on `env set` because it's not a valid flag.
+          bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }}
+          bun run convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
 
-          # Run the seed script against the specific preview environment URL
-          bun run convex run seed:run --url ${{ env.CONVEX_URL }}
+          # Run the seed script
+          bun run convex run seed:run
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-
-      - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps chromium
 
       - name: Build Web Application
         # We build the consumer app since the layout modification was there
         run: |
           echo "Building consumer app with EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}"
           cd apps/consumer-app
-          # Explicitly create .env.local to ensure Expo picks up the environment variable
-          echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}" > .env.local
-          bun run build
+          # Set directly into environment before running build to guarantee it is picked up
+          # without relying solely on .env.local
+          EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL="${{ env.CONVEX_URL }}" bun run build
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
@@ -73,6 +69,9 @@ jobs:
           directory: apps/consumer-app/dist
           # Deploying to a branch automatically creates a preview deployment in Cloudflare
           branch: ${{ github.head_ref }}
+
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps chromium
 
       - name: Run Playwright E2E Tests
         run: bunx playwright test
