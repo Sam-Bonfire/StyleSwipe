@@ -32,10 +32,12 @@ jobs:
           #
           # NOTE: bunx is not available globally without installation, so we use `bun run convex`.
 
+          # The Convex CLI exports the URL to the `--cmd-url-env-var-name` within the subshell execution of `--cmd`.
+          # We append that to $GITHUB_ENV to make it accessible in subsequent steps.
           bun run convex deploy \
             --preview-create "${{ github.head_ref }}" \
             --cmd-url-env-var-name "CONVEX_URL" \
-            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> $GITHUB_ENV'
+            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> "$GITHUB_ENV"'
 
 
         env:
