@@ -54,6 +54,7 @@ jobs:
       - name: Build Web Application
         # We build the consumer app since the layout modification was there
         run: |
+          echo "Building consumer app with EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}"
           cd apps/consumer-app
           bun run build
         env:
