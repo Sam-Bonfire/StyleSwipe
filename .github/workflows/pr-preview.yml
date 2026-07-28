@@ -35,17 +35,23 @@ jobs:
           bun run convex deploy \
             --preview-create "${{ github.head_ref }}" \
             --cmd-url-env-var-name "CONVEX_URL" \
-            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> $GITHUB_ENV && CONVEX_URL=$CONVEX_URL bun run convex run seed:run'
+            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> $GITHUB_ENV'
+
 
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
-      - name: Configure Convex Environment
+      - name: Configure and Seed Convex Environment
         run: |
           cd packages/convex
           # Set the BETTER_AUTH_URL dynamically to match the exact preview URL deployed above
-          bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }}
-          bun run convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
+          # CRITICAL: We MUST pass --url to ensure we are modifying the newly created preview environment
+          # and not accidentally overwriting the production environment variables!
+          bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }} --url ${{ env.CONVEX_URL }}
+          bun run convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }} --url ${{ env.CONVEX_URL }}
+
+          # Run the seed script against the specific preview environment URL
+          bun run convex run seed:run --url ${{ env.CONVEX_URL }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
