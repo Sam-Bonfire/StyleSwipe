@@ -33,6 +33,7 @@ jobs:
           # NOTE: bunx is not available globally without installation, so we use `bun run convex`.
 
           bun run convex deploy \
+            --preview-create "${{ github.head_ref }}" \
             --cmd-url-env-var-name "CONVEX_URL" \
             --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> $GITHUB_ENV && CONVEX_URL=$CONVEX_URL bun run convex run seed:run'
 
@@ -56,9 +57,9 @@ jobs:
         run: |
           echo "Building consumer app with EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}"
           cd apps/consumer-app
+          # Explicitly create .env.local to ensure Expo picks up the environment variable
+          echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}" > .env.local
           bun run build
-        env:
-          EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL: ${{ env.CONVEX_URL }}
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare

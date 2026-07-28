@@ -11,12 +11,9 @@ import { YStack, Spinner, Text } from 'tamagui';
 import { GlobalErrorBoundary } from '../src/components/GlobalErrorBoundary';
 import { authAdapter } from '../src/lib/auth';
 
-const convex = new ConvexReactClient(
-  process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL || 'http://localhost:3210',
-  {
-    unsavedChangesWarning: false,
-  }
-);
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {
+  unsavedChangesWarning: false,
+});
 
 /**
  * Auth guard: redirects users based on authentication state.
