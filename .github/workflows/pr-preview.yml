@@ -37,7 +37,7 @@ jobs:
           bun run convex deploy \
             --preview-create "${{ github.head_ref }}" \
             --cmd-url-env-var-name "CONVEX_URL" \
-            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> "$GITHUB_ENV"'
+            --cmd 'node -e "const url = process.env.CONVEX_URL.match(/https:\/\/[^\s]+/)[0]; require(\"fs\").appendFileSync(process.env.GITHUB_ENV, \`CONVEX_URL=\${url}\n\`);"'
 
 
         env:
