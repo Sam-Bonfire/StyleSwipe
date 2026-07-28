@@ -24,22 +24,15 @@ jobs:
         id: convex
         run: |
           cd packages/convex
-          # Convex deploy automatically targets a preview if CONVEX_DEPLOY_KEY is a preview key
-          # If CONVEX_DEPLOY_KEY is set to a preview key, a preview deployment is automatically created.
-          # By using --cmd, Convex will automatically expose the generated URL inside the command
-          # We can use that command to export the URL to GITHUB_ENV so subsequent steps can use it.
-          # Also run the seed script locally pointing to the new preview.
+          # Note: If CONVEX_DEPLOY_KEY is NOT a preview deploy key (e.g. prod deploy key),
+          # the `--preview-create` flag will cause convex to exit with code 1.
+          # If it is a preview deploy key, this creates an ephemeral preview deployment matching the PR branch.
           #
-          # NOTE: bunx is not available globally without installation, so we use `bun run convex`.
-
-          # The Convex CLI exports the URL to the `--cmd-url-env-var-name` within the subshell execution of `--cmd`.
-          # We append that to $GITHUB_ENV to make it accessible in subsequent steps.
+          # We use `--cmd` to run a Node script that pulls the deployment URL and injects it into GITHUB_ENV.
           bun run convex deploy \
             --preview-create "${{ github.head_ref }}" \
             --cmd-url-env-var-name "CONVEX_URL" \
-            --cmd 'node -e "const url = process.env.CONVEX_URL.match(/https:\/\/[^\s]+/)[0]; require(\"fs\").appendFileSync(process.env.GITHUB_ENV, \`CONVEX_URL=\${url}\n\`);"'
-
-
+            --cmd 'node -e "const url = process.env.CONVEX_URL.trim(); require(\"fs\").appendFileSync(process.env.GITHUB_ENV, \`CONVEX_URL=\${url}\n\`);"'
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
