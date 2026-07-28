@@ -28,18 +28,17 @@ jobs:
           # the `--preview-create` flag will cause convex to exit with code 1.
           # If it is a preview deploy key, this creates an ephemeral preview deployment matching the PR branch.
           #
-          # We use `--cmd` to run a shell command that pulls the deployment URL and injects it into GITHUB_ENV.
-          # `echo "$CONVEX_URL" >> $GITHUB_ENV` failed on the previous run likely because of escaping. Let's write it to a .env file.
-          bun run convex deploy \
-            --preview-create "${{ github.head_ref }}" \
-            --cmd-url-env-var-name "CONVEX_URL" \
-            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> "$GITHUB_ENV"'
+          # To retrieve the URL securely without Bun polluting the output stream,
+          # we invoke the Convex CLI directly using Node and capture the stdout.
+          PREVIEW_URL=$(node node_modules/.bin/convex deploy --preview-create "${{ github.head_ref }}" --url-only)
+          echo "CONVEX_URL=$PREVIEW_URL" >> $GITHUB_ENV
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Configure and Seed Convex Environment
         run: |
           cd packages/convex
+
           # Note: If CONVEX_DEPLOY_KEY is a preview key, `convex env set` will automatically target the preview.
           # We cannot use `--url` on `env set` because it's not a valid flag.
           bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }}
@@ -55,9 +54,11 @@ jobs:
         run: |
           echo "Building consumer app with EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}"
           cd apps/consumer-app
-          # Set directly into environment before running build to guarantee it is picked up
-          # without relying solely on .env.local
-          EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL="${{ env.CONVEX_URL }}" bun run build
+
+          # Write it securely to .env.local
+          echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}" > .env.local
+
+          bun run build
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
