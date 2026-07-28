@@ -5,7 +5,7 @@ import { ConvexReactClient } from 'convex/react';
 import { initLogger } from './src/lib/logger';
 
 // Initialize Convex Client and Logger as early as possible
-const rawUrl = process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL;
+const rawUrl = process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL || 'http://localhost:3210';
 const sanitizedUrl = typeof rawUrl === 'string' ? rawUrl.replace(/\/+$/, '') : rawUrl;
 const convex = new ConvexReactClient(sanitizedUrl);
 initLogger(convex);
