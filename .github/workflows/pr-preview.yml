@@ -59,6 +59,9 @@ jobs:
 
           # Write it securely to .env.local
           echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}" > .env.local
+          # Provide SITE_URL as well, better-auth needs it to match endpoints
+          SITE_URL=$(echo ${{ env.CONVEX_URL }} | sed 's/\.cloud/\.site/')
+          echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
 
           bun run build
 
