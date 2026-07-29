@@ -28,10 +28,12 @@ jobs:
           # the `--preview-create` flag will cause convex to exit with code 1.
           # If it is a preview deploy key, this creates an ephemeral preview deployment matching the PR branch.
           #
-          # To retrieve the URL securely without Bun polluting the output stream,
-          # we invoke the Convex CLI directly using Node from the workspace root and capture the stdout.
-          PREVIEW_URL=$(node ../../node_modules/convex/bin/main.js deploy --preview-create "${{ github.head_ref }}" --url-only)
-          echo "CONVEX_URL=$PREVIEW_URL" >> $GITHUB_ENV
+          # We use `npx` (which works reliably across CI environments) to execute `convex deploy`.
+          # We use `--cmd` to securely append the URL to GITHUB_ENV without relying on parsing stdout.
+          npx convex deploy \
+            --preview-create "${{ github.head_ref }}" \
+            --cmd-url-env-var-name "CONVEX_URL" \
+            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> "$GITHUB_ENV"'
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
@@ -41,11 +43,11 @@ jobs:
 
           # Note: If CONVEX_DEPLOY_KEY is a preview key, `convex env set` will automatically target the preview.
           # We cannot use `--url` on `env set` because it's not a valid flag.
-          bun run convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }}
-          bun run convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
+          npx convex env set BETTER_AUTH_URL ${{ env.CONVEX_URL }}
+          npx convex env set BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
 
           # Run the seed script
-          bun run convex run seed:run
+          npx convex run seed:run
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
