@@ -43,11 +43,11 @@ jobs:
 
           # Note: If CONVEX_DEPLOY_KEY is a preview key, `convex env set` will automatically target the preview.
           # We cannot use `--url` on `env set` because it's not a valid flag.
-          npx convex env set BETTER_AUTH_URL --deployment ${{ github.head_ref }} ${{ env.CONVEX_URL }}
-          npx convex env set BETTER_AUTH_SECRET --deployment ${{ github.head_ref }} ${{ secrets.BETTER_AUTH_SECRET }}
+          npx convex env set BETTER_AUTH_URL --deployment preview/${{ github.head_ref }} ${{ env.CONVEX_URL }}
+          npx convex env set BETTER_AUTH_SECRET --deployment preview/${{ github.head_ref }} ${{ secrets.BETTER_AUTH_SECRET }}
 
           # Run the seed script
-          npx convex run seed:run --deployment ${{ github.head_ref }}
+          npx convex run seed:run --deployment preview/${{ github.head_ref }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
