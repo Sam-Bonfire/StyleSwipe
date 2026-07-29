@@ -29,8 +29,8 @@ jobs:
           # If it is a preview deploy key, this creates an ephemeral preview deployment matching the PR branch.
           #
           # To retrieve the URL securely without Bun polluting the output stream,
-          # we invoke the Convex CLI directly using Node and capture the stdout.
-          PREVIEW_URL=$(node node_modules/.bin/convex deploy --preview-create "${{ github.head_ref }}" --url-only)
+          # we invoke the Convex CLI directly using Node from the workspace root and capture the stdout.
+          PREVIEW_URL=$(node ../../node_modules/convex/bin/main.js deploy --preview-create "${{ github.head_ref }}" --url-only)
           echo "CONVEX_URL=$PREVIEW_URL" >> $GITHUB_ENV
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
