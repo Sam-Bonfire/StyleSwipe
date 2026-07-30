@@ -76,6 +76,13 @@ jobs:
           # Deploying to a branch automatically creates a preview deployment in Cloudflare
           branch: ${{ github.head_ref }}
 
+      - name: Configure Convex Trusted Origins
+        run: |
+          cd packages/convex
+          npx convex env set TRUSTED_ORIGINS --deployment preview/${{ github.head_ref }} ${{ steps.cloudflare.outputs.url }}
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
 
