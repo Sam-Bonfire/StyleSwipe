@@ -160,8 +160,7 @@ export const CartScreen = () => {
         onOpenChange={setModalOpen}
         dismissOnSnapToBottom
         snapPoints={[65]}
-        animation="lazy"
-      >
+              >
         <Sheet.Overlay backgroundColor="rgba(0,0,0,0.5)" />
         <Sheet.Frame backgroundColor="$background" borderTopLeftRadius="$5" borderTopRightRadius="$5">
           <Sheet.Handle backgroundColor="$borderColor" height={5} width={40} marginVertical="$3" alignSelf="center" />

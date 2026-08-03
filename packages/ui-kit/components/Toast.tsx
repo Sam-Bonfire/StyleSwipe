@@ -14,7 +14,7 @@ import Animated, {
   withSpring,
   runOnJS,
 } from 'react-native-reanimated';
-import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text } from 'tamagui';
 
 const ToastFrame = styled(XStack, {
   name: 'Toast',
@@ -39,7 +39,7 @@ const ToastFrame = styled(XStack, {
   // Removed variants for borderLeftColor to make it cleaner
 });
 
-const IconContainer = styled(Stack, {
+const IconContainer = styled(YStack, {
   name: 'ToastIcon',
   width: 28,
   height: 28,
@@ -93,7 +93,7 @@ const ActionButton = styled(Text, {
   },
 });
 
-const CloseButton = styled(Stack, {
+const CloseButton = styled(YStack, {
   name: 'ToastClose',
   width: 24,
   height: 24,

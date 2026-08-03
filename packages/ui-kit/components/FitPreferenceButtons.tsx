@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, XStack, YStack, Text } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text } from 'tamagui';
 
 const ContainerFrame = styled(YStack, {
   name: 'FitPreferenceButtons',
@@ -43,8 +43,6 @@ const PreferenceButton = styled(YStack, {
   cursor: 'pointer',
   minWidth: 80,
 
-  animation: 'quick' as any,
-
   hoverStyle: {
     scale: 1.02,
   },
@@ -76,7 +74,7 @@ const PreferenceButton = styled(YStack, {
   },
 });
 
-const IconContainer = styled(Stack, {
+const IconContainer = styled(YStack, {
   name: 'FitPreferenceIconContainer',
   marginBottom: '$0.5',
 
@@ -113,52 +111,52 @@ const ButtonLabel = styled(Text, {
 
 // Fit silhouette icons as simple shapes
 const SlimIcon = ({ selected }: { selected: boolean }) => (
-  <Stack width={24} height={32} alignItems="center" justifyContent="center">
-    <Stack
+  <YStack width={24} height={32} alignItems="center" justifyContent="center">
+    <YStack
       width={8}
       height={28}
       backgroundColor={selected ? '$textInverse' : '$textSecondary'}
       borderRadius="$1"
     />
-  </Stack>
+  </YStack>
 );
 
 const RegularIcon = ({ selected }: { selected: boolean }) => (
-  <Stack width={24} height={32} alignItems="center" justifyContent="center">
-    <Stack
+  <YStack width={24} height={32} alignItems="center" justifyContent="center">
+    <YStack
       width={14}
       height={28}
       backgroundColor={selected ? '$textInverse' : '$textSecondary'}
       borderRadius="$1"
     />
-  </Stack>
+  </YStack>
 );
 
 const OversizedIcon = ({ selected }: { selected: boolean }) => (
-  <Stack width={24} height={32} alignItems="center" justifyContent="center">
-    <Stack
+  <YStack width={24} height={32} alignItems="center" justifyContent="center">
+    <YStack
       width={22}
       height={28}
       backgroundColor={selected ? '$textInverse' : '$textSecondary'}
       borderRadius="$2"
     />
-  </Stack>
+  </YStack>
 );
 
 const SkinnyIcon = ({ selected }: { selected: boolean }) => (
-  <Stack width={24} height={32} alignItems="center" justifyContent="center">
-    <Stack
+  <YStack width={24} height={32} alignItems="center" justifyContent="center">
+    <YStack
       width={6}
       height={28}
       backgroundColor={selected ? '$textInverse' : '$textSecondary'}
       borderRadius="$1"
     />
-  </Stack>
+  </YStack>
 );
 
 const WideLegIcon = ({ selected }: { selected: boolean }) => (
-  <Stack width={24} height={32} alignItems="center" justifyContent="center">
-    <Stack
+  <YStack width={24} height={32} alignItems="center" justifyContent="center">
+    <YStack
       width={20}
       height={28}
       backgroundColor={selected ? '$textInverse' : '$textSecondary'}
@@ -167,7 +165,7 @@ const WideLegIcon = ({ selected }: { selected: boolean }) => (
       borderBottomLeftRadius="$3"
       borderBottomRightRadius="$3"
     />
-  </Stack>
+  </YStack>
 );
 
 const FitIconMap: Record<string, React.FC<{ selected: boolean }>> = {

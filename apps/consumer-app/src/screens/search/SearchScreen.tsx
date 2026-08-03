@@ -106,8 +106,8 @@ export function SearchScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <YStack flex={1} padding="$2" space="$4">
-        <YStack space="$2">
+      <YStack flex={1} padding="$2" gap="$4">
+        <YStack gap="$2">
           <Input
             placeholder="Search for items..."
             borderWidth={1}
@@ -115,7 +115,7 @@ export function SearchScreen() {
             onChangeText={setQuery}
           />
           {suggestions.length > 0 && (
-            <XStack space="$2" flexWrap="wrap">
+            <XStack gap="$2" flexWrap="wrap">
               {suggestions.map((s, i) => (
                 <Button key={i} size="small" onPress={() => setQuery(s)}>
                   {s}

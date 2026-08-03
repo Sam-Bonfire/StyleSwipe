@@ -13,9 +13,9 @@ import Animated, {
   withTiming,
   withSpring,
 } from 'react-native-reanimated';
-import { styled, GetProps, YStack, XStack, Text, Stack, Portal } from 'tamagui';
+import { styled, GetProps, YStack, XStack, Text, Portal } from 'tamagui';
 
-const Backdrop = styled(Stack, {
+const Backdrop = styled(YStack, {
   name: 'ModalBackdrop',
   position: 'absolute',
   top: 0,
@@ -63,7 +63,7 @@ const ModalTitle = styled(Text, {
   flex: 1,
 });
 
-const CloseButton = styled(Stack, {
+const CloseButton = styled(YStack, {
   name: 'ModalCloseButton',
   width: 36,
   height: 36,

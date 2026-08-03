@@ -1,6 +1,6 @@
 import { Button as UIButton } from '@app/ui-kit';
 import { X } from '@tamagui/lucide-icons';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import React, { useRef } from 'react';
 import { Modal, Alert, Platform } from 'react-native';

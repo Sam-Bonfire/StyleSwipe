@@ -46,7 +46,6 @@ export function EditUserModal({ user, open, onOpenChange, onSuccess }: EditUserM
             <Dialog.Portal>
                 <Dialog.Overlay
                     key="overlay"
-                    animation="quick"
                     opacity={0.5}
                     enterStyle={{ opacity: 0 }}
                     exitStyle={{ opacity: 0 }}
@@ -55,15 +54,6 @@ export function EditUserModal({ user, open, onOpenChange, onSuccess }: EditUserM
                     bordered
                     elevate
                     key="content"
-                    animateOnly={['transform', 'opacity']}
-                    animation={[
-                        'quick',
-                        {
-                            opacity: {
-                                overshootClamping: true,
-                            },
-                        },
-                    ]}
                     enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
                     exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
                     gap="$4"

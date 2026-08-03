@@ -33,8 +33,8 @@ export function StyleSwipeProvider({ children, theme = 'BrandIdentityLight' }: S
 
     if (!fontsLoaded) {
         return (
-            <TamaguiProvider config={config}>
-                <Theme name={theme}>
+            <TamaguiProvider config={config} defaultTheme={theme as any}>
+                <Theme name={theme as any}>
                     <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background">
                         <Spinner size="large" color="$primary" />
                     </YStack>
@@ -44,8 +44,8 @@ export function StyleSwipeProvider({ children, theme = 'BrandIdentityLight' }: S
     }
 
     return (
-        <TamaguiProvider config={config}>
-            <Theme name={theme}>
+        <TamaguiProvider config={config} defaultTheme={theme as any}>
+            <Theme name={theme as any}>
                 <ToastProvider>
                     {children}
                 </ToastProvider>
