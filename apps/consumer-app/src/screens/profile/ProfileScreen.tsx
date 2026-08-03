@@ -40,7 +40,7 @@ export function ProfileScreen() {
             <Button variant="outlined" onPress={() => router.push('/(app)/wishlist')}>My Wishlist</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/orders')}>Your Orders</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/feedback')}>Give Feedback</Button>
-            <Button color="$error" variant="ghost" onPress={handleLogout}>
+            <Button variant="ghost" onPress={handleLogout}>
               Sign Out
             </Button>
           </YStack>

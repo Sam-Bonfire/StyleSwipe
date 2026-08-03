@@ -17,7 +17,6 @@ config.resolver.nodeModulesPaths = [
 ];
 
 // 3. Enable symlinks and package exports
-config.resolver.unstable_enableSymlinks = true;
 // package exports is now default in SDK 53+
 
 // 4. Force map subpaths that Metro struggles to resolve in monorepos
