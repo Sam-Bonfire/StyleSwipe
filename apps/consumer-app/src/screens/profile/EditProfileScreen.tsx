@@ -52,7 +52,7 @@ export function EditProfileScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            <XStack alignItems="center" space="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
+            <XStack alignItems="center" gap="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
                 <TopBarIconButton
                     onPress={() => router.back()}
                     backgroundColor="$background"
@@ -64,24 +64,24 @@ export function EditProfileScreen() {
                 </TopBarIconButton>
                 <Text fontSize="$5" fontWeight="bold">Edit Profile</Text>
             </XStack>
-            <YStack flex={1} padding="$4" space="$4">
+            <YStack flex={1} padding="$4" gap="$4">
 
-                <YStack space="$2">
+                <YStack gap="$2">
                     <Text fontSize="$3" fontWeight="600">Name</Text>
                     <Input value={name} onChangeText={setName} placeholder="Enter your name" />
                 </YStack>
 
-                <YStack space="$2">
+                <YStack gap="$2">
                     <Text fontSize="$3" fontWeight="600">Phone Number</Text>
                     <Input value={phoneNumber} onChangeText={setPhoneNumber} placeholder="Enter your phone number" keyboardType="phone-pad" />
                 </YStack>
 
-                <YStack space="$2">
+                <YStack gap="$2">
                     <Text fontSize="$3" fontWeight="600" opacity={0.5}>Email (Cannot be changed)</Text>
-                    <Input value={user.email} editable={false} opacity={0.5} />
+                    <Input value={user.email} readOnly opacity={0.5} />
                 </YStack>
 
-                <YStack space="$3" marginTop="$6">
+                <YStack gap="$3" marginTop="$6">
                     <Button onPress={handleSave} disabled={isSaving}>
                         {isSaving ? <Spinner color="white" /> : 'Save Changes'}
                     </Button>

@@ -29,7 +29,6 @@ import {
   YStack,
   XStack,
   Text,
-  Stack,
   ScrollView,
   H1,
   H2,
@@ -53,7 +52,7 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 // Color swatch component
 const ColorSwatch = ({ name, color }: { name: string; color: string }) => (
   <YStack alignItems="center" gap="$1" width={80}>
-    <Stack
+    <YStack
       width={48}
       height={48}
       borderRadius="$2"
@@ -78,7 +77,7 @@ const SpacingSwatch = ({ name, size }: { name: string; size: number }) => (
     <Text fontSize="$3" color="$textSecondary" width={60}>
       {name}
     </Text>
-    <Stack height={16} width={size} backgroundColor="$primary" borderRadius="$1" />
+    <YStack height={16} width={size} backgroundColor="$primary" borderRadius="$1" />
     <Text fontSize="$2" color="$textTertiary">
       {size}px
     </Text>
@@ -140,7 +139,7 @@ export function DesignSystemGallery() {
   ];
 
   return (
-    <TamaguiProvider config={config}>
+    <TamaguiProvider config={config} defaultTheme="light">
       <Theme name="BrandIdentityLight">
         <YStack flex={1} backgroundColor="$background">
           {/* Top Bar Demo */}
@@ -363,7 +362,7 @@ export function DesignSystemGallery() {
               </Section>
 
               {/* Bottom padding for navigation */}
-              <Stack height={80} />
+              <YStack height={80} />
             </YStack>
           </ScrollView>
 

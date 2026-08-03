@@ -7,7 +7,7 @@
 
 import { Minus, Plus, Trash2 } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, Stack, XStack, YStack, Text, Image } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text, Image } from 'tamagui';
 
 const ItemFrame = styled(XStack, {
   name: 'CartItem',
@@ -100,7 +100,7 @@ const QuantityContainer = styled(XStack, {
   paddingVertical: '$0.5',
 });
 
-const QuantityButton = styled(Stack, {
+const QuantityButton = styled(YStack, {
   name: 'CartItemQuantityButton',
   width: 28,
   height: 28,
@@ -139,7 +139,7 @@ const QuantityText = styled(Text, {
   textAlign: 'center',
 });
 
-const RemoveButton = styled(Stack, {
+const RemoveButton = styled(YStack, {
   name: 'CartItemRemoveButton',
   position: 'absolute',
   top: '$1',

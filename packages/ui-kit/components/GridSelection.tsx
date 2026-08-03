@@ -7,9 +7,9 @@
 
 import { Check } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, Stack, Image, Text, TamaguiElement } from 'tamagui';
+import { styled, GetProps, YStack, Image, Text } from 'tamagui';
 
-const GridFrame = styled(Stack, {
+const GridFrame = styled(YStack, {
   name: 'GridSelection',
   flexDirection: 'row',
   flexWrap: 'wrap',
@@ -31,7 +31,7 @@ const GridFrame = styled(Stack, {
   },
 });
 
-const GridItemFrame = styled(Stack, {
+const GridItemFrame = styled(YStack, {
   name: 'GridSelectionItem',
   position: 'relative',
   borderRadius: '$3',
@@ -93,7 +93,7 @@ const ItemImage = styled(Image, {
   height: '100%',
 });
 
-const SelectionOverlay = styled(Stack, {
+const SelectionOverlay = styled(YStack, {
   name: 'GridSelectionOverlay',
   position: 'absolute',
   top: 0,
@@ -105,7 +105,7 @@ const SelectionOverlay = styled(Stack, {
   justifyContent: 'center',
 });
 
-const CheckmarkCircle = styled(Stack, {
+const CheckmarkCircle = styled(YStack, {
   name: 'GridSelectionCheckmark',
   width: 32,
   height: 32,
@@ -115,7 +115,7 @@ const CheckmarkCircle = styled(Stack, {
   justifyContent: 'center',
 });
 
-const ItemLabel = styled(Stack, {
+const ItemLabel = styled(YStack, {
   name: 'GridSelectionItemLabel',
   position: 'absolute',
   bottom: 0,
@@ -149,7 +149,7 @@ export type GridSelectionProps = Omit<GetProps<typeof GridFrame>, 'children'> & 
   itemSize?: 'small' | 'medium' | 'large' | 'flexible';
 };
 
-export const GridSelection = React.forwardRef<TamaguiElement, GridSelectionProps>(
+export const GridSelection = React.forwardRef<any, GridSelectionProps>(
   (props: GridSelectionProps, ref) => {
     const {
       items,

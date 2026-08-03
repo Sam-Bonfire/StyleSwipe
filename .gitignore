@@ -76,3 +76,5 @@ docs/Plan-*.md
 
 # Windows Zone Identifier
 *:Zone.Identifier
+playwright-report/
+test-results/

@@ -8,7 +8,7 @@ import { ChevronLeft, Heart, ShieldCheck, Truck, ArrowLeftRight, Leaf, TrendingU
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
-import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
+import { Separator, Spacer, Text, YStack, XStack, useTheme, Spinner } from 'tamagui';
 
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
@@ -314,7 +314,7 @@ export function ProductDetailScreen() {
           {/* Ratings */}
           <XStack alignItems="center" gap="$2" marginTop="$1">
             <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
-            <Stack height={16} width={1} backgroundColor="$borderColor" />
+            <YStack height={16} width={1} backgroundColor="$borderColor" />
             <Text fontSize="$3" color="$primary" fontWeight="500">
               {product.platform}
             </Text>
@@ -462,7 +462,7 @@ export function ProductDetailScreen() {
                   borderColor="$borderColor"
                   borderWidth={1}
                 >
-                  <Stack width="35%" flexShrink={0}>
+                  <YStack width="35%" flexShrink={0}>
                     <Text
                       fontSize="$3"
                       color="$textSecondary"
@@ -470,12 +470,12 @@ export function ProductDetailScreen() {
                     >
                       {formatAttributeKey(key)}
                     </Text>
-                  </Stack>
-                  <Stack flex={1} paddingLeft="$2">
+                  </YStack>
+                  <YStack flex={1} paddingLeft="$2">
                     <Text fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">
                       {value}
                     </Text>
-                  </Stack>
+                  </YStack>
                 </XStack>
               );
             })}

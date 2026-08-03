@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, XStack, YStack, Text } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text } from 'tamagui';
 
 const ContainerFrame = styled(YStack, {
   name: 'SizeChipGroup',
@@ -40,7 +40,7 @@ const ChipRow = styled(XStack, {
   gap: '$1',
 });
 
-const SizeChip = styled(Stack, {
+const SizeChip = styled(YStack, {
   name: 'SizeChip',
   paddingHorizontal: '$2',
   paddingVertical: '$1',
@@ -51,8 +51,6 @@ const SizeChip = styled(Stack, {
   minWidth: 48,
   alignItems: 'center',
   justifyContent: 'center',
-
-  animation: 'quick' as any,
 
   hoverStyle: {
     scale: 1.02,
@@ -116,7 +114,7 @@ const RegionSelector = styled(XStack, {
   marginBottom: '$1',
 });
 
-const RegionButton = styled(Stack, {
+const RegionButton = styled(YStack, {
   name: 'SizeChipRegionButton',
   paddingHorizontal: '$1.5',
   paddingVertical: '$0.5',

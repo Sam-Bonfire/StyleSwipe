@@ -7,11 +7,11 @@
 
 import { Star } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
+import { styled, GetProps, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
 
 import { WishlistButton } from './WishlistButton';
 
-const TileFrame = styled(Stack, {
+const TileFrame = styled(YStack, {
   name: 'ProductTile',
   backgroundColor: '$surface',
   borderRadius: '$3',
@@ -48,7 +48,7 @@ const TileFrame = styled(Stack, {
   },
 });
 
-const ImageContainer = styled(Stack, {
+const ImageContainer = styled(YStack, {
   name: 'ProductTileImageContainer',
   position: 'relative',
   width: '100%',
@@ -68,7 +68,7 @@ const ProductImage = styled(Image, {
   height: '100%',
 });
 
-const SaleBadge = styled(Stack, {
+const SaleBadge = styled(YStack, {
   name: 'ProductTileSaleBadge',
   position: 'absolute',
   top: '$1.5',

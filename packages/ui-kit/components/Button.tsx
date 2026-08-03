@@ -132,7 +132,7 @@ export type ButtonProps = Omit<GetProps<typeof StyledButton>, 'buttonSize' | 'si
   size?: 'small' | 'medium' | 'large';
 };
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = React.forwardRef<any, ButtonProps>(
   ({ children, loading, disabled, size = 'medium', icon, iconAfter, ...props }, ref) => {
     const isDisabled = disabled || loading;
 

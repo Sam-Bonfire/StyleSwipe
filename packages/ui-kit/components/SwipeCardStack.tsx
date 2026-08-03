@@ -8,10 +8,9 @@
 import { Heart, X, Star } from '@tamagui/lucide-icons';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
-  useAnimatedGestureHandler,
   useAnimatedReaction,
   useSharedValue,
   withSpring,
@@ -19,8 +18,9 @@ import Animated, {
   runOnJS,
   interpolate,
   Extrapolate,
+  type SharedValue,
 } from 'react-native-reanimated';
-import { styled, GetProps, Stack, YStack, Text } from 'tamagui';
+import { styled, GetProps, YStack, Text } from 'tamagui';
 
 // Safe polyfill for Pointer Events capture/release DOMExceptions on Web browsers
 if (typeof window !== 'undefined' && typeof Element !== 'undefined') {
@@ -54,11 +54,11 @@ const StackContainer = styled(YStack, {
   justifyContent: 'center',
 });
 
-const CardWrapper = styled(Stack, {
+const CardWrapper = styled(YStack, {
   name: 'SwipeCardWrapper',
 });
 
-const ActionOverlay = styled(Stack, {
+const ActionOverlay = styled(YStack, {
   name: 'SwipeActionOverlay',
   position: 'absolute',
   top: '$4',
@@ -138,8 +138,8 @@ const AnimatedCard = React.forwardRef(
       isTop: boolean;
       cardOffset: number;
       cardScale: number;
-      sharedX: Animated.SharedValue<number>;
-      sharedY: Animated.SharedValue<number>;
+      sharedX: SharedValue<number>;
+      sharedY: SharedValue<number>;
     },
     ref,
   ) => {
@@ -194,9 +194,9 @@ const AnimatedCard = React.forwardRef(
       swipe: triggerSwipe,
     }));
 
-    const gestureHandler = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-      onActive: (event) => {
-        if (!isTop) return;
+    const panGesture = Gesture.Pan()
+      .enabled(isTop)
+      .onUpdate((event) => {
         translateX.value = event.translationX;
         translateY.value = event.translationY;
 
@@ -207,9 +207,8 @@ const AnimatedCard = React.forwardRef(
         } else if (event.translationY > 50 && onSwipeStart) {
           runOnJS(onSwipeStart)('down');
         }
-      },
-      onEnd: (event) => {
-        if (!isTop) return;
+      })
+      .onEnd((event) => {
         if (event.translationX > SWIPE_THRESHOLD) {
           translateX.value = withTiming(1000, { duration: 250 }, (finished) => {
             if (finished) runOnJS(handleSwipeCompletion)('right');
@@ -231,8 +230,7 @@ const AnimatedCard = React.forwardRef(
           translateY.value = withSpring(0, SPRING_CONFIG);
         }
         if (onSwipeEnd) runOnJS(onSwipeEnd)();
-      },
-    }, [isTop, handleSwipeCompletion, onSwipeStart, onSwipeEnd]);
+      });
 
     const animatedStyle = useAnimatedStyle(() => {
       const rotate = isTop
@@ -284,11 +282,7 @@ const AnimatedCard = React.forwardRef(
 
     return (
       <Animated.View style={animatedStyle}>
-        <PanGestureHandler
-          onGestureEvent={gestureHandler}
-          onHandlerStateChange={gestureHandler}
-          enabled={isTop}
-        >
+        <GestureDetector gesture={panGesture}>
           <Animated.View style={{ width: '100%', height: '100%' }}>
             <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
               {renderCard(item, index)}
@@ -324,7 +318,7 @@ const AnimatedCard = React.forwardRef(
               </Animated.View>
             </CardWrapper>
           </Animated.View>
-        </PanGestureHandler>
+        </GestureDetector>
       </Animated.View>
     );
   },
@@ -397,7 +391,7 @@ export function SwipeCardStack<T>({
 
   return (
     <StackContainer {...props}>
-      <Stack width={stackWidth} height={stackHeight} position="relative">
+      <YStack width={stackWidth} height={stackHeight} position="relative">
         {visibleData
           .map((item, index) => (
             <AnimatedCard
@@ -418,7 +412,7 @@ export function SwipeCardStack<T>({
             />
           ))
           .reverse()}
-      </Stack>
+      </YStack>
     </StackContainer>
   );
 }

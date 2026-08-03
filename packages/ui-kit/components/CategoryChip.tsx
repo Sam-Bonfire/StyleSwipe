@@ -8,7 +8,7 @@
 
 import { X } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, Stack, Text, XStack } from 'tamagui';
+import { styled, GetProps, YStack, Text, XStack } from 'tamagui';
 
 const ChipFrame = styled(XStack, {
   name: 'CategoryChip',
@@ -21,8 +21,6 @@ const ChipFrame = styled(XStack, {
   borderWidth: 1.5,
   borderStyle: 'solid',
   cursor: 'pointer',
-
-  animation: 'quick' as any,
 
   variants: {
     variant: {
@@ -133,7 +131,7 @@ const ChipText = styled(Text, {
   },
 });
 
-const CloseButton = styled(Stack, {
+const CloseButton = styled(YStack, {
   name: 'CategoryChipCloseButton',
   marginLeft: '$0.5',
   padding: '$0.5',

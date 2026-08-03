@@ -8,6 +8,11 @@ import { Star, StarHalf } from '@tamagui/lucide-icons';
 import React from 'react';
 import { styled, GetProps, XStack, Text } from 'tamagui';
 
+// React 19 removes `key` from component props types, but lucide-icons
+// types don't account for this. Cast to accept standard JSX props.
+const StarIcon = Star as React.ComponentType<any>;
+const StarHalfIcon = StarHalf as React.ComponentType<any>;
+
 const RatingContainer = styled(XStack, {
   name: 'RatingStarsContainer',
   alignItems: 'center',
@@ -52,21 +57,21 @@ export const RatingStars = React.forwardRef<any, RatingStarsProps>((props, ref) 
     // Full Stars
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star key={`full-${i}`} size={starSize as any} color="$warning" fill="currentColor" />,
+        <StarIcon key={`full-${i}`} size={starSize} color="$warning" fill="currentColor" />,
       );
     }
 
     // Half Star
     if (hasHalfStar) {
       stars.push(
-        <StarHalf key="half" size={starSize as any} color="$warning" fill="currentColor" />,
+        <StarHalfIcon key="half" size={starSize} color="$warning" fill="currentColor" />,
       );
     }
 
     // Empty Stars
     const emptyStars = max - stars.length;
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<Star key={`empty-${i}`} size={starSize as any} color="$neutral300" />);
+      stars.push(<StarIcon key={`empty-${i}`} size={starSize} color="$neutral300" />);
     }
 
     return stars;

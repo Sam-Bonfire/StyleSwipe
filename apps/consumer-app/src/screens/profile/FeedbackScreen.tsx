@@ -79,7 +79,7 @@ export function FeedbackScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            <XStack alignItems="center" space="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
+            <XStack alignItems="center" gap="$2" padding="$2" borderBottomWidth={1} borderColor="$borderColor">
                 <TopBarIconButton
                     onPress={() => router.back()}
                     backgroundColor="$background"
@@ -92,10 +92,10 @@ export function FeedbackScreen() {
                 <Text fontSize="$5" fontWeight="bold">Send Feedback</Text>
             </XStack>
             <ScrollView>
-                <YStack padding="$4" space="$4" paddingBottom="$10">
+                <YStack padding="$4" gap="$4" paddingBottom="$10">
                     <Text color="$color" opacity={0.7}>We value your input! Let us know about bugs, features, or general improvements.</Text>
 
-                    <YStack space="$2">
+                    <YStack gap="$2">
                         <Label>Feedback Type</Label>
                         <Select value={type} onValueChange={setType}>
                             <Select.Trigger iconAfter={ChevronDown}>
@@ -125,7 +125,7 @@ export function FeedbackScreen() {
                         </Select>
                     </YStack>
 
-                    <YStack space="$2">
+                    <YStack gap="$2">
                         <Label>Message</Label>
                         <TextArea
                             value={message}
@@ -135,12 +135,12 @@ export function FeedbackScreen() {
                         />
                     </YStack>
 
-                    <YStack space="$2">
+                    <YStack gap="$2">
                         <Button variant="outlined" icon={Upload} onPress={handlePickDocument}>
                             {attachment ? 'Change Attachment' : 'Attach Screenshot/File'}
                         </Button>
                         {attachment && (
-                            <XStack alignItems="center" space="$2">
+                            <XStack alignItems="center" gap="$2">
                                 <File size={16} />
                                 <Text fontSize="$2" numberOfLines={1} flex={1}>{attachment.name}</Text>
                             </XStack>
@@ -152,10 +152,10 @@ export function FeedbackScreen() {
                     </Button>
 
                     {myFeedback && myFeedback.length > 0 && (
-                        <YStack marginTop="$6" space="$3">
+                        <YStack marginTop="$6" gap="$3">
                             <Text fontSize="$5" fontWeight="bold">My Feedback History</Text>
                             {myFeedback.map((item) => (
-                                <YStack key={item._id} padding="$3" borderWidth={1} borderColor="$borderColor" borderRadius="$3" space="$2">
+                                <YStack key={item._id} padding="$3" borderWidth={1} borderColor="$borderColor" borderRadius="$3" gap="$2">
                                     <XStack justifyContent="space-between">
                                         <Text fontWeight="600" textTransform="capitalize">{item.type}</Text>
                                         <Text color={item.status === 'Replied' ? '$success' : '$color'} opacity={0.7} fontSize="$2">{item.status}</Text>
