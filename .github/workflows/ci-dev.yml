@@ -156,6 +156,7 @@ jobs:
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
           APP_VERSION: ${{ env.APP_VERSION }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Distribute Android via Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -178,6 +179,7 @@ jobs:
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
           APP_VERSION: ${{ env.APP_VERSION }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Distribute iOS via Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
