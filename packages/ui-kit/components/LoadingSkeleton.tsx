@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, XStack, YStack } from 'tamagui';
+import { styled, GetProps, XStack, YStack } from 'tamagui';
 
-const SkeletonBase = styled(Stack, {
+const SkeletonBase = styled(YStack, {
   name: 'LoadingSkeleton',
   backgroundColor: '$neutral200',
   overflow: 'hidden',

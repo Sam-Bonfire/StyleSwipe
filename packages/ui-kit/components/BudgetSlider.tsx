@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, XStack, YStack, Text } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text } from 'tamagui';
 
 const SliderFrame = styled(YStack, {
   name: 'BudgetSlider',
@@ -35,7 +35,7 @@ const BandContainer = styled(XStack, {
   gap: '$1.5',
 });
 
-const BandChip = styled(Stack, {
+const BandChip = styled(YStack, {
   name: 'BudgetSliderBandChip',
   paddingHorizontal: '$2',
   paddingVertical: '$1.5',
@@ -43,8 +43,6 @@ const BandChip = styled(Stack, {
   borderWidth: 2,
   borderStyle: 'solid',
   cursor: 'pointer',
-
-  animation: 'quick' as any,
 
   hoverStyle: {
     scale: 1.02,
@@ -96,7 +94,7 @@ const BandChipText = styled(Text, {
 });
 
 // Visual slider track
-const SliderTrack = styled(Stack, {
+const SliderTrack = styled(YStack, {
   name: 'BudgetSliderTrack',
   height: 8,
   backgroundColor: '$neutral200',
@@ -105,7 +103,7 @@ const SliderTrack = styled(Stack, {
   marginTop: '$2',
 });
 
-const SliderFill = styled(Stack, {
+const SliderFill = styled(YStack, {
   name: 'BudgetSliderFill',
   height: '100%',
   backgroundColor: '$primary',

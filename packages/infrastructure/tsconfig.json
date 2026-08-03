@@ -3,10 +3,12 @@
   "compilerOptions": {
     "outDir": "dist",
     "noEmit": false,
-    "baseUrl": "."
+    "rootDir": "../.."
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../core/src/**/*",
+    "../convex/convex/**/*"
   ],
   "exclude": [
     "node_modules",

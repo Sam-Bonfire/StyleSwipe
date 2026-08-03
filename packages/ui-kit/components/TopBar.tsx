@@ -7,7 +7,7 @@
 
 import { MapPin, Search, Heart, ShoppingCart, ChevronDown } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, XStack, YStack, Text, Stack } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text } from 'tamagui';
 
 const TopBarFrame = styled(XStack, {
   name: 'TopBar',
@@ -106,7 +106,7 @@ const TitleText = styled(Text, {
   color: '$textPrimary',
 });
 
-export const TopBarIconButton = styled(Stack, {
+export const TopBarIconButton = styled(YStack, {
   name: 'TopBarIconButton',
   width: 40,
   height: 40,
@@ -125,7 +125,7 @@ export const TopBarIconButton = styled(Stack, {
   },
 });
 
-export const TopBarBadgeCount = styled(Stack, {
+export const TopBarBadgeCount = styled(YStack, {
   name: 'TopBarBadgeCount',
   position: 'absolute',
   top: 4,

@@ -176,7 +176,7 @@ export function WishlistScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <XStack
         alignItems="center"
-        space="$2"
+        gap="$2"
         padding="$2"
         borderBottomWidth={1}
         borderColor="$borderColor"

@@ -63,7 +63,7 @@ export function OnboardingScreen() {
   if (isGenerating) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" space="$6" justifyContent="center" alignItems="center">
+        <YStack flex={1} padding="$4" gap="$6" justifyContent="center" alignItems="center">
           <Spinner size="large" color="$primary" />
           <H2 textAlign="center">Designing Your Experience...</H2>
           <Text textAlign="center" color="$textSecondary">
@@ -82,19 +82,19 @@ export function OnboardingScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <YStack flex={1} padding="$4" space="$6" justifyContent="center">
-        <YStack space="$2">
+      <YStack flex={1} padding="$4" gap="$6" justifyContent="center">
+        <YStack gap="$2">
           <H1 textAlign="center">Personalize Your Style</H1>
 
           <Progress value={progress} size="$2">
-            <Progress.Indicator animation="quick" />
+            <Progress.Indicator />
           </Progress>
           <Text textAlign="center" color="$textSecondary">
             Question {step + 1} of {questions.length}
           </Text>
         </YStack>
 
-        <YStack space="$4">
+        <YStack gap="$4">
           <H2 textAlign="center">{currentQuestion.question}</H2>
           <XStack flexWrap="wrap" justifyContent="center" gap="$3">
             {currentQuestion.options.map((option) => (
@@ -109,7 +109,7 @@ export function OnboardingScreen() {
           </XStack>
         </YStack>
 
-        <XStack space="$4" justifyContent="center">
+        <XStack gap="$4" justifyContent="center">
           {step > 0 && (
             <Button onPress={handleBack} variant="outlined">
               Back

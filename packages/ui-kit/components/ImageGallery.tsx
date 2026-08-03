@@ -5,7 +5,7 @@ import {
   ScrollView,
   useWindowDimensions,
 } from 'react-native';
-import { Image, Stack, XStack, YStack } from 'tamagui';
+import { Image, XStack, YStack } from 'tamagui';
 
 interface ImageGalleryProps {
   images: string[];
@@ -41,7 +41,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
         bounces={false}
       >
         {images.map((img, index) => (
-          <Stack
+          <YStack
             key={index}
             width={windowWidth}
             height={galleryHeight}
@@ -53,13 +53,13 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
               source={{ uri: img, width: windowWidth, height: galleryHeight }}
               resizeMode="cover"
             />
-          </Stack>
+          </YStack>
         ))}
       </ScrollView>
 
       <XStack position="absolute" bottom={20} left={0} right={0} justifyContent="center" gap="$2">
         {images.map((_, index) => (
-          <Stack
+          <YStack
             key={index}
             width="$1"
             height="$1"

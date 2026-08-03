@@ -7,7 +7,7 @@
 
 import { User, Users } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, YStack, XStack, Text, Stack, TamaguiElement } from 'tamagui';
+import { styled, GetProps, YStack, XStack, Text, TamaguiElement } from 'tamagui';
 
 const SliderFrame = styled(YStack, {
   name: 'BlendSlider',
@@ -42,7 +42,7 @@ const ValueText = styled(Text, {
   color: '$primary',
 });
 
-const TrackContainer = styled(Stack, {
+const TrackContainer = styled(YStack, {
   name: 'BlendSliderTrackContainer',
   height: 48,
   position: 'relative',
@@ -56,12 +56,12 @@ const Track = styled(XStack, {
   overflow: 'hidden',
 });
 
-const TrackFill = styled(Stack, {
+const TrackFill = styled(YStack, {
   name: 'BlendSliderTrackFill',
   height: '100%',
 });
 
-const Thumb = styled(Stack, {
+const Thumb = styled(YStack, {
   name: 'BlendSliderThumb',
   position: 'absolute',
   width: 28,

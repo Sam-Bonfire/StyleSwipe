@@ -23,11 +23,11 @@
         ".": "./src/index.ts"
     },
     "dependencies": {
-        "expo-battery": "~9.0.2",
-        "expo-device": "~7.0.2",
-        "expo-network": "~7.0.5",
-        "expo-application": "~6.0.2",
-        "expo-constants": "~17.0.4",
+        "expo-battery": "~57.0.0",
+        "expo-device": "~57.0.0",
+        "expo-network": "~57.0.0",
+        "expo-application": "~57.0.0",
+        "expo-constants": "~57.0.0",
         "@app/convex": "workspace:*",
         "convex": "^1.11.0"
     },

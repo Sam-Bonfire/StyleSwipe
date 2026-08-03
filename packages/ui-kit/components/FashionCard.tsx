@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import { styled, GetProps, Stack, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
+import { styled, GetProps, Text, Image, YStack, XStack, TamaguiElement } from 'tamagui';
 import { LinearGradient } from 'tamagui/linear-gradient';
 
 import { Button } from './Button';
 
-const CardFrame = styled(Stack, {
+const CardFrame = styled(YStack, {
   name: 'FashionCard',
   position: 'relative',
   borderRadius: '$4',
@@ -116,7 +116,7 @@ const OriginalPriceText = styled(Text, {
   textDecorationLine: 'line-through',
 });
 
-const DiscountBadge = styled(Stack, {
+const DiscountBadge = styled(YStack, {
   name: 'FashionCardDiscountBadge',
   backgroundColor: '$success',
   paddingHorizontal: '$1',

@@ -83,7 +83,7 @@ export function HomeScreen() {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 20 }}
       >
-        <YStack paddingVertical="$2" space="$6">
+        <YStack paddingVertical="$2" gap="$6">
           {/* Latest Additions */}
           <YStack>
             <SectionHeader title="Latest Additions" onSeeAll={() => { }} />
