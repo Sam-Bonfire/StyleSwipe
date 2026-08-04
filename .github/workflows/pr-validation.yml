@@ -1,24 +1,50 @@
-name: PR Preview Deploy
+name: PR Validation & Preview
 
 on:
   pull_request:
+    branches: ["dev"]
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_CACHE_DIR: .turbo
+  MISE_TRUSTED_CONFIG_PATHS: '/'
 
 jobs:
-  preview:
-    name: Preview Deploy & E2E
+  validation-and-preview:
+    name: Validation, Preview Deploy & E2E
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
       - name: Install Tools (Mise)
         uses: jdx/mise-action@v2
         with:
-          install: true # Ensures tools in .mise.toml (like bun) are installed
+          install: true
+
+      - name: Trust Mise
+        run: mise trust
 
       - name: Install Dependencies
         run: bun install
+
+      - name: Run Verifications (Lint, Typecheck, Test)
+        run: bunx turbo run lint typecheck test
 
       - name: Sanitize Branch Name
         id: sanitize_branch
@@ -31,12 +57,6 @@ jobs:
         id: convex
         run: |
           cd packages/convex
-          # Note: If CONVEX_DEPLOY_KEY is NOT a preview deploy key (e.g. prod deploy key),
-          # the `--preview-create` flag will cause convex to exit with code 1.
-          # If it is a preview deploy key, this creates an ephemeral preview deployment matching the PR branch.
-          #
-          # We use `npx` (which works reliably across CI environments) to execute `convex deploy`.
-          # We use `--cmd` to securely append the URL to GITHUB_ENV without relying on parsing stdout.
           npx convex deploy \
             --preview-create "${{ steps.sanitize_branch.outputs.branch_name }}" \
             --cmd-url-env-var-name "CONVEX_URL" \
@@ -47,26 +67,18 @@ jobs:
       - name: Configure and Seed Convex Environment
         run: |
           cd packages/convex
-
-          # Note: If CONVEX_DEPLOY_KEY is a preview key, `convex env set` will automatically target the preview.
-          # We cannot use `--url` on `env set` because it's not a valid flag.
           npx convex env set BETTER_AUTH_URL --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }} ${{ env.CONVEX_URL }}
           npx convex env set BETTER_AUTH_SECRET --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }} ${{ secrets.BETTER_AUTH_SECRET }}
-
-          # Run the seed script
           npx convex run seed:run --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Build Web Application
-        # We build the consumer app since the layout modification was there
         run: |
           echo "Building consumer app with EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}"
           cd apps/consumer-app
 
-          # Write it securely to .env.local
           echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}" > .env.local
-          # Provide SITE_URL as well, better-auth needs it to match endpoints
           SITE_URL=$(echo ${{ env.CONVEX_URL }} | sed 's/\.cloud/\.site/')
           echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
 
@@ -80,7 +92,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: styleswipe-consumer-app
           directory: apps/consumer-app/dist
-          # Deploying to a branch automatically creates a preview deployment in Cloudflare
           branch: ${{ github.head_ref }}
 
       - name: Configure Convex Trusted Origins
@@ -96,5 +107,4 @@ jobs:
       - name: Run Playwright E2E Tests
         run: bunx playwright test
         env:
-          # Point the Playwright tests to the Cloudflare preview URL generated above
           PREVIEW_URL: ${{ steps.cloudflare.outputs.url }}

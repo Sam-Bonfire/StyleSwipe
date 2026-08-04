@@ -1,9 +1,9 @@
-name: CI Dev
+name: Production Release
 
 on:
   push:
-    branches: ["dev"]
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -14,25 +14,18 @@ env:
   MISE_TRUSTED_CONFIG_PATHS: '/'
 
 jobs:
-  setup:
+  create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Turbo Cache
-        uses: actions/cache@v3
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
-      - uses: jdx/mise-action@v2
-      - run: mise trust
-      - run: bun install
-      - name: Run Verifications
-        run: bunx turbo run lint typecheck test
+          generate_release_notes: true
+          draft: false
+          prerelease: false
 
-  build-docker:
-    needs: [setup]
+  build-push-docker:
+    needs: [create-release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -55,21 +48,23 @@ jobs:
         run: |
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
+          # Extract version from tag (e.g. v1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF_NAME#v}
           docker build -f apps/${{ matrix.app }}/Dockerfile \
-            -t "${TAG_BASE}:dev-latest" \
-            -t "${TAG_BASE}:dev-${{ github.sha }}" \
-            -t "${TAG_BASE}:dev-build-${{ github.run_number }}" \
+            -t "${TAG_BASE}:latest" \
+            -t "${TAG_BASE}:${VERSION}" \
             .
-          docker push "${TAG_BASE}:dev-latest"
-          docker push "${TAG_BASE}:dev-${{ github.sha }}"
-          docker push "${TAG_BASE}:dev-build-${{ github.run_number }}"
+          docker push "${TAG_BASE}:latest"
+          docker push "${TAG_BASE}:${VERSION}"
 
-  build-extension:
-    needs: [setup]
+  build-publish-extension:
+    needs: [create-release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
       - name: Build Extension
@@ -78,18 +73,19 @@ jobs:
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
-        run: zip -r extension-dev-${{ github.sha }}.zip .
-      - name: Upload Extension Artifact
-        uses: actions/upload-artifact@v4
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          zip -r extension-v${VERSION}.zip .
+      
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: browser-extension-dev-${{ github.sha }}
-          path: apps/browser-extension/dist/extension-dev-${{ github.sha }}.zip
-          retention-days: 5
+          files: apps/browser-extension/dist/extension-*.zip
 
   build-spas:
-    needs: [setup]
+    needs: [create-release]
     runs-on: ubuntu-latest
-    environment: staging
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - name: Turbo Cache
@@ -100,34 +96,36 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
 
       - name: Generate env file
         run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.staging
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.production
 
       - name: Build SPAs
-        run: bun run --env-file=.env --env-file=.env.staging bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
+        run: bun run --env-file=.env --env-file=.env.production bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
         env:
-          APP_ENV: staging
+          APP_ENV: production
 
       - name: Upload Admin Panel Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: admin-panel-dev-${{ github.sha }}
+          name: admin-panel-prod-${{ github.ref_name }}
           path: apps/admin-panel/dist
           retention-days: 5
 
       - name: Upload Consumer App Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-dev-${{ github.sha }}
+          name: consumer-app-prod-${{ github.ref_name }}
           path: apps/consumer-app/dist
           retention-days: 5
 
   build-mobile:
-    needs: [setup]
+    needs: [create-release]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -139,67 +137,50 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
-      - name: Extract App Version
-        id: version
-        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Setup Expo and EAS
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       
-      - name: Build Android APK (Local)
-        run: eas build --platform android --local --non-interactive --profile preview --output build/app.apk
+      - name: Build Android AAB (Local)
+        run: eas build --platform android --local --non-interactive --profile production --output build/app.aab
         working-directory: apps/consumer-app
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
-          APP_VERSION: ${{ env.APP_VERSION }}
+          APP_VERSION: ${{ github.ref_name }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Distribute Android via Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: testers
-          file: apps/consumer-app/build/app.apk
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-android-preview-${{ github.sha }}
-          path: apps/consumer-app/build/app.apk
+          name: consumer-app-android-prod-${{ github.ref_name }}
+          path: apps/consumer-app/build/app.aab
           retention-days: 5
 
       - name: Build iOS IPA (Local)
-        run: eas build --platform ios --local --non-interactive --profile preview --output build/app.ipa
+        run: eas build --platform ios --local --non-interactive --profile production --output build/app.ipa
         working-directory: apps/consumer-app
         env:
           EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
-          APP_VERSION: ${{ env.APP_VERSION }}
+          APP_VERSION: ${{ github.ref_name }}
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Distribute iOS via Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_IOS }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: testers
-          file: apps/consumer-app/build/app.ipa
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-ios-preview-${{ github.sha }}
+          name: consumer-app-ios-prod-${{ github.ref_name }}
           path: apps/consumer-app/build/app.ipa
           retention-days: 5
 
-  deploy-staging:
+  deploy-production:
+    needs: [create-release, build-push-docker, build-publish-extension, build-spas, build-mobile]
     runs-on: ubuntu-latest
-    needs: [build-docker, build-extension, build-spas, build-mobile]
-    environment: staging
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - name: Turbo Cache
@@ -210,52 +191,36 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
         with:
-          name: admin-panel-dev-${{ github.sha }}
+          name: admin-panel-prod-${{ github.ref_name }}
           path: apps/admin-panel/dist
 
       - name: Download Consumer App Artifact
         uses: actions/download-artifact@v4
         with:
-          name: consumer-app-dev-${{ github.sha }}
+          name: consumer-app-prod-${{ github.ref_name }}
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: bunx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=staging
+        run: bunx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: bunx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=staging
+        run: bunx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Deploy Convex (Preview)
+      - name: Deploy Convex (Production)
         run: bunx convex deploy
-        working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-
-  promote:
-    runs-on: ubuntu-latest
-    needs: [deploy-staging]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-      
-      - name: Merge dev to main
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout main
-          git merge --ff-only origin/dev
-          git push origin main
