@@ -55,3 +55,14 @@ If you are an AI Agent working in this repo:
 1.  **Install Tools**: `mise install` (Installs Bun, Node, Graphite).
 2.  **Install Deps**: `bun install`.
 3.  **Run Dev**: `bun run dev` (Starts Convex, Expo, and Admin).
+
+## CI/CD Secrets
+
+To run the Continuous Native Generation (CNG) pipeline, you must add the following secrets to your GitHub repository:
+- `ANDROID_KEYSTORE_BASE64`: Base64 encoded release keystore
+- `ANDROID_KEYSTORE_PASSWORD`: Password for the keystore
+- `ANDROID_KEY_ALIAS`: Alias for the key
+- `ANDROID_KEY_PASSWORD`: Password for the key
+- `IOS_CERTIFICATE_BASE64`: Base64 encoded p12 certificate
+- `IOS_CERTIFICATE_PASSWORD`: Password for the p12 certificate
+- `IOS_PROVISIONING_PROFILE_BASE64`: Base64 encoded mobileprovision file
