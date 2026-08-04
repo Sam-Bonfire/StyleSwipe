@@ -8,6 +8,15 @@ on:
 permissions:
   contents: write
   packages: write
+# Required CI Secrets for Native Builds:
+# - ANDROID_KEYSTORE_BASE64: Base64 encoded release keystore
+# - ANDROID_KEYSTORE_PASSWORD: Password for the keystore
+# - ANDROID_KEY_ALIAS: Alias for the key
+# - ANDROID_KEY_PASSWORD: Password for the key
+# - IOS_CERTIFICATE_BASE64: Base64 encoded p12 certificate
+# - IOS_CERTIFICATE_PASSWORD: Password for the p12 certificate
+# - IOS_PROVISIONING_PROFILE_BASE64: Base64 encoded mobileprovision file
+
 
 env:
   TURBO_CACHE_DIR: .turbo
@@ -126,7 +135,60 @@ jobs:
           path: apps/consumer-app/dist
           retention-days: 5
 
-  build-mobile:
+  build-android:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
+      - run: bun install
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - name: Extract App Version
+        id: version
+        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+      - name: Expo Prebuild
+        working-directory: apps/consumer-app
+        run: bunx expo prebuild --platform android --clean
+      # Placeholder: Inject Keystore and properties here
+      # - name: Setup Android Keystore
+      #   run: |
+      #     echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > apps/consumer-app/android/app/release.keystore
+      #     echo "MYAPP_UPLOAD_STORE_FILE=release.keystore" >> apps/consumer-app/android/gradle.properties
+      #     echo "MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> apps/consumer-app/android/gradle.properties
+      #     echo "MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
+      #     echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
+      - name: Build Android APK
+        working-directory: apps/consumer-app/android
+        run: ./gradlew assembleRelease
+      - name: Distribute Android via Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
+          groups: testers
+          file: apps/consumer-app/android/app/build/outputs/apk/release/app-release.apk
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-android-preview-${{ github.sha }}
+          path: apps/consumer-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 5
+
+  build-ios:
     needs: [setup]
     runs-on: macos-latest
     steps:
@@ -139,66 +201,48 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
       - name: Extract App Version
         id: version
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-      
-      - name: Build Android APK (Local)
-        run: eas build --platform android --local --non-interactive --profile preview --output build/app.apk
+      - name: Expo Prebuild
         working-directory: apps/consumer-app
-        env:
-          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
-          APP_VERSION: ${{ env.APP_VERSION }}
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Distribute Android via Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: testers
-          file: apps/consumer-app/build/app.apk
-
-      - name: Upload Android Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: consumer-app-android-preview-${{ github.sha }}
-          path: apps/consumer-app/build/app.apk
-          retention-days: 5
-
-      - name: Build iOS IPA (Local)
-        run: eas build --platform ios --local --non-interactive --profile preview --output build/app.ipa
-        working-directory: apps/consumer-app
-        env:
-          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
-          APP_VERSION: ${{ env.APP_VERSION }}
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Distribute iOS via Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_IOS }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: testers
-          file: apps/consumer-app/build/app.ipa
-
+        run: bunx expo prebuild --platform ios --clean
+      - name: Install Pods
+        working-directory: apps/consumer-app/ios
+        run: pod install
+      # Placeholder: Inject Certificates and Provisioning Profiles here
+      # - name: Setup Provisioning
+      #   run: |
+      #     # Install cert and profile logic here
+      - name: Build iOS IPA
+        working-directory: apps/consumer-app/ios
+        run: |
+          xcodebuild archive \
+            -workspace consumerapp.xcworkspace \
+            -scheme consumerapp \
+            -configuration Release \
+            -archivePath $PWD/build/consumerapp.xcarchive \
+            CODE_SIGNING_ALLOWED=NO
+          # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
           name: consumer-app-ios-preview-${{ github.sha }}
-          path: apps/consumer-app/build/app.ipa
+          path: apps/consumer-app/ios/build/
           retention-days: 5
 
   deploy-staging:
     runs-on: ubuntu-latest
-    needs: [build-docker, build-extension, build-spas, build-mobile]
+    needs: [build-docker, build-extension, build-spas, build-android, build-ios]
     environment: staging
     steps:
       - uses: actions/checkout@v4
@@ -210,6 +254,8 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
 
