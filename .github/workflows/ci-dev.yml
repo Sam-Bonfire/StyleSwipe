@@ -232,10 +232,10 @@ jobs:
         working-directory: apps/consumer-app/ios
         run: |
           xcodebuild archive \
-            -workspace consumerapp.xcworkspace \
-            -scheme consumerapp \
+            -workspace StyleSwipe.xcworkspace \
+            -scheme StyleSwipe \
             -configuration Release \
-            -archivePath $PWD/build/consumerapp.xcarchive \
+            -archivePath $PWD/build/StyleSwipe.xcarchive \
             CODE_SIGNING_ALLOWED=NO
           # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
       - name: Upload iOS Artifact
