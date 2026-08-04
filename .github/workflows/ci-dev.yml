@@ -1,9 +1,8 @@
-name: CI Dev
+name: Staging Deployment
 
 on:
   push:
     branches: ["dev"]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -35,6 +34,8 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
       - name: Run Verifications
@@ -58,20 +59,20 @@ jobs:
 
       - name: Generate env file
         run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.production
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.staging
 
       - name: Build and Push
         run: |
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
           docker build -f apps/${{ matrix.app }}/Dockerfile \
-            -t "${TAG_BASE}:dev-latest" \
-            -t "${TAG_BASE}:dev-${{ github.sha }}" \
-            -t "${TAG_BASE}:dev-build-${{ github.run_number }}" \
+            -t "${TAG_BASE}:staging-latest" \
+            -t "${TAG_BASE}:staging-${{ github.sha }}" \
+            -t "${TAG_BASE}:staging-build-${{ github.run_number }}" \
             .
-          docker push "${TAG_BASE}:dev-latest"
-          docker push "${TAG_BASE}:dev-${{ github.sha }}"
-          docker push "${TAG_BASE}:dev-build-${{ github.run_number }}"
+          docker push "${TAG_BASE}:staging-latest"
+          docker push "${TAG_BASE}:staging-${{ github.sha }}"
+          docker push "${TAG_BASE}:staging-build-${{ github.run_number }}"
 
   build-extension:
     needs: [setup]
@@ -79,6 +80,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
       - name: Build Extension
@@ -87,12 +90,12 @@ jobs:
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
-        run: zip -r extension-dev-${{ github.sha }}.zip .
+        run: zip -r extension-staging-${{ github.sha }}.zip .
       - name: Upload Extension Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: browser-extension-dev-${{ github.sha }}
-          path: apps/browser-extension/dist/extension-dev-${{ github.sha }}.zip
+          name: browser-extension-staging-${{ github.sha }}
+          path: apps/browser-extension/dist/extension-staging-${{ github.sha }}.zip
           retention-days: 5
 
   build-spas:
@@ -109,6 +112,8 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
 
@@ -124,14 +129,14 @@ jobs:
       - name: Upload Admin Panel Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: admin-panel-dev-${{ github.sha }}
+          name: admin-panel-staging-${{ github.sha }}
           path: apps/admin-panel/dist
           retention-days: 5
 
       - name: Upload Consumer App Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-dev-${{ github.sha }}
+          name: consumer-app-staging-${{ github.sha }}
           path: apps/consumer-app/dist
           retention-days: 5
 
@@ -262,13 +267,13 @@ jobs:
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
         with:
-          name: admin-panel-dev-${{ github.sha }}
+          name: admin-panel-staging-${{ github.sha }}
           path: apps/admin-panel/dist
 
       - name: Download Consumer App Artifact
         uses: actions/download-artifact@v4
         with:
-          name: consumer-app-dev-${{ github.sha }}
+          name: consumer-app-staging-${{ github.sha }}
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
@@ -297,7 +302,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-      
+
       - name: Merge dev to main
         run: |
           git config --global user.name "github-actions[bot]"
