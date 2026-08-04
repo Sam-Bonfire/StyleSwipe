@@ -1,0 +1,16 @@
+diff --git a/node_modules/onnxruntime-react-native/.bun-tag-5530793c48cc1e46 b/.bun-tag-5530793c48cc1e46
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/android/build.gradle b/android/build.gradle
+index 41b43599a9af6ef1c170047d39db1f3baa6ca682..efc4aa72d4838c3ae61fa6deaa73bdf9ae1e2f7e 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -247,7 +247,7 @@ dependencies {
+     extractLibs "com.microsoft.onnxruntime:onnxruntime-android:latest.integration@aar"
+   }
+
+-  if (VersionNumber.parse(REACT_NATIVE_VERSION) < VersionNumber.parse("0.71")) {
++  if (org.gradle.util.internal.VersionNumber.parse(REACT_NATIVE_VERSION) < org.gradle.util.internal.VersionNumber.parse("0.71")) {
+     extractLibs "com.facebook.fbjni:fbjni:+:headers"
+     extractLibs "com.facebook.fbjni:fbjni:+"
+   }

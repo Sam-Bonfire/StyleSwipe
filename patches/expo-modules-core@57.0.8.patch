@@ -1,0 +1,35 @@
+diff --git a/android/ExpoModulesCorePlugin.gradle b/android/ExpoModulesCorePlugin.gradle
+index 7910c7721652da37400059c129ffd9a2d4c86dcf..56746c6c8b21e43d3cc2b15b5cb7618ea3790f5b 100644
+--- a/android/ExpoModulesCorePlugin.gradle
++++ b/android/ExpoModulesCorePlugin.gradle
+@@ -80,7 +80,7 @@ ext.useExpoPublishing = {
+     apply plugin: 'maven-publish'
+   }
+
+-  if (components.findByName("release") == null) {
++  if (components.findByName("release") == null && components.findByName("default") == null) {
+     return
+   }
+
+@@ -96,7 +96,7 @@ ext.useExpoPublishing = {
+     publishing {
+       publications {
+         release(MavenPublication) {
+-          from components.release
++          from components.findByName("release") ?: components.findByName("default")
+         }
+       }
+       repositories {
+diff --git a/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/MavenPublicationExtension.kt b/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/MavenPublicationExtension.kt
+index f0ce04eab977193df13557d70833170f736b701b..4e81339768ef6dcea4bf39d6ee44788cd39e2879 100644
+--- a/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/MavenPublicationExtension.kt
++++ b/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/MavenPublicationExtension.kt
+@@ -36,7 +36,7 @@ internal data class PublicationInfo(
+   constructor(
+     project: Project,
+   ) : this(
+-    components = project.components.getByName("release"),
++    components = project.components.findByName("release") ?: project.components.findByName("default") ?: error("No release component found"),
+     groupId = project.group.toString(),
+     artifactId = requireNotNull(project.androidLibraryExtension().namespace) {
+       "'android.namespace' is not defined"
