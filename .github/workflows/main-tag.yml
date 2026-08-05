@@ -34,43 +34,31 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          CHANGESET_COUNT=$(find .changeset -name "*.md" 2>/dev/null | wc -l)
-          if [ "$CHANGESET_COUNT" -eq 0 ]; then
-            echo "⚠️ No changesets found. Generating a default automated patch changeset..."
+          # Get current version
+          VERSION=$(jq -r .version package.json)
+          echo "Current version: $VERSION"
 
-            CHANGESET_FILE=".changeset/automated-patch-$(date +%s).md"
+          # Increment patch version
+          IFS='.' read -r -a parts <<< "$VERSION"
+          parts[2]=$((parts[2] + 1))
+          NEW_VERSION="${parts[0]}.${parts[1]}.${parts[2]}"
+          echo "New version: $NEW_VERSION"
 
-            printf "%s\n" \
-              "---" \
-              '"@app/admin-panel": patch' \
-              '"@app/browser-extension": patch' \
-              '"@app/consumer-app": patch' \
-              '"@app/convex": patch' \
-              '"@app/core": patch' \
-              '"@app/infrastructure": patch' \
-              '"@app/logger": patch' \
-              '"@app/scraper-service": patch' \
-              '"@app/ui-kit": patch' \
-              "---" \
-              "" \
-              "Automated patch release for latest main commits" > "$CHANGESET_FILE"
-            echo "✅ Created automated changeset: $CHANGESET_FILE"
-          fi
+          # Update package.json
+          jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > package.json.tmp && mv package.json.tmp package.json
 
-          bun changeset version
+          # Update all workspace package.json files to match the new monorepo version
+          for pkg in apps/*/package.json packages/*/package.json; do
+            if [ -f "$pkg" ]; then
+              jq --arg ver "$NEW_VERSION" '.version = $ver' "$pkg" > "${pkg}.tmp" && mv "${pkg}.tmp" "$pkg"
+            fi
+          done
 
-          if [[ -n $(git status -s) ]]; then
-            git add .
-            git commit -m "chore: version packages"
+          git add package.json apps/*/package.json packages/*/package.json
+          git commit -m "release: v$NEW_VERSION"
 
-            VERSION=$(jq -r .version package.json)
-            TAG="v$VERSION"
+          TAG="v$NEW_VERSION"
+          git tag $TAG
+          git push origin main
+          git push origin $TAG
 
-            echo "New version: $VERSION"
-
-            git tag $TAG
-            git push origin main
-            git push origin $TAG
-          else
-            echo "No changesets found, skipping version bump."
-          fi

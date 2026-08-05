@@ -25,7 +25,16 @@ env:
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.get_version.outputs.version }}
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Extract version
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -134,8 +143,8 @@ jobs:
           retention-days: 5
 
   build-android:
-    needs: [release]
-    if: needs.release.outputs.new_version != 'none'
+    needs: [create-release]
+    if: needs.create-release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -176,18 +185,18 @@ jobs:
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-android-prod-${{ needs.release.outputs.new_version }}
+          name: consumer-app-android-prod-${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 5
 
   build-ios:
-    needs: [release]
-    if: needs.release.outputs.new_version != 'none'
+    needs: [create-release]
+    if: needs.create-release.outputs.new_version != 'none'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: v${{ needs.release.outputs.new_version }}
+          ref: v${{ needs.create-release.outputs.new_version }}
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -231,13 +240,13 @@ jobs:
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-ios-prod-${{ needs.release.outputs.new_version }}
+          name: consumer-app-ios-prod-${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/ios/build/
           retention-days: 5
 
   deploy-production:
-    needs: [release, build-push-docker, build-publish-extension, build-spas, build-android, build-ios]
-    if: needs.release.outputs.new_version != 'none'
+    needs: [create-release, build-push-docker, build-publish-extension, build-spas, build-android, build-ios]
+    if: needs.create-release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
     environment: production
     steps:
