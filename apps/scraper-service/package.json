@@ -1,6 +1,6 @@
 {
   "name": "@app/scraper-service",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",

@@ -1,34 +1,34 @@
 {
-    "name": "@app/convex",
-    "version": "0.0.1",
-    "exports": {
-        ".": {
-            "types": "./convex/index.ts",
-            "import": "./convex/index.ts",
-            "require": "./convex/index.ts"
-        }
-    },
-    "publishConfig": {
-        "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
-        "directory": "packages/convex"
-    },
-    "private": true,
-    "license": "UNLICENSED",
-    "scripts": {
-        "dev": "convex dev",
-        "setup": "convex dev --until-success",
-        "typecheck": "tsc --noEmit"
-    },
-    "dependencies": {
-        "better-auth": "^1.6.23",
-        "convex": "^1.42.3",
-        "convex-helpers": "^0.1.120"
-    },
-    "devDependencies": {
-        "typescript": "~5.9.3"
+  "name": "@app/convex",
+  "version": "0.0.2",
+  "exports": {
+    ".": {
+      "types": "./convex/index.ts",
+      "import": "./convex/index.ts",
+      "require": "./convex/index.ts"
     }
+  },
+  "publishConfig": {
+    "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://git.yomite.in/StyleSwipe/StyleSwipe.git",
+    "directory": "packages/convex"
+  },
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "convex dev",
+    "setup": "convex dev --until-success",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-auth": "^1.6.23",
+    "convex": "^1.42.3",
+    "convex-helpers": "^0.1.120"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
 }
