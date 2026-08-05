@@ -1,5 +1,5 @@
-import { InitializeStyleProfile, GetOnboardingQuestions } from '@app/core';
-import { useUpdateStyleProfile } from '@app/infrastructure';
+import { GetOnboardingQuestions } from '@app/core';
+import { useAnalytics, useCompleteOnboarding, useCurrentUser } from '@app/infrastructure';
 import { Button, CategoryChip } from '@app/ui-kit';
 import { Effect } from 'effect';
 import React, { useState } from 'react';
@@ -9,11 +9,17 @@ import { YStack, XStack, H1, H2, Text, Progress, Spinner } from 'tamagui';
 import { generateEmbedding } from '../../infrastructure/InferenceEngine';
 
 export function OnboardingScreen() {
+  const user = useCurrentUser();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const questions = Effect.runSync(GetOnboardingQuestions.getOnboardingQuestions());
 
-  const updateStyleProfile = useUpdateStyleProfile();
+  const completeOnboarding = useCompleteOnboarding(generateEmbedding);
+  const { trackEvent } = useAnalytics();
+
+  React.useEffect(() => {
+    trackEvent('onboarding_started', undefined, { variant: 'onboarding_v1' });
+  }, []);
 
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;
@@ -25,26 +31,25 @@ export function OnboardingScreen() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleNext = async () => {
+    trackEvent('onboarding_step_completed', { 
+      step: step + 1,
+      totalSteps: questions.length,
+      questionId: currentQuestion.id,
+      selectedOption: answers[currentQuestion.id]
+    }, { variant: 'onboarding_v1' });
+
     if (step < questions.length - 1) {
       setStep(step + 1);
     } else {
       // Final step
       setIsGenerating(true);
       try {
-        // Initialize profile
-        const styleProfile = Effect.runSync(InitializeStyleProfile.initializeStyleProfile(answers));
-
-        // ---------------------------------------------------------
-        // REAL ONBOARDING VECTORIZATION
-        // ---------------------------------------------------------
-        // If model is not ready, this might take a moment to download/load
-        const semanticDescription = Object.entries(answers)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join('. ');
-
-        const vector = await generateEmbedding(semanticDescription);
-        styleProfile.preferenceVector = vector;
-        await updateStyleProfile({ styleProfile });
+        // Execute the Hexagonal Use Case
+        if (user?._id) {
+          await completeOnboarding(user._id, answers);
+        }
+        
+        trackEvent('onboarding_completed', { answers }, { variant: 'onboarding_v1' });
         // NavigationGuard handles transition
       } catch (e) {
         console.error('Failed to save onboarding', e);
@@ -58,7 +63,7 @@ export function OnboardingScreen() {
   if (isGenerating) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" space="$6" justifyContent="center" alignItems="center">
+        <YStack flex={1} padding="$4" gap="$6" justifyContent="center" alignItems="center">
           <Spinner size="large" color="$primary" />
           <H2 textAlign="center">Designing Your Experience...</H2>
           <Text textAlign="center" color="$textSecondary">
@@ -77,19 +82,19 @@ export function OnboardingScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <YStack flex={1} padding="$4" space="$6" justifyContent="center">
-        <YStack space="$2">
+      <YStack flex={1} padding="$4" gap="$6" justifyContent="center">
+        <YStack gap="$2">
           <H1 textAlign="center">Personalize Your Style</H1>
 
           <Progress value={progress} size="$2">
-            <Progress.Indicator animation="quick" />
+            <Progress.Indicator />
           </Progress>
           <Text textAlign="center" color="$textSecondary">
             Question {step + 1} of {questions.length}
           </Text>
         </YStack>
 
-        <YStack space="$4">
+        <YStack gap="$4">
           <H2 textAlign="center">{currentQuestion.question}</H2>
           <XStack flexWrap="wrap" justifyContent="center" gap="$3">
             {currentQuestion.options.map((option) => (
@@ -104,7 +109,7 @@ export function OnboardingScreen() {
           </XStack>
         </YStack>
 
-        <XStack space="$4" justifyContent="center">
+        <XStack gap="$4" justifyContent="center">
           {step > 0 && (
             <Button onPress={handleBack} variant="outlined">
               Back

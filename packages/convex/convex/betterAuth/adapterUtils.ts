@@ -16,8 +16,11 @@ import { stream } from 'convex-helpers/server/stream';
 import { mergedStream } from 'convex-helpers/server/stream';
 
 export const adapterWhereValidator = v.object({
+  connector: v.optional(v.union(v.literal('AND'), v.literal('OR'))),
   field: v.string(),
+  mode: v.optional(v.union(v.literal('sensitive'), v.literal('insensitive'))),
   operator: v.optional(
+
     v.union(
       v.literal('lt'),
       v.literal('lte'),
@@ -40,7 +43,6 @@ export const adapterWhereValidator = v.object({
     v.array(v.number()),
     v.null(),
   ),
-  connector: v.optional(v.union(v.literal('AND'), v.literal('OR'))),
 });
 
 export const adapterArgsValidator = v.object({

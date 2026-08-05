@@ -21,8 +21,11 @@ export {
 } from './useCart';
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile } from './useUsers';
+export * from './useOnboarding';
+export * from './useAnalytics';
+export * from './usePartnerSync';
 export { useSearch } from './useSearch';
-export { useSystemBoard, useTrackPurchaseClick } from './useBoards';
+export { useSystemBoard, useTrackPurchaseClick, useWishlist, useToggleWishlist } from './useBoards';
 
 // =============================================================================
 // ADMIN HOOKS (use in apps/admin-panel)

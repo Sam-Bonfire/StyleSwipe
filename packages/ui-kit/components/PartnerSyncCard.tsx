@@ -7,7 +7,7 @@
 
 import { Users, Clock, Link2, QrCode, X } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
-import { styled, GetProps, YStack, XStack, Text, Stack, Image } from 'tamagui';
+import { styled, GetProps, YStack, XStack, Text, Image } from 'tamagui';
 
 import { Button } from './Button';
 
@@ -28,7 +28,7 @@ const Header = styled(XStack, {
   gap: '$2',
 });
 
-const IconBadge = styled(Stack, {
+const IconBadge = styled(YStack, {
   name: 'PartnerSyncIconBadge',
   width: 48,
   height: 48,
@@ -73,7 +73,7 @@ const DurationRow = styled(XStack, {
   flexWrap: 'wrap',
 });
 
-const DurationChip = styled(Stack, {
+const DurationChip = styled(YStack, {
   name: 'PartnerSyncDurationChip',
   paddingHorizontal: '$2',
   paddingVertical: '$1',
@@ -128,7 +128,7 @@ const ShareButton = styled(YStack, {
   },
 });
 
-const ShareIconContainer = styled(Stack, {
+const ShareIconContainer = styled(YStack, {
   name: 'PartnerSyncShareIcon',
   width: 48,
   height: 48,
@@ -185,7 +185,7 @@ const TimerText = styled(Text, {
   color: '$textSecondary',
 });
 
-const StopButton = styled(Stack, {
+const StopButton = styled(YStack, {
   name: 'PartnerSyncStopButton',
   padding: '$1.5',
   borderRadius: '$full',

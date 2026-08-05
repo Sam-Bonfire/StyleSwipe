@@ -65,10 +65,10 @@ export function ProductsScreen() {
   }
 
   return (
-    <YStack space="$4" flex={1} padding="$4">
+    <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
         <H3>Scraped Products</H3>
-        <XStack space="$2" alignItems="center">
+        <XStack gap="$2" alignItems="center">
           <Text color="$textSecondary">Items per page:</Text>
           {[20, 50, 100].map((size) => (
             <Button
@@ -113,15 +113,15 @@ export function ProductsScreen() {
           }
           renderItem={({ item }) => (
             <Card
-              elevate
-              bordered
-              padding="$0"
+                          borderWidth={1}
+                          borderColor="$borderColor"
+                          padding="$0"
               marginBottom="$3"
               flex={1}
               maxWidth="32%" // For 3 columns
               overflow="hidden"
             >
-              <Card.Header padded paddingBottom="$0">
+              <Card.Header padding="$0" paddingBottom="$0">
                 <Image
                   source={{ uri: item.images?.[0] }}
                   width="100%"
@@ -130,7 +130,7 @@ export function ProductsScreen() {
                   resizeMode="cover"
                 />
               </Card.Header>
-              <Card.Footer padded flexDirection="column" alignItems="flex-start" gap="$2">
+              <Card.Footer padding="$3" flexDirection="column" alignItems="flex-start" gap="$2">
                 <Text fontWeight="bold" fontSize="$4" numberOfLines={1}>
                   {item.title}
                 </Text>

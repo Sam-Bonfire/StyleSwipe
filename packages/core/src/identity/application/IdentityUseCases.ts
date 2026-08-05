@@ -1,6 +1,9 @@
 import { Effect } from 'effect';
 
 import { AuthService, AuthError } from '../../../shared/application/ports';
+import { completeOnboarding } from './CompleteOnboarding';
+
+export { completeOnboarding };
 
 export const signInWithPhone = (phoneNumber: string): Effect.Effect<void, AuthError, AuthService> =>
   Effect.gen(function* (_) {

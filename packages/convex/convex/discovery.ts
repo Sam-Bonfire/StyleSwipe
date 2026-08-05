@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 
 import { components } from './_generated/api';
 import { Id } from './_generated/dataModel';
-import { MutationCtx, mutation, query } from './_generated/server';
+import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
 
 /** Swipe action validator — defined here in infrastructure, not in core */
 const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.literal('super'));
@@ -10,10 +10,10 @@ const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.litera
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 // Helper to get style profile
-const getStyleProfile = async (ctx: MutationCtx, userId: string) => {
+const getStyleProfile = async (ctx: any, userId: string) => {
   return await ctx.db
     .query('style_profiles')
-    .withIndex('by_user', (q) => q.eq('userId', userId))
+    .withIndex('by_user', (q: any) => q.eq('userId', userId))
     .first();
 };
 
@@ -145,6 +145,7 @@ export const processSwipe = mutation({
   args: {
     productId: v.id('products'),
     action: SwipeActionSchema,
+    newPreferenceVector: v.optional(v.array(v.float64())),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -173,52 +174,25 @@ export const processSwipe = mutation({
     });
 
     // ---------------------------------------------------------
-    // REAL-TIME VECTOR LEARNING
+    // CLIENT-SIDE VECTOR LEARNING UPDATE
     // ---------------------------------------------------------
-    if (action === 'like' || action === 'super') {
-      const product = await ctx.db.get(productId);
-      if (product && product.embedding) {
-        const LEARNING_RATE = action === 'super' ? 0.2 : 0.1;
-
-        const currentProfileDoc = await getStyleProfile(ctx, userId);
-        const currentProfile = currentProfileDoc || {
-          gender: 'both' as const,
+    if (args.newPreferenceVector) {
+      const currentProfileDoc = await getStyleProfile(ctx, userId);
+      if (currentProfileDoc) {
+        await ctx.db.patch(currentProfileDoc._id, {
+          preferenceVector: args.newPreferenceVector,
+          lastUpdated: Date.now(),
+        });
+      } else {
+        await ctx.db.insert('style_profiles', {
+          userId: userId,
+          gender: 'both',
           vibes: [],
           sizes: {},
           budget: { min: 0, max: 20000 },
-        };
-
-        const currentVector = currentProfileDoc?.preferenceVector;
-
-        if (!currentVector) {
-          const newProfile = {
-            ...currentProfile,
-            preferenceVector: product.embedding,
-          };
-
-          if (currentProfileDoc) {
-            await ctx.db.patch(currentProfileDoc._id, {
-              preferenceVector: product.embedding,
-              lastUpdated: Date.now(),
-            });
-          } else {
-            await ctx.db.insert('style_profiles', {
-              userId: userId,
-              ...newProfile,
-              lastUpdated: Date.now(),
-            });
-          }
-        } else {
-          const newVector = currentVector.map((val: number, i: number) => {
-            const targetVal = product.embedding![i];
-            return val + LEARNING_RATE * (targetVal - val);
-          });
-
-          await ctx.db.patch(currentProfileDoc._id, {
-            preferenceVector: newVector,
-            lastUpdated: Date.now(),
-          });
-        }
+          preferenceVector: args.newPreferenceVector,
+          lastUpdated: Date.now(),
+        });
       }
     }
 
@@ -237,4 +211,38 @@ export const getUserSwipedIds = query({
       .collect();
     return swipes.map((s) => s.productId);
   },
+});
+
+export const getCalibrationFeed = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return await ctx.db.query('products').order('desc').take(args.limit || 20);
+    }
+    const userId = identity.subject;
+    const profile = await getStyleProfile(ctx, userId);
+    
+    // Fetch swipes to exclude
+    const swipes = await ctx.db
+      .query('swipes')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .collect();
+    const swipedProductIds = new Set(swipes.map((s) => s.productId));
+
+    // Diverse calibration fetch
+    // Note: A true production calibration would fetch randomly across categories.
+    // For this MVP, we fetch recent items and filter by the user's gender preference to build the initial batch.
+    let productQuery = ctx.db.query('products').order('desc');
+    const allProducts = await productQuery.take(100);
+    
+    let feed = allProducts.filter((p) => !swipedProductIds.has(p._id));
+    if (profile?.gender && profile.gender !== 'both') {
+      feed = feed.filter(p => p.gender === profile.gender || p.gender === 'unisex');
+    }
+    
+    return feed.slice(0, args.limit || 10);
+  }
 });

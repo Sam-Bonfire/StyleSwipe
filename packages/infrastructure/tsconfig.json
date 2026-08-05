@@ -2,11 +2,14 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
+    "composite": true,
     "noEmit": false,
-    "baseUrl": "."
+    "rootDir": "../.."
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../core/src/**/*", "../core/shared/**/*",
+    "../convex/convex/**/*"
   ],
   "exclude": [
     "node_modules",

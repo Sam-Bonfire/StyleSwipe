@@ -23,7 +23,7 @@ export const getUnmigratedProducts = query({
     let lastCursor: number | undefined = args.cursor;
     for (const p of products) {
       lastCursor = p._creationTime;
-      if (p.embedding || p.embeddingVersions?.v1) {
+      if ((p as any).embedding || (p as any).embeddingVersions?.v1) {
         const embDoc = await ctx.db
           .query('product_embeddings')
           .withIndex('by_productId', (q) => q.eq('productId', p._id))
@@ -56,14 +56,14 @@ export const migrateBatch = mutation({
     let lastCursor: number | undefined = args.cursor;
     for (const p of products) {
       lastCursor = p._creationTime;
-      if (p.embedding || p.embeddingVersions?.v1) {
+      if ((p as any).embedding || (p as any).embeddingVersions?.v1) {
         const embDoc = await ctx.db
           .query('product_embeddings')
           .withIndex('by_productId', (q) => q.eq('productId', p._id))
           .first();
           
         if (!embDoc) {
-          const activeEmbedding = p.embedding || p.embeddingVersions?.v1;
+          const activeEmbedding = (p as any).embedding || (p as any).embeddingVersions?.v1;
           await ctx.db.insert('product_embeddings', {
             productId: p._id,
             embeddingVersions: {
@@ -100,8 +100,8 @@ export const purgeLegacyEmbeddings = mutation({
 
     for (const p of products) {
       if (
-        p.embedding !== undefined ||
-        p.embeddingVersions !== undefined ||
+        (p as any).embedding !== undefined ||
+        (p as any).embeddingVersions !== undefined ||
         (p.meta && p.meta.rawAttributes !== undefined)
       ) {
         // Verification: Ensure the new table has the embedding before we purge!
@@ -118,8 +118,8 @@ export const purgeLegacyEmbeddings = mutation({
         }
 
         const patches: any = {};
-        if (p.embedding !== undefined) patches.embedding = undefined;
-        if (p.embeddingVersions !== undefined) patches.embeddingVersions = undefined;
+        if ((p as any).embedding !== undefined) patches.embedding = undefined;
+        if ((p as any).embeddingVersions !== undefined) patches.embeddingVersions = undefined;
         
         // Clean up duplicate rawAttributes in metadata
         if (p.meta && p.meta.rawAttributes !== undefined) {

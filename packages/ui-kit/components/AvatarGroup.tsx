@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { styled, GetProps, XStack, Stack, Text, Image, TamaguiElement } from 'tamagui';
+import { styled, GetProps, XStack, YStack, Text, Image, TamaguiElement } from 'tamagui';
 
 const GroupFrame = styled(XStack, {
   name: 'AvatarGroup',
   alignItems: 'center',
 });
 
-const AvatarWrapper = styled(Stack, {
+const AvatarWrapper = styled(YStack, {
   name: 'AvatarWrapper',
   borderWidth: 2,
   borderColor: '$surface',
@@ -40,7 +40,7 @@ const AvatarImage = styled(Image, {
   height: '100%',
 });
 
-const OverflowBadge = styled(Stack, {
+const OverflowBadge = styled(YStack, {
   name: 'AvatarGroupOverflow',
   borderRadius: '$full',
   borderWidth: 2,
@@ -73,7 +73,7 @@ const OverflowText = styled(Text, {
   } as const,
 });
 
-const InitialsContainer = styled(Stack, {
+const InitialsContainer = styled(YStack, {
   name: 'AvatarGroupInitials',
   width: '100%',
   height: '100%',

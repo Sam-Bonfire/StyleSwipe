@@ -1,138 +1,46 @@
-name: CI/CD Main
+name: Production Release
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
   packages: write
+
+# Required CI Secrets for Native Builds:
+# - ANDROID_KEYSTORE_BASE64: Base64 encoded release keystore
+# - ANDROID_KEYSTORE_PASSWORD: Password for the keystore
+# - ANDROID_KEY_ALIAS: Alias for the key
+# - ANDROID_KEY_PASSWORD: Password for the key
+# - IOS_CERTIFICATE_BASE64: Base64 encoded p12 certificate
+# - IOS_CERTIFICATE_PASSWORD: Password for the p12 certificate
+# - IOS_PROVISIONING_PROFILE_BASE64: Base64 encoded mobileprovision file
 
 env:
   TURBO_CACHE_DIR: .turbo
   MISE_TRUSTED_CONFIG_PATHS: '/'
 
 jobs:
-  setup:
+  create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Turbo Cache
-        uses: actions/cache@v3
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
-      - uses: jdx/mise-action@v2
-      - run: mise trust
-      - run: bun install
-      - name: Run Verifications
-        run: bunx turbo run lint typecheck test
-
-  release:
-    needs: [setup]
-    runs-on: ubuntu-latest
-    outputs:
-      new_version: ${{ steps.version.outputs.VERSION }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Turbo Cache
-        uses: actions/cache@v3
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
-
-      - uses: jdx/mise-action@v2
-      - run: mise trust
-      - run: bun install
-
-      - name: Version and Tag
-        id: version
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Check if there are any changeset files (excluding config.json)
-          CHANGESET_COUNT=$(find .changeset -name "*.md" 2>/dev/null | wc -l)
-          if [ "$CHANGESET_COUNT" -eq 0 ]; then
-            echo "⚠️ No changesets found. Generating a default automated patch changeset..."
-            
-            # Create a unique filename for the automated changeset
-            CHANGESET_FILE=".changeset/automated-patch-$(date +%s).md"
-            
-            printf "%s\n" \
-              "---" \
-              '"@app/admin-panel": patch' \
-              '"@app/browser-extension": patch' \
-              '"@app/consumer-app": patch' \
-              '"@app/convex": patch' \
-              '"@app/core": patch' \
-              '"@app/infrastructure": patch' \
-              '"@app/logger": patch' \
-              '"@app/scraper-service": patch' \
-              '"@app/ui-kit": patch' \
-              "---" \
-              "" \
-              "Automated patch release for latest main commits" > "$CHANGESET_FILE"
-            echo "✅ Created automated changeset: $CHANGESET_FILE"
-          fi
-          
-          # Run changeset version to bump versions and update changelogs
-          bun changeset version
-          
-          # Check if there are changes
-          if [[ -n $(git status -s) ]]; then
-            git add .
-            git commit -m "chore: version packages"
-            
-            # Assuming strictly one version for the app or using the root/main app version
-            # For monorepos, this can be complex. We'll use the root package.json version/tag.
-            VERSION=$(jq -r .version package.json)
-            TAG="v$VERSION"
-            
-            echo "New version: $VERSION"
-            
-            git tag $TAG
-            git push origin main
-            git push origin $TAG
-            
-            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-            echo "TAG=$TAG" >> $GITHUB_ENV
-          else
-            echo "No changesets found, skipping version bump."
-            echo "VERSION=none" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create GitHub Release
-        if: steps.version.outputs.VERSION != 'none'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.VERSION }}
-          name: Release ${{ steps.version.outputs.VERSION }}
-          body_path: CHANGELOG.md
-          files: CHANGELOG.md
+          generate_release_notes: true
           draft: false
           prerelease: false
 
   build-push-docker:
-    needs: [release]
-    if: needs.release.outputs.new_version != 'none'
+    needs: [create-release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         app: [scraper-service]
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.release.outputs.new_version }}
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -149,22 +57,23 @@ jobs:
         run: |
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
+          # Extract version from tag (e.g. v1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF_NAME#v}
           docker build -f apps/${{ matrix.app }}/Dockerfile \
             -t "${TAG_BASE}:latest" \
-            -t "${TAG_BASE}:${{ needs.release.outputs.new_version }}" \
+            -t "${TAG_BASE}:${VERSION}" \
             .
           docker push "${TAG_BASE}:latest"
-          docker push "${TAG_BASE}:${{ needs.release.outputs.new_version }}"
+          docker push "${TAG_BASE}:${VERSION}"
 
   build-publish-extension:
-    needs: [release]
-    if: needs.release.outputs.new_version != 'none'
+    needs: [create-release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.release.outputs.new_version }}
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
       - name: Build Extension
@@ -173,23 +82,21 @@ jobs:
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
-        run: zip -r extension-v${{ needs.release.outputs.new_version }}.zip .
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          zip -r extension-v${VERSION}.zip .
       
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.release.outputs.new_version }}
-          files: apps/browser-extension/dist/extension-v${{ needs.release.outputs.new_version }}.zip
+          files: apps/browser-extension/dist/extension-*.zip
 
   build-spas:
-    needs: [release]
-    if: needs.release.outputs.new_version != 'none'
+    needs: [create-release]
     runs-on: ubuntu-latest
     environment: production
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: v${{ needs.release.outputs.new_version }}
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -198,6 +105,8 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
 
@@ -213,22 +122,68 @@ jobs:
       - name: Upload Admin Panel Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: admin-panel-prod-${{ needs.release.outputs.new_version }}
+          name: admin-panel-prod-${{ github.ref_name }}
           path: apps/admin-panel/dist
           retention-days: 5
 
       - name: Upload Consumer App Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-prod-${{ needs.release.outputs.new_version }}
+          name: consumer-app-prod-${{ github.ref_name }}
           path: apps/consumer-app/dist
           retention-days: 5
 
-  deploy-production:
-    needs: [release, build-push-docker, build-publish-extension, build-spas]
+  build-android:
+    needs: [release]
     if: needs.release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
-    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
+      - run: bun install
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - name: Extract App Version
+        id: version
+        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+      - name: Expo Prebuild
+        working-directory: apps/consumer-app
+        run: bunx expo prebuild --platform android --clean
+      # Placeholder: Inject Keystore and properties here
+      # - name: Setup Android Keystore
+      #   run: |
+      #     echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > apps/consumer-app/android/app/release.keystore
+      #     echo "MYAPP_UPLOAD_STORE_FILE=release.keystore" >> apps/consumer-app/android/gradle.properties
+      #     echo "MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> apps/consumer-app/android/gradle.properties
+      #     echo "MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
+      #     echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
+      - name: Build Android AAB
+        working-directory: apps/consumer-app/android
+        run: ./gradlew bundleRelease
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-android-prod-${{ needs.release.outputs.new_version }}
+          path: apps/consumer-app/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 5
+
+  build-ios:
+    needs: [release]
+    if: needs.release.outputs.new_version != 'none'
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -241,19 +196,75 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
+      - run: bun install
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Extract App Version
+        id: version
+        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+      - name: Expo Prebuild
+        working-directory: apps/consumer-app
+        run: bunx expo prebuild --platform ios --clean
+      - name: Install Pods
+        working-directory: apps/consumer-app/ios
+        run: pod install
+      # Placeholder: Inject Certificates and Provisioning Profiles here
+      # - name: Setup Provisioning
+      #   run: |
+      #     # Install cert and profile logic here
+      - name: Build iOS IPA
+        working-directory: apps/consumer-app/ios
+        run: |
+          xcodebuild archive \
+            -workspace StyleSwipe.xcworkspace \
+            -scheme StyleSwipe \
+            -configuration Release \
+            -archivePath $PWD/build/StyleSwipe.xcarchive \
+            CODE_SIGNING_ALLOWED=NO
+          # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: consumer-app-ios-prod-${{ needs.release.outputs.new_version }}
+          path: apps/consumer-app/ios/build/
+          retention-days: 5
+
+  deploy-production:
+    needs: [release, build-push-docker, build-publish-extension, build-spas, build-android, build-ios]
+    if: needs.release.outputs.new_version != 'none'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Turbo Cache
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - uses: jdx/mise-action@v2
+        with:
+          install: true
       - run: mise trust
       - run: bun install
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
         with:
-          name: admin-panel-prod-${{ needs.release.outputs.new_version }}
+          name: admin-panel-prod-${{ github.ref_name }}
           path: apps/admin-panel/dist
 
       - name: Download Consumer App Artifact
         uses: actions/download-artifact@v4
         with:
-          name: consumer-app-prod-${{ needs.release.outputs.new_version }}
+          name: consumer-app-prod-${{ github.ref_name }}
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
@@ -270,5 +281,6 @@ jobs:
 
       - name: Deploy Convex (Production)
         run: bunx convex deploy
+        working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

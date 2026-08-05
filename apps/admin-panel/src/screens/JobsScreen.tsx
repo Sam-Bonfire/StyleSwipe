@@ -214,15 +214,15 @@ export function JobsScreen() {
                             <StatusChip status={job.status} />
                           </XStack>
                         </YStack>
-                        <Square animation="quick" rotate={open ? '180deg' : '0deg'} marginLeft="$3">
+                        <Square rotate={open ? '180deg' : '0deg'} marginLeft="$3">
                           <ChevronDown size={20} color="$textSecondary" />
                         </Square>
                       </>
                     )}
                   </Accordion.Trigger>
-                  <Accordion.HeightAnimator animation="quick">
+                  <Accordion.HeightAnimator>
                     <Accordion.Content
-                      animation="quick"
+
                       paddingHorizontal="$4"
                       paddingVertical="$3"
                       backgroundColor="$backgroundHover"

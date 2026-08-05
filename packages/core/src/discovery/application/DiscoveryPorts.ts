@@ -58,6 +58,7 @@ export class SwipeRepository extends Context.Tag('SwipeRepository')<
       productId: string,
       action: SwipeAction,
       timestamp: number,
+      newPreferenceVector?: number[],
     ) => Effect.Effect<void, RepositoryError>;
     readonly getSwipesByUser: (
       userId: string,
@@ -70,6 +71,11 @@ export class RecommendationService extends Context.Tag('RecommendationService')<
   RecommendationService,
   {
     readonly getVectorFeed: (
+      userId: string,
+      limit: number,
+      overrideVector?: number[],
+    ) => Effect.Effect<Product[], RepositoryError>;
+    readonly getCalibrationFeed: (
       userId: string,
       limit: number,
     ) => Effect.Effect<Product[], RepositoryError>;

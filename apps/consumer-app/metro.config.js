@@ -17,8 +17,7 @@ config.resolver.nodeModulesPaths = [
 ];
 
 // 3. Enable symlinks and package exports
-config.resolver.unstable_enableSymlinks = true;
-config.resolver.unstable_enablePackageExports = true;
+// package exports is now default in SDK 53+
 
 // 4. Force map subpaths that Metro struggles to resolve in monorepos
 const sharedModules = [
@@ -30,12 +29,6 @@ const sharedModules = [
   'tamagui',
   'effect',
   'better-auth',
-  '@react-navigation/native',
-  '@react-navigation/core',
-  '@react-navigation/native-stack',
-  '@react-navigation/bottom-tabs',
-  '@react-navigation/elements',
-  '@react-navigation/routers',
 ];
 
 config.resolver.extraNodeModules = sharedModules.reduce((acc, name) => {
@@ -57,7 +50,6 @@ const NATIVE_ONLY_MODULES = [
   'onnxruntime-node',
   'onnxruntime-react-native',
   'sharp',
-  'expo-background-fetch',
   'expo-battery',
   'expo-task-manager',
 ];
@@ -92,4 +84,5 @@ module.exports = withTamagui(config, {
   components: ['tamagui', '@app/ui-kit'],
   config: './tamagui.config.ts',
   outputCSS: './tamagui.css',
+  disableExtraction: process.env.NODE_ENV === 'development',
 });

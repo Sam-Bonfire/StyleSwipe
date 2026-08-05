@@ -11,7 +11,7 @@ import { YStack, Spinner } from 'tamagui';
 import { authAdapter } from '../src/lib/auth';
 import { logger } from '../src/lib/logger';
 
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL);
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string);
 
 /**
  * Auth guard: handles redirects based on auth state.

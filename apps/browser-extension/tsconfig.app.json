@@ -20,28 +20,27 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@app/core": [
-        "../../packages/core/src/index.ts"
-      ],
-      "@app/core/*": [
-        "../../packages/core/*"
-      ],
-      "@app/infrastructure": [
-        "../../packages/infrastructure/src/index.ts"
-      ],
-      "@app/infrastructure/*": [
-        "../../packages/infrastructure/*"
-      ]
-    },
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@app/core": [
+        "./../../packages/core/src/index.ts"
+      ],
+      "@app/core/*": [
+        "./../../packages/core/*"
+      ],
+      "@app/infrastructure": [
+        "./../../packages/infrastructure/src/index.ts"
+      ],
+      "@app/infrastructure/*": [
+        "./../../packages/infrastructure/*"
+      ]
+    }
   },
   "include": [
     "src"

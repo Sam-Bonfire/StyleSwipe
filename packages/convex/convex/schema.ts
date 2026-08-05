@@ -128,7 +128,8 @@ const events = defineTable({
   timestamp: v.number(),
 })
   .index('by_user_type', ['userId', 'type'])
-  .index('by_type', ['type']);
+  .index('by_type', ['type'])
+  .index('by_timestamp', ['timestamp']);
 
 // -----------------------------------------------------------------------------
 // CATALOG CONTEXT - Product Data with Vector Embeddings
@@ -157,17 +158,10 @@ const products = defineTable({
   ),
   onSale: v.optional(v.boolean()),
 
-  // PRD Ref: [cite: 201-203] - 384-dim vector for Discovery Mode similarity search (BGE-Small)
-  embedding: v.optional(v.array(v.float64())),
-  // PRD Ref: [cite: 6.0] - Versioned Embeddings
-  embeddingVersions: v.optional(
-    v.object({
-      v1: v.optional(v.array(v.float64())), // 384-dim for BGE-Small-v1.5
-      v2: v.optional(v.array(v.float64())),
-    }),
-  ),
+
   meta: v.optional(v.any()), // Flexible field for scraper extra data
   externalId: v.optional(v.string()), // Generalized from Myntra ID for multi-platform support
+  trustBadges: v.optional(v.array(v.string())), // Dynamic trust indicators like 'authentic', 'sustainable'
   updatedAt: v.optional(v.number()),
 })
   .index('by_externalId', ['externalId'])
@@ -179,16 +173,6 @@ const products = defineTable({
   .searchIndex('search_title', {
     searchField: 'title',
     filterFields: ['brand', 'category', 'masterCategory', 'subCategory', 'gender'],
-  })
-  .vectorIndex('by_embedding', {
-    vectorField: 'embedding',
-    dimensions: 384, // Updated to 384 for BGE-Small
-    filterFields: ['category', 'masterCategory', 'subCategory', 'brand', 'gender', 'priceTier'],
-  })
-  .vectorIndex('by_embedding_v1', {
-    vectorField: 'embeddingVersions.v1',
-    dimensions: 384,
-    filterFields: ['category', 'gender', 'priceTier'],
   });
 
 // PRD Ref: [cite: 18] - Hierarchical Categories
@@ -230,7 +214,8 @@ const swipes = defineTable({
 })
   .index('by_user', ['userId'])
   .index('by_product', ['productId'])
-  .index('by_user_product', ['userId', 'productId']);
+  .index('by_user_product', ['userId', 'productId'])
+  .index('by_timestamp', ['timestamp']);
 
 // PRD Ref: [cite: 3.1] - Weekly Semantic Summaries
 const weekly_summaries = defineTable({
@@ -265,18 +250,22 @@ const boards = defineTable({
   name: v.string(),
   slug: v.string(),
   isSystem: v.optional(v.boolean()),
-  items: v.array(
-    v.object({
-      productId: v.id('products'),
-      addedAt: v.number(),
-    }),
-  ),
   createdAt: v.number(),
   updatedAt: v.number(),
+  deletedAt: v.optional(v.number()),
 })
   .index('by_user', ['userId'])
   .index('by_user_slug', ['userId', 'slug'])
   .index('by_user_system', ['userId', 'isSystem']);
+
+const board_items = defineTable({
+  boardId: v.id('boards'),
+  productId: v.id('products'),
+  addedAt: v.number(),
+  deletedAt: v.optional(v.number()),
+})
+  .index('by_board', ['boardId'])
+  .index('by_board_product', ['boardId', 'productId']);
 
 
 // -----------------------------------------------------------------------------
@@ -286,7 +275,7 @@ const boards = defineTable({
 const scraped_products = defineTable({
   externalId: v.string(),
   url: v.string(),
-  data: v.any(), // Raw JSON data
+  storageId: v.id('_storage'), // Pointer to File Storage blob
   lastScrapedAt: v.number(),
   status: v.union(v.literal('active'), v.literal('out_of_stock')),
 })
@@ -389,6 +378,7 @@ export default defineSchema({
   // Commerce Context
   carts,
   boards,
+  board_items,
 
   // Scraper Context
   scraped_products,

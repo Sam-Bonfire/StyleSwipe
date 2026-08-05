@@ -14,6 +14,7 @@ COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/bun.lock ./bun.lock
 COPY --from=pruner /app/tsconfig.json ./tsconfig.json
 COPY --from=pruner /app/tsconfig.base.json ./tsconfig.base.json
+COPY --from=pruner /app/bin ./bin
 RUN bun install
 
 # Copy source code
@@ -23,6 +24,7 @@ COPY --from=pruner /app/out/full/ .
 FROM oven/bun:1-slim AS prod-deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/bin ./bin
 RUN rm -f bun.lock package-lock.json && bun install --production
 
 # Stage 3: Runner

@@ -28,7 +28,7 @@ export function LoginScreen() {
 
   return (
     <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background">
-      <YStack marginBottom="$2" alignItems="center" space="$2">
+      <YStack marginBottom="$2" alignItems="center" gap="$2">
         <YStack width="80%" aspectRatio={3.13} alignItems="center">
           <Image
             source={logo}
@@ -43,25 +43,24 @@ export function LoginScreen() {
       </YStack>
 
       <Card
-        bordered
-        // Removed elevate for lighter custom shadow
-        shadowColor="$shadowColor"
-        shadowOffset={{ width: 0, height: 4 }}
-        shadowOpacity={0.1}
-        shadowRadius={10}
-        size="$4"
-        width={400}
-        padding="$6"
-        backgroundColor="$surface" // Surface color from light theme
-        borderColor="$borderColor"
+              borderWidth={1}
+              borderColor="$borderColor"
+              shadowColor="$shadowColor"
+              shadowOffset={{ width: 0, height: 4 }}
+              shadowOpacity={0.1}
+              shadowRadius={10}
+              size="$4"
+              width={400}
+              padding="$6"
+              backgroundColor="$surface"
       >
-        <YStack space="$4">
+        <YStack gap="$4">
           <Text textAlign="center" color="$color">
             Sign in to the Neural Command Center
           </Text>
 
-          <YStack space="$3">
-            <YStack space="$2">
+          <YStack gap="$3">
+            <YStack gap="$2">
               <Label htmlFor="email" color="$color">
                 Email Address
               </Label>
@@ -74,7 +73,7 @@ export function LoginScreen() {
               />
             </YStack>
 
-            <YStack space="$2">
+            <YStack gap="$2">
               <Label htmlFor="password" color="$color">
                 Password
               </Label>

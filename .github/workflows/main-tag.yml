@@ -1,0 +1,76 @@
+name: Tag Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 5' # Run every Friday at midnight UTC
+
+permissions:
+  contents: write
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install Tools (Mise)
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+
+      - name: Trust Mise
+        run: mise trust
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Version and Tag
+        id: version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          CHANGESET_COUNT=$(find .changeset -name "*.md" 2>/dev/null | wc -l)
+          if [ "$CHANGESET_COUNT" -eq 0 ]; then
+            echo "⚠️ No changesets found. Generating a default automated patch changeset..."
+
+            CHANGESET_FILE=".changeset/automated-patch-$(date +%s).md"
+
+            printf "%s\n" \
+              "---" \
+              '"@app/admin-panel": patch' \
+              '"@app/browser-extension": patch' \
+              '"@app/consumer-app": patch' \
+              '"@app/convex": patch' \
+              '"@app/core": patch' \
+              '"@app/infrastructure": patch' \
+              '"@app/logger": patch' \
+              '"@app/scraper-service": patch' \
+              '"@app/ui-kit": patch' \
+              "---" \
+              "" \
+              "Automated patch release for latest main commits" > "$CHANGESET_FILE"
+            echo "✅ Created automated changeset: $CHANGESET_FILE"
+          fi
+
+          bun changeset version
+
+          if [[ -n $(git status -s) ]]; then
+            git add .
+            git commit -m "chore: version packages"
+
+            VERSION=$(jq -r .version package.json)
+            TAG="v$VERSION"
+
+            echo "New version: $VERSION"
+
+            git tag $TAG
+            git push origin main
+            git push origin $TAG
+          else
+            echo "No changesets found, skipping version bump."
+          fi

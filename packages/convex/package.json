@@ -24,9 +24,11 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "convex": "^1.31.6"
+        "better-auth": "^1.6.23",
+        "convex": "^1.42.3",
+        "convex-helpers": "^0.1.120"
     },
     "devDependencies": {
-        "typescript": "^5.0.0"
+        "typescript": "~5.9.3"
     }
 }

@@ -15,10 +15,10 @@
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --rule 'hexagonal-architecture/enforce: off' --ignore-pattern .eslintrc.js --ignore-pattern dist --ignore-pattern node_modules"
+    "lint": "eslint . --ignore-pattern .eslintrc.js --ignore-pattern dist --ignore-pattern node_modules"
   },
   "dependencies": {
-    "effect": "^2.0.0",
+    "effect": "^3.22.0",
     "fast-check": "^3.0.0"
   },
   "devDependencies": {

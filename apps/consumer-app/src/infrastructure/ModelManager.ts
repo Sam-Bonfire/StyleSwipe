@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // quantized model (int8) for mobile.
 // Configurable via Env, defaults to HuggingFace Generic

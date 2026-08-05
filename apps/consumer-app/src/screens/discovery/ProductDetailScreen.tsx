@@ -1,14 +1,14 @@
 
 import { CartItem } from '@app/core';
-import { useCurrentUser, useProduct, useAddToCart } from '@app/infrastructure';
+import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlist, useAnalytics } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
 import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
-import { ChevronLeft } from '@tamagui/lucide-icons';
+import { ChevronLeft, Heart, ShieldCheck, Truck, ArrowLeftRight, Leaf, TrendingUp, MapPin } from '@tamagui/lucide-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, View, useWindowDimensions, Alert } from 'react-native';
-import { Separator, Spacer, Text, YStack, XStack, Stack, useTheme, Spinner } from 'tamagui';
+import { Separator, Spacer, Text, YStack, XStack, useTheme, Spinner } from 'tamagui';
 
 // COMPLETE REWRITE OF COMPONENT TO FIX SCROLL ISSUES
 export function ProductDetailScreen() {
@@ -33,10 +33,31 @@ export function ProductDetailScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const addToCart = useAddToCart();
+  const { trackEvent } = useAnalytics();
 
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
   const scrollViewRef = React.useRef<ScrollView>(null);
+
+  const wishlist = useWishlist(userId);
+  const toggleWishlist = useToggleWishlist();
+
+  const isWishlisted = React.useMemo(() => {
+    if (!wishlist || !wishlist.items) return false;
+    return wishlist.items.some((item) => item.productId === productId);
+  }, [wishlist, productId]);
+
+  const handleWishlistToggle = async () => {
+    if (!userId) {
+      Alert.alert('Authentication Required', 'Please log in to wishlist items.');
+      return;
+    }
+    try {
+      await toggleWishlist(userId, productId);
+    } catch (e) {
+      console.error('Failed to toggle wishlist:', e);
+    }
+  };
 
   // -------------------------------------------------------------------------
   // 2. Data Mapping
@@ -189,6 +210,7 @@ export function ProductDetailScreen() {
         ? productData.images
         : ['https://placehold.co/400x500/png?text=No+Image'],
     availableSizes: Array.isArray(rawAttributes.size) ? rawAttributes.size : ['S', 'M', 'L', 'XL'],
+    trustBadges: productData.trustBadges || [],
     attributes: {
       ...displayAttributes,
       ...(inventorySizes.length > 0 ? { inventoryInfo: stockStatus } : {}),
@@ -251,6 +273,8 @@ export function ProductDetailScreen() {
         color: 'Black',
       });
       await addToCart(userId, item);
+      trackEvent('added_to_cart', undefined, { variant: 'macro_v1', productId: product.id });
+      
       setIsAdded(true);
       Alert.alert('Success', 'Added to cart!');
     } catch (e) {
@@ -290,7 +314,7 @@ export function ProductDetailScreen() {
           {/* Ratings */}
           <XStack alignItems="center" gap="$2" marginTop="$1">
             <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
-            <Stack height={16} width={1} backgroundColor="$borderColor" />
+            <YStack height={16} width={1} backgroundColor="$borderColor" />
             <Text fontSize="$3" color="$primary" fontWeight="500">
               {product.platform}
             </Text>
@@ -348,6 +372,34 @@ export function ProductDetailScreen() {
           </ScrollView>
 
           <Separator marginVertical="$4" borderColor="$borderColor" />
+
+          {/* Trust UI Markers */}
+          {product.trustBadges && product.trustBadges.length > 0 && (
+            <XStack justifyContent="space-between" paddingVertical="$2" marginBottom="$4" backgroundColor="$surface" borderRadius="$3" padding="$3" borderColor="$borderColor" borderWidth={1}>
+              {product.trustBadges.slice(0, 3).map((badgeStr: string) => {
+                const config: Record<string, { icon: React.ElementType, label: string }> = {
+                  authentic: { icon: ShieldCheck, label: '100% Authentic' },
+                  free_delivery: { icon: Truck, label: 'Free Delivery' },
+                  easy_returns: { icon: ArrowLeftRight, label: 'Easy Returns' },
+                  sustainable: { icon: Leaf, label: 'Sustainable' },
+                  top_seller: { icon: TrendingUp, label: 'Top Seller' },
+                  vegan: { icon: Leaf, label: 'Vegan' },
+                  locally_sourced: { icon: MapPin, label: 'Locally Sourced' }
+                };
+                
+                const badgeConfig = config[badgeStr];
+                if (!badgeConfig) return null;
+                const Icon = badgeConfig.icon;
+                
+                return (
+                  <YStack key={badgeStr} alignItems="center" gap="$1" flex={1}>
+                    <Icon size={20} color="$primary" />
+                    <Text fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">{badgeConfig.label}</Text>
+                  </YStack>
+                );
+              })}
+            </XStack>
+          )}
 
           {/* Size Selector */}
           <YStack
@@ -410,7 +462,7 @@ export function ProductDetailScreen() {
                   borderColor="$borderColor"
                   borderWidth={1}
                 >
-                  <Stack width="35%" flexShrink={0}>
+                  <YStack width="35%" flexShrink={0}>
                     <Text
                       fontSize="$3"
                       color="$textSecondary"
@@ -418,12 +470,12 @@ export function ProductDetailScreen() {
                     >
                       {formatAttributeKey(key)}
                     </Text>
-                  </Stack>
-                  <Stack flex={1} paddingLeft="$2">
+                  </YStack>
+                  <YStack flex={1} paddingLeft="$2">
                     <Text fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">
                       {value}
                     </Text>
-                  </Stack>
+                  </YStack>
                 </XStack>
               );
             })}
@@ -448,6 +500,23 @@ export function ProductDetailScreen() {
           shadowOpacity={0.1}
         >
           <ChevronLeft size={24} color="$textPrimary" />
+        </TopBarIconButton>
+      </View>
+
+      {/* Floating UI: Wishlist Button */}
+      <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 100 }}>
+        <TopBarIconButton
+          onPress={handleWishlistToggle}
+          backgroundColor="$background"
+          shadowColor="$shadowColor"
+          shadowRadius={4}
+          shadowOpacity={0.1}
+        >
+          <Heart
+            size={24}
+            color={isWishlisted ? '$primary' : '$textPrimary'}
+            fill={isWishlisted ? '$primary' : 'transparent'}
+          />
         </TopBarIconButton>
       </View>
 

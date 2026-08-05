@@ -22,6 +22,7 @@ RUN npm install -g bun
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/bun.lock ./bun.lock
 COPY --from=builder /app/tsconfig.base.json ./tsconfig.base.json
+COPY --from=builder /app/bin ./bin
 RUN bun install
 
 # Copy source code and global assets

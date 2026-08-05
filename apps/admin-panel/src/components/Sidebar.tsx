@@ -1,11 +1,11 @@
 import { Button } from '@app/ui-kit'; // Using UI Kit Button
-import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, Users, Shield, MessageSquare } from '@tamagui/lucide-icons';
+import { Home, Box, Activity, LogOut, ChevronLeft, ChevronRight, Users, Shield, MessageSquare, PieChart } from '@tamagui/lucide-icons';
 import React from 'react';
 import { YStack, XStack, Text, Separator, Avatar } from 'tamagui';
 
 import { authAdapter } from '../lib/auth';
 
-type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs';
+type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics';
 
 interface SidebarProps {
   activePage: Page;
@@ -26,6 +26,7 @@ export function Sidebar({
     { id: 'overview', icon: Home, label: 'Overview' },
     ...(isAdmin
       ? [
+        { id: 'analytics', icon: PieChart, label: 'Analytics' },
         { id: 'products', icon: Box, label: 'Products' },
         { id: 'jobs', icon: Activity, label: 'Scraping Jobs' },
         { id: 'users', icon: Users, label: 'Users' },
@@ -44,7 +45,6 @@ export function Sidebar({
       borderColor="$borderColor"
       paddingVertical="$5"
       paddingHorizontal="$1" // Reduced padding from previous version
-      animation="quick"
     >
       {/* Header */}
       <XStack
@@ -53,7 +53,7 @@ export function Sidebar({
         marginBottom="$6"
       >
         {!isCollapsed && (
-          <XStack alignItems="center" space="$2" padding="$2">
+          <XStack alignItems="center" gap="$2" padding="$2">
             <Text fontSize="$6" fontWeight="bold" color="$color">
               StyleSwipe
             </Text>
@@ -74,7 +74,7 @@ export function Sidebar({
       </XStack>
 
       {/* Navigation */}
-      <YStack space="$2" flex={1} alignItems={isCollapsed ? 'center' : 'stretch'}>
+      <YStack gap="$2" flex={1} alignItems={isCollapsed ? 'center' : 'stretch'}>
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activePage === item.id;
@@ -108,9 +108,9 @@ export function Sidebar({
 
       {/* User / Logout */}
       <Separator marginVertical="$4" borderColor="$borderColor" />
-      <YStack space="$3" alignItems={isCollapsed ? 'center' : 'stretch'}>
+      <YStack gap="$3" alignItems={isCollapsed ? 'center' : 'stretch'}>
         {!isCollapsed && (
-          <XStack alignItems="center" space="$2" paddingHorizontal="$1">
+          <XStack alignItems="center" gap="$2" paddingHorizontal="$1">
             <Avatar circular size="$3">
               <Avatar.Image src="https://github.com/shadcn.png" />
               <Avatar.Fallback backgroundColor="$primaryDark" />

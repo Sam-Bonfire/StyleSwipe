@@ -21,7 +21,7 @@ export * as ManageOrganizations from './identity/application/ManageOrganizations
 export * as ManageLogs from './identity/application/ManageLogs';
 export * as ManageAdminFeedback from './identity/application/ManageAdminFeedback';
 export * as IdentityUseCases from './identity/application/IdentityUseCases';
-
+export * as CompleteOnboarding from './identity/application/CompleteOnboarding';
 // Commerce
 export * from './commerce/domain/Cart';
 export * from './commerce/application/CartRepository';

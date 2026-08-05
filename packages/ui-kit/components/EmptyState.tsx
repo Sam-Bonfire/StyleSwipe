@@ -7,7 +7,7 @@
 
 import { ShoppingCart, Search, Heart, Package } from '@tamagui/lucide-icons';
 import React from 'react';
-import { styled, GetProps, YStack, Text, Stack } from 'tamagui';
+import { styled, GetProps, YStack, Text } from 'tamagui';
 
 import { Button } from './Button';
 
@@ -20,7 +20,7 @@ const EmptyFrame = styled(YStack, {
   gap: '$3',
 });
 
-const IconContainer = styled(Stack, {
+const IconContainer = styled(YStack, {
   name: 'EmptyStateIcon',
   width: 80,
   height: 80,
