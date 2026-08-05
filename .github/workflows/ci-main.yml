@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_call:
+    inputs:
+      tag_name:
+        description: 'Tag version to release'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -30,14 +36,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
       - name: Extract version
         id: get_version
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
+          REF="${{ inputs.tag_name || github.ref_name }}"
+          VERSION=${REF#v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -50,6 +60,8 @@ jobs:
         app: [scraper-service]
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -66,8 +78,7 @@ jobs:
         run: |
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
-          # Extract version from tag (e.g. v1.0.0 -> 1.0.0)
-          VERSION=${GITHUB_REF_NAME#v}
+          VERSION=${{ needs.create-release.outputs.new_version }}
           docker build -f apps/${{ matrix.app }}/Dockerfile \
             -t "${TAG_BASE}:latest" \
             -t "${TAG_BASE}:${VERSION}" \
@@ -80,6 +91,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
       - uses: jdx/mise-action@v2
         with:
           install: true
@@ -92,12 +105,13 @@ jobs:
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
+          VERSION=${{ needs.create-release.outputs.new_version }}
           zip -r extension-v${VERSION}.zip .
       
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
           files: apps/browser-extension/dist/extension-*.zip
 
   build-spas:
@@ -106,6 +120,8 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -131,14 +147,14 @@ jobs:
       - name: Upload Admin Panel Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: admin-panel-prod-${{ github.ref_name }}
+          name: admin-panel-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/admin-panel/dist
           retention-days: 5
 
       - name: Upload Consumer App Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: consumer-app-prod-${{ github.ref_name }}
+          name: consumer-app-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/dist
           retention-days: 5
 
@@ -148,6 +164,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -251,6 +269,8 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -267,13 +287,13 @@ jobs:
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
         with:
-          name: admin-panel-prod-${{ github.ref_name }}
+          name: admin-panel-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/admin-panel/dist
 
       - name: Download Consumer App Artifact
         uses: actions/download-artifact@v4
         with:
-          name: consumer-app-prod-${{ github.ref_name }}
+          name: consumer-app-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
