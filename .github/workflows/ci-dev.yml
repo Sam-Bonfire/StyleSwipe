@@ -39,7 +39,10 @@ jobs:
       - run: mise trust
       - run: bun install
       - name: Run Verifications
-        run: bunx turbo run lint typecheck test
+        run: |
+          mise run lint
+          mise run typecheck
+          mise run test
 
   build-docker:
     needs: [setup]
@@ -85,8 +88,7 @@ jobs:
       - run: mise trust
       - run: bun install
       - name: Build Extension
-        working-directory: apps/browser-extension
-        run: bun run build
+        run: mise run build:extension
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
@@ -119,10 +121,10 @@ jobs:
 
       - name: Generate env file
         run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.staging
+          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
 
       - name: Build SPAs
-        run: bun run --env-file=.env --env-file=.env.staging bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app
+        run: mise run build:spas
         env:
           APP_ENV: staging
 

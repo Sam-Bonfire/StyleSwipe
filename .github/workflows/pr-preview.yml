@@ -44,7 +44,10 @@ jobs:
         run: bun install
 
       - name: Run Verifications (Lint, Typecheck, Test)
-        run: bunx turbo run lint typecheck test
+        run: |
+          mise run lint
+          mise run typecheck
+          mise run test
 
       - name: Sanitize Branch Name
         id: sanitize_branch
