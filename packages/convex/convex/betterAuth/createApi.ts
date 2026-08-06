@@ -87,6 +87,41 @@ export const createApi = <Schema extends SchemaDefinition<any, any>>(
         return result;
       },
     }),
+    createMany: mutationGeneric({
+      args: {
+        input: v.union(
+          ...Object.entries(schema.tables).map(([model, table]) =>
+            v.object({
+              model: v.literal(model),
+              data: v.array(v.object((table as any).validator.fields)),
+            }),
+          ),
+        ),
+        select: v.optional(v.array(v.string())),
+        onCreateHandle: v.optional(v.string()),
+      },
+      handler: async (ctx, args) => {
+        const results = await Promise.all(
+          args.input.data.map(async (dataItem) => {
+            await checkUniqueFields(ctx, schema, betterAuthSchema, args.input.model, dataItem);
+            const id = await ctx.db.insert(args.input.model as any, dataItem);
+            const doc = await ctx.db.get(id);
+            if (!doc) {
+              throw new Error(`Failed to create ${args.input.model}`);
+            }
+            const result = selectFields(doc, args.select);
+            if (args.onCreateHandle) {
+              await ctx.runMutation(args.onCreateHandle as FunctionHandle<'mutation'>, {
+                model: args.input.model,
+                doc,
+              });
+            }
+            return result;
+          })
+        );
+        return results;
+      },
+    }),
     findOne: queryGeneric({
       args: {
         model: v.union(...Object.keys(schema.tables).map((model) => v.literal(model))),

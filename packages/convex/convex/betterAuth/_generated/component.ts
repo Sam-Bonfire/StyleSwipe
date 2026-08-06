@@ -788,6 +788,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           where?: Array<{
             connector?: "AND" | "OR";
             field: string;
+            mode?: "sensitive" | "insensitive";
             operator?:
               | "lt"
               | "lte"
@@ -826,6 +827,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           where?: Array<{
             connector?: "AND" | "OR";
             field: string;
+            mode?: "sensitive" | "insensitive";
             operator?:
               | "lt"
               | "lte"
@@ -1740,6 +1742,123 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         any,
         Name
       >;
+      createMany: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          input:
+            | {
+                data: Array<{
+                  createdAt: number;
+                  displayUsername?: null | string;
+                  email: string;
+                  emailVerified: boolean;
+                  image?: null | string;
+                  name: string;
+                  phoneNumber?: null | string;
+                  phoneNumberVerified?: null | boolean;
+                  updatedAt: number;
+                  userId?: null | string;
+                  username?: null | string;
+                }>;
+                model: "users";
+              }
+            | {
+                data: Array<{
+                  activeOrganizationId?: null | string;
+                  createdAt: number;
+                  expiresAt: number;
+                  ipAddress?: null | string;
+                  token: string;
+                  updatedAt: number;
+                  userAgent?: null | string;
+                  userId: string;
+                }>;
+                model: "sessions";
+              }
+            | {
+                data: Array<{
+                  accessToken?: null | string;
+                  accessTokenExpiresAt?: null | number;
+                  accountId: string;
+                  createdAt: number;
+                  idToken?: null | string;
+                  password?: null | string;
+                  providerId: string;
+                  refreshToken?: null | string;
+                  refreshTokenExpiresAt?: null | number;
+                  scope?: null | string;
+                  updatedAt: number;
+                  userId: string;
+                }>;
+                model: "accounts";
+              }
+            | {
+                data: Array<{
+                  createdAt: number;
+                  expiresAt: number;
+                  identifier: string;
+                  updatedAt: number;
+                  value: string;
+                }>;
+                model: "verifications";
+              }
+            | {
+                data: Array<{
+                  createdAt: number;
+                  logo?: null | string;
+                  metadata?: null | string;
+                  name: string;
+                  slug: string;
+                }>;
+                model: "organizations";
+              }
+            | {
+                data: Array<{
+                  createdAt: number;
+                  organizationId: string;
+                  permission: string;
+                  role: string;
+                  updatedAt?: null | number;
+                }>;
+                model: "organizationRoles";
+              }
+            | {
+                data: Array<{
+                  createdAt: number;
+                  organizationId: string;
+                  role: string;
+                  userId: string;
+                }>;
+                model: "members";
+              }
+            | {
+                data: Array<{
+                  createdAt: number;
+                  email: string;
+                  expiresAt: number;
+                  inviterId: string;
+                  organizationId: string;
+                  role?: null | string;
+                  status: string;
+                }>;
+                model: "invitations";
+              }
+            | {
+                data: Array<{
+                  createdAt: number;
+                  expiresAt?: null | number;
+                  privateKey: string;
+                  publicKey: string;
+                }>;
+                model: "jwks";
+              };
+          onCreateHandle?: string;
+          select?: Array<string>;
+        },
+        any,
+        Name
+      >;
       deleteMany: FunctionReference<
         "mutation",
         "internal",
@@ -2387,6 +2506,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           where?: Array<{
             connector?: "AND" | "OR";
             field: string;
+            mode?: "sensitive" | "insensitive";
             operator?:
               | "lt"
               | "lte"
@@ -2425,6 +2545,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           where?: Array<{
             connector?: "AND" | "OR";
             field: string;
+            mode?: "sensitive" | "insensitive";
             operator?:
               | "lt"
               | "lte"
