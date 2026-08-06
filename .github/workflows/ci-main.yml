@@ -49,6 +49,27 @@ jobs:
           
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "owner_lower=$OWNER_LOWER" >> $GITHUB_OUTPUT
+          
+          # Fetch tags so git describe works
+          git fetch --tags --unshallow || git fetch --tags || true
+          
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            echo "Generating changelog between $PREV_TAG and HEAD"
+            CHANGELOG=$(git log "$PREV_TAG..HEAD" --pretty=format:"* %s (%h)" --no-merges || echo "")
+          else
+            echo "No previous tag found. Generating full log."
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" --no-merges || echo "")
+          fi
+          
+          # Clean changelog from release/bot-commit messages
+          CLEAN_CHANGELOG=$(echo "$CHANGELOG" | grep -v -E "release: v|chore:|bot-commit" || echo "No changes listed.")
+          
+          # Write changelog to GITHUB_OUTPUT (handling multiline strings)
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CLEAN_CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -58,6 +79,9 @@ jobs:
             ```bash
             docker pull ghcr.io/${{ steps.get_version.outputs.owner_lower }}/scraper-service:${{ steps.get_version.outputs.version }}
             ```
+
+            ### 📝 Changelog
+            ${{ steps.get_version.outputs.changelog }}
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -229,6 +253,11 @@ jobs:
           name: consumer-app-android-prod-${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 5
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          files: apps/consumer-app/android/app/build/outputs/bundle/release/app-release.aab
 
   build-ios:
     needs: [create-release]
@@ -284,6 +313,16 @@ jobs:
           name: consumer-app-ios-prod-${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/ios/build/
           retention-days: 5
+      - name: Zip iOS Build
+        working-directory: apps/consumer-app/ios
+        run: |
+          VERSION=${{ needs.create-release.outputs.new_version }}
+          zip -r ios-build-v${VERSION}.zip build/
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          files: apps/consumer-app/ios/ios-build-*.zip
 
   deploy-production:
     needs: [create-release, build-push-docker, build-publish-extension, build-spas, build-android, build-ios]
