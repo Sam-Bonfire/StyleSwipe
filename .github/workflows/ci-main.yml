@@ -172,6 +172,17 @@ jobs:
     if: needs.create-release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
     steps:
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
