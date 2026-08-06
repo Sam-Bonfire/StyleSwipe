@@ -185,15 +185,11 @@ export class ConvexQueueAdapter<T> {
   pushBatch(items: T[]): Effect.Effect<string[], RepositoryError> {
     return Effect.tryPromise({
       try: async () => {
-        const ids: string[] = [];
-        for (const item of items) {
-          const id = await this.client.mutation(
-            'scraper:enqueueItem' as any,
-            { data: item as any },
-          );
-          ids.push(id);
-        }
-        return ids;
+        const ids = await this.client.mutation(
+          'scraper:enqueueItems' as any,
+          { data: items as any },
+        );
+        return ids as string[];
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     });
