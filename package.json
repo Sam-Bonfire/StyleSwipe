@@ -33,7 +33,9 @@
     "eslint-plugin-perfectionist": "^3.0.0",
     "globals": "^16.5.0",
     "lightningcss-linux-x64-gnu": "1.33.0",
-    "turbo": "^2.10.5",
+    "turbo": "2.10.8",
+    "@turbo/windows-64": "2.10.8",
+    "@turbo/linux-64": "2.10.8",
     "turbo-linux-64": "^2.8.3",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.0.0"
@@ -67,8 +69,7 @@
     "@tamagui/themes": "2.0.0-rc.26"
   },
   "optionalDependencies": {
-    "lightningcss-win32-x64-msvc": "1.33.0",
-    "@turbo/windows-64": "2.10.8"
+    "lightningcss-win32-x64-msvc": "1.33.0"
   },
   "trustedDependencies": [
     "esbuild"
