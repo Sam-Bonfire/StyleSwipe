@@ -85,17 +85,19 @@ export class VectorizationWorker {
 
     console.log(`[VectorizationWorker] Processing ${items.length} products`);
 
-    for (const item of items) {
-      try {
-        await this.processProduct(item.id, item.data);
-        await Effect.runPromise(this.queue.complete(item.id));
-      } catch (error) {
-        console.error(`[VectorizationWorker] Failed to process ${item.id}:`, error);
-        await Effect.runPromise(
-          this.queue.fail(item.id, error instanceof Error ? error.message : 'Unknown error'),
-        );
-      }
-    }
+    await Promise.all(
+      items.map(async (item) => {
+        try {
+          await this.processProduct(item.id, item.data);
+          await Effect.runPromise(this.queue.complete(item.id));
+        } catch (error) {
+          console.error(`[VectorizationWorker] Failed to process ${item.id}:`, error);
+          await Effect.runPromise(
+            this.queue.fail(item.id, error instanceof Error ? error.message : 'Unknown error'),
+          );
+        }
+      }),
+    );
     console.log(`[VectorizationWorker] Completed batch of ${items.length} products`);
   }
 
