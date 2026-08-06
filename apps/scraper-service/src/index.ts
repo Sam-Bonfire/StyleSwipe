@@ -141,16 +141,24 @@ async function runCategory(url: string, maxPages: number): Promise<void> {
 
   console.log(`[CLI] Found ${products.length} products`);
 
-  // Save all to Convex using service endpoint
+  // Save all to Convex using service endpoint concurrently in chunks
   const client = new ConvexHttpClient(CONVEX_URL!);
-  for (const product of products) {
-    await client.mutation(api.scraper.serviceSaveProduct, {
-      externalId: product.externalId,
-      url: product.url,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: product as any,
-    });
+  const chunkSize = 50;
+
+  for (let i = 0; i < products.length; i += chunkSize) {
+    const chunk = products.slice(i, i + chunkSize);
+    await Promise.all(
+      chunk.map((product) =>
+        client.mutation(api.scraper.serviceSaveProduct, {
+          externalId: product.externalId,
+          url: product.url,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data: product as any,
+        }),
+      ),
+    );
   }
+
   console.log(`[CLI] Saved ${products.length} products to database!`);
 
   await scraper.close();
