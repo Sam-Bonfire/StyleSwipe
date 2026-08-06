@@ -1,7 +1,5 @@
 ---
 trigger: always_on
-description: "Development workflow and version control rules"
-globs: ["**/*"]
 ---
 
 # Workflow Rules
