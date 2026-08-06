@@ -283,19 +283,18 @@ export const createCustomRole = mutation({
     const isAdmin = await isCoreOrgAdmin(ctx, identity.subject);
     if (!isAdmin) throw new Error('Unauthorized');
 
-    for (const perm of permissions) {
-      await ctx.runMutation(components.auth.api.create, {
-        input: {
-          model: 'organizationRoles', // Plural
-          data: {
-            organizationId,
-            role: roleName,
-            permission: `${perm.resource}:${perm.action}`,
-            createdAt: Date.now(),
-          },
-        },
-      });
-    }
+    const now = Date.now();
+    await ctx.runMutation(components.auth.api.createMany, {
+      input: {
+        model: 'organizationRoles', // Plural
+        data: permissions.map((perm) => ({
+          organizationId,
+          role: roleName,
+          permission: `${perm.resource}:${perm.action}`,
+          createdAt: now,
+        })),
+      },
+    });
     return { success: true };
   },
 });
