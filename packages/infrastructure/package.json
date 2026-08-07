@@ -1,6 +1,6 @@
 {
   "name": "@app/infrastructure",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "src/index.ts",
   "publishConfig": {
     "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
