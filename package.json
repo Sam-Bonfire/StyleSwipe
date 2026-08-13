@@ -13,7 +13,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "NODE_OPTIONS='--max-old-space-size=4096' turbo run lint",
-    "test": "vitest run",
+    "test": "turbo run test",
     "prepare": "node -e \"const fs = require('fs'); if (fs.existsSync('bin/setup-hooks.ts')) { require('child_process').execSync('pnpm dlx tsx bin/setup-hooks.ts', { stdio: 'inherit' }); }\"",
     "postinstall": "npx tsx bin/fix-lightningcss.ts"
   },
