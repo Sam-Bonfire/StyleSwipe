@@ -131,7 +131,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: pnpm install
+      - run: corepack enable pnpm && pnpm install
       - name: Build Extension
         run: pnpm run build:extension
 
@@ -166,7 +166,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: pnpm install
+      - run: corepack enable pnpm && pnpm install
 
       - name: Generate env file
         run: |
@@ -223,7 +223,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: pnpm install
+      - run: corepack enable pnpm && pnpm install
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -277,7 +277,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: pnpm install
+      - run: corepack enable pnpm && pnpm install
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -343,7 +343,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: pnpm install
+      - run: corepack enable pnpm && pnpm install
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4

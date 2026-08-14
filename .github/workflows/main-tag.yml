@@ -29,7 +29,7 @@ jobs:
         run: mise trust
 
       - name: Install Dependencies
-        run: pnpm install
+        run: corepack enable pnpm && pnpm install
 
       - name: Version and Tag
         id: version
