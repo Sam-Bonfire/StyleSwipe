@@ -1,7 +1,7 @@
 {
   "name": "@app/browser-extension",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "copy-assets": "bun scripts/copy-assets.ts",
