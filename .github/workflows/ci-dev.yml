@@ -37,7 +37,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: corepack enable pnpm && pnpm install
+      - run: npm install -g pnpm@9.0.0 && pnpm install
       - name: Run Verifications
         run: |
           pnpm exec turbo run lint
@@ -86,7 +86,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: corepack enable pnpm && pnpm install
+      - run: npm install -g pnpm@9.0.0 && pnpm install
       - name: Build Extension
         run: pnpm run build:extension
 
@@ -117,7 +117,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: corepack enable pnpm && pnpm install
+      - run: npm install -g pnpm@9.0.0 && pnpm install
 
       - name: Generate env file
         run: |
@@ -171,7 +171,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: corepack enable pnpm && pnpm install
+      - run: npm install -g pnpm@9.0.0 && pnpm install
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -224,7 +224,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: corepack enable pnpm && pnpm install
+      - run: npm install -g pnpm@9.0.0 && pnpm install
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -277,7 +277,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: corepack enable pnpm && pnpm install
+      - run: npm install -g pnpm@9.0.0 && pnpm install
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
