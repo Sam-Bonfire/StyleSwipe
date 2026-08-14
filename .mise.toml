@@ -57,7 +57,7 @@ run = "bunx turbo run lint"
 
 [tasks.test]
 description = "Run all tests"
-run = "turbo run test"
+run = "bunx turbo run test"
 
 [tasks.submit]
 description = "Submit current stack to GitHub using Graphite"
