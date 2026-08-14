@@ -1,6 +1,8 @@
 [tools]
 node = "lts"
 "npm:@withgraphite/graphite-cli" = "latest"
+pnpm = "9.0.0"
+
 
 [tasks.killports]
 description = "Kill any orphaned processes running on local dev ports (8081, 8082, 3001)"
@@ -119,3 +121,11 @@ run = 'pnpm dlx tsx bin/snapshot.ts "$usage_type" "$usage_title" "$usage_descrip
 [tasks.clean]
 description = "Cleanup all node_modules, .turbo, and build artifacts"
 run = "pnpm dlx tsx bin/clean.ts"
+
+[tasks.init]
+description = "Initialize the project, trust mise configuration, install tools and dependencies"
+run = [
+  "mise trust",
+  "mise install",
+  "pnpm install"
+]
