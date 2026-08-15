@@ -13,7 +13,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "test": "vitest run",
+    "test": "bun test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern .eslintrc.js --ignore-pattern dist --ignore-pattern node_modules"
   },

@@ -131,9 +131,9 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: mise run init
+      - run: corepack enable pnpm && pnpm install
       - name: Build Extension
-        run: mise run build:extension
+        run: pnpm run build:extension
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
@@ -166,14 +166,14 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: mise run init
+      - run: corepack enable pnpm && pnpm install
 
       - name: Generate env file
         run: |
           echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
 
       - name: Build SPAs
-        run: mise run build:spas
+        run: pnpm run build:spas
         env:
           APP_ENV: production
 
@@ -223,7 +223,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: mise run init
+      - run: corepack enable pnpm && pnpm install
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -234,7 +234,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: mise run prebuild:android
+        run: pnpm dlx expo prebuild --platform android --clean
       # Placeholder: Inject Keystore and properties here
       # - name: Setup Android Keystore
       #   run: |
@@ -277,7 +277,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: mise run init
+      - run: corepack enable pnpm && pnpm install
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -288,7 +288,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: mise run prebuild:ios
+        run: pnpm dlx expo prebuild --platform ios --clean
       - name: Install Pods
         working-directory: apps/consumer-app/ios
         run: pod install
@@ -343,7 +343,7 @@ jobs:
         with:
           install: true
       - run: mise trust
-      - run: mise run init
+      - run: corepack enable pnpm && pnpm install
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
@@ -358,19 +358,19 @@ jobs:
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: mise run deploy:admin-panel main
+        run: pnpm dlx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: mise run deploy:consumer-app main
+        run: pnpm dlx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Convex (Production)
-        run: mise run deploy:convex
+        run: pnpm dlx convex deploy
         working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

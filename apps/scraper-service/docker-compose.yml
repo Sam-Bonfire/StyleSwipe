@@ -28,7 +28,7 @@ services:
     build:
       context: ../..
       dockerfile: apps/scraper-service/Dockerfile
-    command: ['pnpm', 'run', 'apps/scraper-service/src/index.ts', '--worker', '--queue', 'convex']
+    command: ['bun', 'run', 'apps/scraper-service/src/index.ts', '--worker', '--queue', 'convex']
     environment:
       - VITE_CONVEX_URL=${VITE_CONVEX_URL}
     restart: unless-stopped

@@ -38,4 +38,4 @@ function cleanDir(dir: string) {
 
 console.log("🧹 Starting deep cleanup of monorepo artifacts...");
 cleanDir(path.resolve('.'));
-console.log("\n✅ Cleanup complete. Run 'pnpm install' to restore dependencies.");
+console.log("\n✅ Cleanup complete. Run 'bun install' to restore dependencies.");

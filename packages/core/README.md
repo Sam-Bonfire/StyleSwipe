@@ -18,5 +18,5 @@ This package is the **Hexagonal Center** of StyleSwipe. It contains all **Domain
 
 ## Testing Strategy
 *   **Must** have unit tests for all logic.
-*   **Run**: `pnpm run test --filter @app/core`.
+*   **Run**: `bun test --filter @app/core`.
 *   **Goal**: 100% Logic Coverage, running in milliseconds.

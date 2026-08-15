@@ -14,7 +14,7 @@ The primary interface for users. Supports **iOS**, **Android**, and **Web** via 
 ## Development
 ```bash
 # Run on all platforms
-pnpm run start
+bun run start
 ```
 
 ## Stack

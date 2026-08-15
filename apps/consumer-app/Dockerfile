@@ -1,10 +1,10 @@
 # Stage 1: Builder
-FROM node:1-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
 # Install turbo globally
-RUN npm install -g turbo
+RUN bun add -g turbo
 
 # Prune the workspace to only include consumer-app and its dependencies
 COPY . .
@@ -15,15 +15,15 @@ RUN turbo prune @app/consumer-app --docker
 FROM node:20-alpine AS installer
 WORKDIR /app
 
-# Install pnpm for dependency management
-
+# Install bun for dependency management
+RUN npm install -g bun
 
 # Add dependencies
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/out/bun.lock ./bun.lock
 COPY --from=builder /app/tsconfig.base.json ./tsconfig.base.json
 COPY --from=builder /app/bin ./bin
-RUN pnpm install
+RUN bun install
 
 # Copy source code and global assets
 COPY --from=builder /app/out/full/ .

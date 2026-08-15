@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'bun:test';
 
 // Test the mapToEntity pure mapping logic by replicating the same transformation.
 // We can't import ConvexProductRepository directly because it depends on `convex/browser`,

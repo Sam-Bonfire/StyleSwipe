@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 
 import { mapToScrapedProduct, type MyntraRawData } from '../../src/scrapers/MyntraScraper';
 
