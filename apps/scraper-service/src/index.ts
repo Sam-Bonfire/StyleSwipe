@@ -69,7 +69,7 @@ function printHelp(): void {
 Scraper Service - StyleSwipe
 
 USAGE:
-  bun run src/index.ts <mode> [options]
+  pnpm dlx tsx src/index.ts <mode> [options]
 
 MODES:
   --scrape <url>              Scrape a single product URL
@@ -84,9 +84,9 @@ OPTIONS:
   --help                      Show this help
 
 EXAMPLES:
-  bun run src/index.ts --scrape https://www.myntra.com/shirts/roadster/12345
-  bun run src/index.ts --category https://www.myntra.com/men-casual-shirts --pages 3
-  bun run src/index.ts --daemon --queue convex
+  pnpm dlx tsx src/index.ts --scrape https://www.myntra.com/shirts/roadster/12345
+  pnpm dlx tsx src/index.ts --category https://www.myntra.com/men-casual-shirts --pages 3
+  pnpm dlx tsx src/index.ts --daemon --queue convex
 
 ENVIRONMENT:
   VITE_CONVEX_URL            Convex deployment URL (required)

@@ -13,7 +13,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "lint": "eslint . --ignore-pattern dist",
-    "test": "bun test",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

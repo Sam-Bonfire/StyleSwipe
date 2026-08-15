@@ -15,5 +15,5 @@ Autonomous service for ingesting product data from external partners (Myntra, et
 ## Commands
 ```bash
 # Run scraper
-bun run start
+pnpm run start
 ```

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import type { LogEntry } from '../../src/types';
 
@@ -19,7 +19,7 @@ describe('ConvexTransport', () => {
     let transport: ConvexTransport;
 
     beforeEach(() => {
-        mockClient = { mutation: mock(() => Promise.resolve()) };
+        mockClient = { mutation: vi.fn(() => Promise.resolve()) };
         transport = new ConvexTransport(mockClient, { batchSize: 3 });
     });
 
@@ -63,7 +63,7 @@ describe('ConvexTransport', () => {
         });
 
         it('should not throw when client mutation fails', async () => {
-            mockClient.mutation = mock(() => Promise.reject(new Error('network')));
+            mockClient.mutation = vi.fn(() => Promise.reject(new Error('network')));
             transport = new ConvexTransport(mockClient, { batchSize: 10 });
             transport.log(createEntry());
             await expect(transport.flush()).resolves.toBeUndefined();

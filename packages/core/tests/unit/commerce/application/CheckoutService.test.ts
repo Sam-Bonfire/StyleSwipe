@@ -1,6 +1,6 @@
 import * as CheckoutService from '@app/core';
 import { Cart, CartItem, type Address } from '@app/core';
-import { describe, it, expect, mock } from 'bun:test';
+import { describe, it, expect, vi } from 'vitest';
 import { Effect, Exit, Layer } from 'effect';
 
 import { OrderRepository } from '../../../../src/commerce/application/CheckoutService';
@@ -8,8 +8,8 @@ import { OrderRepository } from '../../../../src/commerce/application/CheckoutSe
 describe('CheckoutService', () => {
   it('should create an order from a cart', async () => {
     const repoMock = OrderRepository.of({
-      save: mock(() => Effect.succeed(undefined)),
-      findById: mock(() => Effect.succeed(null)),
+      save: vi.fn(() => Effect.succeed(undefined)),
+      findById: vi.fn(() => Effect.succeed(null)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);
@@ -37,8 +37,8 @@ describe('CheckoutService', () => {
 
   it('should fail with EmptyCartError on empty cart', async () => {
     const repoMock = OrderRepository.of({
-      save: mock(() => Effect.succeed(undefined)),
-      findById: mock(() => Effect.succeed(null)),
+      save: vi.fn(() => Effect.succeed(undefined)),
+      findById: vi.fn(() => Effect.succeed(null)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);

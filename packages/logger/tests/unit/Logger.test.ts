@@ -1,13 +1,13 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect } from 'vitest';
 
 import type { LogEntry, Transport, Breadcrumb, LogContext } from '../../src/types';
 
 import { maskPII } from '../../src/utils/PIIMasker';
 
 /**
- * Logger.ts cannot be directly imported in bun test because it has
+ * Logger.ts cannot be directly imported in pnpm test because it has
  * top-level Expo imports (expo-battery, expo-device, expo-network)
- * that transitively load react-native (Flow-typed, unparseable by bun).
+ * that transitively load react-native (Flow-typed, unparseable by pnpm).
  *
  * Instead, we test Logger's core behaviors by exercising the individual
  * building blocks it uses:

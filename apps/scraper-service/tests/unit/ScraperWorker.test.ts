@@ -1,15 +1,15 @@
 import type { QueueService, ScrapedProduct } from '@app/core';
 
-import { describe, expect, test, mock, beforeEach, afterEach, spyOn, type Mock } from 'bun:test';
+import { describe, expect, test, beforeEach, afterEach, vi, type Mock } from 'vitest';
 import { Effect } from 'effect';
 
 import { ScraperWorker } from '../../src/workers/ScraperWorker';
 
 // Mock dependencies
-const mockQuery = mock(() => Promise.resolve([]));
-const mockMutation = mock(() => Promise.resolve(undefined));
+const mockQuery = vi.fn(() => Promise.resolve([]));
+const mockMutation = vi.fn(() => Promise.resolve(undefined));
 
-mock.module('convex/browser', () => ({
+vi.mock('convex/browser', () => ({
   ConvexHttpClient: class {
     query = mockQuery;
     mutation = mockMutation;
@@ -19,7 +19,7 @@ mock.module('convex/browser', () => ({
 import { MyntraAPIScraper } from '../../src/scrapers/MyntraAPIScraper';
 import { MyntraScraper } from '../../src/scrapers/MyntraScraper';
 
-// Mock Scrapers using spyOn later to avoid actual scraping without leaking across files
+// Mock Scrapers using vi.spyOn later to avoid actual scraping without leaking across files
 const mockScrapeProductResponse = {
   externalId: '123',
   title: 'Test Product',
@@ -39,12 +39,12 @@ describe('ScraperWorker', () => {
 
   beforeEach(() => {
     mockQueue = {
-      push: mock(() => Effect.succeed('id')),
-      pushBatch: mock(() => Effect.succeed(['id'])),
-      pull: mock(() => Effect.succeed([])),
-      complete: mock(() => Effect.succeed(undefined)),
-      fail: mock(() => Effect.succeed(undefined)),
-      size: mock(() => Effect.succeed(0)),
+      push: vi.fn(() => Effect.succeed('id')),
+      pushBatch: vi.fn(() => Effect.succeed(['id'])),
+      pull: vi.fn(() => Effect.succeed([])),
+      complete: vi.fn(() => Effect.succeed(undefined)),
+      fail: vi.fn(() => Effect.succeed(undefined)),
+      size: vi.fn(() => Effect.succeed(0)),
     } as unknown as QueueService<ScrapedProduct>;
 
     worker = new ScraperWorker({
@@ -57,20 +57,20 @@ describe('ScraperWorker', () => {
     mockQuery.mockClear();
     mockMutation.mockClear();
 
-    spyOn(MyntraAPIScraper.prototype, 'init').mockImplementation(() => Promise.resolve());
-    spyOn(MyntraAPIScraper.prototype, 'close').mockImplementation(() => Promise.resolve());
-    spyOn(MyntraAPIScraper.prototype, 'scrapeProduct').mockImplementation(() => Promise.resolve(mockScrapeProductResponse));
-    spyOn(MyntraAPIScraper.prototype, 'scrapeCategory').mockImplementation(() => Promise.resolve(mockScrapeCategoryResponse));
+    vi.spyOn(MyntraAPIScraper.prototype, 'init').mockImplementation(() => Promise.resolve());
+    vi.spyOn(MyntraAPIScraper.prototype, 'close').mockImplementation(() => Promise.resolve());
+    vi.spyOn(MyntraAPIScraper.prototype, 'scrapeProduct').mockImplementation(() => Promise.resolve(mockScrapeProductResponse));
+    vi.spyOn(MyntraAPIScraper.prototype, 'scrapeCategory').mockImplementation(() => Promise.resolve(mockScrapeCategoryResponse));
 
-    spyOn(MyntraScraper.prototype, 'init').mockImplementation(() => Promise.resolve());
-    spyOn(MyntraScraper.prototype, 'close').mockImplementation(() => Promise.resolve());
-    spyOn(MyntraScraper.prototype, 'scrapeProduct').mockImplementation(() => Promise.resolve(mockScrapeProductResponse));
-    spyOn(MyntraScraper.prototype, 'scrapeCategory').mockImplementation(() => Promise.resolve(mockScrapeCategoryResponse));
+    vi.spyOn(MyntraScraper.prototype, 'init').mockImplementation(() => Promise.resolve());
+    vi.spyOn(MyntraScraper.prototype, 'close').mockImplementation(() => Promise.resolve());
+    vi.spyOn(MyntraScraper.prototype, 'scrapeProduct').mockImplementation(() => Promise.resolve(mockScrapeProductResponse));
+    vi.spyOn(MyntraScraper.prototype, 'scrapeCategory').mockImplementation(() => Promise.resolve(mockScrapeCategoryResponse));
   });
 
   afterEach(async () => {
     await worker.stop();
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   test('should initialize successfully', async () => {

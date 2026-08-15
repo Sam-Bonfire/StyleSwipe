@@ -11,7 +11,7 @@ Internal dashboard for Merchandising and System Operations.
 ## Development
 ```bash
 # Run web client
-bun run dev
+pnpm run dev
 ```
 
 ## Stack

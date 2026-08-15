@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect } from 'vitest';
 
 import { Cart, CartItem } from '../../../../src/commerce/domain/Cart';
 import { PriceEstimator } from '../../../../src/commerce/domain/PriceEstimator';
