@@ -14,7 +14,7 @@ depends = ["dev:convex", "dev:consumer:run", "dev:admin:run", "dev:scraper:run"]
 
 [tasks."dev:convex"]
 description = "Start Convex backend development server"
-run = "pnpm dlx turbo run dev --filter @app/convex"
+run = "pnpm exec turbo run dev --filter @app/convex"
 
 [tasks."dev:consumer"]
 description = "Start Consumer Mobile/Web App (with Convex)"
@@ -50,15 +50,15 @@ run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/scraper-serv
 
 [tasks.typecheck]
 description = "Run TypeScript type checking across the entire monorepo"
-run = "pnpm dlx turbo run typecheck"
+run = "pnpm exec turbo run typecheck"
 
 [tasks.lint]
 description = "Run ESLint across the entire monorepo"
-run = "pnpm dlx turbo run lint"
+run = "pnpm exec turbo run lint"
 
 [tasks.test]
 description = "Run all tests"
-run = "turbo run test"
+run = "pnpm exec turbo run test"
 
 [tasks.submit]
 description = "Submit current stack to GitHub using Graphite"
@@ -86,7 +86,7 @@ run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/browser-exte
 
 [tasks."build:spas"]
 description = "Build all SPAs (Admin and Consumer) with target environment variables loaded"
-run = "pnpm run --env-file=.env --env-file=.env.local pnpm dlx turbo run build --filter @app/admin-panel --filter @app/consumer-app"
+run = "pnpm run --env-file=.env --env-file=.env.local pnpm exec turbo run build --filter @app/admin-panel --filter @app/consumer-app"
 
 [tasks."typecheck:ui"]
 description = "Typecheck only the UI Kit"
@@ -129,3 +129,43 @@ run = [
   "mise install",
   "pnpm install"
 ]
+
+[tasks."deploy:admin-panel"]
+description = "Deploy Admin Panel to Cloudflare Pages"
+usage = """
+arg "<branch>" help="Branch to deploy to (staging, main)"
+"""
+run = 'pnpm dlx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch="$usage_branch"'
+
+[tasks."deploy:consumer-app"]
+description = "Deploy Consumer App to Cloudflare Pages"
+usage = """
+arg "<branch>" help="Branch to deploy to (staging, main)"
+"""
+run = 'pnpm dlx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch="$usage_branch"'
+
+[tasks."deploy:convex"]
+description = "Deploy Convex"
+run = "pnpm dlx convex deploy"
+
+[tasks."e2e:install"]
+description = "Install Playwright Browsers"
+run = "pnpm dlx playwright install --with-deps chromium"
+
+[tasks.e2e]
+description = "Run Playwright E2E Tests"
+run = "pnpm dlx playwright test"
+
+[tasks."prebuild:android"]
+description = "Expo prebuild for Android"
+dir = "apps/consumer-app"
+run = "pnpm dlx expo prebuild --platform android --clean"
+
+[tasks."prebuild:ios"]
+description = "Expo prebuild for iOS"
+dir = "apps/consumer-app"
+run = "pnpm dlx expo prebuild --platform ios --clean"
+
+[tasks."build:consumer"]
+description = "Build Consumer App"
+run = "pnpm run --filter @app/consumer-app build"

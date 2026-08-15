@@ -133,7 +133,7 @@ jobs:
       - run: mise trust
       - run: mise run init
       - name: Build Extension
-        run: pnpm run build:extension
+        run: mise run build:extension
 
       - name: Zip Extension
         working-directory: apps/browser-extension/dist
@@ -173,7 +173,7 @@ jobs:
           echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
 
       - name: Build SPAs
-        run: pnpm run build:spas
+        run: mise run build:spas
         env:
           APP_ENV: production
 
@@ -234,7 +234,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: pnpm dlx expo prebuild --platform android --clean
+        run: mise run prebuild:android
       # Placeholder: Inject Keystore and properties here
       # - name: Setup Android Keystore
       #   run: |
@@ -288,7 +288,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: pnpm dlx expo prebuild --platform ios --clean
+        run: mise run prebuild:ios
       - name: Install Pods
         working-directory: apps/consumer-app/ios
         run: pod install
@@ -358,19 +358,19 @@ jobs:
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: pnpm dlx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
+        run: mise run deploy:admin-panel main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: pnpm dlx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
+        run: mise run deploy:consumer-app main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Convex (Production)
-        run: pnpm dlx convex deploy
+        run: mise run deploy:convex
         working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

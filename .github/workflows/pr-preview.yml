@@ -45,9 +45,9 @@ jobs:
 
       - name: Run Verifications (Lint, Typecheck, Test)
         run: |
-          pnpm exec turbo run lint
-          pnpm exec turbo run typecheck
-          pnpm exec turbo run test
+          mise run lint
+          mise run typecheck
+          mise run test
 
       - name: Sanitize Branch Name
         id: sanitize_branch
@@ -85,7 +85,7 @@ jobs:
           SITE_URL=$(echo ${{ env.CONVEX_URL }} | sed 's/\.cloud/\.site/')
           echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
 
-          pnpm run build
+          mise run build:consumer
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
@@ -105,9 +105,9 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Install Playwright Browsers
-        run: pnpm dlx playwright install --with-deps chromium
+        run: mise run e2e:install
 
       - name: Run Playwright E2E Tests
-        run: pnpm dlx playwright test
+        run: mise run e2e
         env:
           PREVIEW_URL: ${{ steps.cloudflare.outputs.url }}
