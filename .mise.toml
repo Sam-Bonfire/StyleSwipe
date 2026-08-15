@@ -127,7 +127,7 @@ description = "Initialize the project, trust mise configuration, install tools a
 run = [
   "mise trust",
   "mise install",
-  "pnpm install"
+  "pnpm install --no-frozen-lockfile"
 ]
 
 [tasks."deploy:admin-panel"]
