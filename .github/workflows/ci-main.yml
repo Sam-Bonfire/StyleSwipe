@@ -127,11 +127,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
-      - uses: jdx/mise-action@v2
-        with:
-          install: true
       - run: mise trust
-      - run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable pnpm && pnpm install
       - name: Build Extension
         run: mise run build:extension
 
@@ -162,11 +162,11 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - uses: jdx/mise-action@v2
-        with:
-          install: true
       - run: mise trust
-      - run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable pnpm && pnpm install
 
       - name: Generate env file
         run: |
@@ -219,11 +219,11 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - uses: jdx/mise-action@v2
-        with:
-          install: true
       - run: mise trust
-      - run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable pnpm && pnpm install
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -234,7 +234,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: bunx expo prebuild --platform android --clean
+        run: npx expo prebuild --platform android --clean
       # Placeholder: Inject Keystore and properties here
       # - name: Setup Android Keystore
       #   run: |
@@ -273,11 +273,11 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - uses: jdx/mise-action@v2
-        with:
-          install: true
       - run: mise trust
-      - run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable pnpm && pnpm install
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -288,7 +288,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: bunx expo prebuild --platform ios --clean
+        run: npx expo prebuild --platform ios --clean
       - name: Install Pods
         working-directory: apps/consumer-app/ios
         run: pod install
@@ -339,11 +339,11 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - uses: jdx/mise-action@v2
-        with:
-          install: true
       - run: mise trust
-      - run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: corepack enable pnpm && pnpm install
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
@@ -358,19 +358,19 @@ jobs:
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: bunx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
+        run: npx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: bunx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
+        run: npx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Convex (Production)
-        run: bunx convex deploy
+        run: npx convex deploy
         working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

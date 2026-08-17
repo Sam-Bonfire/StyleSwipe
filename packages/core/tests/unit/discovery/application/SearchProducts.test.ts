@@ -2,8 +2,8 @@ import type { Vector384 } from '@app/core';
 
 import { Embedder, ProductSearchRepository } from '@app/core';
 import { SearchProducts } from '@app/core';
-import { describe, it, expect } from 'bun:test';
 import { Effect, Exit, Layer } from 'effect';
+import { describe, expect, it } from 'vitest';
 
 function createMockEmbedderLayer(vector: Vector384 = Array(384).fill(0.1) as Vector384): Layer.Layer<Embedder, never, never> {
     return Layer.succeed(

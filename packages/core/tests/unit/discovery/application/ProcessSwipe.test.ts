@@ -1,7 +1,7 @@
 import { SwipeRepository } from '@app/core';
 import { ProcessSwipe } from '@app/core';
-import { describe, expect, it } from 'bun:test';
 import { Effect, Exit, Cause, Option, Layer } from 'effect';
+import { describe, expect, it } from 'vitest';
 
 const { processSwipe, SwipeError } = ProcessSwipe;
 type ProcessSwipeInput = ProcessSwipe.ProcessSwipeInput;

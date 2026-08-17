@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { AuthAdapter } from '../../../src/auth/AuthAdapter';
 
@@ -8,33 +8,33 @@ import { AuthAdapter } from '../../../src/auth/AuthAdapter';
 function createMockAuthClient() {
     return {
         signIn: {
-            phone: mock(() => Promise.resolve()),
-            email: mock(() => Promise.resolve()),
+            phone: vi.fn(() => Promise.resolve()),
+            email: vi.fn(() => Promise.resolve()),
         },
         signUp: {
-            email: mock(() => Promise.resolve()),
+            email: vi.fn(() => Promise.resolve()),
         },
-        signOut: mock(() => Promise.resolve()),
+        signOut: vi.fn(() => Promise.resolve()),
         organization: {
-            create: mock(() => Promise.resolve({ id: 'org-1' })),
-            list: mock(() => Promise.resolve([])),
-            getActive: mock(() => Promise.resolve(null)),
-            setActive: mock(() => Promise.resolve()),
-            update: mock(() => Promise.resolve()),
-            delete: mock(() => Promise.resolve()),
-            inviteMember: mock(() => Promise.resolve()),
-            removeMember: mock(() => Promise.resolve()),
-            updateMemberRole: mock(() => Promise.resolve()),
-            listMembers: mock(() => Promise.resolve([])),
-            acceptInvitation: mock(() => Promise.resolve()),
-            rejectInvitation: mock(() => Promise.resolve()),
-            cancelInvitation: mock(() => Promise.resolve()),
-            listInvitations: mock(() => Promise.resolve([])),
-            createRole: mock(() => Promise.resolve()),
-            listRoles: mock(() => Promise.resolve([])),
-            updateRole: mock(() => Promise.resolve()),
-            deleteRole: mock(() => Promise.resolve()),
-            hasPermission: mock(() => Promise.resolve(true)),
+            create: vi.fn(() => Promise.resolve({ id: 'org-1' })),
+            list: vi.fn(() => Promise.resolve([])),
+            getActive: vi.fn(() => Promise.resolve(null)),
+            setActive: vi.fn(() => Promise.resolve()),
+            update: vi.fn(() => Promise.resolve()),
+            delete: vi.fn(() => Promise.resolve()),
+            inviteMember: vi.fn(() => Promise.resolve()),
+            removeMember: vi.fn(() => Promise.resolve()),
+            updateMemberRole: vi.fn(() => Promise.resolve()),
+            listMembers: vi.fn(() => Promise.resolve([])),
+            acceptInvitation: vi.fn(() => Promise.resolve()),
+            rejectInvitation: vi.fn(() => Promise.resolve()),
+            cancelInvitation: vi.fn(() => Promise.resolve()),
+            listInvitations: vi.fn(() => Promise.resolve([])),
+            createRole: vi.fn(() => Promise.resolve()),
+            listRoles: vi.fn(() => Promise.resolve([])),
+            updateRole: vi.fn(() => Promise.resolve()),
+            deleteRole: vi.fn(() => Promise.resolve()),
+            hasPermission: vi.fn(() => Promise.resolve(true)),
         },
     };
 }
