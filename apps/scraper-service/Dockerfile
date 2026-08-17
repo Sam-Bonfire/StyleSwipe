@@ -1,34 +1,34 @@
 # Stage 1: Pruner
-FROM oven/bun:1-slim AS pruner
+FROM node:20-slim AS pruner
 WORKDIR /app
-RUN bun add -g turbo
+RUN npm install -g turbo
 COPY . .
 RUN turbo prune @app/scraper-service --docker
 
 # Stage 2: Builder
-FROM oven/bun:1-slim AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
 # Add dependencies
 COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/bun.lock ./bun.lock
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=pruner /app/tsconfig.json ./tsconfig.json
 COPY --from=pruner /app/tsconfig.base.json ./tsconfig.base.json
 COPY --from=pruner /app/bin ./bin
-RUN bun install
+RUN corepack enable pnpm && pnpm install
 
 # Copy source code
 COPY --from=pruner /app/out/full/ .
 
 # Stage 2.5: Production Dependencies
-FROM oven/bun:1-slim AS prod-deps
+FROM node:20-slim AS prod-deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/bin ./bin
-RUN rm -f bun.lock package-lock.json && bun install --production
+RUN rm -f pnpm-lock.yaml package-lock.json && corepack enable pnpm && pnpm install --production
 
 # Stage 3: Runner
-FROM oven/bun:1-slim AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
@@ -43,7 +43,7 @@ COPY --from=builder /app/tsconfig.json ./
 COPY --from=builder /app/tsconfig.base.json ./
 
 # REMOVED: Playwright install steps
-# RUN bun x playwright install-deps chromium
+# RUN pnpm dlx playwright install-deps chromium
 
 ENV NODE_ENV=production
 ENV SCRAPER_API_PORT=3001
@@ -52,4 +52,4 @@ EXPOSE 3001
 
 # Default entrypoint
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["bun", "run", "apps/scraper-service/src/index.ts", "--daemon"]
+CMD ["npx", "tsx", "apps/scraper-service/src/index.ts", "--daemon"]

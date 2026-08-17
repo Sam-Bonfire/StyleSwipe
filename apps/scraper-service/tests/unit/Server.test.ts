@@ -1,25 +1,25 @@
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
+import { describe, expect, it, test, vi as mock, beforeEach, afterEach, vi } from 'vitest';
 import { Effect } from 'effect';
 
 import { createServer } from '../../src/server';
 
 // Mock ConvexHttpClient to prevent real network calls
-mock.module('convex/browser', () => ({
+vi.mock('convex/browser', () => ({
   ConvexHttpClient: class {
-    query = mock(() => Promise.resolve([]));
-    mutation = mock(() => Promise.resolve('job-1'));
+    query = vi.fn(() => Promise.resolve([]));
+    mutation = vi.fn(() => Promise.resolve('job-1'));
   },
 }));
 
 describe('Scraper Server', () => {
   let app: ReturnType<typeof createServer>;
   const mockQueue = {
-    push: mock(() => Effect.succeed('id')),
-    pushBatch: mock(() => Effect.succeed(['id'])),
-    pull: mock(() => Effect.succeed([])),
-    complete: mock(() => Effect.succeed(undefined)),
-    fail: mock(() => Effect.succeed(undefined)),
-    size: mock(() => Effect.succeed(42)),
+    push: vi.fn(() => Effect.succeed('id')),
+    pushBatch: vi.fn(() => Effect.succeed(['id'])),
+    pull: vi.fn(() => Effect.succeed([])),
+    complete: vi.fn(() => Effect.succeed(undefined)),
+    fail: vi.fn(() => Effect.succeed(undefined)),
+    size: vi.fn(() => Effect.succeed(42)),
   };
 
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, expect, it, test, vi as mock, beforeEach, afterEach, vi } from 'vitest';
 
 import { MyntraAPIScraper } from '../../src/scrapers/MyntraAPIScraper';
 

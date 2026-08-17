@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, expect, it, test, vi as mock, beforeEach, afterEach, vi } from 'vitest';
 
 import { AjioScraper } from '../../src/scrapers/AjioScraper';
 

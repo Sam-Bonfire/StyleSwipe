@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'bun:test';
 import { Effect } from 'effect';
+import { describe, expect, it } from 'vitest';
 
 import { initializeStyleProfile } from '../../../../src/identity/application/InitializeStyleProfile';
 

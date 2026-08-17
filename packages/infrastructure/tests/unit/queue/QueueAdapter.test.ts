@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
 import { Effect } from 'effect';
+import { describe, expect, it, beforeEach,  } from 'vitest';
 
 import { InMemoryQueueAdapter, createQueue } from '../../../src/queue/QueueAdapter';
 

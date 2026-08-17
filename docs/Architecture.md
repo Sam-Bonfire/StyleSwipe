@@ -83,7 +83,7 @@ To a developer exploring the code, the rules are visible in the `package.json` o
 
 *   **Directional Flow**: Dependencies only move inward. You can import `Core` into `Mobile`, but you can never import `Mobile` into `Core`.
 *   **Interface Dependency**: The `Application` layer should depend on **interfaces**, not **classes**.
-*   **Testability**: You should be able to run unit tests on the entire `Core` package in milliseconds using `bun test` without mocking a database or starting an Expo server.
+*   **Testability**: You should be able to run unit tests on the entire `Core` package in milliseconds using `vitest run` without mocking a database or starting an Expo server.
 
 ## 6. The "Single Command" Workflow
 
@@ -94,4 +94,4 @@ All development activity, whether by the human architect or AI agents, must use 
 | **Start**    | `mise run task`    | `gt branch create` (Stacked Branching).                   |
 | **Snapshot** | `mise run snap`    | Structured Commit + Push (Remote Backup).                 |
 | **Deliver**  | `mise run submit`  | `turbo lint/test` + `gt stack submit`.                    |
-| **Release**  | `mise run release` | `bun version patch` + `git tag` + `git push`.             |
+| **Release**  | `mise run release` | `npm version patch` + `git tag` + `git push`.             |

@@ -1,14 +1,14 @@
 import { Cart, CartItem } from '@app/core';
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Effect } from 'effect';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { ConvexCartRepository } from '../../../src/convex/repositories/ConvexCartRepository';
 
 // Mock ConvexClient with typed method signatures
 function createMockClient() {
     return {
-        mutation: mock(() => Promise.resolve()),
-        query: mock(() => Promise.resolve(null)) as ReturnType<typeof mock>,
+        mutation: vi.fn(() => Promise.resolve()),
+        query: vi.fn(() => Promise.resolve(null)) as ReturnType<typeof mock>,
     };
 }
 
@@ -55,13 +55,13 @@ describe('ConvexCartRepository', () => {
 
     describe('findByUserId', () => {
         it('should return null when no cart exists', async () => {
-            mockClient.query = mock(() => Promise.resolve(null));
+            mockClient.query = vi.fn(() => Promise.resolve(null));
             const result = await Effect.runPromise(repo.findByUserId('user-1'));
             expect(result).toBeNull();
         });
 
         it('should reconstruct Cart domain object from Convex data', async () => {
-            mockClient.query = mock(() =>
+            mockClient.query = vi.fn(() =>
                 Promise.resolve({
                     userId: 'user-1',
                     items: [
@@ -84,7 +84,7 @@ describe('ConvexCartRepository', () => {
         });
 
         it('should default missing attributes to empty object', async () => {
-            mockClient.query = mock(() =>
+            mockClient.query = vi.fn(() =>
                 Promise.resolve({
                     userId: 'user-1',
                     items: [{ productId: 'prod-1', quantity: 1, price: 100 }],
