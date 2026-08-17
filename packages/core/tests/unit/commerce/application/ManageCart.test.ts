@@ -1,21 +1,21 @@
 import { CartRepository } from '@app/core';
 import * as ManageCart from '@app/core';
 import { Cart, CartItem } from '@app/core';
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Effect, Exit, Layer } from 'effect';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 function createMockLayer() {
     const store = new Map<string, Cart>();
     
     // Create the mock implementation matching Context.Tag structure
     const repoMock = CartRepository.of({
-        save: mock((cart: Cart) => Effect.sync(() => {
+        save: vi.fn((cart: Cart) => Effect.sync(() => {
             store.set(cart.userId, cart);
         })),
-        findByUserId: mock((userId: string) => Effect.sync(() => {
+        findByUserId: vi.fn((userId: string) => Effect.sync(() => {
             return store.get(userId) ?? null;
         })),
-        clear: mock((userId: string) => Effect.sync(() => {
+        clear: vi.fn((userId: string) => Effect.sync(() => {
             store.delete(userId);
         })),
     });

@@ -13,7 +13,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "lint": "eslint . --ignore-pattern dist",
-    "test": "bun test",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,6 +32,6 @@
     "@types/node": "^20.0.0",
     "ts-morph": "^27.0.2",
     "typescript": "~5.9.3",
-    "vitest": "^1.0.0"
+    "vitest": "^4.1.10"
   }
 }

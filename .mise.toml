@@ -1,11 +1,11 @@
 [tools]
-bun = "1.3.14"
+pnpm = "9.12.3"
 node = "lts"
 "npm:@withgraphite/graphite-cli" = "latest"
 
 [tasks.killports]
 description = "Kill any orphaned processes running on local dev ports (8081, 8082, 3001)"
-run = "bun bin/kill-ports.ts"
+run = "npx tsx bin/kill-ports.ts"
 
 [tasks.dev]
 description = "Start all development services (Convex, Consumer, Admin, Scraper)"
@@ -13,7 +13,7 @@ depends = ["dev:convex", "dev:consumer:run", "dev:admin:run", "dev:scraper:run"]
 
 [tasks."dev:convex"]
 description = "Start Convex backend development server"
-run = "bunx turbo run dev --filter @app/convex"
+run = "pnpm dlx turbo run dev --filter @app/convex"
 
 [tasks."dev:consumer"]
 description = "Start Consumer Mobile/Web App (with Convex)"
@@ -21,7 +21,7 @@ depends = ["dev:convex", "dev:consumer:run"]
 
 [tasks."dev:consumer:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.local --filter @app/consumer-app dev"
+run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/consumer-app dev"
 
 [tasks."dev:consumer:web"]
 description = "Start Consumer App for Web (with Convex)"
@@ -29,7 +29,7 @@ depends = ["dev:convex", "dev:consumer:web:run"]
 
 [tasks."dev:consumer:web:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.local --filter @app/consumer-app web"
+run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/consumer-app web"
 
 [tasks."dev:admin"]
 description = "Start Admin Panel (with Convex)"
@@ -37,7 +37,7 @@ depends = ["dev:convex", "dev:admin:run"]
 
 [tasks."dev:admin:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.local --filter @app/admin-panel dev"
+run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/admin-panel dev"
 
 [tasks."dev:scraper"]
 description = "Start Scraper Service (with Convex)"
@@ -45,27 +45,27 @@ depends = ["dev:convex", "dev:scraper:run"]
 
 [tasks."dev:scraper:run"]
 hide = true
-run = "bun run --env-file=.env --env-file=.env.local --filter @app/scraper-service start -- --daemon"
+run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/scraper-service start -- --daemon"
 
 [tasks.typecheck]
 description = "Run TypeScript type checking across the entire monorepo"
-run = "bunx turbo run typecheck"
+run = "pnpm dlx turbo run typecheck"
 
 [tasks.lint]
 description = "Run ESLint across the entire monorepo"
-run = "bunx turbo run lint"
+run = "pnpm dlx turbo run lint"
 
 [tasks.test]
 description = "Run all tests"
-run = "bunx turbo run test"
+run = "pnpm dlx turbo run test"
 
 [tasks.submit]
 description = "Submit current stack to GitHub using Graphite"
-run = "bun bin/submit.ts"
+run = "npx tsx bin/submit.ts"
 
 [tasks.release]
 description = "Run release process"
-run = "bun bin/release.ts"
+run = "npx tsx bin/release.ts"
 
 [tasks.sync]
 description = "Sync Graphite stack"
@@ -81,23 +81,23 @@ run = "prettier --write ."
 
 [tasks."build:extension"]
 description = "Build the Browser Extension"
-run = "bun run --env-file=.env --env-file=.env.local --filter @app/browser-extension build"
+run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/browser-extension build"
 
 [tasks."build:spas"]
 description = "Build all SPAs (Admin and Consumer) with target environment variables loaded"
-run = "bun run --env-file=.env --env-file=.env.local bunx turbo run build --filter @app/admin-panel --filter @app/consumer-app"
+run = "pnpm run --env-file=.env --env-file=.env.local pnpm dlx turbo run build --filter @app/admin-panel --filter @app/consumer-app"
 
 [tasks."typecheck:ui"]
 description = "Typecheck only the UI Kit"
-run = "bun run --filter @app/ui-kit typecheck"
+run = "pnpm run --filter @app/ui-kit typecheck"
 
 [tasks.scraper]
 description = "Start Scraper Service (foreground)"
-run = "bun run --env-file=.env.local --filter @app/scraper-service start --"
+run = "pnpm run --env-file=.env.local --filter @app/scraper-service start --"
 
 [tasks."verify:scraper"]
 description = "Typecheck only the Scraper Service"
-run = "bun run --filter @app/scraper-service typecheck"
+run = "pnpm run --filter @app/scraper-service typecheck"
 
 [tasks.task]
 description = "Start a new development task"
@@ -105,7 +105,7 @@ usage = """
 arg "<type>" help="Task type (feat, fix, refactor, chore)"
 arg "<title>..." help="Brief title of the task"
 """
-run = 'bun bin/task-start.ts "$usage_type" "$usage_title"'
+run = 'npx tsx bin/task-start.ts "$usage_type" "$usage_title"'
 
 [tasks.snap]
 description = "Create a project snapshot"
@@ -115,8 +115,12 @@ arg "<title>..." help="Brief title"
 flag "-d --description <text>" help="Optional detailed description"
 flag "-t --ticket <id>" help="Optional ticket ID"
 """
-run = 'bun bin/snapshot.ts "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
+run = 'npx tsx bin/snapshot.ts "$usage_type" "$usage_title" "$usage_description" "$usage_ticket"'
 
 [tasks.clean]
 description = "Cleanup all node_modules, .turbo, and build artifacts"
-run = "bun bin/clean.ts"
+run = "npx tsx bin/clean.ts"
+
+[tasks.init]
+description = "Install dependencies using pnpm"
+run = "mise install && corepack enable pnpm && pnpm install"

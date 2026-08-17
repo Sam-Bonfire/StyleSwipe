@@ -33,15 +33,15 @@ jobs:
             turbo-${{ runner.os }}-
 
       - name: Install Tools (Mise)
-        uses: jdx/mise-action@v2
-        with:
-          install: true
 
       - name: Trust Mise
         run: mise trust
 
       - name: Install Dependencies
-        run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+        run: corepack enable pnpm && pnpm install
 
       - name: Run Verifications (Lint, Typecheck, Test)
         run: |
@@ -85,7 +85,7 @@ jobs:
           SITE_URL=$(echo ${{ env.CONVEX_URL }} | sed 's/\.cloud/\.site/')
           echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
 
-          bun run build
+          pnpm run build
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
@@ -105,9 +105,9 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright E2E Tests
-        run: bunx playwright test
+        run: npx playwright test
         env:
           PREVIEW_URL: ${{ steps.cloudflare.outputs.url }}

@@ -2,9 +2,9 @@
   "name": "@app/scraper-service",
   "version": "0.0.3",
   "scripts": {
-    "start": "bun run src/index.ts",
+    "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
+    "test": "vitest run",
     "test:api": "hurl --test tests/api/*.hurl"
   },
   "module": "src/index.ts",
@@ -24,8 +24,9 @@
     "playwright": "^1.61.1"
   },
   "devDependencies": {
-    "bun-types": "latest",
-    "typescript": "~5.9.3"
+
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "typescript": "~5.9.3"

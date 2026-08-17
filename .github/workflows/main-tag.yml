@@ -21,15 +21,15 @@ jobs:
           fetch-depth: 0
 
       - name: Install Tools (Mise)
-        uses: jdx/mise-action@v2
-        with:
-          install: true
 
       - name: Trust Mise
         run: mise trust
 
       - name: Install Dependencies
-        run: bun install
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+        run: corepack enable pnpm && pnpm install
 
       - name: Version and Tag
         id: version
