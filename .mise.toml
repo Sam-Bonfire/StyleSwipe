@@ -124,3 +124,80 @@ run = "npx tsx bin/clean.ts"
 [tasks.init]
 description = "Install dependencies using pnpm"
 run = "mise install && corepack enable pnpm && pnpm install"
+
+[tasks."expo:prebuild:android"]
+description = "Expo prebuild for Android"
+run = "cd apps/consumer-app && npx expo prebuild --platform android --clean"
+
+[tasks."expo:prebuild:ios"]
+description = "Expo prebuild for iOS"
+run = "cd apps/consumer-app && npx expo prebuild --platform ios --clean"
+
+[tasks."build:android:apk"]
+description = "Build Android APK"
+run = "cd apps/consumer-app/android && ./gradlew assembleRelease"
+
+[tasks."build:android:aab"]
+description = "Build Android AAB"
+run = "cd apps/consumer-app/android && ./gradlew bundleRelease"
+
+[tasks."ios:pod-install"]
+description = "Install iOS pods"
+run = "cd apps/consumer-app/ios && pod install"
+
+[tasks."build:ios:archive"]
+description = "Build iOS Archive"
+run = "cd apps/consumer-app/ios && xcodebuild archive -workspace StyleSwipe.xcworkspace -scheme StyleSwipe -configuration Release -archivePath $PWD/build/StyleSwipe.xcarchive CODE_SIGNING_ALLOWED=NO"
+
+[tasks."deploy:pages:admin"]
+description = "Deploy Admin Panel to Cloudflare Pages"
+usage = """
+arg "<branch>" help="Branch to deploy to"
+"""
+run = "npx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=$usage_branch"
+
+[tasks."deploy:pages:consumer"]
+description = "Deploy Consumer App to Cloudflare Pages"
+usage = """
+arg "<branch>" help="Branch to deploy to"
+"""
+run = "npx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=$usage_branch"
+
+[tasks."deploy:convex"]
+description = "Deploy Convex"
+run = "cd packages/convex && npx convex deploy"
+
+[tasks."deploy:convex:preview"]
+description = "Deploy Convex Preview"
+usage = """
+arg "<branch>" help="Branch to create preview for"
+"""
+run = "cd packages/convex && npx convex deploy --preview-create $usage_branch --cmd-url-env-var-name CONVEX_URL --cmd 'echo \"CONVEX_URL=$CONVEX_URL\" >> \"$GITHUB_ENV\"'"
+
+[tasks."convex:env:set"]
+description = "Set Convex Environment Variable"
+usage = """
+arg "<branch>" help="Branch to set env var for"
+arg "<key>" help="Env var key"
+arg "<value>" help="Env var value"
+"""
+run = "cd packages/convex && npx convex env set $usage_key --deployment preview/$usage_branch $usage_value"
+
+[tasks."convex:seed"]
+description = "Seed Convex Preview"
+usage = """
+arg "<branch>" help="Branch to seed"
+"""
+run = "cd packages/convex && npx convex run seed:run --deployment preview/$usage_branch"
+
+[tasks."test:e2e:install"]
+description = "Install Playwright dependencies"
+run = "npx playwright install --with-deps chromium"
+
+[tasks."test:e2e"]
+description = "Run E2E tests"
+run = "npx playwright test"
+
+[tasks."build:consumer"]
+description = "Build consumer app"
+run = "cd apps/consumer-app && pnpm run build"
