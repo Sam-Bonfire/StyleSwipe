@@ -32,16 +32,10 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
 
-      - name: Install Tools (Mise)
-
-      - name: Trust Mise
-        run: mise trust
-
-      - name: Install Dependencies
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-        run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
 
       - name: Run Verifications (Lint, Typecheck, Test)
         run: |
@@ -58,21 +52,15 @@ jobs:
 
       - name: Deploy Convex Preview
         id: convex
-        run: |
-          cd packages/convex
-          npx convex deploy \
-            --preview-create "${{ steps.sanitize_branch.outputs.branch_name }}" \
-            --cmd-url-env-var-name "CONVEX_URL" \
-            --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> "$GITHUB_ENV"'
+        run: mise run deploy:convex:preview ${{ steps.sanitize_branch.outputs.branch_name }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Configure and Seed Convex Environment
         run: |
-          cd packages/convex
-          npx convex env set BETTER_AUTH_URL --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }} ${{ env.CONVEX_URL }}
-          npx convex env set BETTER_AUTH_SECRET --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }} ${{ secrets.BETTER_AUTH_SECRET }}
-          npx convex run seed:run --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }}
+          mise run convex:env:set ${{ steps.sanitize_branch.outputs.branch_name }} BETTER_AUTH_URL ${{ env.CONVEX_URL }}
+          mise run convex:env:set ${{ steps.sanitize_branch.outputs.branch_name }} BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
+          mise run convex:seed ${{ steps.sanitize_branch.outputs.branch_name }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
@@ -85,7 +73,8 @@ jobs:
           SITE_URL=$(echo ${{ env.CONVEX_URL }} | sed 's/\.cloud/\.site/')
           echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
 
-          pnpm run build
+          cd ../..
+          mise run build:consumer
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
@@ -98,16 +87,14 @@ jobs:
           branch: ${{ github.head_ref }}
 
       - name: Configure Convex Trusted Origins
-        run: |
-          cd packages/convex
-          npx convex env set TRUSTED_ORIGINS --deployment preview/${{ steps.sanitize_branch.outputs.branch_name }} ${{ steps.cloudflare.outputs.url }}
+        run: mise run convex:env:set ${{ steps.sanitize_branch.outputs.branch_name }} TRUSTED_ORIGINS ${{ steps.cloudflare.outputs.url }}
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        run: mise run test:e2e:install
 
       - name: Run Playwright E2E Tests
-        run: npx playwright test
+        run: mise run test:e2e
         env:
           PREVIEW_URL: ${{ steps.cloudflare.outputs.url }}

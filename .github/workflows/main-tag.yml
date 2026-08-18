@@ -20,16 +20,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Install Tools (Mise)
-
-      - name: Trust Mise
-        run: mise trust
-
-      - name: Install Dependencies
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-        run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
 
       - name: Version and Tag
         id: version

@@ -127,11 +127,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
       - name: Build Extension
         run: mise run build:extension
 
@@ -162,11 +161,10 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
 
       - name: Generate env file
         run: |
@@ -219,11 +217,10 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -234,7 +231,7 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: npx expo prebuild --platform android --clean
+        run: mise run expo:prebuild:android
       # Placeholder: Inject Keystore and properties here
       # - name: Setup Android Keystore
       #   run: |
@@ -245,7 +242,7 @@ jobs:
       #     echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
       - name: Build Android AAB
         working-directory: apps/consumer-app/android
-        run: ./gradlew bundleRelease
+        run: mise run build:android:aab
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -273,11 +270,10 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -288,24 +284,18 @@ jobs:
         run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
       - name: Expo Prebuild
         working-directory: apps/consumer-app
-        run: npx expo prebuild --platform ios --clean
+        run: mise run expo:prebuild:ios
       - name: Install Pods
         working-directory: apps/consumer-app/ios
-        run: pod install
+        run: mise run ios:pod-install
       # Placeholder: Inject Certificates and Provisioning Profiles here
       # - name: Setup Provisioning
       #   run: |
       #     # Install cert and profile logic here
       - name: Build iOS IPA
         working-directory: apps/consumer-app/ios
-        run: |
-          xcodebuild archive \
-            -workspace StyleSwipe.xcworkspace \
-            -scheme StyleSwipe \
-            -configuration Release \
-            -archivePath $PWD/build/StyleSwipe.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
-          # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
+        run: mise run build:ios:archive
+        # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -339,11 +329,10 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise run init
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
@@ -358,19 +347,19 @@ jobs:
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: npx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
+        run: mise run deploy:pages:admin main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: npx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
+        run: mise run deploy:pages:consumer main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Convex (Production)
-        run: npx convex deploy
+        run: mise run deploy:convex
         working-directory: packages/convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
