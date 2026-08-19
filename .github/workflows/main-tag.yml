@@ -20,52 +20,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Install Tools (Mise)
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
 
       - name: Trust Mise
         run: mise trust
 
       - name: Install Dependencies
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-        run: corepack enable pnpm && pnpm install
+        run: mise run init
 
       - name: Version and Tag
         id: version
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Get current version
-          VERSION=$(jq -r .version package.json)
-          echo "Current version: $VERSION"
-
-          # Increment patch version
-          IFS='.' read -r -a parts <<< "$VERSION"
-          parts[2]=$((parts[2] + 1))
-          NEW_VERSION="${parts[0]}.${parts[1]}.${parts[2]}"
-          echo "New version: $NEW_VERSION"
-
-          # Update package.json
-          jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > package.json.tmp && mv package.json.tmp package.json
-
-          # Update all workspace package.json files to match the new monorepo version
-          for pkg in apps/*/package.json packages/*/package.json; do
-            if [ -f "$pkg" ]; then
-              jq --arg ver "$NEW_VERSION" '.version = $ver' "$pkg" > "${pkg}.tmp" && mv "${pkg}.tmp" "$pkg"
-            fi
-          done
-
-          git add package.json apps/*/package.json packages/*/package.json
-          git commit -m "release: v$NEW_VERSION"
-
-          TAG="v$NEW_VERSION"
-          git tag $TAG
-          git push origin main
-          git push origin $TAG
-
-          echo "tag_name=$TAG" >> "$GITHUB_OUTPUT"
+        run: mise run version:bump
 
   trigger-production:
     needs: [tag-release]
@@ -73,4 +41,3 @@ jobs:
     uses: ./.github/workflows/ci-main.yml
     with:
       tag_name: ${{ needs.tag-release.outputs.tag_name }}
-
