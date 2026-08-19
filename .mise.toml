@@ -89,11 +89,11 @@ run = "npx dotenv -e .env -e .env.local -o -- pnpm dlx turbo run build --filter 
 
 [tasks."build:consumer"]
 description = "Build the Consumer App for Web"
-run = "npx dotenv -e .env -e .env.local -o -- pnpm dlx turbo run build --filter @app/consumer-app"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/consumer-app build"
 
 [tasks."build:admin"]
 description = "Build the Admin Panel for Web"
-run = "npx dotenv -e .env -e .env.local -o -- pnpm dlx turbo run build --filter @app/admin-panel"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/admin-panel build"
 
 [tasks."pack:extension"]
 description = "Zip browser extension build directory"
@@ -126,6 +126,8 @@ run = """
 SITE_URL=$(echo "$usage_convex_url" | sed 's/\\.cloud/\\.site/')
 echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=$usage_convex_url" > .env.local
 echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
+cp .env.local apps/consumer-app/.env.local 2>/dev/null || true
+cp .env.local apps/admin-panel/.env.local 2>/dev/null || true
 """
 
 [tasks."branch:sanitize"]
