@@ -28,12 +28,12 @@
         "rootDir": "./",
         "paths": {
             "@app/core": ["./packages/core/src"],
+            "@app/core/*": ["./packages/core/*"],
             "@app/infrastructure": ["./packages/infrastructure/src"],
             "@app/ui-kit": ["./packages/ui-kit"],
             "@app/convex": ["./packages/convex/convex"],
             "@app/logger": ["./packages/logger/src"]
-        },
-
+        }
     },
     "exclude": [
         "node_modules",
