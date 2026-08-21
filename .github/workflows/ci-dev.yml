@@ -7,15 +7,6 @@ on:
 permissions:
   contents: write
   packages: write
-# Required CI Secrets for Native Builds:
-# - ANDROID_KEYSTORE_BASE64: Base64 encoded release keystore
-# - ANDROID_KEYSTORE_PASSWORD: Password for the keystore
-# - ANDROID_KEY_ALIAS: Alias for the key
-# - ANDROID_KEY_PASSWORD: Password for the key
-# - IOS_CERTIFICATE_BASE64: Base64 encoded p12 certificate
-# - IOS_CERTIFICATE_PASSWORD: Password for the p12 certificate
-# - IOS_PROVISIONING_PROFILE_BASE64: Base64 encoded mobileprovision file
-
 
 env:
   TURBO_CACHE_DIR: .turbo
@@ -33,11 +24,12 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
       - name: Run Verifications
         run: |
           mise run lint
@@ -53,6 +45,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -61,38 +59,34 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate env file
-        run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.staging
+        run: mise run env:generate '${{ toJSON(vars) }}' .env.staging
 
       - name: Build and Push
         run: |
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
-          docker build -f apps/${{ matrix.app }}/Dockerfile \
-            -t "${TAG_BASE}:staging-latest" \
-            -t "${TAG_BASE}:staging-${{ github.sha }}" \
-            -t "${TAG_BASE}:staging-build-${{ github.run_number }}" \
-            .
-          docker push "${TAG_BASE}:staging-latest"
-          docker push "${TAG_BASE}:staging-${{ github.sha }}"
-          docker push "${TAG_BASE}:staging-build-${{ github.run_number }}"
+          TAGS="${TAG_BASE}:staging-latest ${TAG_BASE}:staging-${{ github.sha }} ${TAG_BASE}:staging-build-${{ github.run_number }}"
+          mise run docker:build "${{ matrix.app }}" "$TAGS"
+          mise run docker:push "$TAGS"
 
   build-extension:
     needs: [setup]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
+
       - name: Build Extension
         run: mise run build:extension
 
       - name: Zip Extension
-        working-directory: apps/browser-extension/dist
-        run: zip -r extension-staging-${{ github.sha }}.zip .
+        run: mise run pack:extension "extension-staging-${{ github.sha }}.zip"
+
       - name: Upload Extension Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -113,15 +107,15 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
 
       - name: Generate env file
-        run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
+        run: mise run env:generate '${{ toJSON(vars) }}' .env.local
 
       - name: Build SPAs
         run: mise run build:spas
@@ -158,8 +152,15 @@ jobs:
           swap-storage: true
 
       - uses: actions/checkout@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
+
       - name: Prune Unused Workspaces
-        run: rm -rf apps/admin-panel apps/browser-extension apps/scraper-service
+        run: mise run prune:unused-workspaces
+
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -167,33 +168,25 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+
+      - run: mise run init
+
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
+
       - name: Extract App Version
         id: version
-        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+        run: mise run app:extract-version
+
       - name: Expo Prebuild
-        working-directory: apps/consumer-app
-        run: npx expo prebuild --platform android --clean
-      # Placeholder: Inject Keystore and properties here
-      # - name: Setup Android Keystore
-      #   run: |
-      #     echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > apps/consumer-app/android/app/release.keystore
-      #     echo "MYAPP_UPLOAD_STORE_FILE=release.keystore" >> apps/consumer-app/android/gradle.properties
-      #     echo "MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> apps/consumer-app/android/gradle.properties
-      #     echo "MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
-      #     echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
+        run: mise run mobile:prebuild android
+
       - name: Build Android APK
-        working-directory: apps/consumer-app/android
-        run: ./gradlew assembleRelease
+        run: mise run android:build:apk
+
       - name: Distribute Android via Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
@@ -201,6 +194,7 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
           file: apps/consumer-app/android/app/build/outputs/apk/release/app-release.apk
+
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -220,39 +214,32 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
+
       - name: Extract App Version
         id: version
-        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+        run: mise run app:extract-version
+
       - name: Expo Prebuild
-        working-directory: apps/consumer-app
-        run: npx expo prebuild --platform ios --clean
+        run: mise run mobile:prebuild ios
+
       - name: Install Pods
-        working-directory: apps/consumer-app/ios
-        run: pod install
-      # Placeholder: Inject Certificates and Provisioning Profiles here
-      # - name: Setup Provisioning
-      #   run: |
-      #     # Install cert and profile logic here
+        run: mise run ios:pod-install
+
       - name: Build iOS IPA
-        working-directory: apps/consumer-app/ios
-        run: |
-          xcodebuild archive \
-            -workspace StyleSwipe.xcworkspace \
-            -scheme StyleSwipe \
-            -configuration Release \
-            -archivePath $PWD/build/StyleSwipe.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
-          # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
+        run: mise run ios:build
+
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -273,11 +260,12 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
@@ -292,20 +280,19 @@ jobs:
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: npx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=staging
+        run: mise run deploy:cloudflare apps/admin-panel/dist styleswipe-admin-panel staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: npx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=staging
+        run: mise run deploy:cloudflare apps/consumer-app/dist styleswipe-consumer-app staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Convex (Preview)
-        run: npx convex deploy
-        working-directory: packages/convex
+        run: mise run convex:deploy
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
@@ -317,11 +304,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
 
       - name: Merge dev to main
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout main
-          git merge --ff-only origin/dev
-          git push origin main
+        run: mise run git:promote-dev

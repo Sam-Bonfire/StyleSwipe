@@ -16,15 +16,6 @@ permissions:
   contents: write
   packages: write
 
-# Required CI Secrets for Native Builds:
-# - ANDROID_KEYSTORE_BASE64: Base64 encoded release keystore
-# - ANDROID_KEYSTORE_PASSWORD: Password for the keystore
-# - ANDROID_KEY_ALIAS: Alias for the key
-# - ANDROID_KEY_PASSWORD: Password for the key
-# - IOS_CERTIFICATE_BASE64: Base64 encoded p12 certificate
-# - IOS_CERTIFICATE_PASSWORD: Password for the p12 certificate
-# - IOS_PROVISIONING_PROFILE_BASE64: Base64 encoded mobileprovision file
-
 env:
   TURBO_CACHE_DIR: .turbo
   MISE_TRUSTED_CONFIG_PATHS: '/'
@@ -40,36 +31,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
       - name: Extract version
         id: get_version
-        run: |
-          REF="${{ inputs.tag_name || github.ref_name }}"
-          VERSION=${REF#v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          
-          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          echo "owner_lower=$OWNER_LOWER" >> $GITHUB_OUTPUT
-          
-          # Fetch tags so git describe works
-          git fetch --tags --unshallow || git fetch --tags || true
-          
-          # Get previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          if [ -n "$PREV_TAG" ]; then
-            echo "Generating changelog between $PREV_TAG and HEAD"
-            CHANGELOG=$(git log "$PREV_TAG..HEAD" --pretty=format:"* %s (%h)" --no-merges || echo "")
-          else
-            echo "No previous tag found. Generating full log."
-            CHANGELOG=$(git log --pretty=format:"* %s (%h)" --no-merges || echo "")
-          fi
-          
-          # Clean changelog from release/bot-commit messages
-          CLEAN_CHANGELOG=$(echo "$CHANGELOG" | grep -v -E "release: v|chore:|bot-commit" || echo "No changes listed.")
-          
-          # Write changelog to GITHUB_OUTPUT (handling multiline strings)
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CLEAN_CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        run: mise run release:extract-info "${{ inputs.tag_name || github.ref_name }}" "${{ github.repository_owner }}"
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -96,6 +65,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -105,20 +79,16 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate env file
-        run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.production
+        run: mise run env:generate '${{ toJSON(vars) }}' .env.production
 
       - name: Build and Push
         run: |
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
           VERSION=${{ needs.create-release.outputs.new_version }}
-          docker build -f apps/${{ matrix.app }}/Dockerfile \
-            -t "${TAG_BASE}:latest" \
-            -t "${TAG_BASE}:${VERSION}" \
-            .
-          docker push "${TAG_BASE}:latest"
-          docker push "${TAG_BASE}:${VERSION}"
+          TAGS="${TAG_BASE}:latest ${TAG_BASE}:${VERSION}"
+          mise run docker:build "${{ matrix.app }}" "$TAGS"
+          mise run docker:push "$TAGS"
 
   build-publish-extension:
     needs: [create-release]
@@ -127,20 +97,21 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
+
       - name: Build Extension
         run: mise run build:extension
 
       - name: Zip Extension
-        working-directory: apps/browser-extension/dist
         run: |
           VERSION=${{ needs.create-release.outputs.new_version }}
-          zip -r extension-v${VERSION}.zip .
-      
+          mise run pack:extension "extension-v${VERSION}.zip"
+
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
@@ -162,15 +133,15 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
 
       - name: Generate env file
-        run: |
-          echo '${{ toJSON(vars) }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env.local
+        run: mise run env:generate '${{ toJSON(vars) }}' .env.local
 
       - name: Build SPAs
         run: mise run build:spas
@@ -210,8 +181,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag_name || github.ref }}
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+      - run: mise trust
       - name: Prune Unused Workspaces
-        run: rm -rf apps/admin-panel apps/browser-extension apps/scraper-service
+        run: mise run prune:unused-workspaces
       - name: Turbo Cache
         uses: actions/cache@v3
         with:
@@ -219,11 +195,7 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+      - run: mise run init
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -231,21 +203,11 @@ jobs:
           java-version: '17'
       - name: Extract App Version
         id: version
-        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+        run: mise run app:extract-version
       - name: Expo Prebuild
-        working-directory: apps/consumer-app
-        run: npx expo prebuild --platform android --clean
-      # Placeholder: Inject Keystore and properties here
-      # - name: Setup Android Keystore
-      #   run: |
-      #     echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > apps/consumer-app/android/app/release.keystore
-      #     echo "MYAPP_UPLOAD_STORE_FILE=release.keystore" >> apps/consumer-app/android/gradle.properties
-      #     echo "MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> apps/consumer-app/android/gradle.properties
-      #     echo "MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
-      #     echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> apps/consumer-app/android/gradle.properties
+        run: mise run mobile:prebuild android
       - name: Build Android AAB
-        working-directory: apps/consumer-app/android
-        run: ./gradlew bundleRelease
+        run: mise run android:build:aab
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -273,11 +235,12 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -285,27 +248,13 @@ jobs:
           bundler-cache: true
       - name: Extract App Version
         id: version
-        run: echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> $GITHUB_ENV
+        run: mise run app:extract-version
       - name: Expo Prebuild
-        working-directory: apps/consumer-app
-        run: npx expo prebuild --platform ios --clean
+        run: mise run mobile:prebuild ios
       - name: Install Pods
-        working-directory: apps/consumer-app/ios
-        run: pod install
-      # Placeholder: Inject Certificates and Provisioning Profiles here
-      # - name: Setup Provisioning
-      #   run: |
-      #     # Install cert and profile logic here
+        run: mise run ios:pod-install
       - name: Build iOS IPA
-        working-directory: apps/consumer-app/ios
-        run: |
-          xcodebuild archive \
-            -workspace StyleSwipe.xcworkspace \
-            -scheme StyleSwipe \
-            -configuration Release \
-            -archivePath $PWD/build/StyleSwipe.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
-          # CODE_SIGNING_ALLOWED=NO is set for demonstration purposes, to allow unsigned builds to pass. In reality, you'd setup provisioning and export the IPA.
+        run: mise run ios:build
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -313,10 +262,9 @@ jobs:
           path: apps/consumer-app/ios/build/
           retention-days: 5
       - name: Zip iOS Build
-        working-directory: apps/consumer-app/ios
         run: |
           VERSION=${{ needs.create-release.outputs.new_version }}
-          zip -r ios-build-v${VERSION}.zip build/
+          mise run pack:ios "ios-build-v${VERSION}.zip"
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
@@ -339,11 +287,12 @@ jobs:
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
             turbo-${{ runner.os }}-
-      - run: mise trust
-      - uses: actions/setup-node@v4
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
-          node-version: 20
-      - run: corepack enable pnpm && pnpm install
+          install: true
+      - run: mise trust
+      - run: mise run init
 
       - name: Download Admin Panel Artifact
         uses: actions/download-artifact@v4
@@ -358,19 +307,18 @@ jobs:
           path: apps/consumer-app/dist
 
       - name: Deploy Admin Panel to Cloudflare Pages
-        run: npx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=main
+        run: mise run deploy:cloudflare apps/admin-panel/dist styleswipe-admin-panel main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Consumer App to Cloudflare Pages
-        run: npx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=main
+        run: mise run deploy:cloudflare apps/consumer-app/dist styleswipe-consumer-app main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Convex (Production)
-        run: npx convex deploy
-        working-directory: packages/convex
+        run: mise run convex:deploy
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

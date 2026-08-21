@@ -10,7 +10,7 @@
     "android": "expo start --android --lan --port 8081",
     "ios": "expo start --ios --lan --port 8081",
     "web": "expo start --web --lan --port 8081",
-    "build": "expo export -p web",
+    "build": "expo export -p web --clear",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'",
     "test": "echo \"No tests yet\""

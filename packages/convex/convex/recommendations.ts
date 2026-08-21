@@ -101,7 +101,7 @@ export const getVectorFeed = action({
     const allProductIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id as any) });
 
     // Filter out swiped items
-    const filteredProductIds = allProductIds.filter((id) => !swipedIds.includes(id as any));
+    const filteredProductIds = allProductIds.filter((id: any) => !swipedIds.includes(id as any));
 
     // Slice
     const productIds = filteredProductIds.slice(0, args.limit || 10);

@@ -48,7 +48,21 @@
     "@xenova/transformers": {
       "sharp": "^0.33.5"
     },
-    "esbuild": "0.27.0"
+    "esbuild": "0.27.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native-reanimated": "4.5.0",
+    "eslint": "^9.0.0",
+    "sharp": "^0.33.5",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/utils": "^8.0.0",
+    "@tamagui/core": "2.0.0-rc.26",
+    "tamagui": "2.0.0-rc.26",
+    "@tamagui/lucide-icons": "2.0.0-rc.26",
+    "@tamagui/animations-react-native": "2.0.0-rc.26",
+    "@tamagui/linear-gradient": "2.0.0-rc.26",
+    "@tamagui/shorthands": "2.0.0-rc.26",
+    "@tamagui/themes": "2.0.0-rc.26"
   },
   "resolutions": {
     "fsevents": "npm:empty-npm-package@1.0.0",
