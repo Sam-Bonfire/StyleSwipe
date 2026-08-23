@@ -366,3 +366,4 @@ run = "npx tsx bin/clean.ts"
 [tasks.init]
 description = "Install dependencies using pnpm"
 run = "mise install && corepack enable pnpm && pnpm install"
+

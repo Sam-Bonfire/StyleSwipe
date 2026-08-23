@@ -24,7 +24,7 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ignore-pattern .eslintrc.js --ignore-pattern dist --ignore-pattern node_modules"
+    "lint": "eslint . --ignore-pattern .eslintrc.js --ignore-pattern dist --ignore-pattern node_modules --ignore-pattern vitest.config.ts"
   },
   "dependencies": {
     "effect": "^3.22.0",

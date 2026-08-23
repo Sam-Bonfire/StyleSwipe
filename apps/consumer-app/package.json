@@ -12,7 +12,7 @@
     "web": "expo start --web --lan --port 8081",
     "build": "expo export -p web --clear",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'",
+    "lint": "eslint .",
     "test": "echo \"No tests yet\""
   },
   "dependencies": {

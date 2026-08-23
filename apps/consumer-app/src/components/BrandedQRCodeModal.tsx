@@ -7,6 +7,7 @@ import { Modal, Alert, Platform } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { YStack, XStack, Text, Button, useTheme } from 'tamagui';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const logoSource = require('../../../../assets/favicon/favicon.png');
 
 interface BrandedQRCodeModalProps {

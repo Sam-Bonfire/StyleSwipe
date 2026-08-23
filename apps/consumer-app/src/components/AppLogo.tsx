@@ -5,6 +5,7 @@ import { XStack } from 'tamagui';
 // Verify path - in Expo/RN usually requires require()
 // Use shared asset from workspace root
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const logoSource = require('../../../../assets/favicon/favicon.png');
 
 export const AppLogo = () => {
