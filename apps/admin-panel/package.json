@@ -10,7 +10,7 @@
     "build": "expo export -p web --clear",
     "dev": "expo start --web --lan --port 8082",
     "typecheck": "tsc --noEmit",
-    "lint": "NODE_OPTIONS='--max-old-space-size=4096' eslint . --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@app/convex": "workspace:*",
