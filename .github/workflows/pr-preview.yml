@@ -32,10 +32,16 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
 
-      - uses: jdx/mise-action@v2
+      - name: Setup Mise
+        uses: jdx/mise-action@v2
         with:
           install: true
-      - run: mise run init
+
+      - name: Trust Mise
+        run: mise trust
+
+      - name: Install Dependencies
+        run: mise run init
 
       - name: Run Verifications (Lint, Typecheck, Test)
         run: |
@@ -45,35 +51,23 @@ jobs:
 
       - name: Sanitize Branch Name
         id: sanitize_branch
-        run: |
-          BRANCH_NAME="${{ github.head_ref }}"
-          SANITIZED_NAME=$(echo "$BRANCH_NAME" | tr '/' '-')
-          echo "branch_name=$SANITIZED_NAME" >> "$GITHUB_OUTPUT"
+        run: mise run branch:sanitize "${{ github.head_ref }}"
 
       - name: Deploy Convex Preview
         id: convex
-        run: mise run deploy:convex:preview ${{ steps.sanitize_branch.outputs.branch_name }}
+        run: mise run convex:deploy-preview "${{ steps.sanitize_branch.outputs.branch_name }}"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Configure and Seed Convex Environment
-        run: |
-          mise run convex:env:set ${{ steps.sanitize_branch.outputs.branch_name }} BETTER_AUTH_URL ${{ env.CONVEX_URL }}
-          mise run convex:env:set ${{ steps.sanitize_branch.outputs.branch_name }} BETTER_AUTH_SECRET ${{ secrets.BETTER_AUTH_SECRET }}
-          mise run convex:seed ${{ steps.sanitize_branch.outputs.branch_name }}
+        run: mise run convex:setup-preview "${{ steps.sanitize_branch.outputs.branch_name }}"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
 
       - name: Build Web Application
         run: |
-          echo "Building consumer app with EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}"
-          cd apps/consumer-app
-
-          echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=${{ env.CONVEX_URL }}" > .env.local
-          SITE_URL=$(echo ${{ env.CONVEX_URL }} | sed 's/\.cloud/\.site/')
-          echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
-
-          cd ../..
+          mise run env:preview "${{ env.CONVEX_URL }}"
           mise run build:consumer
 
       - name: Deploy to Cloudflare Pages (Preview)
@@ -87,7 +81,7 @@ jobs:
           branch: ${{ github.head_ref }}
 
       - name: Configure Convex Trusted Origins
-        run: mise run convex:env:set ${{ steps.sanitize_branch.outputs.branch_name }} TRUSTED_ORIGINS ${{ steps.cloudflare.outputs.url }}
+        run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "${{ steps.cloudflare.outputs.url }}"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 

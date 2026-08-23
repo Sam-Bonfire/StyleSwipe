@@ -91,10 +91,6 @@ export default function RootLayout() {
           console.error('Failed to register worker', e),
         );
       });
-    } else {
-      import('../src/workers/BackgroundWorker').then(({ registerBackgroundWorker }) => {
-        registerBackgroundWorker();
-      });
     }
   }, []);
 

@@ -1,4 +1,3 @@
- 
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 
@@ -16,33 +15,62 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-// 3. Enable symlinks and package exports
-// package exports is now default in SDK 53+
-
-// 4. Force map subpaths that Metro struggles to resolve in monorepos
-const sharedModules = [
+// 3. Force map deduplicated modules across monorepo
+const DEDUPLICATED_MODULES = [
   'react',
   'react-dom',
   'react-native',
   'react-native-web',
-  'convex',
   'tamagui',
+  '@tamagui/core',
+  '@tamagui/web',
+  'convex',
   'effect',
   'better-auth',
 ];
 
-config.resolver.extraNodeModules = sharedModules.reduce((acc, name) => {
-  acc[name] = path.resolve(workspaceRoot, 'node_modules', name);
-  return acc;
-}, {});
+const deduplicatedPaths = {};
+for (const mod of DEDUPLICATED_MODULES) {
+  try {
+    deduplicatedPaths[mod] = path.dirname(require.resolve(`${mod}/package.json`, { paths: [projectRoot] }));
+  } catch {
+    deduplicatedPaths[mod] = path.resolve(projectRoot, 'node_modules', mod);
+  }
+}
+
+config.resolver.extraNodeModules = deduplicatedPaths;
 
 // Add workspace aliases
 config.resolver.extraNodeModules['@app/core'] = path.resolve(workspaceRoot, 'packages/core/src');
+config.resolver.extraNodeModules['@app/infrastructure'] = path.resolve(workspaceRoot, 'packages/infrastructure/src');
+config.resolver.extraNodeModules['@app/ui-kit'] = path.resolve(workspaceRoot, 'packages/ui-kit');
+config.resolver.extraNodeModules['@app/logger'] = path.resolve(workspaceRoot, 'packages/logger/src');
 config.resolver.extraNodeModules['@app/convex'] = path.resolve(workspaceRoot, 'packages/convex/convex');
 
 config.resolver.disableHierarchicalLookup = false;
 
-// 5. Preserve class/function names to prevent "Module implementation must be a class" errors on web production builds
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (deduplicatedPaths[moduleName]) {
+    return context.resolveRequest(context, deduplicatedPaths[moduleName], platform);
+  }
+
+  if (moduleName.startsWith('@tamagui/')) {
+    const pkgName = moduleName.split('/').slice(0, 2).join('/');
+    if (deduplicatedPaths[pkgName]) {
+      const subpath = moduleName.substring(pkgName.length);
+      const target = deduplicatedPaths[pkgName] + subpath;
+      return context.resolveRequest(context, target, platform);
+    }
+  }
+
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+// 4. Preserve class/function names to prevent "Module implementation must be a class" errors on web production builds
 config.transformer.minifierConfig = {
   keep_classnames: true,
   keep_fnames: true,

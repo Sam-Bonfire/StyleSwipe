@@ -21,7 +21,7 @@ depends = ["dev:convex", "dev:consumer:run"]
 
 [tasks."dev:consumer:run"]
 hide = true
-run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/consumer-app dev"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/consumer-app dev"
 
 [tasks."dev:consumer:web"]
 description = "Start Consumer App for Web (with Convex)"
@@ -29,7 +29,7 @@ depends = ["dev:convex", "dev:consumer:web:run"]
 
 [tasks."dev:consumer:web:run"]
 hide = true
-run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/consumer-app web"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/consumer-app web"
 
 [tasks."dev:admin"]
 description = "Start Admin Panel (with Convex)"
@@ -37,7 +37,7 @@ depends = ["dev:convex", "dev:admin:run"]
 
 [tasks."dev:admin:run"]
 hide = true
-run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/admin-panel dev"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/admin-panel dev"
 
 [tasks."dev:scraper"]
 description = "Start Scraper Service (with Convex)"
@@ -45,7 +45,7 @@ depends = ["dev:convex", "dev:scraper:run"]
 
 [tasks."dev:scraper:run"]
 hide = true
-run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/scraper-service start -- --daemon"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/scraper-service start -- --daemon"
 
 [tasks.typecheck]
 description = "Run TypeScript type checking across the entire monorepo"
@@ -81,11 +81,253 @@ run = "prettier --write ."
 
 [tasks."build:extension"]
 description = "Build the Browser Extension"
-run = "pnpm run --env-file=.env --env-file=.env.local --filter @app/browser-extension build"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/browser-extension build"
 
 [tasks."build:spas"]
 description = "Build all SPAs (Admin and Consumer) with target environment variables loaded"
-run = "pnpm run --env-file=.env --env-file=.env.local pnpm dlx turbo run build --filter @app/admin-panel --filter @app/consumer-app"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm dlx turbo run build --filter @app/admin-panel --filter @app/consumer-app"
+
+[tasks."build:consumer"]
+description = "Build the Consumer App for Web"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/consumer-app build"
+
+[tasks."build:admin"]
+description = "Build the Admin Panel for Web"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/admin-panel build"
+
+[tasks."pack:extension"]
+description = "Zip browser extension build directory"
+usage = """
+arg "<output_file>" help="Output zip filename"
+"""
+run = 'cd apps/browser-extension/dist && zip -r "$usage_output_file" .'
+
+[tasks."pack:ios"]
+description = "Zip iOS build directory"
+usage = """
+arg "<output_file>" help="Output zip filename"
+"""
+run = 'cd apps/consumer-app/ios && zip -r "$usage_output_file" build/'
+
+[tasks."env:generate"]
+description = "Generate environment file from JSON string of variables"
+usage = """
+arg "<json_vars>" help="JSON string of variables"
+arg "<output_file>" help="Output environment file path"
+"""
+run = 'echo "$usage_json_vars" | jq -r "to_entries[] | \"\\(.key)=\\(.value)\"" > "$usage_output_file"'
+
+[tasks."env:preview"]
+description = "Generate .env.local for preview build"
+usage = """
+arg "<convex_url>" help="Convex deployment URL"
+"""
+run = """
+SITE_URL=$(echo "$usage_convex_url" | sed 's/\\.cloud/\\.site/')
+echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL=$usage_convex_url" > .env.local
+echo "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL=$SITE_URL" >> .env.local
+cp .env.local apps/consumer-app/.env.local 2>/dev/null || true
+cp .env.local apps/admin-panel/.env.local 2>/dev/null || true
+"""
+
+[tasks."branch:sanitize"]
+description = "Sanitize branch name for deployment"
+usage = """
+arg "<branch>" help="Branch name"
+"""
+run = 'echo "branch_name=$(echo "$usage_branch" | tr "/" "-")" >> "$GITHUB_OUTPUT"'
+
+[tasks."docker:build"]
+description = "Build Docker image"
+usage = """
+arg "<app>" help="App name"
+arg "<tags>..." help="Space-separated list of image tags"
+"""
+run = """
+TAG_ARGS=""
+for tag in $usage_tags; do
+  TAG_ARGS="$TAG_ARGS -t $tag"
+done
+docker build -f apps/"$usage_app"/Dockerfile $TAG_ARGS .
+"""
+
+[tasks."docker:push"]
+description = "Push Docker images"
+usage = """
+arg "<tags>..." help="Space-separated list of image tags"
+"""
+run = """
+for tag in $usage_tags; do
+  docker push "$tag"
+done
+"""
+
+[tasks."convex:deploy"]
+description = "Deploy Convex functions"
+run = "cd packages/convex && npx convex deploy"
+
+[tasks."convex:deploy-preview"]
+description = "Deploy Convex preview environment"
+usage = """
+arg "<branch_name>" help="Branch name for preview"
+"""
+run = """
+cd packages/convex
+npx convex deploy \
+  --preview-create "$usage_branch_name" \
+  --cmd-url-env-var-name "CONVEX_URL" \
+  --cmd 'echo "CONVEX_URL=$CONVEX_URL" >> "$GITHUB_ENV"'
+"""
+
+[tasks."convex:setup-preview"]
+description = "Configure and seed Convex preview environment"
+usage = """
+arg "<branch_name>" help="Branch name for preview"
+"""
+run = """
+cd packages/convex
+npx convex env set BETTER_AUTH_URL --deployment preview/"$usage_branch_name" "$CONVEX_URL"
+npx convex env set BETTER_AUTH_SECRET --deployment preview/"$usage_branch_name" "$BETTER_AUTH_SECRET"
+npx convex run seed:run --deployment preview/"$usage_branch_name"
+"""
+
+[tasks."convex:set-trusted-origins"]
+description = "Set trusted origins for Convex preview environment"
+usage = """
+arg "<branch_name>" help="Branch name for preview"
+arg "<origin>" help="Origin URL"
+"""
+run = 'cd packages/convex && npx convex env set TRUSTED_ORIGINS --deployment preview/"$usage_branch_name" "$usage_origin"'
+
+[tasks."mobile:prebuild"]
+description = "Run Expo prebuild for consumer app"
+usage = """
+arg "<platform>" help="android or ios"
+"""
+run = 'cd apps/consumer-app && npx expo prebuild --platform "$usage_platform" --clean'
+
+[tasks."android:build:apk"]
+description = "Build Android release APK"
+run = "cd apps/consumer-app/android && ./gradlew assembleRelease"
+
+[tasks."android:build:aab"]
+description = "Build Android release AAB bundle"
+run = "cd apps/consumer-app/android && ./gradlew bundleRelease"
+
+[tasks."ios:pod-install"]
+description = "Install CocoaPods for iOS"
+run = "cd apps/consumer-app/ios && pod install"
+
+[tasks."ios:build"]
+description = "Build iOS release archive"
+run = """
+cd apps/consumer-app/ios && xcodebuild archive \
+  -workspace StyleSwipe.xcworkspace \
+  -scheme StyleSwipe \
+  -configuration Release \
+  -archivePath $PWD/build/StyleSwipe.xcarchive \
+  CODE_SIGNING_ALLOWED=NO
+"""
+
+[tasks."deploy:cloudflare"]
+description = "Deploy app dist directory to Cloudflare Pages"
+usage = """
+arg "<dist_dir>" help="Path to dist directory"
+arg "<project_name>" help="Cloudflare project name"
+arg "<branch>" help="Branch name"
+"""
+run = 'npx wrangler pages deploy "$usage_dist_dir" --project-name="$usage_project_name" --branch="$usage_branch"'
+
+[tasks."test:e2e:install"]
+description = "Install Playwright browsers with dependencies"
+run = "npx playwright install --with-deps chromium"
+
+[tasks."test:e2e"]
+description = "Run Playwright E2E tests"
+run = "npx playwright test"
+
+[tasks."git:promote-dev"]
+description = "Fast-forward merge dev into main and push"
+run = """
+git config --global user.name "github-actions[bot]"
+git config --global user.email "github-actions[bot]@users.noreply.github.com"
+git checkout main
+git merge --ff-only origin/dev
+git push origin main
+"""
+
+[tasks."version:bump"]
+description = "Bump patch version across package.json files and create git tag"
+run = """
+git config user.name "github-actions[bot]"
+git config user.email "github-actions[bot]@users.noreply.github.com"
+
+VERSION=$(jq -r .version package.json)
+echo "Current version: $VERSION"
+
+IFS='.' read -r -a parts <<< "$VERSION"
+parts[2]=$((parts[2] + 1))
+NEW_VERSION="${parts[0]}.${parts[1]}.${parts[2]}"
+echo "New version: $NEW_VERSION"
+
+jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > package.json.tmp && mv package.json.tmp package.json
+
+for pkg in apps/*/package.json packages/*/package.json; do
+  if [ -f "$pkg" ]; then
+    jq --arg ver "$NEW_VERSION" '.version = $ver' "$pkg" > "${pkg}.tmp" && mv "${pkg}.tmp" "$pkg"
+  fi
+done
+
+git add package.json apps/*/package.json packages/*/package.json
+git commit -m "release: v$NEW_VERSION"
+
+TAG="v$NEW_VERSION"
+git tag $TAG
+git push origin main
+git push origin $TAG
+
+echo "tag_name=$TAG" >> "$GITHUB_OUTPUT"
+"""
+
+[tasks."release:extract-info"]
+description = "Extract version, owner_lower, and changelog for production release"
+usage = """
+arg "<ref>" help="Git ref or tag name"
+arg "<repo_owner>" help="GitHub repository owner"
+"""
+run = """
+REF="$usage_ref"
+VERSION=${REF#v}
+echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+OWNER_LOWER=$(echo "$usage_repo_owner" | tr '[:upper:]' '[:lower:]')
+echo "owner_lower=$OWNER_LOWER" >> "$GITHUB_OUTPUT"
+
+git fetch --tags --unshallow || git fetch --tags || true
+
+PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+if [ -n "$PREV_TAG" ]; then
+  echo "Generating changelog between $PREV_TAG and HEAD"
+  CHANGELOG=$(git log "$PREV_TAG..HEAD" --pretty=format:"* %s (%h)" --no-merges || echo "")
+else
+  echo "No previous tag found. Generating full log."
+  CHANGELOG=$(git log --pretty=format:"* %s (%h)" --no-merges || echo "")
+fi
+
+CLEAN_CHANGELOG=$(echo "$CHANGELOG" | grep -v -E "release: v|chore:|bot-commit" || echo "No changes listed.")
+
+echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
+echo "$CLEAN_CHANGELOG" >> "$GITHUB_OUTPUT"
+echo "EOF" >> "$GITHUB_OUTPUT"
+"""
+
+[tasks."app:extract-version"]
+description = "Extract app version to GITHUB_ENV"
+run = 'echo "APP_VERSION=$(jq -r .version apps/consumer-app/package.json)" >> "$GITHUB_ENV"'
+
+[tasks."prune:unused-workspaces"]
+description = "Prune non-mobile workspaces to save disk space"
+run = "rm -rf apps/admin-panel apps/browser-extension apps/scraper-service"
 
 [tasks."typecheck:ui"]
 description = "Typecheck only the UI Kit"
@@ -93,7 +335,7 @@ run = "pnpm run --filter @app/ui-kit typecheck"
 
 [tasks.scraper]
 description = "Start Scraper Service (foreground)"
-run = "pnpm run --env-file=.env.local --filter @app/scraper-service start --"
+run = "npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/scraper-service start --"
 
 [tasks."verify:scraper"]
 description = "Typecheck only the Scraper Service"
@@ -125,79 +367,3 @@ run = "npx tsx bin/clean.ts"
 description = "Install dependencies using pnpm"
 run = "mise install && corepack enable pnpm && pnpm install"
 
-[tasks."expo:prebuild:android"]
-description = "Expo prebuild for Android"
-run = "cd apps/consumer-app && npx expo prebuild --platform android --clean"
-
-[tasks."expo:prebuild:ios"]
-description = "Expo prebuild for iOS"
-run = "cd apps/consumer-app && npx expo prebuild --platform ios --clean"
-
-[tasks."build:android:apk"]
-description = "Build Android APK"
-run = "cd apps/consumer-app/android && ./gradlew assembleRelease"
-
-[tasks."build:android:aab"]
-description = "Build Android AAB"
-run = "cd apps/consumer-app/android && ./gradlew bundleRelease"
-
-[tasks."ios:pod-install"]
-description = "Install iOS pods"
-run = "cd apps/consumer-app/ios && pod install"
-
-[tasks."build:ios:archive"]
-description = "Build iOS Archive"
-run = "cd apps/consumer-app/ios && xcodebuild archive -workspace StyleSwipe.xcworkspace -scheme StyleSwipe -configuration Release -archivePath $PWD/build/StyleSwipe.xcarchive CODE_SIGNING_ALLOWED=NO"
-
-[tasks."deploy:pages:admin"]
-description = "Deploy Admin Panel to Cloudflare Pages"
-usage = """
-arg "<branch>" help="Branch to deploy to"
-"""
-run = "npx wrangler pages deploy apps/admin-panel/dist --project-name=styleswipe-admin-panel --branch=$usage_branch"
-
-[tasks."deploy:pages:consumer"]
-description = "Deploy Consumer App to Cloudflare Pages"
-usage = """
-arg "<branch>" help="Branch to deploy to"
-"""
-run = "npx wrangler pages deploy apps/consumer-app/dist --project-name=styleswipe-consumer-app --branch=$usage_branch"
-
-[tasks."deploy:convex"]
-description = "Deploy Convex"
-run = "cd packages/convex && npx convex deploy"
-
-[tasks."deploy:convex:preview"]
-description = "Deploy Convex Preview"
-usage = """
-arg "<branch>" help="Branch to create preview for"
-"""
-run = "cd packages/convex && npx convex deploy --preview-create $usage_branch --cmd-url-env-var-name CONVEX_URL --cmd 'echo \"CONVEX_URL=$CONVEX_URL\" >> \"$GITHUB_ENV\"'"
-
-[tasks."convex:env:set"]
-description = "Set Convex Environment Variable"
-usage = """
-arg "<branch>" help="Branch to set env var for"
-arg "<key>" help="Env var key"
-arg "<value>" help="Env var value"
-"""
-run = "cd packages/convex && npx convex env set $usage_key --deployment preview/$usage_branch $usage_value"
-
-[tasks."convex:seed"]
-description = "Seed Convex Preview"
-usage = """
-arg "<branch>" help="Branch to seed"
-"""
-run = "cd packages/convex && npx convex run seed:run --deployment preview/$usage_branch"
-
-[tasks."test:e2e:install"]
-description = "Install Playwright dependencies"
-run = "npx playwright install --with-deps chromium"
-
-[tasks."test:e2e"]
-description = "Run E2E tests"
-run = "npx playwright test"
-
-[tasks."build:consumer"]
-description = "Build consumer app"
-run = "cd apps/consumer-app && pnpm run build"
