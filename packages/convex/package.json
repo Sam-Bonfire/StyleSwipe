@@ -24,7 +24,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "better-auth": "^1.6.23",
+    "better-auth": "^1.6.29",
     "convex": "^1.42.3",
     "convex-helpers": "^0.1.120"
   },
