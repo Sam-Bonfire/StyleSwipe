@@ -13,6 +13,10 @@ export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
 
 // Identity
 export * from './identity/domain/StyleDNA';
+export * from './identity/domain/Auth';
+export * from './identity/domain/errors';
+export * from './identity/application/AuthPorts';
+export * from './identity/application/OtpPorts';
 export * as InitializeStyleProfile from './identity/application/InitializeStyleProfile';
 export * as GetOnboardingQuestions from './identity/application/GetOnboardingQuestions';
 export * as ManageFeedback from './identity/application/ManageFeedback';
