@@ -14,7 +14,7 @@ export interface DisplacementConfig {
   superLikeMultiplier?: number; // Added this one too just in case
 }
 
-export interface SwipeEvent {
+export interface StyleDNASwipeEvent {
   id: string;
   timestamp: number;
   userId: string;

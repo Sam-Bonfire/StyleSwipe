@@ -38,3 +38,10 @@ export * as SearchProducts from './discovery/application/SearchProducts';
 export * as ProcessSwipe from './discovery/application/ProcessSwipe';
 export * as RecordInteraction from './discovery/application/RecordInteraction';
 export * as GetRecommendations from './discovery/application/GetRecommendations';
+
+// Discovery Domain
+export * from './discovery/domain/SwipeEvent';
+export * from './discovery/domain/RecommendationScore';
+
+// Identity Domain
+export * from './identity/domain/Onboarding';
