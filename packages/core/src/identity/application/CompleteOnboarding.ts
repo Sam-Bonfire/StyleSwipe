@@ -3,7 +3,7 @@ import { Effect } from 'effect';
 import type { StyleProfile } from '../domain/StyleProfile';
 
 import { UserRepository, Embedder } from '../../../shared/application/ports';
-import { RepositoryError, AuthError } from '../../../shared/domain/errors';
+import { RepositoryError, AuthError, OnboardingValidationError } from '../../../shared/domain/errors';
 import { initializeStyleProfile } from './InitializeStyleProfile';
 
 /**
@@ -15,10 +15,22 @@ import { initializeStyleProfile } from './InitializeStyleProfile';
 export const completeOnboarding = (
   userId: string,
   answers: Record<string, string>,
-): Effect.Effect<StyleProfile, RepositoryError | AuthError | Error, UserRepository | Embedder> =>
+): Effect.Effect<StyleProfile, RepositoryError | AuthError | OnboardingValidationError | Error, UserRepository | Embedder> =>
   Effect.gen(function* (_) {
     if (!userId) {
       return yield* _(Effect.fail(new Error('UserId is required')));
+    }
+
+    if (!answers || Object.keys(answers).length === 0) {
+      return yield* _(Effect.fail(new OnboardingValidationError('Answers are required for onboarding')));
+    }
+
+    if (!answers.gender) {
+      return yield* _(Effect.fail(new OnboardingValidationError('Gender preference is required')));
+    }
+
+    if (!answers.fit) {
+      return yield* _(Effect.fail(new OnboardingValidationError('Fit preference is required')));
     }
 
     // 1. Create base profile using domain logic
