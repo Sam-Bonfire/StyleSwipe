@@ -1,9 +1,10 @@
-import * as CheckoutService from '@app/core';
-import { Cart, CartItem, type Address } from '@app/core';
 import { Effect, Exit, Layer } from 'effect';
 import { describe, expect, it, vi } from 'vitest';
 
+import * as CheckoutService from '../../../../src/commerce/application/CheckoutService';
 import { OrderRepository } from '../../../../src/commerce/application/CheckoutService';
+import { type Address } from '../../../../src/commerce/domain/Address';
+import { createCart, addCartItem } from '../../../../src/commerce/domain/Cart';
 
 describe('CheckoutService', () => {
   it('should create an order from a cart', async () => {
@@ -14,16 +15,18 @@ describe('CheckoutService', () => {
     
     const layer = Layer.succeed(OrderRepository, repoMock);
 
-    const cart = new Cart('user-1');
-    cart.addItem(new CartItem('prod-1', 1, 1000, { brand: 'Test' }));
+    let cart = createCart({ userId: 'user-1' });
+    cart = addCartItem(cart, { productId: 'prod-1', quantity: 1, price: 1000, selectedAttributes: { brand: 'Test' } });
 
     const address: Address = {
       fullName: 'Sam Altman',
-      street: '123 AI Blvd',
+      addressLine1: '123 AI Blvd',
       city: 'San Francisco',
       state: 'CA',
-      zipCode: '94103',
-      phone: '555-0199',
+      postalCode: '94103',
+      phoneNumber: '5550199000',
+      country: 'US',
+      isDefault: false
     };
 
     const order = await Effect.runPromise(
@@ -31,7 +34,7 @@ describe('CheckoutService', () => {
     );
 
     expect(order.id).toBe('order-123');
-    expect(order.totalAmount).toBeGreaterThan(1000); // Including tax/shipping
+    expect(order.pricing.totalAmount).toBeGreaterThan(1000); // Including tax/shipping
     expect(repoMock.save).toHaveBeenCalledTimes(1);
   });
 
@@ -43,14 +46,16 @@ describe('CheckoutService', () => {
     
     const layer = Layer.succeed(OrderRepository, repoMock);
     
-    const cart = new Cart('user-1'); // Empty
+    const cart = createCart({ userId: 'user-1' }); // Empty
     const address: Address = {
       fullName: 'Sam Altman',
-      street: '123 AI Blvd',
+      addressLine1: '123 AI Blvd',
       city: 'San Francisco',
       state: 'CA',
-      zipCode: '94103',
-      phone: '555-0199',
+      postalCode: '94103',
+      phoneNumber: '5550199000',
+      country: 'US',
+      isDefault: false
     };
 
     const exit = await Effect.runPromiseExit(

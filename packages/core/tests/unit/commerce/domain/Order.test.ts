@@ -1,70 +1,103 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Address } from '../../../../src/commerce/domain/Order';
+import type { Address } from '../../../../src/commerce/domain/Address';
 
-import { Order, OrderItem, OrderStatus } from '../../../../src/commerce/domain/Order';
+import { createOrder, updateOrderStatus, type OrderItem } from '../../../../src/commerce/domain/Order';
 
-describe('OrderItem', () => {
-    it('should calculate total as price * quantity', () => {
-        const item = new OrderItem('prod-1', 3, 250, 'Nike', 'Air Max', 'img.jpg');
-        expect(item.total).toBe(750);
+describe('Order Domain Schema', () => {
+  const mockAddress: Address = {
+    fullName: 'John Doe',
+    addressLine1: '123 Main St',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    postalCode: '400001',
+    phoneNumber: '9876543210',
+    country: 'India',
+    isDefault: false,
+  };
+
+  it('should create an order with default PENDING status', () => {
+    const items: OrderItem[] = [{ productId: 'prod-1', quantity: 1, price: 100, brand: 'Nike', title: 'Shirt', image: 'img.jpg' }];
+
+    const order = createOrder({
+      userId: 'user-1',
+      items,
+      deliveryAddress: mockAddress,
+      pricing: {
+        subtotal: 100,
+        shippingCost: 0,
+        discountAmount: 0,
+        tax: 5,
+        totalAmount: 105,
+      }
     });
 
-    it('should handle quantity of 1', () => {
-        const item = new OrderItem('prod-1', 1, 999, 'Adidas', 'Ultraboost', 'img.jpg');
-        expect(item.total).toBe(999);
+    expect(order.status).toBe('PENDING');
+    expect(order.statusHistory.length).toBe(1);
+    expect(order.statusHistory[0].status).toBe('PENDING');
+  });
+
+  it('should accept a custom initial status', () => {
+    const items: OrderItem[] = [{ productId: 'prod-1', quantity: 1, price: 100 }];
+
+    const order = createOrder({
+      userId: 'user-1',
+      items,
+      deliveryAddress: mockAddress,
+      status: 'SHIPPED',
+      pricing: {
+        subtotal: 100,
+        shippingCost: 0,
+        discountAmount: 0,
+        tax: 5,
+        totalAmount: 105,
+      }
     });
 
-    it('should handle zero quantity', () => {
-        const item = new OrderItem('prod-1', 0, 500, 'Puma', 'RS-X', 'img.jpg');
-        expect(item.total).toBe(0);
+    expect(order.status).toBe('SHIPPED');
+    expect(order.statusHistory[0].status).toBe('SHIPPED');
+  });
+
+  it('should set createdAt to current time by default', () => {
+    const before = Date.now();
+    const items: OrderItem[] = [{ productId: 'prod-1', quantity: 1, price: 100 }];
+    const order = createOrder({
+      userId: 'user-1',
+      items,
+      deliveryAddress: mockAddress,
+      pricing: { subtotal: 100, shippingCost: 0, discountAmount: 0, tax: 5, totalAmount: 105 }
     });
-});
+    const after = Date.now();
 
-describe('Order', () => {
-    const mockAddress: Address = {
-        fullName: 'John Doe',
-        street: '123 Main St',
-        city: 'Mumbai',
-        state: 'Maharashtra',
-        zipCode: '400001',
-        phone: '9876543210',
-    };
+    expect(order.createdAt).toBeGreaterThanOrEqual(before);
+    expect(order.createdAt).toBeLessThanOrEqual(after);
+  });
 
-    it('should default to PENDING status', () => {
-        const items = [new OrderItem('prod-1', 1, 100, 'Nike', 'Shirt', 'img.jpg')];
-        const order = new Order('ord-1', 'user-1', items, mockAddress, undefined, undefined, 100, 0, 5);
-        expect(order.status).toBe(OrderStatus.PENDING);
-    });
-
-    it('should accept a custom status', () => {
-        const items = [new OrderItem('prod-1', 1, 100, 'Nike', 'Shirt', 'img.jpg')];
-        const order = new Order('ord-1', 'user-1', items, mockAddress, OrderStatus.SHIPPED, undefined, 100, 0, 5);
-        expect(order.status).toBe(OrderStatus.SHIPPED);
-    });
-
-    it('should set createdAt to current time by default', () => {
-        const before = Date.now();
-        const items = [new OrderItem('prod-1', 1, 100, 'Nike', 'Shirt', 'img.jpg')];
-        const order = new Order('ord-1', 'user-1', items, mockAddress, undefined, undefined, 100, 0, 5);
-        const after = Date.now();
-        expect(order.createdAt).toBeGreaterThanOrEqual(before);
-        expect(order.createdAt).toBeLessThanOrEqual(after);
+  it('should update status and append to history', () => {
+    const items: OrderItem[] = [{ productId: 'prod-1', quantity: 2, price: 100 }];
+    let order = createOrder({
+      userId: 'user-1',
+      items,
+      deliveryAddress: mockAddress,
+      pricing: { subtotal: 200, shippingCost: 50, discountAmount: 0, tax: 20, totalAmount: 270 }
     });
 
-    it('should store all constructor properties', () => {
-        const items = [
-            new OrderItem('prod-1', 2, 100, 'Nike', 'Shirt', 'img.jpg'),
-            new OrderItem('prod-2', 1, 200, 'Adidas', 'Pants', 'img2.jpg'),
-        ];
-        const order = new Order('ord-1', 'user-1', items, mockAddress, OrderStatus.CONFIRMED, 1700000000000, 400, 50, 20);
+    order = updateOrderStatus(order, 'CONFIRMED', 'Payment verified');
 
-        expect(order.id).toBe('ord-1');
-        expect(order.userId).toBe('user-1');
-        expect(order.items).toHaveLength(2);
-        expect(order.shippingAddress).toEqual(mockAddress);
-        expect(order.totalAmount).toBe(400);
-        expect(order.shippingCost).toBe(50);
-        expect(order.tax).toBe(20);
-    });
+    expect(order.status).toBe('CONFIRMED');
+    expect(order.statusHistory.length).toBe(2);
+    expect(order.statusHistory[1].status).toBe('CONFIRMED');
+    expect(order.statusHistory[1].reason).toBe('Payment verified');
+  });
+
+  it('should fail to create order with no items', () => {
+    expect(() => {
+      createOrder({
+        userId: 'user-1',
+        items: [],
+        deliveryAddress: mockAddress,
+        pricing: { subtotal: 0, shippingCost: 0, discountAmount: 0, tax: 0, totalAmount: 0 }
+      });
+    }).toThrow();
+  });
 });
