@@ -47,6 +47,12 @@ export * from './notifications/domain';
 
 // Audit
 export * from './audit/domain';
+// Social
+export * from './social/domain/PartnerSyncSession';
+export * from './social/domain/StyleBoard';
+
+// Affiliate
+export * from './affiliate/domain/AffiliateRedirect';
 // Discovery Domain
 export * from './discovery/domain/SwipeEvent';
 export * from './discovery/domain/RecommendationScore';
