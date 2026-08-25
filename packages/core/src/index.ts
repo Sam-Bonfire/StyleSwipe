@@ -42,6 +42,7 @@ export * as ManageCart from './commerce/application/ManageCart';
 export * as CheckoutService from './commerce/application/CheckoutService';
 
 // Discovery
+export * from './discovery/domain';
 export * from './discovery/application/DiscoveryPorts';
 export * as SearchProducts from './discovery/application/SearchProducts';
 export * as ProcessSwipe from './discovery/application/ProcessSwipe';
