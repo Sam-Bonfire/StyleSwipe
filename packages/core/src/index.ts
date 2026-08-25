@@ -39,6 +39,14 @@ export * as ProcessSwipe from './discovery/application/ProcessSwipe';
 export * as RecordInteraction from './discovery/application/RecordInteraction';
 export * as GetRecommendations from './discovery/application/GetRecommendations';
 
+// Feedback
+export * from './feedback/domain';
+
+// Notifications
+export * from './notifications/domain';
+
+// Audit
+export * from './audit/domain';
 // Social
 export * from './social/domain/PartnerSyncSession';
 export * from './social/domain/StyleBoard';
