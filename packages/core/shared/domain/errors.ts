@@ -21,3 +21,19 @@ export class AuthError {
     readonly cause?: unknown,
   ) {}
 }
+
+export class OnboardingValidationError extends Error {
+  readonly _tag = 'OnboardingValidationError' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'OnboardingValidationError';
+  }
+}
+
+export class StyleProfileNotFoundError extends Error {
+  readonly _tag = 'StyleProfileNotFoundError' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'StyleProfileNotFoundError';
+  }
+}
