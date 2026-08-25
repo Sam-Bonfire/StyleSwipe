@@ -12,7 +12,8 @@ export * as ManageAdminDashboard from './catalog/application/ManageAdminDashboar
 export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
 
 // Identity
-export * from './identity/domain/AuthSession';
+export { AuthSessionSchema, AuthSessionService } from './identity/domain/AuthSession';
+export type { AuthSession, DeviceContext } from './identity/domain/AuthSession';
 export * from './identity/domain/IdentityAccount';
 export * from './identity/domain/Permissions';
 export * from './identity/domain/Role';
