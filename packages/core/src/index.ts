@@ -12,6 +12,11 @@ export * as ManageAdminDashboard from './catalog/application/ManageAdminDashboar
 export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
 
 // Identity
+export { AuthSessionSchema, AuthSessionService } from './identity/domain/AuthSession';
+export type { AuthSession, DeviceContext } from './identity/domain/AuthSession';
+export * from './identity/domain/IdentityAccount';
+export * from './identity/domain/Permissions';
+export * from './identity/domain/Role';
 export * from './identity/domain/StyleDNA';
 export * as InitializeStyleProfile from './identity/application/InitializeStyleProfile';
 export * as GetOnboardingQuestions from './identity/application/GetOnboardingQuestions';
