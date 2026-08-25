@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { Cart, CartItem } from '../../../../src/commerce/domain/Cart';
+import { type Cart, createCart, addCartItem } from '../../../../src/commerce/domain/Cart';
 import { PriceEstimator } from '../../../../src/commerce/domain/PriceEstimator';
 
 describe('PriceEstimator', () => {
     function makeCart(items: { price: number; qty: number }[]): Cart {
-        const cart = new Cart('user-1');
+        let cart = createCart({ userId: 'user-1' });
         for (const { price, qty } of items) {
-            cart.addItem(new CartItem(`prod-${price}`, qty, price, {}));
+            cart = addCartItem(cart, { productId: `prod-${price}`, quantity: qty, price });
         }
         return cart;
     }
@@ -65,7 +65,7 @@ describe('PriceEstimator', () => {
     });
 
     it('should handle empty cart', () => {
-        const cart = new Cart('user-1');
+        const cart = createCart({ userId: 'user-1' });
         const result = PriceEstimator.estimate(cart);
         expect(result.subtotal).toBe(0);
         expect(result.shipping).toBe(100); // below threshold
