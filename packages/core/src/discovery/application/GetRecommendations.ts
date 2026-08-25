@@ -61,18 +61,20 @@ export const getRecommendations = (
         }
 
         // Price Affinity Scoring
-        if (product.price >= profile.budget.min && product.price <= profile.budget.max) {
+        if (profile.budget && product.price >= profile.budget.min && product.price <= profile.budget.max) {
             score += 1.0;
-        } else {
+        } else if (profile.budget) {
             score -= 0.5; // Penalty for being outside budget
         }
 
         // Brand/Category Affinities
-        const brandMatch = profile.vibes.some(v => product.brand?.toLowerCase().includes(v.toLowerCase()));
-        if (brandMatch) score += 0.5;
+        if (profile.vibes) {
+            const brandMatch = profile.vibes.some(v => product.brand?.toLowerCase().includes(v.toLowerCase()));
+            if (brandMatch) score += 0.5;
 
-        const categoryMatch = profile.vibes.some(v => product.category?.toLowerCase().includes(v.toLowerCase()));
-        if (categoryMatch) score += 0.5;
+            const categoryMatch = profile.vibes.some(v => product.category?.toLowerCase().includes(v.toLowerCase()));
+            if (categoryMatch) score += 0.5;
+        }
 
         return { product, score };
     });

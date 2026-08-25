@@ -8,7 +8,7 @@ import { User } from '../../../../src/identity/domain/User';
 
 describe('AuthPorts', () => {
   it('should resolve AuthRepository port', async () => {
-    const mockUser = new User('user-1', 'Test User');
+    const mockUser: User = { id: 'user-1', name: 'Test User' };
 
     const AuthRepositoryLive = Layer.succeed(
       AuthRepository,

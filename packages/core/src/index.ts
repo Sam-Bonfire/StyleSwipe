@@ -1,10 +1,51 @@
- 
 // Shared Domain Types & Ports
-export * from '../shared/domain/types';
+export type {
+  StyleSizes,
+  BudgetRange,
+  Session,
+  Account,
+  Verification,
+  VerificationType,
+  Organization,
+  OrganizationType,
+  OrganizationMetadata,
+  Member,
+  MemberRole,
+  FeatureFlag,
+  FeatureFlagRule,
+  FeatureFlagRuleType,
+  Environment,
+  LogLevel,
+  LogEntry,
+  SampledEvent,
+  ProductAttributes,
+  PartnerSync,
+  PartnerSyncStatus,
+  Platform,
+  ScrapedProduct,
+  QueueItem,
+  QueueItemStatus,
+  Feedback,
+  FeedbackType,
+  FeedbackStatus,
+  FeedbackReply,
+  ScrapingJob,
+  ScrapeJobType,
+  ScrapeJobStatus,
+  ScraperMode,
+  AdminStats,
+  PaginationOpts,
+  PaginatedResult,
+  EntityId,
+  UnixTimestamp,
+  EmbeddingVector,
+} from '../shared/domain/types';
 export * from '../shared/domain/errors';
 export * from '../shared/application/ports';
 
 // Catalog
+export * from './catalog/domain/Product';
+export * from './catalog/domain/Category';
 export * from './catalog/domain/TaggingService';
 export * as TagProduct from './catalog/application/TagProduct';
 export * as BrowseCatalog from './catalog/application/BrowseCatalog';
@@ -12,9 +53,10 @@ export * as ManageAdminDashboard from './catalog/application/ManageAdminDashboar
 export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
 
 // Identity
+export * from './identity/domain/User';
+export * from './identity/domain/StyleProfile';
 export { AuthSessionSchema, AuthSessionService } from './identity/domain/AuthSession';
 export type { AuthSession, DeviceContext } from './identity/domain/AuthSession';
-export * from './identity/domain/IdentityAccount';
 export * from './identity/domain/Permissions';
 export * from './identity/domain/Role';
 export * from './identity/domain/StyleDNA';
