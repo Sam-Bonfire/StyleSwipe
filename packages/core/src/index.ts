@@ -39,6 +39,12 @@ export * as ProcessSwipe from './discovery/application/ProcessSwipe';
 export * as RecordInteraction from './discovery/application/RecordInteraction';
 export * as GetRecommendations from './discovery/application/GetRecommendations';
 
+// Social
+export * from './social/domain/PartnerSyncSession';
+export * from './social/domain/StyleBoard';
+
+// Affiliate
+export * from './affiliate/domain/AffiliateRedirect';
 // Discovery Domain
 export * from './discovery/domain/SwipeEvent';
 export * from './discovery/domain/RecommendationScore';
