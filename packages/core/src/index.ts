@@ -47,3 +47,9 @@ export * from './notifications/domain';
 
 // Audit
 export * from './audit/domain';
+// Discovery Domain
+export * from './discovery/domain/SwipeEvent';
+export * from './discovery/domain/RecommendationScore';
+
+// Identity Domain
+export * from './identity/domain/Onboarding';
