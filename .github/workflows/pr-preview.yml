@@ -72,18 +72,13 @@ jobs:
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
-        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: styleswipe-consumer-app
-          directory: apps/consumer-app/dist
-          branch: ${{ github.head_ref }}
+        run: mise run deploy:cloudflare apps/consumer-app/dist styleswipe-consumer-app "${{ steps.sanitize_branch.outputs.branch_name }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Configure Convex Trusted Origins
-        if: ${{ steps.cloudflare.outputs.url != '' }}
-        run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "${{ steps.cloudflare.outputs.url }}"
+        run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
@@ -93,4 +88,4 @@ jobs:
       - name: Run Playwright E2E Tests
         run: mise run test:e2e
         env:
-          PREVIEW_URL: ${{ steps.cloudflare.outputs.url }}
+          PREVIEW_URL: "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
