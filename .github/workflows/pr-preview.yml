@@ -80,7 +80,7 @@ jobs:
 
       - name: Configure Convex Trusted Origins
         if: ${{ steps.cloudflare.outputs.deployed == 'true' }}
-        run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
+        run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "${{ steps.cloudflare.outputs.url }}"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
@@ -92,4 +92,4 @@ jobs:
         if: ${{ steps.cloudflare.outputs.deployed == 'true' }}
         run: mise run test:e2e
         env:
-          PREVIEW_URL: "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
+          PREVIEW_URL: "${{ steps.cloudflare.outputs.url }}"

@@ -49,7 +49,8 @@ const args = [
 ];
 
 const result = spawnSync('pnpm', args, {
-  stdio: 'inherit',
+  stdio: 'pipe',
+  encoding: 'utf-8',
   env: {
     ...process.env,
     CLOUDFLARE_API_TOKEN: apiToken,
@@ -58,11 +59,24 @@ const result = spawnSync('pnpm', args, {
   shell: true,
 });
 
+if (result.stdout) {
+  process.stdout.write(result.stdout);
+}
+if (result.stderr) {
+  process.stderr.write(result.stderr);
+}
+
 if (result.status !== 0) {
   console.error(`❌ Cloudflare deployment failed with exit code ${result.status}`);
   setGithubOutput('deployed', 'false');
   process.exit(result.status ?? 1);
 }
 
+const stdout = result.stdout || '';
+const aliasMatch = stdout.match(/Deployment alias URL:\s*(https:\/\/[^\s]+)/i);
+const urlMatch = stdout.match(/Take a peek over at\s*(https:\/\/[^\s]+)/i);
+const finalUrl = aliasMatch?.[1] || urlMatch?.[1] || `https://${branch}.${projectName}.pages.dev`;
+
 setGithubOutput('deployed', 'true');
-console.log(`✅ Successfully deployed ${projectName} to Cloudflare Pages!`);
+setGithubOutput('url', finalUrl);
+console.log(`✅ Successfully deployed ${projectName} to Cloudflare Pages: ${finalUrl}`);
