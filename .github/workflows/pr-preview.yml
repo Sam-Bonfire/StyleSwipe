@@ -15,6 +15,7 @@ concurrency:
 env:
   TURBO_CACHE_DIR: .turbo
   MISE_TRUSTED_CONFIG_PATHS: '/'
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
 jobs:
   validation-and-preview:
@@ -78,21 +79,17 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Configure Convex Trusted Origins
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_API_TOKEN != null }}
         run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Install Playwright Browsers
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_API_TOKEN != null }}
         run: mise run test:e2e:install
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Run Playwright E2E Tests
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_API_TOKEN != null }}
         run: mise run test:e2e
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           PREVIEW_URL: "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
