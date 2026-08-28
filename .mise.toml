@@ -236,7 +236,7 @@ arg "<dist_dir>" help="Path to dist directory"
 arg "<project_name>" help="Cloudflare project name"
 arg "<branch>" help="Branch name"
 """
-run = 'npx wrangler pages deploy "$usage_dist_dir" --project-name="$usage_project_name" --branch="$usage_branch"'
+run = 'npx tsx bin/deploy-cloudflare.ts "$usage_dist_dir" "$usage_project_name" "$usage_branch"'
 
 [tasks."test:e2e:install"]
 description = "Install Playwright browsers with dependencies"

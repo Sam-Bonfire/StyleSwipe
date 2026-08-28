@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Turbo Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.sha }}
@@ -72,6 +72,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages (Preview)
         id: cloudflare
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -81,6 +82,7 @@ jobs:
           branch: ${{ github.head_ref }}
 
       - name: Configure Convex Trusted Origins
+        if: ${{ steps.cloudflare.outputs.url != '' }}
         run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "${{ steps.cloudflare.outputs.url }}"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
