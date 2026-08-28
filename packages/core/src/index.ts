@@ -60,7 +60,6 @@ export type { AuthSession, DeviceContext } from './identity/domain/AuthSession';
 export * from './identity/domain/Permissions';
 export * from './identity/domain/Role';
 export * from './identity/domain/StyleDNA';
-export * from './identity/domain/Auth';
 export * from './identity/domain/errors';
 export * from './identity/application/AuthPorts';
 export * from './identity/application/OtpPorts';
