@@ -79,17 +79,17 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Configure Convex Trusted Origins
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_API_TOKEN != null }}
+        if: ${{ steps.cloudflare.outputs.deployed == 'true' }}
         run: mise run convex:set-trusted-origins "${{ steps.sanitize_branch.outputs.branch_name }}" "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Install Playwright Browsers
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_API_TOKEN != null }}
+        if: ${{ steps.cloudflare.outputs.deployed == 'true' }}
         run: mise run test:e2e:install
 
       - name: Run Playwright E2E Tests
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_API_TOKEN != null }}
+        if: ${{ steps.cloudflare.outputs.deployed == 'true' }}
         run: mise run test:e2e
         env:
           PREVIEW_URL: "https://${{ steps.sanitize_branch.outputs.branch_name }}.styleswipe-consumer-app.pages.dev"

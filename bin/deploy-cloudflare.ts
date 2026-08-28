@@ -1,4 +1,12 @@
 import { spawnSync } from 'child_process';
+import * as fs from 'fs';
+
+function setGithubOutput(key: string, value: string): void {
+  const outputFile = process.env.GITHUB_OUTPUT;
+  if (outputFile && fs.existsSync(outputFile)) {
+    fs.appendFileSync(outputFile, `${key}=${value}\n`);
+  }
+}
 
 function getArg(index: number, envKey: string): string | undefined {
   const arg = process.argv[index];
@@ -24,6 +32,7 @@ if (!apiToken || apiToken.trim() === '') {
   console.warn(`⚠️ WARNING: CLOUDFLARE_API_TOKEN is not set or is empty.`);
   console.warn(`⚠️ Skipping Cloudflare Pages deployment for "${projectName}".`);
   console.warn(`👉 To enable Cloudflare Pages deployments, please set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in GitHub Secrets/Environment Secrets.`);
+  setGithubOutput('deployed', 'false');
   process.exit(0);
 }
 
@@ -51,7 +60,9 @@ const result = spawnSync('pnpm', args, {
 
 if (result.status !== 0) {
   console.error(`❌ Cloudflare deployment failed with exit code ${result.status}`);
+  setGithubOutput('deployed', 'false');
   process.exit(result.status ?? 1);
 }
 
+setGithubOutput('deployed', 'true');
 console.log(`✅ Successfully deployed ${projectName} to Cloudflare Pages!`);
