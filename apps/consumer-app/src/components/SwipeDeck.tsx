@@ -1,4 +1,4 @@
-import { type Vector384 } from '@app/core';
+import { type Vector384, FilterState } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
@@ -21,7 +21,11 @@ interface SwipeDeckProduct {
   embedding?: Vector384;
 }
 
-export function SwipeDeck() {
+export interface SwipeDeckProps {
+  filterState?: FilterState;
+}
+
+export function SwipeDeck({ filterState }: SwipeDeckProps) {
   const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
@@ -32,6 +36,9 @@ export function SwipeDeck() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Note: The actual useVectorFeed does not accept filters in this mock version,
+    // but we pass it conceptually or re-trigger to simulate applying filters.
+    setProducts(null); // Reset before fetching
     getVectorFeed({ limit: 10 })
       .then((data) => {
         console.log('Feed data received:', data?.length);
@@ -42,7 +49,7 @@ export function SwipeDeck() {
         setError(e.message || 'Unknown error fetching feed');
         setProducts([]); // Stop loading
       });
-  }, [getVectorFeed]);
+  }, [getVectorFeed, filterState]);
 
   if (error) {
     return (
