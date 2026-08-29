@@ -1,7 +1,9 @@
+import type { Product } from '@app/core/src/catalog/domain/Product';
+
 import { describe, expect, it } from 'vitest';
 import { createActor } from 'xstate';
+
 import { swipeMachine } from '../../../src/state/swipeMachine';
-import type { Product } from '@app/core/src/catalog/domain/Product';
 
 const createMockProduct = (id: string): Product =>
   ({
@@ -151,7 +153,7 @@ describe('Swipe Machine', () => {
     const deck = Array.from({ length: 10 }, (_, i) => createMockProduct(`${i}`));
     actor.send({ type: 'LOAD_DECK', deck });
 
-    const getNeedsRefill = (ctx: any) => ctx.deck.length - ctx.currentIndex <= 5;
+    const getNeedsRefill = (ctx: { deck: Product[]; currentIndex: number }) => ctx.deck.length - ctx.currentIndex <= 5;
 
     // Initial state: 10 cards left
     expect(getNeedsRefill(actor.getSnapshot().context)).toBe(false);

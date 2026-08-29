@@ -1,6 +1,8 @@
-import { useMachine } from '@xstate/react';
-import { swipeMachine, SwipeMachineEvents } from '../state/swipeMachine';
 import type { Product } from '@app/core/src/catalog/domain/Product';
+
+import { useMachine } from '@xstate/react';
+
+import { swipeMachine, SwipeMachineEvents } from '../state/swipeMachine';
 
 export const useSwipeMachine = () => {
   const [state, send] = useMachine(swipeMachine);

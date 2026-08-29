@@ -1,5 +1,6 @@
-import { setup, assign } from 'xstate';
 import type { Product } from '@app/core/src/catalog/domain/Product';
+
+import { setup, assign } from 'xstate';
 
 export type SwipeAction = 'like' | 'pass' | 'super';
 

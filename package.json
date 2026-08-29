@@ -33,6 +33,8 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-hexagonal-architecture": "^1.0.0",
     "eslint-plugin-perfectionist": "^3.0.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "lightningcss-linux-x64-gnu": "1.33.0",
     "tsx": "^4.23.12",
