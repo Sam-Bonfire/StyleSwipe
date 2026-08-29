@@ -8,6 +8,8 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { YStack, Spinner } from 'tamagui';
 
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { OfflineBanner } from '../src/components/OfflineBanner';
 import { authAdapter } from '../src/lib/auth';
 import { logger } from '../src/lib/logger';
 import { usePushNotifications } from '../src/lib/notifications';
@@ -99,14 +101,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
-        <StyleSwipeProvider theme="BrandIdentityLight">
-          <AuthGuard>
-            <Slot />
-          </AuthGuard>
-        </StyleSwipeProvider>
-      </ConvexBetterAuthProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
+          <StyleSwipeProvider theme="BrandIdentityLight">
+            <AuthGuard>
+              <Slot />
+            </AuthGuard>
+            <OfflineBanner />
+          </StyleSwipeProvider>
+        </ConvexBetterAuthProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
