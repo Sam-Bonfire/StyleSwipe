@@ -145,7 +145,7 @@ arg "<tags>..." help="Space-separated list of image tags"
 """
 run = """
 TAG_ARGS=""
-for tag in $usage_tags; do
+for tag in $(echo "$usage_tags" | tr -d "'\\\""); do
   TAG_ARGS="$TAG_ARGS -t $tag"
 done
 docker build -f apps/"$usage_app"/Dockerfile $TAG_ARGS .
@@ -157,7 +157,7 @@ usage = """
 arg "<tags>..." help="Space-separated list of image tags"
 """
 run = """
-for tag in $usage_tags; do
+for tag in $(echo "$usage_tags" | tr -d "'\\\""); do
   docker push "$tag"
 done
 """

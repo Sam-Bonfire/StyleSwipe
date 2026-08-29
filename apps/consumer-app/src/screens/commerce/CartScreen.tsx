@@ -109,7 +109,7 @@ export const CartScreen = () => {
               const product = productMap.get(item.productId);
               const imageUrl = product?.images?.[0] || 'https://placehold.co/100x120';
               const title = product?.title || `Product ${item.productId}`;
-              const brand = product?.brand || item.attributes?.['brand'] || 'Brand';
+              const brand = product?.brand || item.selectedAttributes?.['brand'] || 'Brand';
               const originalPrice = product?.mrp || item.price;
 
               return (
@@ -122,7 +122,7 @@ export const CartScreen = () => {
                   originalPrice={originalPrice}
                   quantity={item.quantity}
                   currency="INR"
-                  size={item.attributes?.['size']}
+                  size={item.selectedAttributes?.['size']}
                   onQuantityChange={(qty) => handleUpdateQuantity(item.productId, qty)}
                   onRemove={() => handleRemove(item.productId)}
                 />

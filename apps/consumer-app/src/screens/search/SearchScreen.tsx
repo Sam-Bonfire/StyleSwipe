@@ -1,4 +1,4 @@
-import { Product, SearchProducts, Embedder } from '@app/core';
+import { SearchProducts, Embedder, type SearchResult } from '@app/core';
 import { useRecordProductView, createProductSearchRepositoryLayer, useConvexClient } from '@app/infrastructure';
 import { ProductTile, Button } from '@app/ui-kit';
 import { Search } from '@tamagui/lucide-icons';
@@ -17,7 +17,7 @@ export function SearchScreen() {
 
   // State
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Product[]>([]);
+  const [results, setResults] = useState<SearchResult['products']>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -82,7 +82,7 @@ export function SearchScreen() {
     router.push({ pathname: '/(app)/product/[id]', params: { id: productId } });
   };
 
-  const renderItem = ({ item }: { item: Product }) => {
+  const renderItem = ({ item }: { item: SearchResult['products'][number] }) => {
     const discount =
       item.mrp && item.price < item.mrp
         ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
