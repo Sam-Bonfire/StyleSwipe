@@ -1,13 +1,15 @@
 import { type Vector384 } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
+import { Undo2 } from '@tamagui/lucide-icons';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
-import { SwipeCardStack } from '@app/ui-kit/components/SwipeCardStack';
+import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { YStack, H2, H3 } from 'tamagui';
+import { YStack, H2, H3, Button } from 'tamagui';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
+import { SuperLikeStarburst } from './SwipeAnimations';
 
 
 interface SwipeDeckProduct {
@@ -29,7 +31,9 @@ export function SwipeDeck() {
   const router = useRouter();
   const { trackEvent } = useAnalytics();
 
+  const stackRef = useRef<SwipeCardStackRef>(null);
   const [error, setError] = useState<string | null>(null);
+  const [superLikeTrigger, setSuperLikeTrigger] = useState(0);
 
   useEffect(() => {
     getVectorFeed({ limit: 10 })
@@ -80,7 +84,10 @@ export function SwipeDeck() {
 
     let action: 'like' | 'pass' | 'super' = 'pass';
     if (direction === 'right') action = 'like';
-    if (direction === 'up') action = 'super';
+    if (direction === 'up') {
+      action = 'super';
+      setSuperLikeTrigger(prev => prev + 1);
+    }
 
     try {
       // 1. Process Online via use case (validates + persists)
@@ -113,30 +120,46 @@ export function SwipeDeck() {
   };
 
   return (
-    <SwipeCardStack
-      data={products}
-      keyExtractor={(item: SwipeDeckProduct) => item._id}
-      renderCard={(item: SwipeDeckProduct) => {
-        const discount =
-          item.mrp && item.price < item.mrp
-            ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
-            : undefined;
+    <YStack flex={1} position="relative">
+      <SuperLikeStarburst trigger={superLikeTrigger} />
+      <SwipeCardStack
+        ref={stackRef}
+        data={products}
+        keyExtractor={(item: SwipeDeckProduct) => item._id}
+        renderCard={(item: SwipeDeckProduct) => {
+          const discount =
+            item.mrp && item.price < item.mrp
+              ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
+              : undefined;
 
-        return (
-          <FashionCard
-            imageUrl={item.images[0] || ''}
-            title={item.title}
-            price={item.price}
-            originalPrice={item.mrp}
-            discountPercentage={discount}
-            brand={item.brand || 'Unknown'}
-            width="100%"
-            height="100%"
-            onPress={() => router.push({ pathname: '/(app)/product/[id]', params: { id: item._id } })}
-          />
-        );
-      }}
-      onSwipe={handleSwipe}
-    />
+          return (
+            <FashionCard
+              imageUrl={item.images[0] || ''}
+              title={item.title}
+              price={item.price}
+              originalPrice={item.mrp}
+              discountPercentage={discount}
+              brand={item.brand || 'Unknown'}
+              width="100%"
+              height="100%"
+              onPress={() => router.push({ pathname: '/(app)/product/[id]', params: { id: item._id } })}
+            />
+          );
+        }}
+        onSwipe={handleSwipe}
+      />
+      <Button
+        position="absolute"
+        bottom="$6"
+        right="$6"
+        size="$4"
+        circular
+        icon={Undo2}
+        onPress={() => stackRef.current?.rewind()}
+        backgroundColor="$background"
+        borderColor="$borderColor"
+        borderWidth={1}
+      />
+    </YStack>
   );
 }
