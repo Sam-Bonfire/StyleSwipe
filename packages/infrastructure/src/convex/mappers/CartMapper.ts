@@ -1,4 +1,4 @@
-import { Cart, CartItem } from '@app/core';
+import { createCart, type Cart, type CartItem } from '@app/core';
 
 export const CartMapper = {
     toDomain(data: {
@@ -7,13 +7,22 @@ export const CartMapper = {
             productId: string;
             quantity: number;
             price: number;
+            variantId?: string;
+            selectedAttributes?: Record<string, string>;
             attributes?: Record<string, string>;
         }[];
     }): Cart {
-        const items = data.items.map(
-            (i) => new CartItem(i.productId, i.quantity, i.price, i.attributes || {}),
-        );
+        const items: CartItem[] = data.items.map((i) => ({
+            productId: i.productId,
+            variantId: i.variantId,
+            quantity: i.quantity,
+            price: i.price,
+            selectedAttributes: i.selectedAttributes || i.attributes || {},
+        }));
 
-        return new Cart(data.userId, items);
+        return createCart({
+            userId: data.userId,
+            items,
+        });
     },
 };

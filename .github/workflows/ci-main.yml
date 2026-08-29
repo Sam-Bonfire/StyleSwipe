@@ -32,7 +32,7 @@ jobs:
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust
@@ -66,13 +66,13 @@ jobs:
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -87,8 +87,8 @@ jobs:
           TAG_BASE="ghcr.io/${OWNER_LOWER}/${{ matrix.app }}"
           VERSION=${{ needs.create-release.outputs.new_version }}
           TAGS="${TAG_BASE}:latest ${TAG_BASE}:${VERSION}"
-          mise run docker:build "${{ matrix.app }}" "$TAGS"
-          mise run docker:push "$TAGS"
+          mise run docker:build "${{ matrix.app }}" $TAGS
+          mise run docker:push $TAGS
 
   build-publish-extension:
     needs: [create-release]
@@ -98,7 +98,7 @@ jobs:
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust
@@ -134,7 +134,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust
@@ -182,7 +182,7 @@ jobs:
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust
@@ -236,7 +236,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust
@@ -288,7 +288,7 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-
       - name: Setup Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
         with:
           install: true
       - run: mise trust

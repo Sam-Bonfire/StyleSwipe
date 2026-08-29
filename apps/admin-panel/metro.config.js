@@ -32,9 +32,9 @@ const DEDUPLICATED_MODULES = [
 const deduplicatedPaths = {};
 for (const mod of DEDUPLICATED_MODULES) {
   try {
-    deduplicatedPaths[mod] = path.dirname(require.resolve(`${mod}/package.json`, { paths: [projectRoot] }));
+    deduplicatedPaths[mod] = path.dirname(require.resolve(`${mod}/package.json`, { paths: [projectRoot, workspaceRoot] }));
   } catch {
-    deduplicatedPaths[mod] = path.resolve(projectRoot, 'node_modules', mod);
+    // If not found, do not set dummy path that breaks module resolution
   }
 }
 

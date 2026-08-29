@@ -1,8 +1,8 @@
-import { Address, PriceEstimator, EventRepository } from '@app/core';
+import { PriceEstimator, EventRepository } from '@app/core';
 import { useCurrentUser, useCart, useClearCart, createEventRepositoryLayer } from '@app/infrastructure';
 import { ConvexClient, useConvexClient } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
-import { AddressForm } from '@app/ui-kit/components/AddressForm';
+import { AddressForm, Address as FormAddress } from '@app/ui-kit/components/AddressForm';
 import { CheckCircle, CreditCard, MapPin } from '@tamagui/lucide-icons';
 import { Effect } from 'effect';
 import { useRouter } from 'expo-router';
@@ -14,7 +14,7 @@ export const CheckoutScreen = () => {
   const router = useRouter();
   const convex = useConvexClient();
   const [step, setStep] = useState<'ADDRESS' | 'PAYMENT' | 'CONFIRMATION'>('ADDRESS');
-  const [address, setAddress] = useState<Address | null>(null);
+  const [address, setAddress] = useState<FormAddress | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ export const CheckoutScreen = () => {
   const cart = useCart(userId);
   const clearCart = useClearCart();
 
-  const handleAddressSubmit = (addr: Address) => {
+  const handleAddressSubmit = (addr: FormAddress) => {
     setAddress(addr);
     setStep('PAYMENT');
   };

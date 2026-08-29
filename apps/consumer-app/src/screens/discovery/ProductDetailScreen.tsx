@@ -1,5 +1,6 @@
 
-import { CartItem } from '@app/core';
+import type { CartItem } from '@app/core';
+
 import { useCurrentUser, useProduct, useAddToCart, useWishlist, useToggleWishlist, useAnalytics } from '@app/infrastructure';
 import { TopBarIconButton, RatingStars, SizeChipGroup, SizeField, Button, CategoryChip } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
@@ -267,11 +268,16 @@ export function ProductDetailScreen() {
 
     setIsLoading(true);
     try {
-      const item = new CartItem(product.id, 1, product.price, {
-        brand: product.brand,
-        size: selectedSize,
-        color: 'Black',
-      });
+      const item: CartItem = {
+        productId: product.id,
+        quantity: 1,
+        price: product.price,
+        selectedAttributes: {
+          brand: product.brand,
+          size: selectedSize,
+          color: 'Black',
+        },
+      };
       await addToCart(userId, item);
       trackEvent('added_to_cart', undefined, { variant: 'macro_v1', productId: product.id });
       
