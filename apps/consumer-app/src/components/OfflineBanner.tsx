@@ -9,13 +9,11 @@ export function OfflineBanner() {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
     const checkNetwork = async () => {
       try {
         const networkState = await Network.getNetworkStateAsync();
         setIsOffline(networkState.isConnected === false);
-      } catch (e) {
+      } catch {
         // Assume online if we can't check
       }
     };
@@ -24,7 +22,7 @@ export function OfflineBanner() {
     checkNetwork();
 
     // Poll every 5 seconds since expo-network doesn't have an event listener for state changes
-    interval = setInterval(checkNetwork, 5000);
+    const interval = setInterval(checkNetwork, 5000);
 
     return () => clearInterval(interval);
   }, []);
