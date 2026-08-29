@@ -1,8 +1,8 @@
 import { type Vector384 } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
-import { Undo2 } from '@tamagui/lucide-icons';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
+import { Undo2 } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator } from 'react-native';

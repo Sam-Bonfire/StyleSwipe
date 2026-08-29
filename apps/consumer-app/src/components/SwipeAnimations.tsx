@@ -5,8 +5,6 @@ import Animated, {
   useSharedValue,
   withDelay,
   withSpring,
-  withTiming,
-  Easing,
 } from 'react-native-reanimated';
 import { YStack } from 'tamagui';
 
