@@ -1,10 +1,4 @@
-import React, { useState } from 'react';
-import { View, Alert, Linking, ScrollView, Platform, SafeAreaView } from 'react-native';
-import { YStack, XStack, Text, Button, Spinner, Image } from 'tamagui';
-import { ChevronLeft, Share as ShareIcon, X } from '@tamagui/lucide-icons';
-import { useRouter } from 'expo-router';
-
-
+import { AffiliateLinkSchema } from '@app/core';
 import {
   useCurrentUser,
   useBoard,
@@ -13,13 +7,17 @@ import {
   useRemoveBoardItem
 } from '@app/infrastructure';
 import { AvatarGroup, TopBarIconButton, ProductTile } from '@app/ui-kit';
-import { AffiliateLinkSchema } from '@app/core';
+import { ChevronLeft, Share as ShareIcon, X } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { View, Alert, Linking, ScrollView, Platform, SafeAreaView } from 'react-native';
+import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 export function StyleBoardScreen({ boardId }: { boardId: string }) {
   const router = useRouter();
   const user = useCurrentUser();
   const board = useBoard(boardId, user?._id);
-  const activeSyncs = useActivePartnerSync(user?._id) as any[];
+  const activeSyncs = useActivePartnerSync(user?._id) as Record<string, unknown>[];
   const createSync = useCreatePartnerSync();
   const removeBoardItem = useRemoveBoardItem();
 
@@ -44,7 +42,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
 
       const message = `Let's sync our style on StyleSwipe! Click here to collaborate on my board: ${url}`;
 
-      const { Share } = require('react-native');
+      const Share = (await import('react-native')).Share;
       await Share.share({
         message,
         url: Platform.OS === 'ios' ? url : undefined,
@@ -145,7 +143,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
 
         {/* Grid Section */}
         <XStack flexWrap="wrap" padding="$2">
-          {board.items?.map((item: any) => {
+          {board.items?.map((item: { productId: string; matchStatus: string; product: Record<string, unknown> }) => {
             const product = item.product;
             if (!product) return null;
 
@@ -153,8 +151,8 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
               <YStack key={item.productId} width="50%" padding="$2">
                 <View style={{ position: 'relative' }}>
                   <ProductTile
-                    product={product as any}
-                    onPress={() => router.push(`/product/${item.productId}` as any)}
+                    product={product as Record<string, unknown>}
+                    onPress={() => router.push(`/product/${item.productId}` as never)}
                   />
 
                   {/* Match Indicator Badge */}
@@ -199,7 +197,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
                 <Button
                   size="$2"
                   marginTop="$2"
-                  onPress={() => handleShop(item.productId, product.url || 'https://styleswipe.com', product.merchantName || product.platform)}
+                  onPress={() => handleShop(item.productId, (product.url as string) || 'https://styleswipe.com', (product.merchantName as string) || (product.platform as string))}
                 >
                   Shop on Merchant
                 </Button>
