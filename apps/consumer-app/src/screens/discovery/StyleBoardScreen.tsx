@@ -6,11 +6,11 @@ import {
   useCreatePartnerSync,
   useRemoveBoardItem
 } from '@app/infrastructure';
-import { AvatarGroup, TopBarIconButton, ProductTile } from '@app/ui-kit';
+import { AvatarGroup, ProductTile, TopBarIconButton } from '@app/ui-kit';
 import { ChevronLeft, Share as ShareIcon, X } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { View, Alert, Linking, ScrollView, Platform, SafeAreaView } from 'react-native';
+import { View, Alert, Linking, ScrollView, Platform, SafeAreaView, Share } from 'react-native';
 import { Button, Spinner, Text, XStack, YStack } from 'tamagui';
 
 export function StyleBoardScreen({ boardId }: { boardId: string }) {
@@ -42,7 +42,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
 
       const message = `Let's sync our style on StyleSwipe! Click here to collaborate on my board: ${url}`;
 
-      const Share = (await import('react-native')).Share;
+
       await Share.share({
         message,
         url: Platform.OS === 'ios' ? url : undefined,
