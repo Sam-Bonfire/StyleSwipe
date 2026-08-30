@@ -20,3 +20,4 @@ export * from './repositories/ScraperRepository';
 export * from './repositories/SessionRepository';
 export * from './repositories/UserRepository';
 export * from './repositories/VerificationRepository';
+export * from './repositories/CategoryRepository';
