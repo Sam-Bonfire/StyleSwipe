@@ -114,7 +114,6 @@ export * from './social/domain/StyleBoard';
 
 // Affiliate
 export * from './affiliate/domain/AffiliateRedirect';
-export * as AffiliateRedirectService from './affiliate/application/AffiliateRedirectService';
 // Discovery Domain
 export * from './discovery/domain/SwipeEvent';
 export * from './discovery/domain/RecommendationScore';

@@ -190,9 +190,16 @@ export const getBoardById = query({
     const sortedItems = boardItems.sort((a, b) => b.addedAt - a.addedAt);
     const productIds = sortedItems.map((item) => item.productId);
 
-    const productsDocs = (await Promise.all(productIds.map((id) => ctx.db.get(id)))).filter(Boolean);
+    const productsDocs = await ctx.db
+      .query('products')
+      .filter((q) =>
+        productIds.length === 1
+          ? q.eq(q.field('_id'), productIds[0])
+          : q.or(...productIds.map((id) => q.eq(q.field('_id'), id)))
+      )
+      .collect();
 
-    const productsMap = new Map(productsDocs.map((p) => [p!._id, p]));
+    const productsMap = new Map(productsDocs.map((p) => [p._id, p]));
 
     const populatedItems = sortedItems
       .map((item) => {
