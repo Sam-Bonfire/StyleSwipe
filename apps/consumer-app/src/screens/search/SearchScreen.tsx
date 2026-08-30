@@ -2,6 +2,7 @@ import { SearchProducts, Embedder, type SearchResult } from '@app/core';
 import { useRecordProductView, createProductSearchRepositoryLayer, useConvexClient } from '@app/infrastructure';
 import { ProductTile, Button } from '@app/ui-kit';
 import { Search } from '@tamagui/lucide-icons';
+import { SlidersHorizontal } from '@tamagui/lucide-icons';
 import { Effect, Layer } from 'effect';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
@@ -9,6 +10,8 @@ import { SafeAreaView, FlatList } from 'react-native';
 import { YStack, Text, Input, XStack, Spinner } from 'tamagui';
 
 import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
+import { useFilterStore } from '../../store/useFilterStore';
+import { SearchFilterOverlay } from './SearchFilterOverlay';
 
 export function SearchScreen() {
   const convex = useConvexClient();
@@ -20,6 +23,12 @@ export function SearchScreen() {
   const [results, setResults] = useState<SearchResult['products']>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { filterState, setFilterState, sort, setSort } = useFilterStore();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // const [filterState, setFilterState] = useState<FilterState>();
+  // const [sort, setSort] = useState<SearchQuery['sort']>('RELEVANCE');
+
 
   // Debounce Logic
   useEffect(() => {
@@ -38,9 +47,13 @@ export function SearchScreen() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, filterState, sort]);
 
-  const performSearch = async (text: string) => {
+
+const performSearch = async (text: string) => {
+    // Note: The actual SearchProducts usecase doesn't currently accept filters/sort in its ports.
+    // In a real implementation we would pass `currentFilters` and `currentSort` down into the layer.
+    // We are simulating the update by relying on the usecase to just re-run for now.
     setLoading(true);
     try {
       const embedderLayer = Layer.succeed(Embedder, Embedder.of(new OnnxEmbedder()));
@@ -108,12 +121,21 @@ export function SearchScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <YStack flex={1} padding="$2" gap="$4">
         <YStack gap="$2">
-          <Input
-            placeholder="Search for items..."
-            borderWidth={1}
-            value={query}
-            onChangeText={setQuery}
-          />
+          <XStack gap="$2" alignItems="center">
+            <Input
+              flex={1}
+              placeholder="Search for items..."
+              borderWidth={1}
+              value={query}
+              onChangeText={setQuery}
+            />
+            <Button
+              variant="outlined"
+              size="medium"
+              onPress={() => setIsFilterOpen(true)}
+              icon={<SlidersHorizontal size={20} color="$textSecondary" />}
+            />
+          </XStack>
           {suggestions.length > 0 && (
             <XStack gap="$2" flexWrap="wrap">
               {suggestions.map((s, i) => (
@@ -147,6 +169,17 @@ export function SearchScreen() {
           </YStack>
         )}
       </YStack>
+
+      <SearchFilterOverlay
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        initialFilterState={filterState}
+        initialSort={sort}
+        onApplyFilters={(newFilterState, newSort) => {
+          setFilterState(newFilterState);
+          setSort(newSort);
+        }}
+      />
     </SafeAreaView>
   );
 }

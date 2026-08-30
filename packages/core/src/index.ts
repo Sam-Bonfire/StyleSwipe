@@ -44,6 +44,9 @@ export * from '../shared/domain/errors';
 export * from '../shared/application/ports';
 
 // Catalog
+// Search & Filters
+export * from './catalog/domain/SearchQuery';
+export * from './catalog/domain/FilterState';
 export * from './catalog/domain/Product';
 export * from './catalog/domain/Category';
 export * from './catalog/domain/TaggingService';
