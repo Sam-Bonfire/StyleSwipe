@@ -162,6 +162,98 @@ export const getSystemBoard = query({
 });
 
 /**
+ * query to fetch a generic board by ID and populate all product details.
+ */
+export const getBoardById = query({
+  args: {
+    id: v.id('boards'),
+  },
+  handler: async (ctx, args) => {
+    const board = await ctx.db.get(args.id);
+
+    if (!board) {
+      return null;
+    }
+
+    const boardItems = await ctx.db
+      .query('board_items')
+      .withIndex('by_board', (q) => q.eq('boardId', board._id))
+      .collect();
+
+    if (boardItems.length === 0) {
+      return {
+        ...board,
+        items: [],
+      };
+    }
+
+    const sortedItems = boardItems.sort((a, b) => b.addedAt - a.addedAt);
+    const productIds = sortedItems.map((item) => item.productId);
+
+    const productsDocs = (await Promise.all(productIds.map((id) => ctx.db.get(id)))).filter(Boolean);
+
+    const productsMap = new Map(productsDocs.map((p) => [p!._id, p]));
+
+    const populatedItems = sortedItems
+      .map((item) => {
+        const product = productsMap.get(item.productId);
+        if (!product) return null;
+
+        const { meta, ...rest } = product;
+
+        let cleanMeta = meta;
+        if (meta && meta.rawAttributes !== undefined) {
+          const { rawAttributes, ...otherMeta } = meta;
+          cleanMeta = otherMeta;
+        }
+
+        return {
+          productId: item.productId,
+          addedAt: item.addedAt,
+          product: {
+            ...rest,
+            ...(cleanMeta ? { meta: cleanMeta } : {}),
+          },
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      _id: board._id,
+      _creationTime: board._creationTime,
+      userId: board.userId,
+      name: board.name,
+      slug: board.slug,
+      isSystem: board.isSystem,
+      items: populatedItems,
+      createdAt: board.createdAt,
+      updatedAt: board.updatedAt,
+    };
+  },
+});
+
+/**
+ * mutation to remove an item from a generic board.
+ */
+export const removeBoardItem = mutation({
+  args: {
+    boardId: v.id('boards'),
+    productId: v.id('products'),
+  },
+  handler: async (ctx, args) => {
+    const existingItem = await ctx.db
+      .query('board_items')
+      .withIndex('by_board_product', (q) => q.eq('boardId', args.boardId).eq('productId', args.productId))
+      .unique();
+
+    if (existingItem) {
+      await ctx.db.delete(existingItem._id);
+      await ctx.db.patch(args.boardId, { updatedAt: Date.now() });
+    }
+  },
+});
+
+/**
  * mutation to toggle a product inside the user's Wishlist system board.
  * If the item is already present, it is removed; otherwise, it is added.
  */

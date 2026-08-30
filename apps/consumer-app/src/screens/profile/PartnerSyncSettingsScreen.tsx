@@ -228,9 +228,14 @@ export function PartnerSyncSettingsScreen() {
                        </YStack>
                      </XStack>
 
-                     <Button variant="secondary" onPress={() => handleStopSharing(sync._id as string)} marginTop="$2">
-                       Stop Sharing
-                     </Button>
+                     <XStack gap="$3">
+                       <Button flex={1} variant="secondary" onPress={() => handleStopSharing(sync._id as string)} marginTop="$2">
+                         Stop Sharing
+                       </Button>
+                       <Button flex={1} variant="primary" onPress={() => router.push(`/(app)/board/wishlist`)} marginTop="$2">
+                         View Board
+                       </Button>
+                     </XStack>
                    </YStack>
                  ))}
               </YStack>

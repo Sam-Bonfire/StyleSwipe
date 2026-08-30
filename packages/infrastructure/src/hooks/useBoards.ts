@@ -33,6 +33,35 @@ export function useTrackPurchaseClick() {
 }
 
 /**
+ * Hook to retrieve a generic board by ID with fully populated products.
+ */
+export function useBoard(boardId: string | undefined) {
+  const data = useQuery(api.boards.getBoardById, boardId ? { id: boardId as Id<'boards'> } : 'skip');
+
+  return React.useMemo(() => {
+    if (data === undefined) return undefined;
+    return data;
+  }, [data]);
+}
+
+/**
+ * Hook to trigger removing an item from a board.
+ */
+export function useRemoveBoardItem() {
+  const mutation = useMutation(api.boards.removeBoardItem);
+
+  return React.useCallback(
+    async (boardId: string, productId: string) => {
+      return await mutation({
+        boardId: boardId as Id<'boards'>,
+        productId: productId as Id<'products'>,
+      });
+    },
+    [mutation]
+  );
+}
+
+/**
  * Hook to retrieve the user's "Wishlist" system board with fully populated products.
  */
 export function useWishlist(userId: string | undefined) {

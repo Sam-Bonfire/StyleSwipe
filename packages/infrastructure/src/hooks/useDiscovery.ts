@@ -22,6 +22,14 @@ export function useCalibrationFeed(limit: number = 10) {
   return useQuery(api.discovery.getCalibrationFeed, { limit });
 }
 
+export function useUserSwipedIds(userId: string | undefined) {
+  return useQuery(api.discovery.getUserSwipedIds, userId ? { userId } : 'skip');
+}
+
+export function usePartnerLikes(partnerId: string | undefined) {
+  return useQuery(api.discovery.getPartnerLikes, partnerId ? { partnerId } : 'skip');
+}
+
 export function useProcessSwipe() {
   const swipeMutation = useMutation(api.discovery.processSwipe);
 
