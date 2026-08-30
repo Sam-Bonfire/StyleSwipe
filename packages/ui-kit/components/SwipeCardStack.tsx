@@ -111,10 +111,30 @@ export type SwipeCardStackProps<T> = Omit<GetProps<typeof StackContainer>, 'chil
   cardScale?: number;
 };
 
+export interface SwipeCardStackRef {
+  rewind: () => void;
+}
+
 // Animated Card Component
 
+export interface AnimatedCardProps<T> {
+  item: T;
+  index: number;
+  animIndex: SharedValue<number>;
+  renderCard: (item: T, index: number) => React.ReactNode;
+  onSwipe: (direction: SwipeDirection) => void;
+  onSwipeStart?: (direction: SwipeDirection) => void;
+  onSwipeEnd?: () => void;
+  isTop: boolean;
+  cardOffset: number;
+  cardScale: number;
+  sharedX: SharedValue<number>;
+  sharedY: SharedValue<number>;
+  entranceDirection?: SwipeDirection | null;
+}
+
 const AnimatedCard = React.forwardRef(
-  (
+  <T,>(
     {
       item,
       index,
@@ -122,29 +142,33 @@ const AnimatedCard = React.forwardRef(
       onSwipe,
       onSwipeStart,
       onSwipeEnd,
+      animIndex,
       isTop,
       cardOffset,
       cardScale,
       sharedX,
       sharedY,
-    }: {
-      item: any;
-      index: number;
-
-      renderCard: (item: any, index: number) => React.ReactNode;
-      onSwipe: (direction: SwipeDirection) => void;
-      onSwipeStart?: (direction: SwipeDirection) => void;
-      onSwipeEnd?: () => void;
-      isTop: boolean;
-      cardOffset: number;
-      cardScale: number;
-      sharedX: SharedValue<number>;
-      sharedY: SharedValue<number>;
-    },
-    ref,
+      entranceDirection,
+    }: AnimatedCardProps<T>,
+    ref: React.Ref<{ swipe: (dir: SwipeDirection) => void }>,
   ) => {
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
+
+    // Initial rewind entrance animation
+    useEffect(() => {
+      if (entranceDirection) {
+        if (entranceDirection === 'left') translateX.value = -1000;
+        else if (entranceDirection === 'right') translateX.value = 1000;
+        else if (entranceDirection === 'up') translateY.value = -1000;
+        else if (entranceDirection === 'down') translateY.value = 1000;
+
+        translateX.value = withSpring(0, { damping: 15, stiffness: 150 });
+        translateY.value = withSpring(0, { damping: 15, stiffness: 150 });
+      }
+    }, [entranceDirection, translateX, translateY]);
+
+    const superLikeScale = useSharedValue(1);
 
     // Sync local movement to shared values if top card
     useAnimatedReaction(
@@ -178,6 +202,7 @@ const AnimatedCard = React.forwardRef(
             if (finished) runOnJS(handleSwipeCompletion)('left');
           });
         } else if (direction === 'up') {
+          superLikeScale.value = withTiming(1.05, { duration: 150 });
           translateY.value = withTiming(-1000, { duration: EXIT_DURATION }, (finished) => {
             if (finished) runOnJS(handleSwipeCompletion)('up');
           });
@@ -218,6 +243,7 @@ const AnimatedCard = React.forwardRef(
             if (finished) runOnJS(handleSwipeCompletion)('left');
           });
         } else if (event.translationY < -SWIPE_UP_THRESHOLD) {
+          superLikeScale.value = withTiming(1.05, { duration: 150 });
           translateY.value = withTiming(-1000, { duration: 250 }, (finished) => {
             if (finished) runOnJS(handleSwipeCompletion)('up');
           });
@@ -241,18 +267,28 @@ const AnimatedCard = React.forwardRef(
       const progress = interpolate(maxInteraction, [0, SWIPE_THRESHOLD], [0, 1], Extrapolate.CLAMP);
 
       // Current base position values
-      const curScale = isTop ? 1.0 : cardScale - index * 0.05;
-      const curY = isTop ? 0 : index * cardOffset;
+      const curScale = isTop ? 1.0 : cardScale - animIndex.value * 0.05;
+      const curY = isTop ? 0 : animIndex.value * cardOffset;
 
       // Target position values (once swiped away)
-      const nextIdx = index - 1;
+      const nextIdx = animIndex.value - 1;
       const effNextIdx = nextIdx < 0 ? 0 : nextIdx;
       const nxtScale = effNextIdx === 0 ? 1.0 : cardScale - effNextIdx * 0.05;
       const nxtY = effNextIdx * cardOffset;
 
       // Pure layout interpolation: transition seamlessly under top card dragging
-      const interpolatedScale = interpolate(progress, [0, 1], [curScale, nxtScale]);
+      // If the item is swiped up (super like), mix in the super like scale
+      const superLikeScaleValue = translateY.value < 0 ? superLikeScale.value : 1;
+
+      const baseScale = interpolate(progress, [0, 1], [curScale, nxtScale]);
+      const interpolatedScale = isTop ? baseScale * superLikeScaleValue : baseScale;
+
       const interpolatedY = interpolate(progress, [0, 1], [curY, nxtY]);
+
+      // Calculate super like exit fade out
+      const superLikeOpacityValue = translateY.value < -SWIPE_UP_THRESHOLD
+        ? interpolate(translateY.value, [-SWIPE_UP_THRESHOLD, -SWIPE_UP_THRESHOLD - 200], [1, 0], Extrapolate.CLAMP)
+        : 1;
 
       return {
         position: 'absolute' as const,
@@ -263,8 +299,24 @@ const AnimatedCard = React.forwardRef(
           { translateY: translateY.value + interpolatedY },
           { rotate: `${rotate}deg` },
           { scale: interpolatedScale },
-        ] as any,
-        zIndex: 100 - index,
+        ],
+        opacity: isTop ? superLikeOpacityValue : 1,
+        zIndex: 100 - Math.round(animIndex.value),
+      } as const;
+    });
+
+    const superLikeGlow = useAnimatedStyle(() => {
+      const glowOpacity = interpolate(translateY.value, [0, -SWIPE_UP_THRESHOLD], [0, 1], Extrapolate.CLAMP);
+      return {
+        position: 'absolute' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 12,
+        borderWidth: 4,
+        borderColor: '#00d0ff',
+        opacity: glowOpacity,
       };
     });
 
@@ -286,6 +338,7 @@ const AnimatedCard = React.forwardRef(
           <Animated.View style={{ width: '100%', height: '100%' }}>
             <CardWrapper pointerEvents={isTop ? 'auto' : 'none'} width="100%" height="100%">
               {renderCard(item, index)}
+              {isTop && <Animated.View pointerEvents="none" style={superLikeGlow} />}
               <Animated.View
                 style={[
                   { position: 'absolute', top: 0, left: 0, pointerEvents: 'none' },
@@ -324,18 +377,22 @@ const AnimatedCard = React.forwardRef(
   },
 );
 
-export function SwipeCardStack<T>({
-  data,
-  renderCard,
-  keyExtractor,
-  onSwipe,
-  onSwipeStart,
-  onSwipeEnd,
-  visibleCards = 4,
-  cardOffset = 28,
-  cardScale = 0.96,
-  ...props
-}: SwipeCardStackProps<T>) {
+export const SwipeCardStack = React.forwardRef(
+  <T,>(
+    {
+      data,
+      renderCard,
+      keyExtractor,
+      onSwipe,
+      onSwipeStart,
+      onSwipeEnd,
+      visibleCards = 4,
+      cardOffset = 28,
+      cardScale = 0.96,
+      ...props
+    }: SwipeCardStackProps<T>,
+    ref: React.Ref<SwipeCardStackRef>
+  ) => {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const stackWidth = screenWidth * 0.9;
   const stackHeight = screenHeight * 0.72;
@@ -344,14 +401,48 @@ export function SwipeCardStack<T>({
 
   const sharedX = useSharedValue(0);
   const sharedY = useSharedValue(0);
+  const animIndices = Array.from({ length: visibleCards }).map((_, i) => useSharedValue(i));
+
+  const [swipeHistory, setSwipeHistory] = useState<{ item: T; direction: SwipeDirection }[]>([]);
+  const [lastEntrance, setLastEntrance] = useState<SwipeDirection | null>(null);
 
   const handleSwipe = useCallback(
     (item: T, direction: SwipeDirection) => {
+      setSwipeHistory((prev) => [...prev, { item, direction }]);
+      setLastEntrance(null); // Clear entrance direction for next card
       onSwipe(item, direction);
       setCurrentIndex((prev) => prev + 1);
+
+      // Animate indices forward
+      animIndices.forEach((animVal, i) => {
+        if (i < visibleCards - 1) {
+          animVal.value = withSpring(i, { damping: 20, stiffness: 150 });
+        }
+      });
     },
-    [onSwipe],
+    [onSwipe, visibleCards, animIndices],
   );
+
+  React.useImperativeHandle(ref, () => ({
+    rewind: () => {
+      if (swipeHistory.length > 0 && currentIndex > 0) {
+        const lastSwipe = swipeHistory[swipeHistory.length - 1];
+        setSwipeHistory((prev) => prev.slice(0, -1));
+        setCurrentIndex((prev) => prev - 1);
+        setLastEntrance(lastSwipe.direction);
+
+        // Animate indices backward
+        animIndices.forEach((animVal, i) => {
+          if (i > 0) {
+             // The card at logical index `i` in the new stack was previously at index `i - 1`.
+             // Setting the current value to `i - 1` and springing to `i` animates it backward nicely.
+             animVal.value = i - 1;
+             animVal.value = withSpring(i, { damping: 20, stiffness: 150 });
+          }
+        });
+      }
+    }
+  }));
 
   // Sync reset of shared animation values with the commit of the index promotion.
   // This prevents the underlying card from dropping its active layout drift
@@ -394,12 +485,12 @@ export function SwipeCardStack<T>({
       <YStack width={stackWidth} height={stackHeight} position="relative">
         {visibleData
           .map((item, index) => (
-            <AnimatedCard
-              // @ts-ignore
+            <AnimatedCard<T>
               ref={index === 0 ? topCardRef : null}
               key={keyExtractor(item, currentIndex + index)}
               item={item}
               index={index}
+              animIndex={animIndices[index] || animIndices[animIndices.length - 1]}
               renderCard={renderCard}
               onSwipe={(direction) => handleSwipe(item, direction)}
               onSwipeStart={onSwipeStart}
@@ -409,13 +500,15 @@ export function SwipeCardStack<T>({
               cardScale={cardScale}
               sharedX={sharedX}
               sharedY={sharedY}
+              entranceDirection={index === 0 ? lastEntrance : null}
             />
           ))
           .reverse()}
       </YStack>
     </StackContainer>
   );
-}
+});
 
+// @ts-ignore
 SwipeCardStack.displayName = 'SwipeCardStack';
 export default SwipeCardStack;
