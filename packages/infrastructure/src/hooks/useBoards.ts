@@ -60,3 +60,49 @@ export function useToggleWishlist() {
     [mutation]
   );
 }
+
+/**
+ * Hook to fetch a board by ID, fully populated with products and match indicators.
+ */
+export function useBoard(boardId: string | undefined, userId?: string) {
+  const data = useQuery(api.boards.getBoard, boardId ? { boardId: boardId as Id<'boards'>, userId } : 'skip');
+
+  return React.useMemo(() => {
+    if (data === undefined) return undefined;
+    return data;
+  }, [data]);
+}
+
+/**
+ * Hook to add an item to a board.
+ */
+export function useAddBoardItem() {
+  const mutation = useMutation(api.boards.addBoardItem);
+
+  return React.useCallback(
+    async (boardId: string, productId: string) => {
+      return await mutation({
+        boardId: boardId as Id<'boards'>,
+        productId: productId as Id<'products'>,
+      });
+    },
+    [mutation]
+  );
+}
+
+/**
+ * Hook to remove an item from a board.
+ */
+export function useRemoveBoardItem() {
+  const mutation = useMutation(api.boards.removeBoardItem);
+
+  return React.useCallback(
+    async (boardId: string, productId: string) => {
+      return await mutation({
+        boardId: boardId as Id<'boards'>,
+        productId: productId as Id<'products'>,
+      });
+    },
+    [mutation]
+  );
+}
