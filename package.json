@@ -95,6 +95,7 @@
     "expo-modules-core@57.0.8": "patches/expo-modules-core@57.0.8.patch"
   },
   "dependencies": {
+    "expo-sharing": "~57.0.7",
     "signal-exit": "^4.1.0"
   }
 }
