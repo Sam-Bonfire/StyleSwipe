@@ -1,4 +1,5 @@
 // Shared Domain Types & Ports
+export * from '../shared/application/ports';
 export type {
   StyleSizes,
   BudgetRange,
@@ -41,7 +42,9 @@ export type {
   EmbeddingVector,
 } from '../shared/domain/types';
 export * from '../shared/domain/errors';
-export * from '../shared/application/ports';
+
+export { CategoryRepository, AssetStorageService } from './catalog/application/ports';
+export type { SearchQuery } from './catalog/application/ports';
 
 // Catalog
 // Search & Filters
@@ -59,6 +62,7 @@ export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
 export * from './identity/domain/User';
 export * from './identity/domain/StyleProfile';
 export { AuthSessionSchema, AuthSessionService } from './identity/domain/AuthSession';
+export * from '../shared/application/ports';
 export type { AuthSession, DeviceContext } from './identity/domain/AuthSession';
 export * from './identity/domain/Permissions';
 export * from './identity/domain/Role';
