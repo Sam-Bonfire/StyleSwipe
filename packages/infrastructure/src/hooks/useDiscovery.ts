@@ -39,9 +39,12 @@ export function useProcessSwipe() {
     const layer = Layer.succeed(
       SwipeRepository,
       SwipeRepository.of({
-        recordSwipe: (userId, productId, action: SwipeAction, timestamp, newPreferenceVector) =>
+        recordSwipe: (userId, productId, action: SwipeAction, timestamp, newPreferenceVector, partnerId) =>
           Effect.tryPromise({
-            try: () => swipeMutation({ productId: productId as any, action, newPreferenceVector }),
+            try: async () => {
+              const res = await swipeMutation({ productId: productId as any, action, newPreferenceVector, partnerId });
+              return { isMutualMatch: res?.isMutualMatch };
+            },
             catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
           }),
         getSwipesByUser: () => Effect.succeed([]),
