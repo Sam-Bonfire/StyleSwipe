@@ -98,6 +98,7 @@
   },
   "dependencies": {
     "expo-sharing": "~57.0.7",
-    "signal-exit": "^4.1.0"
+    "signal-exit": "^4.1.0",
+    "xstate": "^5.32.6"
   }
 }
