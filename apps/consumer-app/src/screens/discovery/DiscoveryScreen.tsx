@@ -1,10 +1,10 @@
+import { useCurrentUser, useActivePartnerSync } from '@app/infrastructure';
 import { TopBar, TopBarIconButton } from '@app/ui-kit';
+import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
 import { SlidersHorizontal, Users } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
-import { useCurrentUser, useActivePartnerSync } from '@app/infrastructure';
-import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
 
 import { SwipeDeck } from '../../components/SwipeDeck';
 import { useFilterStore } from '../../store/useFilterStore';
@@ -15,6 +15,7 @@ export function DiscoveryScreen() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const user = useCurrentUser();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activeSyncs = useActivePartnerSync(user?._id) as any[];
 
   const activeSession = activeSyncs && activeSyncs.length > 0 ? activeSyncs[0] : null;

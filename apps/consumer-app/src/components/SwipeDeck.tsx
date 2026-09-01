@@ -1,13 +1,13 @@
 import { type Vector384, FilterState } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
-import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
 import { Modal } from '@app/ui-kit/components/Modal';
+import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
 import { Undo2 } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, Image } from 'react-native';
-import { YStack, H2, H3, Button, XStack, Text } from 'tamagui';
+import { YStack, H2, H3, Button, Text } from 'tamagui';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 import { SuperLikeStarburst } from './SwipeAnimations';
