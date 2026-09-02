@@ -1,14 +1,18 @@
 import { useCurrentUser, useActivePartnerSync } from '@app/infrastructure';
 import { TopBar, TopBarIconButton } from '@app/ui-kit';
 import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
+import { Button } from '@app/ui-kit/components/Button';
 import { SlidersHorizontal, Users } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 
 import { SwipeDeck } from '../../components/SwipeDeck';
 import { useFilterStore } from '../../store/useFilterStore';
 import { SearchFilterOverlay } from '../search/SearchFilterOverlay';
+import { GridDiscovery } from './GridDiscovery';
+
+type ViewMode = 'deck' | 'grid';
 
 export function DiscoveryScreen() {
   const { filterState, setFilterState, sort, setSort } = useFilterStore();
@@ -20,6 +24,7 @@ export function DiscoveryScreen() {
 
   const activeSession = activeSyncs && activeSyncs.length > 0 ? activeSyncs[0] : null;
   const [influenceRatio, setInfluenceRatio] = useState<number>(50);
+  const [viewMode, setViewMode] = useState<ViewMode>('deck');
 
   const handleRatioChange = (val: number) => {
     setInfluenceRatio(val);
@@ -64,11 +69,25 @@ export function DiscoveryScreen() {
             />
           </YStack>
         )}
-        <SwipeDeck
-          filterState={filterState}
-          partnerId={activeSession?.partnerId || activeSession?.initiatorId}
-          influenceRatio={activeSession ? influenceRatio / 100 : undefined}
-        />
+        <XStack justifyContent="center" alignItems="center" gap="$2" paddingBottom="$2">
+          <Button variant={viewMode === 'deck' ? 'primary' : 'outlined'} onPress={() => setViewMode('deck')}>
+            Deck
+          </Button>
+          <Button variant={viewMode === 'grid' ? 'primary' : 'outlined'} onPress={() => setViewMode('grid')}>
+            Grid
+          </Button>
+        </XStack>
+
+        <View style={{ flex: 1, display: viewMode === 'deck' ? 'flex' : 'none' }}>
+          <SwipeDeck
+            filterState={filterState}
+            partnerId={activeSession?.partnerId || activeSession?.initiatorId}
+            influenceRatio={activeSession ? influenceRatio / 100 : undefined}
+          />
+        </View>
+        <View style={{ flex: 1, display: viewMode === 'grid' ? 'flex' : 'none' }}>
+          <GridDiscovery />
+        </View>
       </YStack>
 
       <SearchFilterOverlay
