@@ -1,7 +1,7 @@
 import { useCurrentUser, useActivePartnerSync } from '@app/infrastructure';
 import { TopBar, TopBarIconButton } from '@app/ui-kit';
-import { Button } from '@app/ui-kit/components/Button';
 import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
+import { Button } from '@app/ui-kit/components/Button';
 import { SlidersHorizontal, Users } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
