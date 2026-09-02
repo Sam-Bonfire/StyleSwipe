@@ -1,4 +1,4 @@
-import { FilterState, FilterStateSchema, SearchQuery } from '@app/core';
+import { FilterState, FilterStateSchema, SortOption } from '@app/core';
 import { Modal, Button, BudgetSlider, CategoryChip, DEFAULT_BUDGET_BANDS, SearchBar } from '@app/ui-kit';
 import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
@@ -8,8 +8,8 @@ export interface SearchFilterOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   initialFilterState?: FilterState;
-  initialSort?: SearchQuery['sort'];
-  onApplyFilters: (filterState: FilterState, sort: SearchQuery['sort']) => void;
+  initialSort?: SortOption;
+  onApplyFilters: (filterState: FilterState, sort: SortOption) => void;
 }
 
 // Hardcoded facets for now, ideally passed from backend facets
@@ -27,7 +27,7 @@ export function SearchFilterOverlay({
   const [localFilterState, setLocalFilterState] = useState<FilterState>(
     initialFilterState || FilterStateSchema.parse({ brandIds: [], categoryIds: [], colors: [], sizes: [], fitTypes: [], merchantNames: [], inStockOnly: false })
   );
-  const [localSort, setLocalSort] = useState<SearchQuery['sort']>(initialSort);
+  const [localSort, setLocalSort] = useState<SortOption>(initialSort);
   const [brandSearch, setBrandSearch] = useState('');
 
   // Sync when overlay opens
@@ -110,7 +110,7 @@ export function SearchFilterOverlay({
     }
   };
 
-  const SORT_OPTIONS: { label: string, value: SearchQuery['sort'] }[] = [
+  const SORT_OPTIONS: { label: string, value: SortOption }[] = [
     { label: 'Recommended', value: 'RELEVANCE' },
     { label: 'Price: Low to High', value: 'PRICE_ASC' },
     { label: 'Price: High to Low', value: 'PRICE_DESC' },
