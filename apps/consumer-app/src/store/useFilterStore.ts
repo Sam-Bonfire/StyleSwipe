@@ -1,11 +1,11 @@
-import { FilterState, SearchQuery } from '@app/core';
+import { FilterState, SortOption } from '@app/core';
 import { create } from 'zustand';
 
 interface FilterStore {
   filterState?: FilterState;
-  sort: SearchQuery['sort'];
+  sort: SortOption;
   setFilterState: (state: FilterState) => void;
-  setSort: (sort: SearchQuery['sort']) => void;
+  setSort: (sort: SortOption) => void;
   reset: () => void;
 }
 
