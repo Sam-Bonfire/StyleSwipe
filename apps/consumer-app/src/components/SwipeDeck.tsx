@@ -7,7 +7,8 @@ import { Undo2 } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, Image } from 'react-native';
-import { YStack, H2, H3, Button, Text } from 'tamagui';
+import { YStack, H2, H3, Text } from 'tamagui';
+import { Button } from '@app/ui-kit/components/Button';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 import { SuperLikeStarburst } from './SwipeAnimations';
@@ -208,7 +209,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
               }}>
                 Save to Shared Board
               </Button>
-              <Button variant="text" onPress={() => setMatchedProduct(null)}>
+              <Button variant="ghost" onPress={() => setMatchedProduct(null)}>
                 Keep Swiping
               </Button>
             </YStack>
