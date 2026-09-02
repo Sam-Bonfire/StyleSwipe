@@ -1,12 +1,14 @@
 import { type Vector384, FilterState } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
+import { Button } from '@app/ui-kit/components/Button';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
+import { Modal } from '@app/ui-kit/components/Modal';
 import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
 import { Undo2 } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { YStack, H2, H3, Button } from 'tamagui';
+import { ActivityIndicator, Image } from 'react-native';
+import { YStack, H2, H3, Text } from 'tamagui';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 import { SuperLikeStarburst } from './SwipeAnimations';
@@ -25,10 +27,13 @@ interface SwipeDeckProduct {
 
 export interface SwipeDeckProps {
   filterState?: FilterState;
+  partnerId?: string;
+  influenceRatio?: number;
 }
 
-export function SwipeDeck({ filterState }: SwipeDeckProps) {
+export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckProps) {
   const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
+  const [matchedProduct, setMatchedProduct] = useState<SwipeDeckProduct | null>(null);
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
   const user = useCurrentUser();
@@ -40,10 +45,8 @@ export function SwipeDeck({ filterState }: SwipeDeckProps) {
   const [superLikeTrigger, setSuperLikeTrigger] = useState(0);
 
   useEffect(() => {
-    // Note: The actual useVectorFeed does not accept filters in this mock version,
-    // but we pass it conceptually or re-trigger to simulate applying filters.
     setProducts(null); // Reset before fetching
-    getVectorFeed({ limit: 10 })
+    getVectorFeed({ limit: 10, influenceRatio })
       .then((data) => {
         console.log('Feed data received:', data?.length);
         setProducts(data as SwipeDeckProduct[]);
@@ -53,7 +56,7 @@ export function SwipeDeck({ filterState }: SwipeDeckProps) {
         setError(e.message || 'Unknown error fetching feed');
         setProducts([]); // Stop loading
       });
-  }, [getVectorFeed, filterState]);
+  }, [getVectorFeed, filterState, influenceRatio]);
 
   if (error) {
     return (
@@ -98,15 +101,20 @@ export function SwipeDeck({ filterState }: SwipeDeckProps) {
 
     try {
       // 1. Process Online via use case (validates + persists)
-      await processSwipe({
-        userId: user?._id || '', 
+      const result = await processSwipe({
+        userId: user?._id || '',
         productId: item._id,
         action: action,
         timestamp: Date.now(),
         userPreferenceVector: user?.styleProfile?.preferenceVector,
         productEmbedding: item.embedding,
+        partnerId,
       });
-      console.log(`Synced ${action} for ${item.title} to Convex.`);
+      console.log(`Synced ${action} for ${item.title} to Convex. Mutual match: ${result.isMutualMatch}`);
+
+      if (result.isMutualMatch) {
+        setMatchedProduct(item);
+      }
 
       // 2. Offline-first: Buffer locally for redundancy/worker analysis
       const db = await LocalDatabase.getInstance();
@@ -119,7 +127,7 @@ export function SwipeDeck({ filterState }: SwipeDeckProps) {
       });
 
       console.log(`Swiped ${direction} on ${item.title}`);
-      
+
       trackEvent('product_swiped', { action }, { variant: 'macro_v1', productId: item._id });
     } catch (e) {
       console.warn('Swipe mutation failed (offline?), buffered locally.', e);
@@ -167,6 +175,47 @@ export function SwipeDeck({ filterState }: SwipeDeckProps) {
         borderColor="$borderColor"
         borderWidth={1}
       />
+
+      <Modal
+        open={!!matchedProduct}
+        onClose={() => setMatchedProduct(null)}
+        title="It's a Match! 🎉"
+      >
+        {matchedProduct && (
+          <YStack alignItems="center" gap="$4" padding="$4">
+            <Text fontSize="$4" textAlign="center" color="$textSecondary">
+              You and your partner both liked this item!
+            </Text>
+
+            <Image
+              source={{ uri: matchedProduct.images[0] }}
+              style={{ width: 160, height: 200, borderRadius: 12 }}
+              resizeMode="cover"
+            />
+
+            <H3 textAlign="center">{matchedProduct.title}</H3>
+            <Text fontSize="$5" fontWeight="bold" color="$primary">${matchedProduct.price}</Text>
+
+            <YStack gap="$3" width="100%" marginTop="$4">
+              <Button variant="primary" onPress={() => {
+                setMatchedProduct(null);
+                router.push({ pathname: '/(app)/product/[id]', params: { id: matchedProduct._id } });
+              }}>
+                View Product Details
+              </Button>
+              <Button variant="secondary" onPress={() => {
+                // TODO: Save to shared board action
+                setMatchedProduct(null);
+              }}>
+                Save to Shared Board
+              </Button>
+              <Button variant="ghost" onPress={() => setMatchedProduct(null)}>
+                Keep Swiping
+              </Button>
+            </YStack>
+          </YStack>
+        )}
+      </Modal>
     </YStack>
   );
 }

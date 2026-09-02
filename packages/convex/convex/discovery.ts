@@ -146,6 +146,7 @@ export const processSwipe = mutation({
     productId: v.id('products'),
     action: SwipeActionSchema,
     newPreferenceVector: v.optional(v.array(v.float64())),
+    partnerId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -155,7 +156,7 @@ export const processSwipe = mutation({
 
     const userId = identity.subject;
 
-    const { productId, action } = args;
+    const { productId, action, partnerId } = args;
 
     const existingSwipe = await ctx.db
       .query('swipes')
@@ -163,7 +164,7 @@ export const processSwipe = mutation({
       .first();
 
     if (existingSwipe) {
-      return { status: 'duplicate', swipeId: existingSwipe._id };
+      return { status: 'duplicate', swipeId: existingSwipe._id, isMutualMatch: false };
     }
 
     const swipeId = await ctx.db.insert('swipes', {
@@ -172,6 +173,20 @@ export const processSwipe = mutation({
       action,
       timestamp: Date.now(),
     });
+
+    let isMutualMatch = false;
+
+    // Check for mutual match if swiped like or super and partnerId is provided
+    if (partnerId && (action === 'like' || action === 'super')) {
+      const partnerSwipe = await ctx.db
+        .query('swipes')
+        .withIndex('by_user_product', (q) => q.eq('userId', partnerId).eq('productId', productId))
+        .first();
+
+      if (partnerSwipe && (partnerSwipe.action === 'like' || partnerSwipe.action === 'super')) {
+        isMutualMatch = true;
+      }
+    }
 
     // ---------------------------------------------------------
     // CLIENT-SIDE VECTOR LEARNING UPDATE
@@ -196,7 +211,7 @@ export const processSwipe = mutation({
       }
     }
 
-    return { status: 'success', swipeId };
+    return { status: 'success', swipeId, isMutualMatch };
   },
 });
 

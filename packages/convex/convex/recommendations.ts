@@ -7,6 +7,7 @@ export const getVectorFeed = action({
   args: {
     limit: v.optional(v.number()),
     overrideVector: v.optional(v.array(v.float64())),
+    influenceRatio: v.optional(v.number()),
   },
   handler: async (ctx, args): Promise<any> => {
     const identity = await ctx.auth.getUserIdentity();
@@ -53,17 +54,41 @@ export const getVectorFeed = action({
           
           if (partnerVectors.length > 0) {
               const blended = new Array(user.styleProfile.preferenceVector.length).fill(0);
-              const allVectors = [user.styleProfile.preferenceVector, ...partnerVectors];
-              for (let i = 0; i < allVectors.length; i++) {
-                  for (let j = 0; j < blended.length; j++) {
-                      blended[j] += allVectors[i][j];
+
+              if (args.influenceRatio !== undefined) {
+                  const partnerWeight = args.influenceRatio;
+                  const hostWeight = 1.0 - partnerWeight;
+                  // For simplicity, if multiple partners, we average their vectors first, then blend with host.
+                  // Or just use the first partner's vector since UI supports 1 partner currently.
+                  const avgPartnerVector = new Array(user.styleProfile.preferenceVector.length).fill(0);
+                  for (let i = 0; i < partnerVectors.length; i++) {
+                      for (let j = 0; j < avgPartnerVector.length; j++) {
+                          avgPartnerVector[j] += partnerVectors[i][j];
+                      }
                   }
+                  for (let j = 0; j < avgPartnerVector.length; j++) {
+                      avgPartnerVector[j] /= partnerVectors.length;
+                  }
+
+                  for (let j = 0; j < blended.length; j++) {
+                      blended[j] = (user.styleProfile.preferenceVector[j] * hostWeight) + (avgPartnerVector[j] * partnerWeight);
+                  }
+                  console.log(`[Vector Blending] Calculated Blended Vector with ratio ${args.influenceRatio}`);
+              } else {
+                  // Default straight averaging
+                  const allVectors = [user.styleProfile.preferenceVector, ...partnerVectors];
+                  for (let i = 0; i < allVectors.length; i++) {
+                      for (let j = 0; j < blended.length; j++) {
+                          blended[j] += allVectors[i][j];
+                      }
+                  }
+                  for (let j = 0; j < blended.length; j++) {
+                      blended[j] /= allVectors.length;
+                  }
+                  console.log(`[Vector Blending] Calculated Unified Party Vector across ${allVectors.length} users`);
               }
-              for (let j = 0; j < blended.length; j++) {
-                  blended[j] /= allVectors.length;
-              }
+
               preferenceVector = blended;
-              console.log(`[Vector Blending] Calculated Unified Party Vector across ${allVectors.length} users`);
           }
       }
     }

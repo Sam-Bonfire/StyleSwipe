@@ -348,7 +348,7 @@ importers:
         specifier: ~57.0.4
         version: 57.0.6(expo@57.0.13)(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.87.0(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)
       expo-notifications:
-        specifier: ~57.0.0
+        specifier: ~57.0.15
         version: 57.0.15(expo@57.0.13)(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.87.0(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       expo-router:
         specifier: ~57.0.8

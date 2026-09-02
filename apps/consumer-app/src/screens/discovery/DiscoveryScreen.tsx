@@ -1,9 +1,10 @@
+import { useCurrentUser, useActivePartnerSync } from '@app/infrastructure';
 import { TopBar, TopBarIconButton } from '@app/ui-kit';
-import { SlidersHorizontal } from '@tamagui/lucide-icons';
-import React from 'react';
-import { useState } from 'react';
+import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
+import { SlidersHorizontal, Users } from '@tamagui/lucide-icons';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
-import { YStack } from 'tamagui';
+import { YStack, XStack, Text } from 'tamagui';
 
 import { SwipeDeck } from '../../components/SwipeDeck';
 import { useFilterStore } from '../../store/useFilterStore';
@@ -12,8 +13,17 @@ import { SearchFilterOverlay } from '../search/SearchFilterOverlay';
 export function DiscoveryScreen() {
   const { filterState, setFilterState, sort, setSort } = useFilterStore();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  // const [filterState, setFilterState] = useState<FilterState>();
-  // const [sort, setSort] = useState<SearchQuery['sort']>('RELEVANCE');
+
+  const user = useCurrentUser();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const activeSyncs = useActivePartnerSync(user?._id) as any[];
+
+  const activeSession = activeSyncs && activeSyncs.length > 0 ? activeSyncs[0] : null;
+  const [influenceRatio, setInfluenceRatio] = useState<number>(50);
+
+  const handleRatioChange = (val: number) => {
+    setInfluenceRatio(val);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -30,7 +40,35 @@ export function DiscoveryScreen() {
         }
       />
       <YStack flex={1} padding="$4" gap="$4">
-        <SwipeDeck filterState={filterState} />
+        {activeSession && (
+          <YStack gap="$4" marginBottom="$2">
+            <XStack
+              alignItems="center"
+              justifyContent="center"
+              gap="$2"
+              backgroundColor="$primaryLight"
+              padding="$2"
+              borderRadius="$full"
+            >
+              <YStack width={8} height={8} borderRadius={4} backgroundColor="$success" />
+              <Text fontSize="$3" fontWeight="600" color="$primary">
+                Partner Syncing with {activeSession.partnerName || 'Partner'}
+              </Text>
+              <Users size={16} color="$primary" />
+            </XStack>
+
+            <BlendSlider
+              value={influenceRatio}
+              onChange={handleRatioChange}
+              partnerName={activeSession.partnerName || 'Partner'}
+            />
+          </YStack>
+        )}
+        <SwipeDeck
+          filterState={filterState}
+          partnerId={activeSession?.partnerId || activeSession?.initiatorId}
+          influenceRatio={activeSession ? influenceRatio / 100 : undefined}
+        />
       </YStack>
 
       <SearchFilterOverlay
