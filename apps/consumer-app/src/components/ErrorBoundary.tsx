@@ -73,8 +73,8 @@ export class ErrorBoundary extends Component<Props, State> {
             gap="$4"
             elevation="$2"
           >
-            <AlertTriangle size={48} color="$danger" />
-            <Text fontSize="$6" fontWeight="bold" color="$text" textAlign="center">
+            <AlertTriangle size={48} color="$red10" />
+            <Text fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
               Oops! Something went wrong.
             </Text>
             <Text fontSize="$4" color="$textSecondary" textAlign="center">
@@ -92,7 +92,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </Button>
               <Button
                 flex={1}
-                theme="active"
+                backgroundColor="$primary"
                 icon={<RefreshCw size={18} />}
                 onPress={this.handleTryAgain}
               >
@@ -118,9 +118,9 @@ export class ErrorBoundary extends Component<Props, State> {
                     padding="$2"
                     borderRadius="$2"
                     borderWidth={1}
-                    borderColor="$border"
+                    borderColor="$borderColor"
                   >
-                    <Text fontSize="$2" color="$danger" fontWeight="bold">
+                    <Text fontSize="$2" color="$red10" fontWeight="bold">
                       {this.state.error.message}
                     </Text>
                     {this.state.errorInfo?.componentStack && (
