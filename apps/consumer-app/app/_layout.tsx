@@ -10,6 +10,7 @@ import { YStack, Spinner } from 'tamagui';
 
 import { authAdapter } from '../src/lib/auth';
 import { logger } from '../src/lib/logger';
+import { usePushNotifications } from '../src/lib/notifications';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string);
 
@@ -22,6 +23,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useCurrentUser();
   const segments = useSegments();
   const router = useRouter();
+
+  // Register push notification listeners + token on app launch
+  usePushNotifications();
 
   React.useEffect(() => {
     if (user) {

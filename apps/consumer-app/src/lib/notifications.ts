@@ -1,6 +1,5 @@
-import { api } from '@app/convex';
 import { deserializeNotificationPayload } from '@app/core/notifications/domain/Notification';
-import { useMutation } from 'convex/react';
+import { useUpdatePushToken } from '@app/infrastructure';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
@@ -22,7 +21,7 @@ Notifications.setNotificationHandler({
 
 export function usePushNotifications() {
   const router = useRouter();
-  const updatePushToken = useMutation(api.users.updatePushToken);
+  const updatePushToken = useUpdatePushToken();
 
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
@@ -67,7 +66,9 @@ export function usePushNotifications() {
 
         if (token) {
           logger.info('Push token retrieved', { token });
-          await updatePushToken({ token });
+          const platform = Platform.OS === 'ios' ? 'IOS' : Platform.OS === 'android' ? 'ANDROID' : 'WEB';
+          const service = Platform.OS === 'ios' ? 'APNS' : 'FCM';
+          await updatePushToken({ token, platform, service });
         }
       } catch (e) {
         logger.error('Error fetching push token', { error: e });

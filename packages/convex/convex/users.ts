@@ -343,3 +343,45 @@ export const remove = mutation({
     }
   },
 });
+
+// Registers or refreshes the push token for the authenticated user's device.
+// Uses the join-table pattern (user_devices) so tokens live outside Better Auth's
+// managed users table, avoiding schema conflicts with the auth component.
+export const updatePushToken = mutation({
+  args: {
+    token: v.string(),
+    platform: v.union(v.literal('IOS'), v.literal('ANDROID'), v.literal('WEB')),
+    service: v.union(v.literal('APNS'), v.literal('FCM')),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Unauthenticated');
+    }
+
+    const userId = identity.subject;
+    const now = Date.now();
+
+    const existing = await ctx.db
+      .query('user_devices')
+      .withIndex('by_user', (q: any) => q.eq('userId', userId))
+      .filter((q: any) => q.eq(q.field('token'), args.token))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        isActive: true,
+        lastSeenAt: now,
+      });
+    } else {
+      await ctx.db.insert('user_devices', {
+        userId,
+        token: args.token,
+        platform: args.platform,
+        service: args.service,
+        isActive: true,
+        lastSeenAt: now,
+      });
+    }
+  },
+});

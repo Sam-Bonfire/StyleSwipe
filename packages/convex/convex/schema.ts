@@ -46,6 +46,17 @@ const style_profiles = defineTable({
   lastUpdated: v.optional(v.number()),
 }).index('by_user', ['userId']);
 
+// Per-device push notification tokens for a user (Join Table Pattern)
+// PRD Ref: Push Notifications - partner sync, drops, price alerts
+const user_devices = defineTable({
+  userId: v.string(), // Foreign key to users table (Better Auth uses string IDs)
+  token: v.string(), // Expo push token
+  platform: v.union(v.literal('IOS'), v.literal('ANDROID'), v.literal('WEB')),
+  service: v.union(v.literal('APNS'), v.literal('FCM')),
+  isActive: v.boolean(),
+  lastSeenAt: v.number(),
+}).index('by_user', ['userId']);
+
 // -----------------------------------------------------------------------------
 // GOVERNANCE CONTEXT - Feature Flags, Logging, Strategic Sampling
 // -----------------------------------------------------------------------------
@@ -418,6 +429,7 @@ const product_embeddings = defineTable({
 export default defineSchema({
   // StyleSwipe Custom Tables
   style_profiles,
+  user_devices,
 
   // Governance Context
   feature_flags,
