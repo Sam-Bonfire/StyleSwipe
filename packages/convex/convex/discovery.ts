@@ -213,6 +213,20 @@ export const getUserSwipedIds = query({
   },
 });
 
+export const getPartnerLikes = query({
+  args: {
+    partnerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const swipes = await ctx.db
+      .query('swipes')
+      .withIndex('by_user', (q) => q.eq('userId', args.partnerId))
+      .filter((q) => q.or(q.eq(q.field('action'), 'like'), q.eq(q.field('action'), 'super')))
+      .collect();
+    return swipes.map((s) => s.productId);
+  },
+});
+
 export const getCalibrationFeed = query({
   args: {
     limit: v.optional(v.number()),

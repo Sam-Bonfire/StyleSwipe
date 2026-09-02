@@ -11,6 +11,8 @@ export {
   useRecordProductView,
   useVectorFeed,
   useProcessSwipe,
+  useUserSwipedIds,
+  usePartnerLikes,
 } from './useDiscovery';
 export {
   useCart,
