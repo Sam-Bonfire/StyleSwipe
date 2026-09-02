@@ -35,7 +35,7 @@ export function OfflineBanner() {
       top={insets.top > 0 ? insets.top : 20}
       left={16}
       right={16}
-      backgroundColor="$red10"
+      backgroundColor="red"
       padding="$3"
       borderRadius="$4"
       zIndex={1000}

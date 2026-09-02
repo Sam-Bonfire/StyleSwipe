@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
             gap="$4"
             elevation="$2"
           >
-            <AlertTriangle size={48} color="$red10" />
+            <AlertTriangle size={48} color="red" />
             <Text fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
               Oops! Something went wrong.
             </Text>
@@ -120,7 +120,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     borderWidth={1}
                     borderColor="$borderColor"
                   >
-                    <Text fontSize="$2" color="$red10" fontWeight="bold">
+                    <Text fontSize="$2" color="red" fontWeight="bold">
                       {this.state.error.message}
                     </Text>
                     {this.state.errorInfo?.componentStack && (
