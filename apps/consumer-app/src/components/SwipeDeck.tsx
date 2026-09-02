@@ -1,5 +1,6 @@
 import { type Vector384, FilterState } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
+import { Button } from '@app/ui-kit/components/Button';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { Modal } from '@app/ui-kit/components/Modal';
 import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
@@ -8,7 +9,6 @@ import { useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, Image } from 'react-native';
 import { YStack, H2, H3, Text } from 'tamagui';
-import { Button } from '@app/ui-kit/components/Button';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
 import { SuperLikeStarburst } from './SwipeAnimations';
