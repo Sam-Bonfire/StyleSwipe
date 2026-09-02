@@ -8,9 +8,9 @@ index 41b43599a9af6ef1c170047d39db1f3baa6ca682..efc4aa72d4838c3ae61fa6deaa73bdf9
 @@ -247,7 +247,7 @@ dependencies {
      extractLibs "com.microsoft.onnxruntime:onnxruntime-android:latest.integration@aar"
    }
-
+ 
 -  if (VersionNumber.parse(REACT_NATIVE_VERSION) < VersionNumber.parse("0.71")) {
-+  if (org.gradle.util.internal.VersionNumber.parse(REACT_NATIVE_VERSION) < org.gradle.util.internal.VersionNumber.parse("0.71")) {
++  if (org.gradle.util.VersionNumber.parse(REACT_NATIVE_VERSION) < org.gradle.util.VersionNumber.parse("0.71")) {
      extractLibs "com.facebook.fbjni:fbjni:+:headers"
      extractLibs "com.facebook.fbjni:fbjni:+"
    }

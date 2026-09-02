@@ -94,7 +94,8 @@
   ],
   "patchedDependencies": {
     "onnxruntime-react-native@1.24.3": "patches/onnxruntime-react-native@1.24.3.patch",
-    "expo-modules-core@57.0.8": "patches/expo-modules-core@57.0.8.patch"
+    "expo-modules-core@57.0.8": "patches/expo-modules-core@57.0.8.patch",
+    "expo-modules-core@57.0.11": "patches/expo-modules-core@57.0.8.patch"
   },
   "dependencies": {
     "expo-sharing": "~57.0.7",
