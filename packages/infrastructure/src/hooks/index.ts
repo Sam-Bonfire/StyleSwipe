@@ -20,7 +20,7 @@ export {
   useClearCart,
 } from './useCart';
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
-export { useUpdateUser, useUpdateStyleProfile } from './useUsers';
+export { useUpdateUser, useUpdateStyleProfile, useUpdatePushToken } from './useUsers';
 export * from './useOnboarding';
 export * from './useAnalytics';
 export * from './usePartnerSync';
