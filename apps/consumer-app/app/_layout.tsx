@@ -45,11 +45,30 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
 
+    const isGatedRoute = (): boolean => {
+      const flat = segments.join('/');
+      return (
+        flat.includes('cart') ||
+        flat.includes('wishlist') ||
+        flat.includes('checkout') ||
+        flat.includes('orders') ||
+        flat.includes('partner-sync')
+      );
+    };
+
     if (!user) {
-      if (!inAuthGroup) {
+      if (inOnboarding) {
+        router.replace('/(app)/(tabs)');
+        return;
+      }
+      if (isGatedRoute() && !inAuthGroup) {
         router.replace('/(auth)');
       }
-    } else if (!user.styleProfile) {
+      // otherwise allow guest browsing (home, discover, search, product)
+      return;
+    }
+
+    if (!user.styleProfile) {
       if (!inOnboarding) {
         router.replace('/onboarding');
       }

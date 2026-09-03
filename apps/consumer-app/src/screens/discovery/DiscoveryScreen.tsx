@@ -64,7 +64,7 @@ export function DiscoveryScreen() {
 
             <BlendSlider
               value={influenceRatio}
-              onChange={handleRatioChange}
+              onChange={handleRatioChange as unknown as never}
               partnerName={activeSession.partnerName || 'Partner'}
             />
           </YStack>

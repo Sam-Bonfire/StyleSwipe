@@ -120,3 +120,4 @@ export * from './discovery/domain/RecommendationScore';
 
 // Identity Domain
 export * from './identity/domain/Onboarding';
+export type { OnboardingQuestion, OnboardingQuestionType, VISUAL_VIBE_OPTIONS } from './identity/application/GetOnboardingQuestions';

@@ -151,7 +151,10 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
               <YStack key={item.productId} width="50%" padding="$2">
                 <View style={{ position: 'relative' }}>
                   <ProductTile
-                    product={product as Record<string, unknown>}
+                    imageUrl={(product.images as string[])?.[0] ?? 'https://placehold.co/200x250'}
+                    brand={(product.brand as string) ?? 'Brand'}
+                    title={(product.title as string) ?? 'Product'}
+                    price={(product.price as number) ?? 0}
                     onPress={() => router.push(`/product/${item.productId}` as never)}
                   />
 
