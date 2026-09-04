@@ -76,8 +76,9 @@ describe('CompleteOnboarding', () => {
     await expect(Effect.runPromise(Effect.provide(program, MainLayer))).rejects.toThrowError("Gender preference is required");
   });
 
-  it('should fail with OnboardingValidationError if fit is missing', async () => {
-    const program = completeOnboarding('user-1', { gender: 'men' });
-    await expect(Effect.runPromise(Effect.provide(program, MainLayer))).rejects.toThrowError("Fit preference is required");
-  });
+    it('should succeed without fit/sizes since sizing is optional', async () => {
+        const program = completeOnboarding('user-1', { gender: 'men' });
+        const profile = await Effect.runPromise(Effect.provide(program, MainLayer));
+        expect(profile.gender).toBe('men');
+    });
 });

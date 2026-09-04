@@ -55,12 +55,12 @@ describe('GetOnboardingQuestions', () => {
         expect(vibeQ!.options.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should include fit question with sizing options', async () => {
+    it('should include sizes question with sizing options', async () => {
         const result = await Effect.runPromise(getOnboardingQuestions());
-        const fitQ = result.find((q) => q.id === 'fit');
-        expect(fitQ).toBeDefined();
-        expect(fitQ!.options).toContain('Slim');
-        expect(fitQ!.options).toContain('Regular');
-        expect(fitQ!.options).toContain('Oversized');
+        const sizesQ = result.find((q) => q.id === 'sizes');
+        expect(sizesQ).toBeDefined();
+        expect(sizesQ!.options).toContain('S');
+        expect(sizesQ!.options).toContain('M');
+        expect(sizesQ!.options).toContain('L');
     });
 });
