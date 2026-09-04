@@ -5,7 +5,8 @@
 
 export * from './useConvexClient';
 export { useCurrentUser, useGetOrCreateUser, useAuthActions } from './useAuth';
-export { useLatestProducts, useProduct, useProductsByIds } from './useProducts';
+export { useLatestProducts, useProduct, useProductsByIds, useSimilarProducts } from './useProducts';
+export { useReviews, useReviewBreakdown, useAddReview, useMarkHelpful } from './useReviews';
 export {
   useRecentlyViewed,
   useRecordProductView,
@@ -27,7 +28,15 @@ export * from './useOnboarding';
 export * from './useAnalytics';
 export * from './usePartnerSync';
 export { useSearch } from './useSearch';
-export { useSystemBoard, useTrackPurchaseClick, useWishlist, useToggleWishlist, useBoard, useAddBoardItem, useRemoveBoardItem } from './useBoards';
+export {
+  useSystemBoard,
+  useTrackPurchaseClick,
+  useWishlist,
+  useToggleWishlist,
+  useBoard,
+  useAddBoardItem,
+  useRemoveBoardItem,
+} from './useBoards';
 
 // =============================================================================
 // ADMIN HOOKS (use in apps/admin-panel)

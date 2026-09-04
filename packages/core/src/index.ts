@@ -52,11 +52,14 @@ export * from './catalog/domain/SearchQuery';
 export * from './catalog/domain/FilterState';
 export * from './catalog/domain/Product';
 export * from './catalog/domain/Category';
+export * from './catalog/domain/Review';
+export * from './catalog/domain/SizeGuide';
 export * from './catalog/domain/TaggingService';
 export * as TagProduct from './catalog/application/TagProduct';
 export * as BrowseCatalog from './catalog/application/BrowseCatalog';
 export * as ManageAdminDashboard from './catalog/application/ManageAdminDashboard';
 export * as ManageScrapingJobs from './catalog/application/ManageScrapingJobs';
+export * as ManageReviews from './catalog/application/ManageReviews';
 
 // Identity
 export * from './identity/domain/User';
