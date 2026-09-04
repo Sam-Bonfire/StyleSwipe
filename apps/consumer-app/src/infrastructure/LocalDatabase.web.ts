@@ -167,6 +167,64 @@ export class LocalDatabase {
     });
   }
 
+  private async getMetadata(key: string): Promise<string | null> {
+    if (!this.idb) await this.init();
+    return new Promise<string | null>((resolve) => {
+      const transaction = this.idb!.transaction(['metadata'], 'readonly');
+      const store = transaction.objectStore('metadata');
+      const req = store.get(key);
+      req.onsuccess = () => resolve((req.result?.value as string) ?? null);
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  private async setMetadata(key: string, value: string): Promise<void> {
+    if (!this.idb) await this.init();
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.idb!.transaction(['metadata'], 'readwrite');
+      const store = transaction.objectStore('metadata');
+      const req = store.put({ key, value });
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async getRecentSearches(): Promise<string[]> {
+    const raw: string | null = await this.getMetadata('recent_searches_v1');
+    if (!raw) return [];
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      return Array.isArray(parsed) ? (parsed as string[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  async saveRecentSearch(query: string): Promise<void> {
+    const trimmed: string = query.trim();
+    if (!trimmed) return;
+    const existing: string[] = await this.getRecentSearches();
+    const next: string[] = [trimmed, ...existing.filter((q: string) => q !== trimmed)].slice(0, 5);
+    await this.setMetadata('recent_searches_v1', JSON.stringify(next));
+  }
+
+  async removeRecentSearch(query: string): Promise<void> {
+    const existing: string[] = await this.getRecentSearches();
+    await this.setMetadata('recent_searches_v1', JSON.stringify(existing.filter((q: string) => q !== query)));
+  }
+
+  async clearRecentSearches(): Promise<void> {
+    if (!this.idb) await this.init();
+    return new Promise<void>((resolve) => {
+      const transaction = this.idb!.transaction(['metadata'], 'readwrite');
+      const store = transaction.objectStore('metadata');
+      const req = store.delete('recent_searches_v1');
+      req.onsuccess = () => resolve();
+      req.onerror = () => resolve();
+    });
+  }
+
+
   async getOnboardingState(): Promise<{ step: number; answers: Record<string, string>; welcomeDone: boolean } | null> {
     if (!this.idb) await this.init();
     return new Promise((resolve) => {

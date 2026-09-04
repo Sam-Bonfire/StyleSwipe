@@ -57,6 +57,22 @@ export const save = mutation({
   },
 });
 
+export const listByParent = query({
+  args: { parentId: v.optional(v.id('categories')) },
+  handler: async (ctx, args) => {
+    if (args.parentId === undefined) {
+      return await ctx.db
+        .query('categories')
+        .filter((q) => q.eq(q.field('parentId'), undefined))
+        .collect();
+    }
+    return await ctx.db
+      .query('categories')
+      .withIndex('by_parent', (q) => q.eq('parentId', args.parentId!))
+      .collect();
+  },
+});
+
 export const remove = mutation({
   args: { id: v.id('categories') },
   handler: async (ctx, args) => {
