@@ -55,7 +55,57 @@ const user_devices = defineTable({
   service: v.union(v.literal('APNS'), v.literal('FCM')),
   isActive: v.boolean(),
   lastSeenAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_token', ['token']);
+
+// Req 9.1: push_tokens table — explicit per spec (alias of user_devices for hexagonal clarity)
+// Keep both tables in sync via updatePushToken mutation.
+const push_tokens = defineTable({
+  userId: v.string(),
+  token: v.string(), // Expo push token
+  platform: v.union(v.literal('IOS'), v.literal('ANDROID'), v.literal('WEB')),
+  service: v.union(v.literal('APNS'), v.literal('FCM')),
+  isActive: v.boolean(),
+  lastSeenAt: v.number(),
+  createdAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_token', ['token']);
+
+const notification_preferences = defineTable({
+  userId: v.string(),
+  push: v.boolean(),
+  email: v.boolean(),
+  inApp: v.boolean(),
+  priceDrops: v.boolean(),
+  partnerSync: v.boolean(),
+  dailyDrops: v.boolean(),
+  marketing: v.boolean(),
+  updatedAt: v.number(),
 }).index('by_user', ['userId']);
+
+const notifications = defineTable({
+  userId: v.string(),
+  type: v.union(
+    v.literal('PRICE_DROP'),
+    v.literal('BACK_IN_STOCK'),
+    v.literal('PARTNER_LIKED'),
+    v.literal('ORDER_UPDATE'),
+    v.literal('PARTNER_INVITE'),
+    v.literal('PARTNER_MATCH'),
+    v.literal('DISCOVERY_DROP'),
+    v.literal('SYSTEM'),
+  ),
+  title: v.string(),
+  body: v.string(),
+  data: v.optional(v.any()),
+  isRead: v.boolean(),
+  createdAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_user_created', ['userId', 'createdAt'])
+  .index('by_user_type', ['userId', 'type']);
 
 // -----------------------------------------------------------------------------
 // GOVERNANCE CONTEXT - Feature Flags, Logging, Strategic Sampling
@@ -267,6 +317,7 @@ const orders = defineTable({
       brand: v.optional(v.string()),
       title: v.optional(v.string()),
       image: v.optional(v.string()),
+      attributes: v.optional(v.any()),
     })
   ),
   pricing: v.object({
@@ -286,6 +337,20 @@ const orders = defineTable({
     country: v.string(),
     phone: v.string(),
   }),
+  // Flattened convenience fields per 5.1 spec
+  address: v.optional(
+    v.object({
+      name: v.string(),
+      line1: v.string(),
+      line2: v.optional(v.string()),
+      city: v.string(),
+      state: v.string(),
+      postalCode: v.string(),
+      country: v.string(),
+      phone: v.string(),
+    })
+  ),
+  paymentMethod: v.optional(v.string()),
   paymentInfo: v.optional(
     v.object({
       method: v.string(),
@@ -293,6 +358,7 @@ const orders = defineTable({
       paymentStatus: v.string(),
     })
   ),
+  trackingId: v.optional(v.string()),
   tracking: v.optional(
     v.object({
       carrier: v.string(),
@@ -300,7 +366,22 @@ const orders = defineTable({
       estimatedDeliveryDate: v.optional(v.number()),
     })
   ),
-  status: v.string(),
+  status: v.union(
+    v.literal('pending'),
+    v.literal('paid'),
+    v.literal('shipped'),
+    v.literal('delivered'),
+    v.literal('returned'),
+    v.literal('cancelled'),
+    v.literal('PENDING'),
+    v.literal('CONFIRMED'),
+    v.literal('PAID'),
+    v.literal('SHIPPED'),
+    v.literal('DELIVERED'),
+    v.literal('RETURNED'),
+    v.literal('CANCELLED'),
+    v.string()
+  ),
   statusHistory: v.array(
     v.object({
       status: v.string(),
@@ -313,6 +394,26 @@ const orders = defineTable({
 })
   .index('by_user', ['userId'])
   .index('by_order_number', ['orderNumber'])
+  .index('by_user_created', ['userId', 'createdAt'])
+  .index('by_status', ['status']);
+
+// Address book — Req 5.2: addresses table with default, pincode, Indian states
+const addresses = defineTable({
+  userId: v.string(),
+  fullName: v.string(),
+  phone: v.string(),
+  line1: v.string(),
+  line2: v.optional(v.string()),
+  city: v.string(),
+  state: v.string(),
+  pincode: v.string(), // 6-digit Indian pincode
+  country: v.string(), // default 'India'
+  isDefault: v.boolean(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_user_default', ['userId', 'isDefault'])
   .index('by_user_created', ['userId', 'createdAt']);
 
 const boards = defineTable({
@@ -422,6 +523,20 @@ const product_embeddings = defineTable({
     filterFields: ['category', 'gender', 'priceTier'],
   });
 
+// PDP Reviews — Req 4.2: product reviews with rating breakdown
+const reviews = defineTable({
+  productId: v.id('products'),
+  userId: v.string(),
+  rating: v.number(), // 1..5
+  text: v.string(),
+  images: v.optional(v.array(v.string())),
+  helpful: v.number(), // helpful count
+  createdAt: v.number(),
+})
+  .index('by_product', ['productId'])
+  .index('by_user', ['userId'])
+  .index('by_product_created', ['productId', 'createdAt']);
+
 // =============================================================================
 // SCHEMA EXPORT
 // =============================================================================
@@ -430,6 +545,9 @@ export default defineSchema({
   // StyleSwipe Custom Tables
   style_profiles,
   user_devices,
+  push_tokens,
+  notification_preferences,
+  notifications,
 
   // Governance Context
   feature_flags,
@@ -440,6 +558,7 @@ export default defineSchema({
   products,
   product_embeddings,
   categories,
+  reviews,
 
   // Discovery Context
   partner_sync,
@@ -449,6 +568,7 @@ export default defineSchema({
   // Commerce Context
   carts,
   orders,
+  addresses,
   boards,
   board_items,
 

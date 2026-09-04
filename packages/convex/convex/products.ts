@@ -204,6 +204,40 @@ export const remove = mutation({
 // Removed getProductsByIds from here to avoid circular dependency
 // Use api.helpers.getProductsByIds instead
 
+export const getSimilarByProductId = action({
+  args: {
+    productId: v.id('products'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<unknown[]> => {
+    const limit = args.limit ?? 10;
+    const embeddingDoc = await ctx.runQuery(api.helpers.getEmbeddingByProductId, {
+      productId: args.productId,
+    });
+    const vector = (embeddingDoc as unknown as { embeddingVersions?: { v1?: number[] } } | null)?.embeddingVersions?.v1;
+    if (!vector) {
+      // fallback to category-based listing
+      const product = await ctx.runQuery(api.products.getById, { id: args.productId });
+      const category = (product as { category?: string } | null)?.category;
+      if (category) {
+        const byCat = await ctx.runQuery(api.products.getByCategory, { category, limit: limit + 1 });
+        return (byCat as unknown[]).filter((p: unknown) => (p as { _id: string })._id !== args.productId).slice(0, limit);
+      }
+      return [];
+    }
+    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', {
+      vector,
+      limit: limit + 1,
+    });
+    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, {
+      ids: results.map((r) => r._id as never),
+    });
+    const filteredIds = (productIds as string[]).filter((id) => id !== args.productId).slice(0, limit);
+    const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: filteredIds as never });
+    return products as unknown[];
+  },
+});
+
 export const getLatest = query({
   args: {
     limit: v.optional(v.number()),

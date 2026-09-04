@@ -42,3 +42,10 @@ export const getProductIdsFromEmbeddings = query({
         return docs.map((d) => d?.productId).filter((id): id is Id<'products'> => id !== undefined);
     },
 });
+
+export const getEmbeddingByProductId = query({
+    args: { productId: v.id('products') },
+    handler: async (ctx, args) => {
+        return await ctx.db.query('product_embeddings').withIndex('by_productId', (q) => q.eq('productId', args.productId)).first();
+    },
+});

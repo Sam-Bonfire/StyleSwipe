@@ -485,6 +485,7 @@ export const SwipeCardStack = React.forwardRef(
       <YStack width={stackWidth} height={stackHeight} position="relative">
         {visibleData
           .map((item, index) => (
+            // @ts-ignore generic JSX type argument not supported in this compiler config
             <AnimatedCard<T>
               ref={index === 0 ? topCardRef : null}
               key={keyExtractor(item, currentIndex + index)}
