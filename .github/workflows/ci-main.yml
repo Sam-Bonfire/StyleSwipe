@@ -28,7 +28,7 @@ jobs:
       owner_lower: ${{ steps.get_version.outputs.owner_lower }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
@@ -40,7 +40,7 @@ jobs:
         id: get_version
         run: mise run release:extract-info "${{ inputs.tag_name || github.ref_name }}" "${{ github.repository_owner }}"
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag_name || github.ref_name }}
           body: |
@@ -62,7 +62,7 @@ jobs:
       matrix:
         app: [scraper-service]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
@@ -94,7 +94,7 @@ jobs:
     needs: [create-release]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
@@ -113,7 +113,7 @@ jobs:
           mise run pack:extension "extension-v${VERSION}.zip"
 
       - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag_name || github.ref_name }}
           files: apps/browser-extension/dist/extension-*.zip
@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Turbo Cache
@@ -149,14 +149,14 @@ jobs:
           APP_ENV: production
 
       - name: Upload Admin Panel Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: admin-panel-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/admin-panel/dist
           retention-days: 5
 
       - name: Upload Consumer App Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: consumer-app-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/dist
@@ -178,7 +178,7 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Setup Mise
@@ -199,7 +199,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
       - name: Extract App Version
         id: version
@@ -207,19 +207,17 @@ jobs:
       - name: Expo Prebuild
         run: mise run mobile:prebuild android
       - name: Pin Gradle 8 for Android build
-        run: |
-          sed -i 's|gradle-.*-bin.zip|gradle-8.13-bin.zip|' apps/consumer-app/android/gradle/wrapper/gradle-wrapper.properties
-          grep distributionUrl apps/consumer-app/android/gradle/wrapper/gradle-wrapper.properties
+        run: mise run mobile:pin-gradle
       - name: Build Android AAB
         run: mise run android:build:aab
       - name: Upload Android Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: consumer-app-android-prod-${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 5
       - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag_name || github.ref_name }}
           files: apps/consumer-app/android/app/build/outputs/bundle/release/app-release.aab
@@ -229,7 +227,7 @@ jobs:
     if: needs.create-release.outputs.new_version != 'none'
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: v${{ needs.create-release.outputs.new_version }}
       - name: Turbo Cache
@@ -260,7 +258,7 @@ jobs:
       - name: Build iOS IPA
         run: mise run ios:build
       - name: Upload iOS Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: consumer-app-ios-prod-${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/ios/build/
@@ -270,7 +268,7 @@ jobs:
           VERSION=${{ needs.create-release.outputs.new_version }}
           mise run pack:ios "ios-build-v${VERSION}.zip"
       - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag_name || github.ref_name }}
           files: apps/consumer-app/ios/ios-build-*.zip
@@ -281,7 +279,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.tag_name || github.ref }}
       - name: Turbo Cache
@@ -299,13 +297,13 @@ jobs:
       - run: mise run init
 
       - name: Download Admin Panel Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: admin-panel-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/admin-panel/dist
 
       - name: Download Consumer App Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: consumer-app-prod-v${{ needs.create-release.outputs.new_version }}
           path: apps/consumer-app/dist

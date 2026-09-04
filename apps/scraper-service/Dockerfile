@@ -9,9 +9,10 @@ RUN turbo prune @app/scraper-service --docker
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Add dependencies
+# Add dependencies (patches/ required: pnpm-lock references patchedDependencies hashes)
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
 COPY --from=pruner /app/tsconfig.json ./tsconfig.json
 COPY --from=pruner /app/tsconfig.base.json ./tsconfig.base.json
 COPY --from=pruner /app/bin ./bin
@@ -25,7 +26,10 @@ FROM node:20-slim AS prod-deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/bin ./bin
-RUN rm -f pnpm-lock.yaml package-lock.json && corepack enable pnpm && pnpm install --production
+# The pruned scraper tree contains neither patched package
+# (onnxruntime-react-native, expo-modules-core), so drop patch entries
+# that would otherwise fail the install with ERR_PNPM_PATCH_NOT_APPLIED.
+RUN rm -f pnpm-lock.yaml package-lock.json && node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));if(p.pnpm)delete p.pnpm.patchedDependencies;fs.writeFileSync('package.json',JSON.stringify(p,null,2))" && corepack enable pnpm && pnpm install --production
 
 # Stage 3: Runner
 FROM node:20-slim AS runner

@@ -18,12 +18,56 @@ env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
 jobs:
+  changes:
+    name: Detect Changed Areas
+    runs-on: ubuntu-latest
+    outputs:
+      mobile: ${{ steps.filter.outputs.mobile }}
+      scraper: ${{ steps.filter.outputs.scraper }}
+      extension: ${{ steps.filter.outputs.extension }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            mobile:
+              - 'apps/consumer-app/**'
+              - 'packages/ui-kit/**'
+              - 'packages/core/**'
+              - 'packages/infrastructure/**'
+              - 'packages/logger/**'
+              - 'packages/convex/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'patches/**'
+              - '.mise.toml'
+              - 'turbo.json'
+            scraper:
+              - 'apps/scraper-service/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'patches/**'
+              - '.mise.toml'
+              - 'turbo.json'
+            extension:
+              - 'apps/browser-extension/**'
+              - 'packages/ui-kit/**'
+              - 'packages/core/**'
+              - 'packages/convex/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'patches/**'
+              - '.mise.toml'
+              - 'turbo.json'
+
   validation-and-preview:
     name: Validation, Preview Deploy & E2E
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Turbo Cache
         uses: actions/cache@v6
@@ -93,3 +137,156 @@ jobs:
         run: mise run test:e2e
         env:
           PREVIEW_URL: "${{ steps.cloudflare.outputs.url }}"
+
+  build-android-pr:
+    name: Build Android APK
+    needs: [changes]
+    if: needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - uses: actions/checkout@v7
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+      - run: mise trust
+
+      - name: Prune Unused Workspaces
+        run: mise run prune:unused-workspaces
+
+      - name: Turbo Cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - run: mise run init
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Extract App Version
+        id: version
+        run: mise run app:extract-version
+
+      - name: Expo Prebuild
+        run: mise run mobile:prebuild android
+
+      - name: Pin Gradle 8 for Android build
+        run: mise run mobile:pin-gradle
+
+      - name: Build Android APK
+        run: mise run android:build:apk
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: consumer-app-android-pr-${{ github.sha }}
+          path: apps/consumer-app/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 3
+
+  build-ios-pr:
+    name: Build iOS IPA
+    needs: [changes]
+    if: needs.changes.outputs.mobile == 'true'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Turbo Cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+      - run: mise trust
+      - run: mise run init
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Extract App Version
+        id: version
+        run: mise run app:extract-version
+
+      - name: Expo Prebuild
+        run: mise run mobile:prebuild ios
+
+      - name: Install Pods
+        run: mise run ios:pod-install
+
+      - name: Build iOS IPA
+        run: mise run ios:build
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: consumer-app-ios-pr-${{ github.sha }}
+          path: apps/consumer-app/ios/build/
+          retention-days: 3
+
+  build-scraper-pr:
+    name: Build Scraper Image
+    needs: [changes]
+    if: needs.changes.outputs.scraper == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+      - run: mise trust
+
+      - name: Build Docker Image (no push)
+        run: mise run docker:build scraper-service scraper-service:pr-${{ github.run_number }}
+
+  build-extension-pr:
+    name: Build Browser Extension
+    needs: [changes]
+    if: needs.changes.outputs.extension == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+      - run: mise trust
+      - run: mise run init
+
+      - name: Build Extension
+        run: mise run build:extension
+
+      - name: Zip Extension
+        run: mise run pack:extension "extension-pr-${{ github.sha }}.zip"
+
+      - name: Upload Extension Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-extension-pr-${{ github.sha }}
+          path: apps/browser-extension/dist/extension-pr-${{ github.sha }}.zip
+          retention-days: 3
