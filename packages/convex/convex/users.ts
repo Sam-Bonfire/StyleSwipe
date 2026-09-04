@@ -383,5 +383,27 @@ export const updatePushToken = mutation({
         lastSeenAt: now,
       });
     }
+
+    // Mirror to push_tokens (Req 9.1 spec table)
+    const existingPush = await ctx.db
+      .query('push_tokens')
+      .withIndex('by_token', (q: any) => q.eq('token', args.token))
+      .first();
+    if (existingPush) {
+      await ctx.db.patch(existingPush._id, {
+        isActive: true,
+        lastSeenAt: now,
+      });
+    } else {
+      await ctx.db.insert('push_tokens', {
+        userId,
+        token: args.token,
+        platform: args.platform,
+        service: args.service,
+        isActive: true,
+        lastSeenAt: now,
+        createdAt: now,
+      });
+    }
   },
 });
