@@ -27,6 +27,8 @@ export const FilterStateSchema = z.object({
   merchantNames: z.array(z.string()).default([]),
   discountMinPercent: z.number().min(0).max(100).optional(),
   inStockOnly: z.boolean().default(false),
+  genders: z.array(z.enum(['men', 'women', 'unisex'])).default([]),
+  onSale: z.boolean().default(false),
 });
 export type FilterState = z.infer<typeof FilterStateSchema>;
 
