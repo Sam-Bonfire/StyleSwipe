@@ -26,8 +26,8 @@ jobs:
       scraper: ${{ steps.filter.outputs.scraper }}
       extension: ${{ steps.filter.outputs.extension }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Turbo Cache
         uses: actions/cache@v6
@@ -155,7 +155,7 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Mise
         uses: jdx/mise-action@v4
         with:
@@ -195,7 +195,7 @@ jobs:
         run: mise run android:build:apk
 
       - name: Upload Android Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: consumer-app-android-pr-${{ github.sha }}
           path: apps/consumer-app/android/app/build/outputs/apk/release/app-release.apk
@@ -207,7 +207,7 @@ jobs:
     if: needs.changes.outputs.mobile == 'true'
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Turbo Cache
         uses: actions/cache@v6
         with:
@@ -242,7 +242,7 @@ jobs:
         run: mise run ios:build
 
       - name: Upload iOS Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: consumer-app-ios-pr-${{ github.sha }}
           path: apps/consumer-app/ios/build/
@@ -254,7 +254,7 @@ jobs:
     if: needs.changes.outputs.scraper == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Mise
         uses: jdx/mise-action@v4
         with:
@@ -270,7 +270,7 @@ jobs:
     if: needs.changes.outputs.extension == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Mise
         uses: jdx/mise-action@v4
         with:
@@ -285,7 +285,7 @@ jobs:
         run: mise run pack:extension "extension-pr-${{ github.sha }}.zip"
 
       - name: Upload Extension Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: browser-extension-pr-${{ github.sha }}
           path: apps/browser-extension/dist/extension-pr-${{ github.sha }}.zip
