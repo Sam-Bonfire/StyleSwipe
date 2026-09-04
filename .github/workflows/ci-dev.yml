@@ -184,6 +184,11 @@ jobs:
       - name: Expo Prebuild
         run: mise run mobile:prebuild android
 
+      - name: Pin Gradle 8 for Android build
+        run: |
+          sed -i 's|gradle-.*-bin.zip|gradle-8.13-bin.zip|' apps/consumer-app/android/gradle/wrapper/gradle-wrapper.properties
+          grep distributionUrl apps/consumer-app/android/gradle/wrapper/gradle-wrapper.properties
+
       - name: Build Android APK
         run: mise run android:build:apk
 
