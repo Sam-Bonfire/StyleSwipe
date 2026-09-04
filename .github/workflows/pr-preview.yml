@@ -139,7 +139,7 @@ jobs:
           PREVIEW_URL: "${{ steps.cloudflare.outputs.url }}"
 
   build-android-pr:
-    name: PR Android APK (if mobile affected)
+    name: Build Android APK
     needs: [changes]
     if: needs.changes.outputs.mobile == 'true'
     runs-on: ubuntu-latest
@@ -202,7 +202,7 @@ jobs:
           retention-days: 3
 
   build-ios-pr:
-    name: PR iOS IPA (if mobile affected)
+    name: Build iOS IPA
     needs: [changes]
     if: needs.changes.outputs.mobile == 'true'
     runs-on: macos-latest
@@ -249,7 +249,7 @@ jobs:
           retention-days: 3
 
   build-scraper-pr:
-    name: PR Scraper Image (if scraper affected)
+    name: Build Scraper Image
     needs: [changes]
     if: needs.changes.outputs.scraper == 'true'
     runs-on: ubuntu-latest
@@ -265,7 +265,7 @@ jobs:
         run: mise run docker:build scraper-service scraper-service:pr-${{ github.run_number }}
 
   build-extension-pr:
-    name: PR Extension (if extension affected)
+    name: Build Browser Extension
     needs: [changes]
     if: needs.changes.outputs.extension == 'true'
     runs-on: ubuntu-latest
