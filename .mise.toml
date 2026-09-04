@@ -206,6 +206,10 @@ arg "<platform>" help="android or ios"
 """
 run = 'cd apps/consumer-app && npx expo prebuild --platform "$usage_platform" --clean'
 
+[tasks."mobile:pin-gradle"]
+description = "Pin Android Gradle wrapper to 8.13 (Gradle 9 breaks onnx + expo publishing)"
+run = "npx tsx bin/pin-gradle.ts"
+
 [tasks."android:build:apk"]
 description = "Build Android release APK"
 run = "cd apps/consumer-app/android && ./gradlew assembleRelease"

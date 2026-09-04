@@ -174,7 +174,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Extract App Version
@@ -185,9 +185,7 @@ jobs:
         run: mise run mobile:prebuild android
 
       - name: Pin Gradle 8 for Android build
-        run: |
-          sed -i 's|gradle-.*-bin.zip|gradle-8.13-bin.zip|' apps/consumer-app/android/gradle/wrapper/gradle-wrapper.properties
-          grep distributionUrl apps/consumer-app/android/gradle/wrapper/gradle-wrapper.properties
+        run: mise run mobile:pin-gradle
 
       - name: Build Android APK
         run: mise run android:build:apk
