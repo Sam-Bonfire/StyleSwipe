@@ -1,4 +1,4 @@
-import { Context, Effect } from 'effect';
+import { Effect } from 'effect';
 
 import { RepositoryError } from '../../../shared/domain/errors';
 import { type Address } from '../domain/Address';
@@ -6,19 +6,19 @@ import { type Cart } from '../domain/Cart';
 import { EmptyCartError } from '../domain/errors';
 import { type Order, type OrderItem, createOrder } from '../domain/Order';
 import { PriceEstimator } from '../domain/PriceEstimator';
+import { OrderRepository } from './OrderRepository';
 
-export class OrderRepository extends Context.Tag('OrderRepository')<
-  OrderRepository,
-  {
-    readonly save: (order: Order) => Effect.Effect<void, RepositoryError>;
-    readonly findById: (id: string) => Effect.Effect<Order | null, RepositoryError>;
-  }
->() {}
+export { OrderRepository };
+
+export interface CheckoutOptions {
+  readonly paymentMethod?: string;
+}
 
 export const createOrderFromCart = (
   cart: Cart,
   shippingAddress: Address,
   orderIdGenerator: () => string,
+  options?: CheckoutOptions,
 ): Effect.Effect<Order, EmptyCartError | RepositoryError, OrderRepository> =>
   Effect.gen(function* (_) {
     if (cart.items.length === 0) {
@@ -38,11 +38,13 @@ export const createOrderFromCart = (
       }),
     );
 
+    const paymentMethod = options?.paymentMethod ?? 'COD';
     const order = createOrder({
       id: orderIdGenerator(),
       userId: cart.userId,
       items: orderItems,
       deliveryAddress: shippingAddress,
+      paymentInfo: { method: paymentMethod, paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PENDING' },
       status: 'PENDING',
       pricing: {
         totalAmount: priceBreakdown.total,

@@ -2,7 +2,7 @@ import { Effect, Exit, Layer } from 'effect';
 import { describe, expect, it, vi } from 'vitest';
 
 import * as CheckoutService from '../../../../src/commerce/application/CheckoutService';
-import { OrderRepository } from '../../../../src/commerce/application/CheckoutService';
+import { OrderRepository } from '../../../../src/commerce/application/OrderRepository';
 import { type Address } from '../../../../src/commerce/domain/Address';
 import { createCart, addCartItem } from '../../../../src/commerce/domain/Cart';
 
@@ -11,6 +11,8 @@ describe('CheckoutService', () => {
     const repoMock = OrderRepository.of({
       save: vi.fn(() => Effect.succeed(undefined)),
       findById: vi.fn(() => Effect.succeed(null)),
+      listByUser: vi.fn(() => Effect.succeed([])),
+      updateStatus: vi.fn(() => Effect.succeed(undefined)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);
@@ -42,6 +44,8 @@ describe('CheckoutService', () => {
     const repoMock = OrderRepository.of({
       save: vi.fn(() => Effect.succeed(undefined)),
       findById: vi.fn(() => Effect.succeed(null)),
+      listByUser: vi.fn(() => Effect.succeed([])),
+      updateStatus: vi.fn(() => Effect.succeed(undefined)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);

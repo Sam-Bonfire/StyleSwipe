@@ -14,6 +14,7 @@ export const placeOrder = mutation({
         brand: v.optional(v.string()),
         title: v.optional(v.string()),
         image: v.optional(v.string()),
+        attributes: v.optional(v.any()),
       })
     ),
     pricing: v.object({
@@ -33,11 +34,24 @@ export const placeOrder = mutation({
       country: v.string(),
       phone: v.string(),
     }),
+    paymentMethod: v.optional(v.string()),
+    paymentInfo: v.optional(
+      v.object({
+        method: v.string(),
+        transactionId: v.optional(v.string()),
+        paymentStatus: v.string(),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const timestamp = Date.now();
-    const orderNumber = `ORD-${timestamp}`;
-    const initialStatus = 'PENDING';
+    const orderNumber = `ORD-${timestamp}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const initialStatus = 'pending';
+    const paymentMethod = args.paymentMethod ?? args.paymentInfo?.method ?? 'COD';
+    const paymentInfo = args.paymentInfo ?? {
+      method: paymentMethod,
+      paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PENDING',
+    };
 
     const orderId = await ctx.db.insert('orders', {
       orderNumber,
@@ -45,6 +59,11 @@ export const placeOrder = mutation({
       items: args.items,
       pricing: args.pricing,
       deliveryAddress: args.deliveryAddress,
+      address: args.deliveryAddress,
+      paymentMethod,
+      paymentInfo,
+      trackingId: undefined,
+      tracking: undefined,
       status: initialStatus,
       statusHistory: [
         {
@@ -150,6 +169,91 @@ export const updateOrderStatus = mutation({
       status: args.status,
       statusHistory: newHistory,
       updatedAt: timestamp,
+    });
+  },
+});
+
+export const cancelOrder = mutation({
+  args: {
+    orderId: v.id('orders'),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error('Order not found');
+    const now = Date.now();
+    const lower = order.status.toLowerCase();
+    if (lower === 'shipped' || lower === 'delivered' || lower === 'cancelled' || lower === 'returned') {
+      throw new Error(`Cannot cancel order in status ${order.status}`);
+    }
+    // 24h window for cancel
+    if (now - order.createdAt > 24 * 60 * 60 * 1000) {
+      throw new Error('Cancel window expired (24h)');
+    }
+    const newHistory = [
+      ...order.statusHistory,
+      { status: 'cancelled', timestamp: now, reason: args.reason ?? 'User cancelled' },
+    ];
+    await ctx.db.patch(args.orderId, {
+      status: 'cancelled',
+      statusHistory: newHistory,
+      updatedAt: now,
+    });
+  },
+});
+
+export const returnOrder = mutation({
+  args: {
+    orderId: v.id('orders'),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error('Order not found');
+    const lower = order.status.toLowerCase();
+    if (lower !== 'delivered' && lower !== 'shipped') {
+      throw new Error(`Return only allowed after shipped/delivered, current ${order.status}`);
+    }
+    // Return window 7 days from delivery/shipped would be ideal; fallback 7 days from now check
+    const lastShipped = [...order.statusHistory].reverse().find((h) => h.status.toLowerCase() === 'delivered' || h.status.toLowerCase() === 'shipped');
+    const base = lastShipped?.timestamp ?? order.createdAt;
+    if (Date.now() - base > 7 * 24 * 60 * 60 * 1000) {
+      throw new Error('Return window expired (7 days)');
+    }
+    const now = Date.now();
+    const newHistory = [...order.statusHistory, { status: 'returned', timestamp: now, reason: args.reason ?? 'User returned' }];
+    await ctx.db.patch(args.orderId, {
+      status: 'returned',
+      statusHistory: newHistory,
+      updatedAt: now,
+    });
+  },
+});
+
+export const addTracking = mutation({
+  args: {
+    orderId: v.id('orders'),
+    carrier: v.string(),
+    trackingNumber: v.string(),
+    estimatedDeliveryDate: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) throw new Error('Order not found');
+    const now = Date.now();
+    await ctx.db.patch(args.orderId, {
+      trackingId: args.trackingNumber,
+      tracking: {
+        carrier: args.carrier,
+        trackingNumber: args.trackingNumber,
+        estimatedDeliveryDate: args.estimatedDeliveryDate,
+      },
+      status: order.status.toLowerCase() === 'pending' || order.status.toLowerCase() === 'paid' ? 'shipped' : order.status,
+      statusHistory:
+        order.status.toLowerCase() === 'pending' || order.status.toLowerCase() === 'paid'
+          ? [...order.statusHistory, { status: 'shipped', timestamp: now, reason: 'Tracking added' }]
+          : order.statusHistory,
+      updatedAt: now,
     });
   },
 });

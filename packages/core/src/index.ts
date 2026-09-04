@@ -92,6 +92,8 @@ export * from './commerce/domain/Wishlist';
 export * from './commerce/domain/errors';
 export * from './commerce/application/CartRepository';
 export * from './commerce/application/CheckoutService';
+export * from './commerce/application/AddressRepository';
+export * from './commerce/application/OrderRepository';
 export * as ManageCart from './commerce/application/ManageCart';
 export * as CheckoutService from './commerce/application/CheckoutService';
 

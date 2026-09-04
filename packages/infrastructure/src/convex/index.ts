@@ -21,3 +21,5 @@ export * from './repositories/SessionRepository';
 export * from './repositories/UserRepository';
 export * from './repositories/VerificationRepository';
 export * from './repositories/CategoryRepository';
+export * from './repositories/ConvexOrderRepository';
+export * from './repositories/ConvexAddressRepository';
