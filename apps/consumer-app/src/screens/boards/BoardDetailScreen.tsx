@@ -10,7 +10,6 @@ import { Button } from '@app/ui-kit';
 import { ProductTile } from '@app/ui-kit/components/ProductTile';
 import { ChevronLeft, Share as ShareIcon, Trash2, Pencil, ArrowLeftRight } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
-import * as Sharing from 'expo-sharing';
 import React from 'react';
 import { Alert, Platform, SafeAreaView, ScrollView } from 'react-native';
 import { YStack, XStack, Text, Spinner } from 'tamagui';
@@ -80,9 +79,6 @@ export function BoardDetailScreen({ boardId }: BoardDetailScreenProps) {
 
   const handleNativeShare = async () => {
     try {
-      if (await Sharing.isAvailableAsync()) {
-        // BrandedQRCodeModal handles sharing QR; here we just do link share
-      }
       const message = `Check my StyleSwipe collection: ${boardUrl}`;
       if (Platform.OS === 'web' && typeof navigator !== 'undefined' && 'share' in navigator) {
         await (navigator as unknown as { share: (data: { title: string; text: string; url: string }) => Promise<void> }).share({ title: board?.name ?? 'StyleSwipe Board', text: message, url: boardUrl });
