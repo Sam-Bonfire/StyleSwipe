@@ -269,4 +269,65 @@ export class LocalDatabase {
     }
     await (this.db as SQLite.SQLiteDatabase).runAsync('DELETE FROM metadata WHERE key = ?', 'onboarding_state_v1');
   }
+
+
+  async getRecentSearches(): Promise<string[]> {
+    if (!this.db) await this.init();
+    const result = await this.db!.getFirstAsync<{ value: string }>(
+      'SELECT value FROM metadata WHERE key = ?',
+      'recent_searches_v1',
+    );
+    if (result?.value) {
+      try {
+        const parsed: unknown = JSON.parse(result.value);
+        return Array.isArray(parsed) ? (parsed as string[]) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
+
+  async saveRecentSearch(query: string): Promise<void> {
+    const trimmed: string = query.trim();
+    if (!trimmed) return;
+    const existing: string[] = await this.getRecentSearches();
+    const next: string[] = [trimmed, ...existing.filter((q: string) => q !== trimmed)].slice(0, 5);
+    const value: string = JSON.stringify(next);
+    if (!this.db) await this.init();
+    if (Platform.OS === 'web') {
+      await (this.db as WebPersistenceDB).runAsync('INSERT OR REPLACE INTO metadata', 'recent_searches_v1', value);
+      return;
+    }
+    await (this.db as SQLite.SQLiteDatabase).runAsync(
+      'INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)',
+      'recent_searches_v1',
+      value,
+    );
+  }
+
+  async removeRecentSearch(query: string): Promise<void> {
+    const existing: string[] = await this.getRecentSearches();
+    const next: string[] = existing.filter((q: string) => q !== query);
+    const value: string = JSON.stringify(next);
+    if (!this.db) await this.init();
+    if (Platform.OS === 'web') {
+      await (this.db as WebPersistenceDB).runAsync('INSERT OR REPLACE INTO metadata', 'recent_searches_v1', value);
+      return;
+    }
+    await (this.db as SQLite.SQLiteDatabase).runAsync(
+      'INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)',
+      'recent_searches_v1',
+      value,
+    );
+  }
+
+  async clearRecentSearches(): Promise<void> {
+    if (!this.db) await this.init();
+    if (Platform.OS === 'web') {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem('metadata_recent_searches_v1');
+      return;
+    }
+    await (this.db as SQLite.SQLiteDatabase).runAsync('DELETE FROM metadata WHERE key = ?', 'recent_searches_v1');
+  }
 }

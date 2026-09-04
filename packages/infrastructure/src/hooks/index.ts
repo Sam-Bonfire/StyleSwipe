@@ -37,6 +37,8 @@ export {
   useAddBoardItem,
   useRemoveBoardItem,
 } from './useBoards';
+export * from './useCategories';
+export * from './useTrending';
 
 // =============================================================================
 // ADMIN HOOKS (use in apps/admin-panel)
