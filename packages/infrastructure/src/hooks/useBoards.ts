@@ -28,7 +28,7 @@ export function useTrackPurchaseClick() {
         productId: productId as Id<'products'>,
       });
     },
-    [mutation]
+    [mutation],
   );
 }
 
@@ -57,7 +57,7 @@ export function useToggleWishlist() {
         productId: productId as Id<'products'>,
       });
     },
-    [mutation]
+    [mutation],
   );
 }
 
@@ -86,7 +86,7 @@ export function useAddBoardItem() {
         productId: productId as Id<'products'>,
       });
     },
-    [mutation]
+    [mutation],
   );
 }
 
@@ -103,6 +103,71 @@ export function useRemoveBoardItem() {
         productId: productId as Id<'products'>,
       });
     },
-    [mutation]
+    [mutation],
+  );
+}
+
+export interface UserBoardSummary {
+  _id: Id<'boards'>;
+  _creationTime: number;
+  userId: string;
+  name: string;
+  slug: string;
+  isSystem?: boolean;
+  createdAt: number;
+  updatedAt: number;
+  itemCount: number;
+  previewImage: string | null;
+}
+
+export function useUserBoards(userId: string | undefined, includeSystem: boolean = false) {
+  const data = useQuery(api.boards.listUserBoards, userId ? { userId, includeSystem } : 'skip');
+  return React.useMemo(() => {
+    if (data === undefined) return undefined;
+    return data as UserBoardSummary[];
+  }, [data]);
+}
+
+export function useCreateBoard() {
+  const mutation = useMutation(api.boards.createBoard);
+  return React.useCallback(
+    async (userId: string, name: string, slug?: string) => {
+      return await mutation({ userId, name, ...(slug ? { slug } : {}) });
+    },
+    [mutation],
+  );
+}
+
+export function useRenameBoard() {
+  const mutation = useMutation(api.boards.renameBoard);
+  return React.useCallback(
+    async (boardId: string, userId: string, name: string, slug?: string) => {
+      return await mutation({ boardId: boardId as Id<'boards'>, userId, name, ...(slug ? { slug } : {}) });
+    },
+    [mutation],
+  );
+}
+
+export function useDeleteBoard() {
+  const mutation = useMutation(api.boards.deleteBoard);
+  return React.useCallback(
+    async (boardId: string, userId: string) => {
+      return await mutation({ boardId: boardId as Id<'boards'>, userId });
+    },
+    [mutation],
+  );
+}
+
+export function useMoveBoardItem() {
+  const mutation = useMutation(api.boards.moveBoardItem);
+  return React.useCallback(
+    async (sourceBoardId: string, targetBoardId: string, productId: string) => {
+      return await mutation({
+        sourceBoardId: sourceBoardId as Id<'boards'>,
+        targetBoardId: targetBoardId as Id<'boards'>,
+        productId: productId as Id<'products'>,
+      });
+    },
+    [mutation],
   );
 }

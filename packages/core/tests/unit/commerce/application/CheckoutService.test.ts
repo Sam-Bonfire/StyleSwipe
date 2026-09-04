@@ -2,7 +2,7 @@ import { Effect, Exit, Layer } from 'effect';
 import { describe, expect, it, vi } from 'vitest';
 
 import * as CheckoutService from '../../../../src/commerce/application/CheckoutService';
-import { OrderRepository } from '../../../../src/commerce/application/CheckoutService';
+import { OrderRepository } from '../../../../src/commerce/application/OrderRepository';
 import { type Address } from '../../../../src/commerce/domain/Address';
 import { createCart, addCartItem } from '../../../../src/commerce/domain/Cart';
 
@@ -11,6 +11,8 @@ describe('CheckoutService', () => {
     const repoMock = OrderRepository.of({
       save: vi.fn(() => Effect.succeed(undefined)),
       findById: vi.fn(() => Effect.succeed(null)),
+      listByUser: vi.fn(() => Effect.succeed([])),
+      updateStatus: vi.fn(() => Effect.succeed(undefined)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);
@@ -20,12 +22,12 @@ describe('CheckoutService', () => {
 
     const address: Address = {
       fullName: 'Sam Altman',
-      addressLine1: '123 AI Blvd',
-      city: 'San Francisco',
-      state: 'CA',
-      postalCode: '94103',
-      phoneNumber: '5550199000',
-      country: 'US',
+      addressLine1: '123 Linking Road, Bandra West',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      postalCode: '400050',
+      phoneNumber: '9876543210',
+      country: 'India',
       isDefault: false
     };
 
@@ -42,6 +44,8 @@ describe('CheckoutService', () => {
     const repoMock = OrderRepository.of({
       save: vi.fn(() => Effect.succeed(undefined)),
       findById: vi.fn(() => Effect.succeed(null)),
+      listByUser: vi.fn(() => Effect.succeed([])),
+      updateStatus: vi.fn(() => Effect.succeed(undefined)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);
@@ -49,12 +53,12 @@ describe('CheckoutService', () => {
     const cart = createCart({ userId: 'user-1' }); // Empty
     const address: Address = {
       fullName: 'Sam Altman',
-      addressLine1: '123 AI Blvd',
-      city: 'San Francisco',
-      state: 'CA',
-      postalCode: '94103',
-      phoneNumber: '5550199000',
-      country: 'US',
+      addressLine1: '123 Linking Road, Bandra West',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      postalCode: '400050',
+      phoneNumber: '9876543210',
+      country: 'India',
       isDefault: false
     };
 
