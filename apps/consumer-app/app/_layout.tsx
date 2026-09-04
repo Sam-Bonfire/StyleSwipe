@@ -11,8 +11,10 @@ import { YStack, Spinner } from 'tamagui';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { OfflineBanner } from '../src/components/OfflineBanner';
 import { authAdapter } from '../src/lib/auth';
+import { linkingConfig } from '../src/lib/linking';
 import { logger } from '../src/lib/logger';
 import { usePushNotifications } from '../src/lib/notifications';
+import { useDeepLinkHandler } from '../src/lib/useDeepLinkHandler';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string);
 
@@ -21,6 +23,12 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
  * IMPORTANT: Must always render children (Slot) — never block the navigator.
  * Expo Router requires the navigator to always be rendered to maintain LinkingContext.
  */
+/**
+ * Deep linking config per Req 9.2
+ * Exported for expo-router linking and universal links verification
+ */
+export const linking = linkingConfig;
+
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useCurrentUser();
   const segments = useSegments();
@@ -28,6 +36,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Register push notification listeners + token on app launch
   usePushNotifications();
+
+  // Handle cold-start / background deep links (styleswipe:// + https://styleswipe.app)
+  useDeepLinkHandler();
 
   React.useEffect(() => {
     if (user) {

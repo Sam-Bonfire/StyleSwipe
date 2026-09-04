@@ -27,6 +27,7 @@ export { useUpdateUser, useUpdateStyleProfile, useUpdatePushToken } from './useU
 export * from './useOnboarding';
 export * from './useAnalytics';
 export * from './usePartnerSync';
+export * from './useNotifications';
 export { useSearch } from './useSearch';
 export {
   useSystemBoard,

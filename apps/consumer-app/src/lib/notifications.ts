@@ -19,7 +19,43 @@ Notifications.setNotificationHandler({
   } as Notifications.NotificationBehavior),
 });
 
-export function usePushNotifications() {
+type PushPermissionResult = {
+  granted: boolean;
+  token: string | null;
+};
+
+export async function requestPushPermissionAndRegister(
+  updatePushToken: (args: { token: string; platform: 'IOS' | 'ANDROID' | 'WEB'; service: 'APNS' | 'FCM' }) => Promise<unknown>,
+): Promise<PushPermissionResult> {
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus: Notifications.PermissionStatus = existingStatus;
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+  if (finalStatus !== 'granted') {
+    logger.warn('Push permission not granted', { status: finalStatus });
+    return { granted: false, token: null };
+  }
+
+  try {
+    const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+    const token: string = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+    if (token) {
+      logger.info('Push token retrieved', { token });
+      const platform: 'IOS' | 'ANDROID' | 'WEB' =
+        Platform.OS === 'ios' ? 'IOS' : Platform.OS === 'android' ? 'ANDROID' : 'WEB';
+      const service: 'APNS' | 'FCM' = Platform.OS === 'ios' ? 'APNS' : 'FCM';
+      await updatePushToken({ token, platform, service });
+      return { granted: true, token };
+    }
+  } catch (e: unknown) {
+    logger.error('Error fetching push token', { error: e });
+  }
+  return { granted: true, token: null };
+}
+
+export function usePushNotifications(): void {
   const router = useRouter();
   const updatePushToken = useUpdatePushToken();
 
@@ -27,7 +63,7 @@ export function usePushNotifications() {
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
-    async function registerForPushNotificationsAsync() {
+    async function setupChannelsAndMaybeRegister(): Promise<void> {
       if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync('partner-sync', {
           name: 'Partner Sync',
@@ -45,37 +81,29 @@ export function usePushNotifications() {
         });
       }
 
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        logger.warn('Failed to get push token for push notification!');
+      // Only auto-register if already granted — do NOT prompt on launch (Req 9.1 after onboarding step 3)
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        logger.info('Push permission not yet granted — skipping auto-register (will prompt after onboarding step 3)');
         return;
       }
 
       try {
-        const projectId =
-          Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-
-        const token = (await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })).data;
-
+        const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+        const token: string = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
         if (token) {
-          logger.info('Push token retrieved', { token });
-          const platform = Platform.OS === 'ios' ? 'IOS' : Platform.OS === 'android' ? 'ANDROID' : 'WEB';
-          const service = Platform.OS === 'ios' ? 'APNS' : 'FCM';
+          logger.info('Push token auto-registered (already granted)', { token });
+          const platform: 'IOS' | 'ANDROID' | 'WEB' =
+            Platform.OS === 'ios' ? 'IOS' : Platform.OS === 'android' ? 'ANDROID' : 'WEB';
+          const service: 'APNS' | 'FCM' = Platform.OS === 'ios' ? 'APNS' : 'FCM';
           await updatePushToken({ token, platform, service });
         }
-      } catch (e) {
-        logger.error('Error fetching push token', { error: e });
+      } catch (e: unknown) {
+        logger.error('Error auto-fetching push token', { error: e });
       }
     }
 
-    registerForPushNotificationsAsync();
+    void setupChannelsAndMaybeRegister();
 
     notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
       logger.info('Notification received in foreground', { notification });
@@ -126,4 +154,11 @@ export function usePushNotifications() {
       }
     };
   }, [router, updatePushToken]);
+}
+
+export function useRequestPushPermission(): () => Promise<PushPermissionResult> {
+  const updatePushToken = useUpdatePushToken();
+  return async (): Promise<PushPermissionResult> => {
+    return requestPushPermissionAndRegister(updatePushToken as unknown as (args: { token: string; platform: 'IOS' | 'ANDROID' | 'WEB'; service: 'APNS' | 'FCM' }) => Promise<unknown>);
+  };
 }

@@ -21,6 +21,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: true,
     bundleIdentifier: "com.styleswipe.app",
     buildNumber: buildNumber,
+    associatedDomains: ['applinks:styleswipe.app', 'applinks:www.styleswipe.app'],
   },
   android: {
     ...config.android,
@@ -30,6 +31,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     package: "com.styleswipe.app",
     versionCode: parseInt(buildNumber, 10),
+    intentFilters: [
+      {
+        action: 'VIEW',
+        autoVerify: true,
+        data: [
+          { scheme: 'https', host: 'styleswipe.app' },
+          { scheme: 'https', host: 'www.styleswipe.app' },
+          { scheme: 'styleswipe' },
+        ],
+        category: ['BROWSABLE', 'DEFAULT'],
+      },
+    ],
   },
   web: {
     ...config.web,
@@ -38,6 +51,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundler: "metro"
   },
   plugins: [
-    "expo-router"
+    "expo-router",
+    [
+      "expo-notifications",
+      {
+        icon: "../../assets/favicon/favicon.png",
+        color: "#ffffff",
+        sounds: [],
+      },
+    ],
   ]
 });
