@@ -181,7 +181,7 @@ export function WishlistScreen() {
         </YStack>
       </ScrollView>
 
-      <CreateBoardModal visible={createVisible} onClose={() => setCreateVisible(false)} userId={userId} onCreated={(id) => router.push({ pathname: '/(app)/boards/[id]', params: { id } })} />
+      <CreateBoardModal visible={createVisible} onClose={() => setCreateVisible(false)} userId={userId} onCreated={(id) => router.push({ pathname: '/(app)/board/[id]', params: { id } })} />
 
       {moveTarget && wishlistBoardId && (
         <MoveItemSheet

@@ -44,7 +44,7 @@ export function BoardsSection({ title = 'Your Collections', compact = false }: B
       ) : compact ? (
         <YStack paddingHorizontal="$4" gap="$2">
           {boards.slice(0, 3).map((b) => (
-            <XStack key={b._id as string} justifyContent="space-between" alignItems="center" backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" onPress={() => router.push({ pathname: '/(app)/boards/[id]', params: { id: b._id as string } })}>
+            <XStack key={b._id as string} justifyContent="space-between" alignItems="center" backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" onPress={() => router.push({ pathname: '/(app)/board/[id]', params: { id: b._id as string } })}>
               <YStack>
                 <Text fontWeight="600">{b.name}</Text>
                 <Text fontSize="$2" color="$textSecondary">{b.itemCount} items</Text>
@@ -64,7 +64,7 @@ export function BoardsSection({ title = 'Your Collections', compact = false }: B
         </ScrollView>
       )}
 
-      <CreateBoardModal visible={createVisible} onClose={() => setCreateVisible(false)} userId={userId} onCreated={(id) => router.push({ pathname: '/(app)/boards/[id]', params: { id } })} />
+      <CreateBoardModal visible={createVisible} onClose={() => setCreateVisible(false)} userId={userId} onCreated={(id) => router.push({ pathname: '/(app)/board/[id]', params: { id } })} />
     </YStack>
   );
 }

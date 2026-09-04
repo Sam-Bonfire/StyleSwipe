@@ -1,9 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
 
-import { BoardDetailScreen } from '../../../src/screens/boards/BoardDetailScreen';
+import { StyleBoardScreen } from '../../../src/screens/discovery/StyleBoardScreen';
 
 export default function BoardPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  return <BoardDetailScreen boardId={id as string} />;
+  return <StyleBoardScreen boardId={id} />;
 }

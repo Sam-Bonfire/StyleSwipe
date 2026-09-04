@@ -14,7 +14,7 @@ export function BoardCard({ board, onPress }: BoardCardProps) {
     if (onPress) {
       onPress();
     } else {
-      router.push({ pathname: '/(app)/boards/[id]', params: { id: board._id as string } });
+      router.push({ pathname: '/(app)/board/[id]', params: { id: board._id as string } });
     }
   };
 
@@ -50,7 +50,7 @@ export function BoardListCard({ board, onPress }: BoardCardProps) {
   const router = useRouter();
   const handlePress = () => {
     if (onPress) onPress();
-    else router.push({ pathname: '/(app)/boards/[id]', params: { id: board._id as string } });
+    else router.push({ pathname: '/(app)/board/[id]', params: { id: board._id as string } });
   };
   return (
     <XStack

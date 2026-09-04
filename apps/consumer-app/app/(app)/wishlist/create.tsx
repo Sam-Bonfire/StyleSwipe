@@ -39,7 +39,7 @@ export default function WishlistCreateRoute() {
     setSubmitting(true);
     try {
       const result = await createBoard(userId, name.trim(), slug);
-      router.replace({ pathname: '/(app)/boards/[id]', params: { id: result.boardId as string } });
+      router.replace({ pathname: '/(app)/board/[id]', params: { id: result.boardId as string } });
     } catch (e) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Failed to create');
     } finally {
