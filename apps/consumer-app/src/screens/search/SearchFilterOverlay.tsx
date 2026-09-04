@@ -169,7 +169,6 @@ export function SearchFilterOverlay({
               value={brandSearch}
               onChangeText={setBrandSearch}
               placeholder="Search brands..."
-              marginBottom="$2"
             />
             <XStack gap="$2" flexWrap="wrap">
               {BRANDS.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase())).map((brand) => (

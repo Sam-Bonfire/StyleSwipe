@@ -166,4 +166,45 @@ export class LocalDatabase {
       req.onerror = () => reject(req.error);
     });
   }
+
+  async getOnboardingState(): Promise<{ step: number; answers: Record<string, string>; welcomeDone: boolean } | null> {
+    if (!this.idb) await this.init();
+    return new Promise((resolve) => {
+      const transaction = this.idb!.transaction(['metadata'], 'readonly');
+      const store = transaction.objectStore('metadata');
+      const req = store.get('onboarding_state_v1');
+      req.onsuccess = () => {
+        if (req.result && req.result.value) {
+          try {
+            resolve(JSON.parse(req.result.value));
+          } catch {
+            resolve(null);
+          }
+        } else resolve(null);
+      };
+      req.onerror = () => resolve(null);
+    });
+  }
+
+  async saveOnboardingState(state: { step: number; answers: Record<string, string>; welcomeDone: boolean }): Promise<void> {
+    if (!this.idb) await this.init();
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.idb!.transaction(['metadata'], 'readwrite');
+      const store = transaction.objectStore('metadata');
+      const req = store.put({ key: 'onboarding_state_v1', value: JSON.stringify(state) });
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async clearOnboardingState(): Promise<void> {
+    if (!this.idb) await this.init();
+    return new Promise<void>((resolve, reject) => {
+      const transaction = this.idb!.transaction(['metadata'], 'readwrite');
+      const store = transaction.objectStore('metadata');
+      const req = store.delete('onboarding_state_v1');
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
 }

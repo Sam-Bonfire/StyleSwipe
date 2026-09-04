@@ -95,3 +95,6 @@ export type { AvatarGroupProps, AvatarItem } from './AvatarGroup';
 
 export { SearchBar } from './SearchBar';
 export type { SearchBarProps } from './SearchBar';
+
+export { InputOTP } from './InputOTP';
+export type { InputOTPProps } from './InputOTP';

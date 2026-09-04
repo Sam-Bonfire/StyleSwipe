@@ -29,10 +29,6 @@ export const completeOnboarding = (
       return yield* _(Effect.fail(new OnboardingValidationError('Gender preference is required')));
     }
 
-    if (!answers.fit) {
-      return yield* _(Effect.fail(new OnboardingValidationError('Fit preference is required')));
-    }
-
     // 1. Create base profile using domain logic
     const baseProfile = yield* _(initializeStyleProfile(answers));
 

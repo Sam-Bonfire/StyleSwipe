@@ -38,6 +38,18 @@ export function WishlistScreen() {
   };
 
   const renderContent = () => {
+    if (user === null) {
+      return (
+        <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
+          <Heart size={48} color="$textSecondary" opacity={0.5} />
+          <Text fontSize="$5" fontWeight="600">Sign in to view wishlist</Text>
+          <Text color="$textSecondary" textAlign="center">Save your favorite styles by signing in.</Text>
+          <Button marginTop="$4" backgroundColor="$primary" onPress={() => router.push('/(auth)')}>
+            <Text color="white" fontWeight="600">Sign In</Text>
+          </Button>
+        </YStack>
+      );
+    }
     if (userId && wishlist === undefined) {
       return (
         <YStack flex={1} alignItems="center" justifyContent="center">

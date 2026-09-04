@@ -24,6 +24,18 @@ export const CheckoutScreen = () => {
   const cart = useCart(userId);
   const clearCart = useClearCart();
 
+  if (user === null) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3" backgroundColor="$background">
+        <Text fontSize="$5" fontWeight="600">Please sign in to checkout</Text>
+        <Text color="$textSecondary" textAlign="center">You need an account to place an order.</Text>
+        <Button backgroundColor="$primary" onPress={() => router.push('/(auth)')} marginTop="$2">
+          Sign In
+        </Button>
+      </YStack>
+    );
+  }
+
   const handleAddressSubmit = (addr: FormAddress) => {
     setAddress(addr);
     setStep('PAYMENT');

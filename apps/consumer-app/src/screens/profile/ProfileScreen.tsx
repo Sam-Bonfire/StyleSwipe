@@ -19,7 +19,7 @@ export function ProfileScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <YStack flex={1} padding="$4" gap="$6">
-          {user && (
+          {user ? (
             <XStack alignItems="center" gap="$4">
               <Avatar circular size="$10">
                 <Avatar.Image src={user.image} />
@@ -32,11 +32,24 @@ export function ProfileScreen() {
                 <Text color="$textSecondary">{user.email}</Text>
               </YStack>
             </XStack>
+          ) : (
+            <YStack gap="$2" alignItems="center">
+              <Text fontWeight="bold" fontSize="$5">
+                Welcome to StyleSwipe
+              </Text>
+              <Text color="$textSecondary" textAlign="center">
+                Sign in to personalize your style and save favorites.
+              </Text>
+              <Button variant="primary" onPress={() => router.push('/(auth)')}>
+                Sign In
+              </Button>
+            </YStack>
           )}
 
           <YStack gap="$4" marginTop="$4">
             <Button variant="primary" onPress={() => router.push('/(app)/partner-sync')}>Partner Sync</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/edit-profile')}>Edit Profile</Button>
+            <Button variant="outlined" onPress={() => router.push('/onboarding')}>Personalize later</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/wishlist')}>My Wishlist</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/orders')}>Your Orders</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/feedback')}>Give Feedback</Button>

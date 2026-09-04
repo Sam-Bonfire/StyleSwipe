@@ -229,4 +229,44 @@ export class LocalDatabase {
       JSON.stringify(vector),
     );
   }
+
+  // Onboarding persistence
+  async getOnboardingState(): Promise<{ step: number; answers: Record<string, string>; welcomeDone: boolean } | null> {
+    if (!this.db) await this.init();
+    const result = await this.db!.getFirstAsync<{ value: string }>(
+      'SELECT value FROM metadata WHERE key = ?',
+      'onboarding_state_v1',
+    );
+    if (result && result.value) {
+      try {
+        return JSON.parse(result.value);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  async saveOnboardingState(state: { step: number; answers: Record<string, string>; welcomeDone: boolean }): Promise<void> {
+    if (!this.db) await this.init();
+    const value = JSON.stringify(state);
+    if (Platform.OS === 'web') {
+      await (this.db as WebPersistenceDB).runAsync('INSERT OR REPLACE INTO metadata', 'onboarding_state_v1', value);
+      return;
+    }
+    await (this.db as SQLite.SQLiteDatabase).runAsync(
+      'INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)',
+      'onboarding_state_v1',
+      value,
+    );
+  }
+
+  async clearOnboardingState(): Promise<void> {
+    if (!this.db) await this.init();
+    if (Platform.OS === 'web') {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem('metadata_onboarding_state_v1');
+      return;
+    }
+    await (this.db as SQLite.SQLiteDatabase).runAsync('DELETE FROM metadata WHERE key = ?', 'onboarding_state_v1');
+  }
 }

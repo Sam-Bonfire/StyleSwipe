@@ -12,6 +12,7 @@ import { Button } from '@app/ui-kit';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
 import { ExternalLink, ShoppingBag } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Linking } from 'react-native';
 import { YStack, ScrollView, Text, Sheet, XStack, Image, Separator } from 'tamagui';
@@ -21,6 +22,20 @@ export const CartScreen = () => {
 
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
+  const router = useRouter();
+
+  if (user === null) {
+    return (
+      <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
+        <ShoppingBag size={48} color="$textSecondary" opacity={0.5} />
+        <Text fontSize="$5" fontWeight="600">Sign in to view your bag</Text>
+        <Text color="$textSecondary" textAlign="center">Your cart is waiting. Please sign in to continue shopping.</Text>
+        <Button variant="primary" onPress={() => router.push('/(auth)')} marginTop="$2">
+          Sign In
+        </Button>
+      </YStack>
+    );
+  }
 
   const cart = useCart(userId);
   const updateQuantity = useUpdateCartQuantity();
