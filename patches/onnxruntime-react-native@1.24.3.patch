@@ -2,8 +2,19 @@ diff --git a/android/build.gradle b/android/build.gradle
 index 41b43599a9af6ef1c170047d39db1f3baa6ca682..efc4aa72d4838c3ae61fa6deaa73bdf9ae1e2f7e 100644
 --- a/android/build.gradle
 +++ b/android/build.gradle
-@@ -247,7 +247,7 @@ dependencies {
-     extractLibs "com.microsoft.onnxruntime:onnxruntime-android:latest.integration@aar"
+@@ -242,12 +242,16 @@ dependencies {
+   implementation "junit:junit:4.12"
+ 
+   if (useQnn) {
+-    extractLibs "com.microsoft.onnxruntime:onnxruntime-android-qnn:latest.integration@aar"
++    // Pinned: latest.integration forces Maven metadata listing, which crashes
++    // with SAXNotRecognizedException on some JDK/Gradle combos.
++    extractLibs "com.microsoft.onnxruntime:onnxruntime-android-qnn:1.24.3@aar"
+   } else {
+-    extractLibs "com.microsoft.onnxruntime:onnxruntime-android:latest.integration@aar"
++    // Pinned: latest.integration forces Maven metadata listing, which crashes
++    // with SAXNotRecognizedException on some JDK/Gradle combos.
++    extractLibs "com.microsoft.onnxruntime:onnxruntime-android:1.24.3@aar"
    }
  
 -  if (VersionNumber.parse(REACT_NATIVE_VERSION) < VersionNumber.parse("0.71")) {
