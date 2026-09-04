@@ -37,7 +37,13 @@ export {
   useBoard,
   useAddBoardItem,
   useRemoveBoardItem,
+  useUserBoards,
+  useCreateBoard,
+  useRenameBoard,
+  useDeleteBoard,
+  useMoveBoardItem,
 } from './useBoards';
+export type { UserBoardSummary } from './useBoards';
 export * from './useOrders';
 export * from './useAddresses';
 export * from './useGuestCart';
