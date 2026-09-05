@@ -11,7 +11,7 @@ export interface ScrapedProduct {
   attributes?: Record<string, string>;
   category?: string;
   availableSizes?: string[];
-  rawJson?: any;
+  rawJson?: unknown;
   scrapedAt: string;
   embedding?: number[];
   embeddingVersions?: {

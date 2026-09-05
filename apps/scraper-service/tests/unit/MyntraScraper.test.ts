@@ -1,4 +1,4 @@
-import { describe, expect, it, test, vi as mock, beforeEach, afterEach, vi } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { mapToScrapedProduct, type MyntraRawData } from '../../src/scrapers/MyntraScraper';
 
