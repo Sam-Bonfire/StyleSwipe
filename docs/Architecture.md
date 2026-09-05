@@ -2,7 +2,7 @@
 
 ## 1. Vision & Core Strategy
 
-StyleSwipe is a next-generation fashion discovery platform supporting two distinct shopping mentalities: an inspiration-heavy **Discover Mode** (Tinder-style) and a utility-heavy **Shop Mode** (Grid-based). The architecture is designed for **maximum solo-developer velocity** using AI-agent collaboration.
+StyleSwipe is a fashion discovery aggregator supporting two distinct shopping mentalities: an inspiration-heavy **Discover Mode** (Tinder-style) and a utility-heavy **Shop Mode** (Grid-based). We aggregate external products and redirect to retailers via affiliate links — there is no cart, checkout, or order system. The architecture is designed for **maximum solo-developer velocity** using AI-agent collaboration.
 
 ## 2. The High-Velocity Stack
 

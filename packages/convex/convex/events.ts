@@ -141,15 +141,13 @@ export const getMacroFunnelMetrics = query({
     const onboardingCompleted = await countEvent('onboarding_completed');
     const productViewed = await countEvent('product_viewed');
     const productSwiped = await countEvent('product_swiped');
-    const addedToCart = await countEvent('added_to_cart');
-    const checkoutInitiated = await countEvent('checkout_initiated');
+    const affiliateRedirect = await countEvent('affiliate_redirect');
 
     return {
       onboardingCompleted,
       productViewed,
       productSwiped,
-      addedToCart,
-      checkoutInitiated,
+      affiliateRedirect,
     };
   },
 });

@@ -3,12 +3,12 @@
  *
  * Custom header for the Home screen implementing the design requirements:
  * - Shuble Logo on the left
- * - Plus, Bell (with badge), Bag (with badge) on the right
+ * - Plus, Bell (with badge) on the right
  */
 
-import { useCurrentUser, useCart, useUnreadCount } from '@app/infrastructure';
+import { useCurrentUser, useUnreadCount } from '@app/infrastructure';
 import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
-import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
+import { Plus, Bell } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 
@@ -18,16 +18,13 @@ export const HomeHeader = () => {
   const router = useRouter();
   const { showToast } = useToast();
 
-  // Fetch User & Cart
+  // Fetch User
   const user = useCurrentUser();
   const userId = user?._id;
-
-  const cart = useCart(userId);
 
   // Dynamic Counts
   const unread = useUnreadCount(userId);
   const notificationCount: number = unread ?? 0;
-  const bagCount = cart?.items?.length ?? 0;
 
   const handlePlusPress = (): void => {
     console.log('Plus pressed');
@@ -43,13 +40,6 @@ export const HomeHeader = () => {
       message: 'Price drops & partner likes will appear here.',
       variant: 'info',
     });
-  };
-
-  const handleBagPress = () => {
-    // Navigate to Main with activeTab 'cart' to switch tabs
-    // Note: Since we are already in Main, this might need a specific handling if Main doesn't listen to params update while mounted.
-    // But we implemented useEffect in MainScreen to listen to params, so this works.
-    router.push('/(app)/(tabs)/cart');
   };
 
   return (
@@ -73,15 +63,6 @@ export const HomeHeader = () => {
                 <TopBarBadgeText>
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </TopBarBadgeText>
-              </TopBarBadgeCount>
-            )}
-          </TopBarIconButton>
-
-          <TopBarIconButton onPress={handleBagPress}>
-            <ShoppingBag size={24} color="$textPrimary" />
-            {bagCount > 0 && (
-              <TopBarBadgeCount>
-                <TopBarBadgeText>{bagCount > 99 ? '99+' : bagCount}</TopBarBadgeText>
               </TopBarBadgeCount>
             )}
           </TopBarIconButton>

@@ -289,132 +289,8 @@ const weekly_summaries = defineTable({
   createdAt: v.number(),
 }).index('by_user_period', ['userId', 'period']);
 
-// -----------------------------------------------------------------------------
-// COMMERCE CONTEXT - Cart, Checkout, Orders
-// -----------------------------------------------------------------------------
-
-const carts = defineTable({
-  userId: v.string(), // Foreign key to users
-  items: v.array(
-    v.object({
-      productId: v.id('products'),
-      quantity: v.number(),
-      price: v.number(),
-      attributes: v.optional(v.any()),
-    }),
-  ),
-  updatedAt: v.number(),
-}).index('by_user', ['userId']);
-
-const orders = defineTable({
-  orderNumber: v.string(),
-  userId: v.string(),
-  items: v.array(
-    v.object({
-      productId: v.string(),
-      quantity: v.number(),
-      price: v.number(),
-      brand: v.optional(v.string()),
-      title: v.optional(v.string()),
-      image: v.optional(v.string()),
-      attributes: v.optional(v.any()),
-    })
-  ),
-  pricing: v.object({
-    subtotal: v.number(),
-    shippingCost: v.number(),
-    discountAmount: v.number(),
-    tax: v.number(),
-    totalAmount: v.number(),
-  }),
-  deliveryAddress: v.object({
-    name: v.string(),
-    line1: v.string(),
-    line2: v.optional(v.string()),
-    city: v.string(),
-    state: v.string(),
-    postalCode: v.string(),
-    country: v.string(),
-    phone: v.string(),
-  }),
-  // Flattened convenience fields per 5.1 spec
-  address: v.optional(
-    v.object({
-      name: v.string(),
-      line1: v.string(),
-      line2: v.optional(v.string()),
-      city: v.string(),
-      state: v.string(),
-      postalCode: v.string(),
-      country: v.string(),
-      phone: v.string(),
-    })
-  ),
-  paymentMethod: v.optional(v.string()),
-  paymentInfo: v.optional(
-    v.object({
-      method: v.string(),
-      transactionId: v.optional(v.string()),
-      paymentStatus: v.string(),
-    })
-  ),
-  trackingId: v.optional(v.string()),
-  tracking: v.optional(
-    v.object({
-      carrier: v.string(),
-      trackingNumber: v.string(),
-      estimatedDeliveryDate: v.optional(v.number()),
-    })
-  ),
-  status: v.union(
-    v.literal('pending'),
-    v.literal('paid'),
-    v.literal('shipped'),
-    v.literal('delivered'),
-    v.literal('returned'),
-    v.literal('cancelled'),
-    v.literal('PENDING'),
-    v.literal('CONFIRMED'),
-    v.literal('PAID'),
-    v.literal('SHIPPED'),
-    v.literal('DELIVERED'),
-    v.literal('RETURNED'),
-    v.literal('CANCELLED'),
-    v.string()
-  ),
-  statusHistory: v.array(
-    v.object({
-      status: v.string(),
-      timestamp: v.number(),
-      reason: v.optional(v.string()),
-    })
-  ),
-  createdAt: v.number(),
-  updatedAt: v.number(),
-})
-  .index('by_user', ['userId'])
-  .index('by_order_number', ['orderNumber'])
-  .index('by_user_created', ['userId', 'createdAt'])
-  .index('by_status', ['status']);
-
-// Address book — Req 5.2: addresses table with default, pincode, Indian states
-const addresses = defineTable({
-  userId: v.string(),
-  fullName: v.string(),
-  phone: v.string(),
-  line1: v.string(),
-  line2: v.optional(v.string()),
-  city: v.string(),
-  state: v.string(),
-  pincode: v.string(), // 6-digit Indian pincode
-  country: v.string(), // default 'India'
-  isDefault: v.boolean(),
-  createdAt: v.number(),
-  updatedAt: v.number(),
-})
-  .index('by_user', ['userId'])
-  .index('by_user_default', ['userId', 'isDefault'])
-  .index('by_user_created', ['userId', 'createdAt']);
+// Collections (boards) live below; transactional commerce tables were removed:
+// StyleSwipe is a discovery aggregator, not a marketplace.
 
 const boards = defineTable({
   userId: v.string(),
@@ -565,10 +441,7 @@ export default defineSchema({
   swipes,
   weekly_summaries,
 
-  // Commerce Context
-  carts,
-  orders,
-  addresses,
+  // Collections
   boards,
   board_items,
 

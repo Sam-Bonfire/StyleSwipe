@@ -82,21 +82,6 @@ export * as ManageLogs from './identity/application/ManageLogs';
 export * as ManageAdminFeedback from './identity/application/ManageAdminFeedback';
 export * as IdentityUseCases from './identity/application/IdentityUseCases';
 export * as CompleteOnboarding from './identity/application/CompleteOnboarding';
-// Commerce
-export * from './commerce/domain/Address';
-export * from './commerce/domain/Cart';
-export * from './commerce/domain/Discount';
-export * from './commerce/domain/Order';
-export * from './commerce/domain/PriceEstimator';
-export * from './commerce/domain/Wishlist';
-export * from './commerce/domain/errors';
-export * from './commerce/application/CartRepository';
-export * from './commerce/application/CheckoutService';
-export * from './commerce/application/AddressRepository';
-export * from './commerce/application/OrderRepository';
-export * as ManageCart from './commerce/application/ManageCart';
-export * as CheckoutService from './commerce/application/CheckoutService';
-
 // Discovery
 export * from './discovery/domain';
 export * from './discovery/application/DiscoveryPorts';

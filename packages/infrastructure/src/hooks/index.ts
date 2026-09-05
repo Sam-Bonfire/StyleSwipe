@@ -5,7 +5,7 @@
 
 export * from './useConvexClient';
 export { useCurrentUser, useGetOrCreateUser, useAuthActions } from './useAuth';
-export { useLatestProducts, useProduct, useProductsByIds, useSimilarProducts } from './useProducts';
+export { useLatestProducts, useProduct, useProductsByIds, useProductSourceUrl, useSimilarProducts } from './useProducts';
 export { useReviews, useReviewBreakdown, useAddReview, useMarkHelpful } from './useReviews';
 export {
   useRecentlyViewed,
@@ -15,13 +15,6 @@ export {
   useUserSwipedIds,
   usePartnerLikes,
 } from './useDiscovery';
-export {
-  useCart,
-  useAddToCart,
-  useRemoveFromCart,
-  useUpdateCartQuantity,
-  useClearCart,
-} from './useCart';
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile, useUpdatePushToken } from './useUsers';
 export * from './useOnboarding';
@@ -31,7 +24,7 @@ export * from './useNotifications';
 export { useSearch } from './useSearch';
 export {
   useSystemBoard,
-  useTrackPurchaseClick,
+  useTrackMerchantRedirect,
   useWishlist,
   useToggleWishlist,
   useBoard,
@@ -44,9 +37,6 @@ export {
   useMoveBoardItem,
 } from './useBoards';
 export type { UserBoardSummary } from './useBoards';
-export * from './useOrders';
-export * from './useAddresses';
-export * from './useGuestCart';
 export * from './useCategories';
 export * from './useTrending';
 
