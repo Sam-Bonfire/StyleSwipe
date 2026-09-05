@@ -3,7 +3,7 @@ import { useMutation, useQuery } from 'convex/react';
 import React from 'react';
 
 /**
- * Hook to retrieve the user's default "Your orders" board with fully populated products.
+ * Hook to retrieve the user's default "Merchant visits" board with fully populated products.
  */
 export function useSystemBoard(userId: string | undefined) {
   const data = useQuery(api.boards.getSystemBoard, userId ? { userId } : 'skip');
@@ -15,11 +15,11 @@ export function useSystemBoard(userId: string | undefined) {
 }
 
 /**
- * Hook to trigger the trackPurchaseClick mutation which logs analytics,
- * updates the user's system board, and clears the product from the shopping cart.
+ * Hook to trigger the trackMerchantRedirect mutation which logs analytics
+ * and updates the user's system board.
  */
-export function useTrackPurchaseClick() {
-  const mutation = useMutation(api.boards.trackPurchaseClick);
+export function useTrackMerchantRedirect() {
+  const mutation = useMutation(api.boards.trackMerchantRedirect);
 
   return React.useCallback(
     async (userId: string, productId: string) => {

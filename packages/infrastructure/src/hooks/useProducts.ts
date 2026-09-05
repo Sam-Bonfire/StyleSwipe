@@ -29,6 +29,13 @@ export function useProductsByIds(ids: string[]) {
     return useQuery(api.helpers.getProductsByIds, { ids: ids as Id<'products'>[] });
 }
 
+/**
+ * Resolves the retailer's source URL for a catalog product. Null when unknown.
+ */
+export function useProductSourceUrl(id: string | undefined) {
+    return useQuery(api.products.getSourceUrl, id ? { id: id as Id<'products'> } : 'skip');
+}
+
 export function useSimilarProducts(productId: string | undefined, limit: number = 8) {
   const action = useAction(api.products.getSimilarByProductId);
   const [data, setData] = React.useState<unknown[] | undefined>(undefined);

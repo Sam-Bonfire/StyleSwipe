@@ -6,7 +6,7 @@ import {
 import {
   ChevronDown, ChevronUp, Check, Activity,
   Flag, User, Sparkles, Ruler, Palette, CheckSquare, Trophy,
-  UserCheck, Eye, MoveRight, ShoppingBag, CreditCard, PieChart
+  UserCheck, Eye, MoveRight, ShoppingBag, ExternalLink, PieChart
 } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
@@ -187,16 +187,16 @@ export function AnalyticsScreen() {
       );
     }
 
-    const { onboardingCompleted, productViewed, productSwiped, addedToCart, checkoutInitiated } = macroData;
+    const { onboardingCompleted, productViewed, productSwiped, addedToBag, affiliateRedirect } = macroData;
     const maxVal = Math.max(onboardingCompleted, 1);
-    const overallConversion = Math.round((checkoutInitiated / maxVal) * 100);
+    const overallConversion = Math.round((affiliateRedirect / maxVal) * 100);
 
     const macroSteps = [
       { label: 'Onboarding Completed', value: onboardingCompleted, icon: UserCheck },
       { label: 'Product Viewed', value: productViewed, icon: Eye },
       { label: 'Product Swiped', value: productSwiped, icon: MoveRight },
-      { label: 'Added to Cart', value: addedToCart, icon: ShoppingBag },
-      { label: 'Checkout Initiated', value: checkoutInitiated, icon: CreditCard },
+      { label: 'Added to Bag', value: addedToBag, icon: ShoppingBag },
+      { label: 'Merchant Redirect', value: affiliateRedirect, icon: ExternalLink },
     ];
 
     if (onboardingCompleted === 0 && productViewed === 0) {

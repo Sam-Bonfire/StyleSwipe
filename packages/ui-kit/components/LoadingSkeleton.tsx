@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { styled, GetProps, XStack, YStack } from 'tamagui';
+import { styled, GetProps, YStack } from 'tamagui';
 
 const SkeletonBase = styled(YStack, {
   name: 'LoadingSkeleton',
@@ -52,21 +52,6 @@ export const FashionCardSkeleton = () => (
   <YStack width={320} height={480} borderRadius="$4" overflow="hidden">
     <LoadingSkeleton width="100%" height="100%" borderRadius="$4" />
   </YStack>
-);
-
-export const CartItemSkeleton = () => (
-  <XStack gap="$2" padding="$2">
-    <LoadingSkeleton width={100} height={120} borderRadius="$2" />
-    <YStack flex={1} gap="$1">
-      <LoadingSkeleton width={80} height={14} />
-      <LoadingSkeleton width="100%" height={16} />
-      <LoadingSkeleton width={60} height={12} />
-      <XStack justifyContent="space-between" marginTop="auto">
-        <LoadingSkeleton width={80} height={20} />
-        <LoadingSkeleton width={100} height={32} borderRadius="$2" />
-      </XStack>
-    </YStack>
-  </XStack>
 );
 
 export default LoadingSkeleton;

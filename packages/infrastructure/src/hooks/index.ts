@@ -5,7 +5,7 @@
 
 export * from './useConvexClient';
 export { useCurrentUser, useGetOrCreateUser, useAuthActions } from './useAuth';
-export { useLatestProducts, useProduct, useProductsByIds, useSimilarProducts } from './useProducts';
+export { useLatestProducts, useProduct, useProductsByIds, useProductSourceUrl, useSimilarProducts } from './useProducts';
 export { useReviews, useReviewBreakdown, useAddReview, useMarkHelpful } from './useReviews';
 export {
   useRecentlyViewed,
@@ -31,7 +31,7 @@ export * from './useNotifications';
 export { useSearch } from './useSearch';
 export {
   useSystemBoard,
-  useTrackPurchaseClick,
+  useTrackMerchantRedirect,
   useWishlist,
   useToggleWishlist,
   useBoard,
@@ -44,9 +44,10 @@ export {
   useMoveBoardItem,
 } from './useBoards';
 export type { UserBoardSummary } from './useBoards';
+export * from './useGuestCart';
 export * from './useOrders';
 export * from './useAddresses';
-export * from './useGuestCart';
+export * from './useFeatureFlag';
 export * from './useCategories';
 export * from './useTrending';
 

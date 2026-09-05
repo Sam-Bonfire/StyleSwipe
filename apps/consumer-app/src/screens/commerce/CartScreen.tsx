@@ -6,6 +6,7 @@ import {
   useRemoveFromCart,
   useProductsByIds,
   useAnalytics,
+  useDirectShoppingEnabled,
   useGuestCart,
 } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
@@ -16,6 +17,44 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { YStack, ScrollView, Text } from 'tamagui';
 
+import { MerchantButton } from '../../components/MerchantButton';
+
+/**
+ * Direct-shopping checkout section. Rendered only when the
+ * direct_shopping feature flag is enabled.
+ */
+const DirectCheckoutSection = ({ cart, onProceed }: { cart: Cart; onProceed: () => void }) => {
+  const priceBreakdown = PriceEstimator.estimate(cart);
+  return (
+    <YStack gap="$3">
+      <PriceSummary
+        subtotal={priceBreakdown.subtotal}
+        shipping={priceBreakdown.shipping}
+        tax={priceBreakdown.tax}
+        freeShippingThreshold={1000}
+        currency="INR"
+      />
+      <Button
+        backgroundColor="$primary"
+        onPress={onProceed}
+        marginTop="$4"
+        size="large"
+        borderRadius="$3"
+        icon={ShoppingBag}
+      >
+        <Text color="white" fontWeight="bold">
+          Proceed to Checkout
+        </Text>
+      </Button>
+    </YStack>
+  );
+};
+
+/**
+ * Bag screen — the aggregator's cross-retailer saved-items list.
+ * Each row hands off to the merchant; direct checkout renders only
+ * when the direct_shopping feature flag is enabled.
+ */
 export const CartScreen = () => {
   const router = useRouter();
   const user = useCurrentUser();
@@ -26,27 +65,26 @@ export const CartScreen = () => {
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
   const { trackEvent } = useAnalytics();
+  const directShopping = useDirectShoppingEnabled();
 
-  // Unified cart: server cart if logged in, otherwise guest cart
+  // Unified bag: server cart if logged in, otherwise guest cart
   const cart: Cart | null = React.useMemo(() => {
     if (userId) return serverCart ?? null;
     if (guest.loading) return null;
-    // Build Cart domain object from guest items
     const items = guest.items.map((g) => ({
       productId: g.productId,
       quantity: g.quantity,
       price: g.price,
       selectedAttributes: g.attributes,
     }));
-    const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
     return {
       userId: 'guest',
       items,
       currency: 'INR',
-      subtotal,
+      subtotal: 0,
       discountTotal: 0,
-      estimatedTax: Math.round(subtotal * 0.05),
-      total: subtotal + Math.round(subtotal * 0.05),
+      estimatedTax: 0,
+      total: 0,
       updatedAt: Date.now(),
     } as Cart;
   }, [userId, serverCart, guest.items, guest.loading]);
@@ -113,8 +151,6 @@ export const CartScreen = () => {
     );
   }
 
-  const priceBreakdown = PriceEstimator.estimate(cart);
-
   return (
     <YStack flex={1} backgroundColor="$background">
       <ScrollView backgroundColor="$background">
@@ -132,47 +168,32 @@ export const CartScreen = () => {
               const originalPrice = product?.mrp || item.price;
 
               return (
-                <CartItemComponent
-                  key={item.productId}
-                  imageUrl={imageUrl}
-                  brand={brand}
-                  title={title}
-                  price={item.price}
-                  originalPrice={originalPrice}
-                  quantity={item.quantity}
-                  currency="INR"
-                  size={item.selectedAttributes?.['size']}
-                  onQuantityChange={(qty) => handleUpdateQuantity(item.productId, qty)}
-                  onRemove={() => handleRemove(item.productId)}
-                />
+                <YStack key={item.productId}>
+                  <CartItemComponent
+                    imageUrl={imageUrl}
+                    brand={brand}
+                    title={title}
+                    price={item.price}
+                    originalPrice={originalPrice}
+                    quantity={item.quantity}
+                    currency="INR"
+                    size={item.selectedAttributes?.['size']}
+                    onQuantityChange={(qty) => handleUpdateQuantity(item.productId, qty)}
+                    onRemove={() => handleRemove(item.productId)}
+                  />
+                  <MerchantButton productId={item.productId} />
+                </YStack>
               );
             })}
           </YStack>
 
-          <PriceSummary
-            subtotal={priceBreakdown.subtotal}
-            shipping={priceBreakdown.shipping}
-            tax={priceBreakdown.tax}
-            freeShippingThreshold={1000}
-            currency="INR"
-          />
-
-          <Button
-            backgroundColor="$primary"
-            onPress={handleProceedToCheckout}
-            marginTop="$4"
-            size="large"
-            borderRadius="$3"
-            icon={ShoppingBag}
-          >
-            <Text color="white" fontWeight="bold">
-              Proceed to Checkout
-            </Text>
-          </Button>
+          {directShopping === true && cart ? (
+            <DirectCheckoutSection cart={cart} onProceed={handleProceedToCheckout} />
+          ) : null}
 
           {!userId ? (
             <Text fontSize="$2" color="$textSecondary" textAlign="center" marginTop="$2">
-              Sign in to save your bag and get faster checkout
+              Sign in to save your bag across devices
             </Text>
           ) : null}
         </YStack>

@@ -289,9 +289,9 @@ const weekly_summaries = defineTable({
   createdAt: v.number(),
 }).index('by_user_period', ['userId', 'period']);
 
-// -----------------------------------------------------------------------------
-// COMMERCE CONTEXT - Cart, Checkout, Orders
-// -----------------------------------------------------------------------------
+// Bag (cart-as-list): the aggregator keeps a cross-retailer saved-items list.
+// orders/addresses below back optional direct shopping behind the
+// direct_shopping feature flag (off by default).
 
 const carts = defineTable({
   userId: v.string(), // Foreign key to users
@@ -415,6 +415,7 @@ const addresses = defineTable({
   .index('by_user', ['userId'])
   .index('by_user_default', ['userId', 'isDefault'])
   .index('by_user_created', ['userId', 'createdAt']);
+
 
 const boards = defineTable({
   userId: v.string(),
@@ -565,12 +566,16 @@ export default defineSchema({
   swipes,
   weekly_summaries,
 
-  // Commerce Context
-  carts,
-  orders,
-  addresses,
+  // Collections
   boards,
   board_items,
+
+  // Bag (cart-as-list)
+  carts,
+
+  // Direct shopping (feature-flagged, off by default)
+  orders,
+  addresses,
 
   // Scraper Context
   scraped_products,

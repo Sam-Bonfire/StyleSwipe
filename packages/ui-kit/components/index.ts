@@ -45,15 +45,16 @@ export type { SizeChipGroupProps, SizeField, SizeOption } from './SizeChipGroup'
 export { SwipeCardStack } from './SwipeCardStack';
 export type { SwipeCardStackProps, SwipeDirection } from './SwipeCardStack';
 
-// Commerce Components
+// Bag Components
 export { CartItem } from './CartItem';
 export type { CartItemProps } from './CartItem';
 
-export { PriceSummary } from './PriceSummary';
-export type { PriceSummaryProps } from './PriceSummary';
-
 export { TransactionalFooter } from './TransactionalFooter';
 export type { TransactionalFooterProps } from './TransactionalFooter';
+
+// Direct shopping components (feature-flagged, off by default)
+export { PriceSummary } from './PriceSummary';
+export type { PriceSummaryProps } from './PriceSummary';
 
 export { CouponInput } from './CouponInput';
 export type { CouponInputProps, CouponStatus } from './CouponInput';
@@ -76,7 +77,6 @@ export {
   LoadingSkeleton,
   ProductTileSkeleton,
   FashionCardSkeleton,
-  CartItemSkeleton,
 } from './LoadingSkeleton';
 export type { LoadingSkeletonProps } from './LoadingSkeleton';
 
