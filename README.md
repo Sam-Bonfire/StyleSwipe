@@ -1,6 +1,6 @@
 # StyleSwipe Monorepo
 
-> **Vision**: A fashion discovery aggregator combining Tinder-style discovery with utility-focused product search across retailers. We aggregate, never transact: no cart, checkout, or orders — users redirect to merchants via affiliate links. Built for high-velocity solo development using AI Agents.
+> **Vision**: A fashion discovery aggregator combining Tinder-style discovery with utility-focused product search across retailers. We aggregate, never transact: no checkout or orders — the bag is a cross-retailer saved-items list, and purchase happens on merchants via affiliate links. Built for high-velocity solo development using AI Agents.
 
 ## Architecture: Hexagonal Monorepo
 
