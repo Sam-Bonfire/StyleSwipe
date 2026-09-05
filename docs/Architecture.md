@@ -8,14 +8,15 @@ StyleSwipe is a next-generation fashion discovery platform supporting two distin
 
 We utilize an industrial-grade toolset to eliminate traditional Git bottlenecks and minimize manual overhead.
 
-- **Runtime**: **Bun (v1.2+)** for high-performance execution.
+- **Runtime**: **Node LTS** with **pnpm (v9.12.3)** for package management.
 - **Task Runner**: **Mise** for consistent environment and workflow execution.
 - **Orchestration**: **TurboRepo** for intelligent caching and pipeline execution.
 - **Auth**: **Better Auth** (with Convex & Organization plugins).
 - **Core Libs**: **Effect TS** for functional error handling.
 - **Primary VCS**: **Git** (via **Graphite CLI** for stacking).
 - **Persistence**: **Convex** for a reactive document store and native vector search.
-- **Frontend**: **Expo + Tamagui** for iOS and Android deployment via EAS.
+- **Frontend**: **Expo + Tamagui** for iOS and Android builds (local Gradle/xcodebuild) and web via Cloudflare Pages.
+- **Distribution**: **Cloudflare Pages** (web/admin) + **Firebase App Distribution** (Android). No EAS.
 
 ## 3. Hexagonal Layering Rules (The Physical Enforcement)
 
@@ -92,6 +93,6 @@ All development activity, whether by the human architect or AI agents, must use 
 | Phase        | Command       | Logic                                                     |
 | ------------ | ------------- | --------------------------------------------------------- |
 | **Start**    | `mise run task`    | `gt branch create` (Stacked Branching).                   |
-| **Snapshot** | `mise run snap`    | Structured Commit + Push (Remote Backup).                 |
-| **Deliver**  | `mise run submit`  | `turbo lint/test` + `gt stack submit`.                    |
+| **Snapshot** | `mise run snap`    | Structured Commit (no push; push explicitly).                 |
+| **Deliver**  | `mise run submit`  | `gt submit --stack` (run `mise run lint/test` first; submit does not verify). |
 | **Release**  | `mise run release` | `npm version patch` + `git tag` + `git push`.             |

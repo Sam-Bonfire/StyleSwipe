@@ -14,12 +14,12 @@ We use a "Single Command" workflow powered by **Mise** to maintain velocity and 
 ## 2. Saving Progress
 - **Command**: `mise run snap <type> <title> [-d desc] [-t ticket]`
 - **Rule**: NEVER use `git commit` directly for work-in-progress.
-- **Effect**: Formats a structured commit message and pushes to remote (Remote Backup).
+- **Effect**: Formats a structured commit message (commit-only; push explicitly when ready for backup).
 
 ## 3. Submitting
 - **Command**: `mise run submit`
 - **Rule**: Use this instead of manual PR creation.
-- **Effect**: Runs lint/tests and submits the Graphite stack.
+- **Effect**: Submits the Graphite stack (`gt submit`). Run `mise run lint` / `mise run test` separately first; submit does not verify.
 
 ## 4. Releasing
 - **Command**: `mise run release`
