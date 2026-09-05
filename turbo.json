@@ -2,7 +2,11 @@
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
     "EXPO_PUBLIC_*",
-    "VITE_*"
+    "VITE_*",
+    "APP_ENV",
+    "CONVEX_URL",
+    "EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL",
+    "EXPO_PUBLIC_CONSUMER_APP_CONVEX_SITE_URL"
   ],
   "tasks": {
     "build": {
