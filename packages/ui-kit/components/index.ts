@@ -52,6 +52,16 @@ export type { CartItemProps } from './CartItem';
 export { TransactionalFooter } from './TransactionalFooter';
 export type { TransactionalFooterProps } from './TransactionalFooter';
 
+// Direct shopping components (feature-flagged, off by default)
+export { PriceSummary } from './PriceSummary';
+export type { PriceSummaryProps } from './PriceSummary';
+
+export { CouponInput } from './CouponInput';
+export type { CouponInputProps, CouponStatus } from './CouponInput';
+
+export { AddressForm } from './AddressForm';
+export type { AddressFormProps } from './AddressForm';
+
 // Feedback Components
 export { Toast } from './Toast';
 export type { ToastProps, ToastVariant } from './Toast';

@@ -1,4 +1,4 @@
-import { useCurrentUser } from '@app/infrastructure';
+import { useCurrentUser, useDirectShoppingEnabled } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -10,6 +10,7 @@ import { authAdapter } from '../../lib/auth';
 export function ProfileScreen() {
   const router = useRouter();
   const user = useCurrentUser();
+  const directShopping = useDirectShoppingEnabled();
 
   const handleLogout = async () => {
     await authAdapter.signOut();
@@ -51,6 +52,12 @@ export function ProfileScreen() {
             <Button variant="outlined" onPress={() => router.push('/(app)/edit-profile')}>Edit Profile</Button>
             <Button variant="outlined" onPress={() => router.push('/onboarding')}>Personalize later</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/wishlist')}>My Wishlist</Button>
+            {directShopping === true ? (
+              <>
+                <Button variant="outlined" onPress={() => router.push('/(app)/orders')}>Your Orders</Button>
+                <Button variant="outlined" onPress={() => router.push('/(app)/addresses')}>Addresses</Button>
+              </>
+            ) : null}
             <Button variant="outlined" onPress={() => router.push('/(app)/feedback')}>Give Feedback</Button>
             <Button variant="ghost" onPress={handleLogout}>
               Sign Out

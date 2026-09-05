@@ -45,6 +45,9 @@ export {
 } from './useBoards';
 export type { UserBoardSummary } from './useBoards';
 export * from './useGuestCart';
+export * from './useOrders';
+export * from './useAddresses';
+export * from './useFeatureFlag';
 export * from './useCategories';
 export * from './useTrending';
 

@@ -1,23 +1,62 @@
-import { type Cart } from '@app/core';
+import { PriceEstimator, type Cart } from '@app/core';
 import {
   useCurrentUser,
   useCart,
   useUpdateCartQuantity,
   useRemoveFromCart,
   useProductsByIds,
+  useAnalytics,
+  useDirectShoppingEnabled,
   useGuestCart,
 } from '@app/infrastructure';
+import { Button } from '@app/ui-kit';
 import CartItemComponent from '@app/ui-kit/components/CartItem';
+import PriceSummary from '@app/ui-kit/components/PriceSummary';
+import { ShoppingBag } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { YStack, ScrollView, Text } from 'tamagui';
 
 import { MerchantButton } from '../../components/MerchantButton';
 
 /**
+ * Direct-shopping checkout section. Rendered only when the
+ * direct_shopping feature flag is enabled.
+ */
+const DirectCheckoutSection = ({ cart, onProceed }: { cart: Cart; onProceed: () => void }) => {
+  const priceBreakdown = PriceEstimator.estimate(cart);
+  return (
+    <YStack gap="$3">
+      <PriceSummary
+        subtotal={priceBreakdown.subtotal}
+        shipping={priceBreakdown.shipping}
+        tax={priceBreakdown.tax}
+        freeShippingThreshold={1000}
+        currency="INR"
+      />
+      <Button
+        backgroundColor="$primary"
+        onPress={onProceed}
+        marginTop="$4"
+        size="large"
+        borderRadius="$3"
+        icon={ShoppingBag}
+      >
+        <Text color="white" fontWeight="bold">
+          Proceed to Checkout
+        </Text>
+      </Button>
+    </YStack>
+  );
+};
+
+/**
  * Bag screen — the aggregator's cross-retailer saved-items list.
- * No totals, no checkout: each row hands off to the merchant.
+ * Each row hands off to the merchant; direct checkout renders only
+ * when the direct_shopping feature flag is enabled.
  */
 export const CartScreen = () => {
+  const router = useRouter();
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
 
@@ -25,6 +64,8 @@ export const CartScreen = () => {
   const guest = useGuestCart();
   const updateQuantity = useUpdateCartQuantity();
   const removeFromCart = useRemoveFromCart();
+  const { trackEvent } = useAnalytics();
+  const directShopping = useDirectShoppingEnabled();
 
   // Unified bag: server cart if logged in, otherwise guest cart
   const cart: Cart | null = React.useMemo(() => {
@@ -83,6 +124,12 @@ export const CartScreen = () => {
     }
   };
 
+  const handleProceedToCheckout = () => {
+    if (!cart || cart.items.length === 0) return;
+    trackEvent('checkout_initiated', { cartItems: cart.items.length }, { variant: 'macro_v1' });
+    router.push('/(app)/checkout');
+  };
+
   if (isLoading) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center">
@@ -139,6 +186,10 @@ export const CartScreen = () => {
               );
             })}
           </YStack>
+
+          {directShopping === true && cart ? (
+            <DirectCheckoutSection cart={cart} onProceed={handleProceedToCheckout} />
+          ) : null}
 
           {!userId ? (
             <Text fontSize="$2" color="$textSecondary" textAlign="center" marginTop="$2">

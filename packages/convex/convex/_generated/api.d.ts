@@ -9,6 +9,7 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as addresses from "../addresses.js";
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as auth_permissions from "../auth/permissions.js";
@@ -31,6 +32,7 @@ import type * as logs from "../logs.js";
 import type * as members from "../members.js";
 import type * as migrations from "../migrations.js";
 import type * as notifications from "../notifications.js";
+import type * as orders from "../orders.js";
 import type * as organizationAdmin from "../organizationAdmin.js";
 import type * as organizations from "../organizations.js";
 import type * as partnerSync from "../partnerSync.js";
@@ -54,6 +56,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  addresses: typeof addresses;
   admin: typeof admin;
   auth: typeof auth;
   "auth/permissions": typeof auth_permissions;
@@ -76,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   members: typeof members;
   migrations: typeof migrations;
   notifications: typeof notifications;
+  orders: typeof orders;
   organizationAdmin: typeof organizationAdmin;
   organizations: typeof organizations;
   partnerSync: typeof partnerSync;

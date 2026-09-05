@@ -61,6 +61,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       return (
         flat.includes('cart') ||
         flat.includes('wishlist') ||
+        flat.includes('checkout') ||
+        flat.includes('orders') ||
+        flat.includes('addresses') ||
         flat.includes('partner-sync')
       );
     };
