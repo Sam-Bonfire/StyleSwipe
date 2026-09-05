@@ -12,6 +12,10 @@ on:
         type: string
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   packages: write
@@ -130,7 +134,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             turbo-${{ runner.os }}-
       - name: Setup Mise
@@ -164,7 +168,6 @@ jobs:
 
   build-android:
     needs: [create-release]
-    if: needs.create-release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
     steps:
       - name: Free Disk Space
@@ -192,7 +195,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             turbo-${{ runner.os }}-
       - run: mise run init
@@ -224,7 +227,6 @@ jobs:
 
   build-ios:
     needs: [create-release]
-    if: needs.create-release.outputs.new_version != 'none'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
@@ -234,7 +236,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             turbo-${{ runner.os }}-
       - name: Setup Mise
@@ -275,7 +277,6 @@ jobs:
 
   deploy-production:
     needs: [create-release, build-push-docker, build-publish-extension, build-spas, build-android, build-ios]
-    if: needs.create-release.outputs.new_version != 'none'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -286,7 +287,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             turbo-${{ runner.os }}-
       - name: Setup Mise
