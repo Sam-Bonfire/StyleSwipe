@@ -546,6 +546,9 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.43
+      '@types/react':
+        specifier: ~19.2.0
+        version: 19.2.18
       ts-morph:
         specifier: ^27.0.2
         version: 27.0.2
