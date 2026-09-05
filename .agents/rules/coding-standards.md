@@ -161,5 +161,5 @@ await queue.pushBatch(items);
 ## 3. Definition of Done
 
 - **Linting**: A task is **NOT COMPLETE** until all linting issues are resolved.
-  - Run `mise run lint` (or `bun lint`) to verify.
+   - Run `mise run lint` to verify.
 - **Documentation**: Whenever major changes are made, associated documentation (architecture, READMEs) **MUST** be updated immediately.
