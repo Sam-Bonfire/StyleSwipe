@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 
-import { query, mutation } from './_generated/server';
 import { components } from './_generated/api';
+import { query, mutation } from './_generated/server';
 
 export const getById = query({
   args: { id: v.id('partner_sync') },
@@ -72,7 +72,7 @@ export const getActiveByUser = query({
         try {
           const users = await ctx.runQuery(components.auth.api.findMany, {
             model: 'users',
-            where: [{ field: '_id', operator: 'eq' as any, value: otherUserId }],
+            where: [{ field: '_id', operator: 'eq', value: otherUserId }],
             paginationOpts: { numItems: 1, cursor: null },
           });
           const otherUser = users.page[0];
@@ -82,7 +82,7 @@ export const getActiveByUser = query({
             partnerName: otherUser?.name || 'Partner',
             partnerImage: otherUser?.image,
           };
-        } catch (e) {
+        } catch {
           // Fallback if auth component is not reachable or errors
           return session;
         }

@@ -60,7 +60,7 @@ export function ProductDetailScreen() {
 
   const isWishlisted = React.useMemo<boolean>(() => {
     if (!wishlist || !wishlist.items) return false;
-    return wishlist.items.some((item) => item.productId === productId);
+    return wishlist.items.some((item: { productId: string }) => item.productId === productId);
   }, [wishlist, productId]);
 
   const handleWishlistToggle = useCallback(async (): Promise<void> => {

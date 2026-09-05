@@ -87,7 +87,7 @@ export function SearchScreen() {
       );
       const fromSuggestions = s.length > 0 ? s : TRENDING_FALLBACK;
       const fromEvents: string[] = (popularEvents ?? [])
-        .map((e) => (e.metadata?.title as string) || (e.metadata?.query as string) || '')
+        .map((e: { metadata?: { title?: string; query?: string } }) => (e.metadata?.title as string) || (e.metadata?.query as string) || '')
         .filter(Boolean)
         .slice(0, 3);
       const merged = Array.from(new Set([...fromSuggestions, ...fromEvents])).slice(0, 8);
@@ -398,7 +398,7 @@ export function SearchScreen() {
                   </XStack>
                 ) : categories && categories.length > 0 ? (
                   <XStack flexWrap="wrap" gap="$2">
-                    {categories.slice(0, 8).map((cat) => (
+                    {categories.slice(0, 8).map((cat: { _id: string; name: string; image?: string }) => (
                       <Pressable key={cat._id} onPress={() => handleCategoryPress(cat as unknown as never)} style={{ width: '48%' }}>
                         <YStack
                           backgroundColor="$neutral100"

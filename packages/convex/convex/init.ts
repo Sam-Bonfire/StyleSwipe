@@ -1,6 +1,8 @@
 import 'convex/server';
+
+import type { RegisteredMutation } from 'convex/server';
+
 import { v } from 'convex/values';
-import { FunctionReference } from 'convex/server';
 
 import { components } from './_generated/api';
 import { mutation } from './_generated/server';
@@ -15,7 +17,7 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 /**
  * Initialize StyleSwipe organizations using the auth component API
  */
-export const initializeOrganizations = mutation({
+export const initializeOrganizations: RegisteredMutation<'public', Record<string, never>, Promise<void>> = mutation({
   handler: async (ctx) => {
     // Fetch all organizations via component API
     const orgsRes = await ctx.runQuery(components.auth.api.findMany, {
@@ -25,7 +27,7 @@ export const initializeOrganizations = mutation({
     const allOrgs = orgsRes.page;
 
     // 1. Check for StyleSwipe Core Organization
-    const coreOrg = allOrgs.find((o: any) => o.slug === 'styleswipe-core');
+    const coreOrg = allOrgs.find((o: { slug?: string }) => o.slug === 'styleswipe-core');
     if (!coreOrg) {
       await ctx.runMutation(components.auth.api.create, {
         input: {
@@ -41,7 +43,7 @@ export const initializeOrganizations = mutation({
     }
 
     // 2. Check for StyleSwipe Customers Organization
-    const customerOrg = allOrgs.find((o: any) => o.slug === 'styleswipe-customers');
+    const customerOrg = allOrgs.find((o: { slug?: string }) => o.slug === 'styleswipe-customers');
     if (!customerOrg) {
       await ctx.runMutation(components.auth.api.create, {
         input: {
@@ -56,7 +58,7 @@ export const initializeOrganizations = mutation({
       });
     }
   },
-}) as unknown as FunctionReference<"mutation", "public", any, any>;
+});
 
 export const assignCoreAdmin = mutation({
   args: {
@@ -66,7 +68,7 @@ export const assignCoreAdmin = mutation({
     // 1. Find User via component
     const users = await ctx.runQuery(components.auth.api.findMany, {
       model: 'users',
-      where: [{ field: 'email', operator: 'eq' as any, value: args.email }],
+      where: [{ field: 'email', operator: 'eq', value: args.email }],
       paginationOpts: DEFAULT_PAGINATION,
     });
     const user = users.page[0];
@@ -98,7 +100,7 @@ export const assignCoreAdmin = mutation({
       await ctx.runMutation(components.auth.api.updateOne, {
         input: {
           model: 'members',
-          where: [{ field: '_id', operator: 'eq' as any, value: existingMember._id }],
+          where: [{ field: '_id', operator: 'eq', value: existingMember._id }],
           update: { role: 'admin' },
         },
       });

@@ -52,7 +52,7 @@ return doc ? mapToEntity(doc) : null;
           const docs = await client.query(api.featureFlags.getByEnvironment, {
   environment,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),

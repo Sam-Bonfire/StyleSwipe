@@ -1,10 +1,12 @@
-import { paginationOptsValidator, FunctionReference, RegisteredQuery } from 'convex/server';
+import type { RegisteredQuery } from 'convex/server';
+
+import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 
+import { api } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { mutation, query, action } from './_generated/server';
 import { MutationCtx } from './_generated/server';
-import { api } from './_generated/api';
 import { requireCoreAdmin } from './permissions';
 
 export const createJob = mutation({
@@ -286,6 +288,7 @@ export const executePromotion = mutation({
     },
     externalId: scraped.externalId, // Top-level for indexing
     updatedAt: Date.now(),
+    trustBadges: [] as string[],
   };
 
   // ==========================================
@@ -320,7 +323,7 @@ export const executePromotion = mutation({
 
   const uniqueBadges = Array.from(new Set(badges));
   // Add to product fields
-  (productFields as any).trustBadges = uniqueBadges;
+  productFields.trustBadges = uniqueBadges;
 
   // Removed categoryId lookup - field no longer in schema
 
@@ -384,15 +387,15 @@ export const executePromotion = mutation({
 }
 });
 
-export const getPendingJobs: RegisteredQuery<"public", any, any> = query({
-  handler: async (ctx): Promise<any> => {
+export const getPendingJobs: RegisteredQuery<'public', Record<string, never>, Promise<Doc<'scrape_jobs'>[]>> = query({
+  handler: async (ctx) => {
     await requireCoreAdmin(ctx);
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .take(5);
   },
-}) as any;
+});
 
 export const getJobs = query({
   args: { paginationOpts: paginationOptsValidator },
@@ -466,14 +469,14 @@ export const getScrapedProducts = query({
  * Service endpoint: Get pending jobs without authentication
  * Used by the scraper worker to poll for jobs
  */
-export const servicePendingJobs: RegisteredQuery<"public", any, any> = query({
-  handler: async (ctx): Promise<any> => {
+export const servicePendingJobs: RegisteredQuery<'public', Record<string, never>, Promise<Doc<'scrape_jobs'>[]>> = query({
+  handler: async (ctx) => {
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .take(5);
   },
-}) as any;
+});
 
 /**
  * Service endpoint: Update job status without authentication

@@ -21,6 +21,7 @@
   "scripts": {
     "dev": "convex dev",
     "setup": "convex dev --until-success",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -154,7 +154,7 @@ export function FeedbackScreen() {
                     {myFeedback && myFeedback.length > 0 && (
                         <YStack marginTop="$6" gap="$3">
                             <Text fontSize="$5" fontWeight="bold">My Feedback History</Text>
-                            {myFeedback.map((item) => (
+                            {myFeedback.map((item: { _id: string; type: string; status: string; message: string; replies?: Array<{ message: string }> }) => (
                                 <YStack key={item._id} padding="$3" borderWidth={1} borderColor="$borderColor" borderRadius="$3" gap="$2">
                                     <XStack justifyContent="space-between">
                                         <Text fontWeight="600" textTransform="capitalize">{item.type}</Text>

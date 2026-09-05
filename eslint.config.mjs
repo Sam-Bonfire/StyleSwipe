@@ -43,7 +43,7 @@ export default tseslint.config(
     ignores: ['packages/core/src/index.ts', 'packages/core/*.config.ts', 'packages/infrastructure/*.config.ts'],
     rules: {
       'hexagonal-architecture/enforce': ['error'],
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': ['error'],
     },
   },
   {
@@ -116,6 +116,20 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+  {
+    /* Auth adapter glue mirrors @convex-dev/better-auth template shapes; typing it adds no safety */
+    files: ['packages/convex/convex/betterAuth/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    /* Backend strips payload fields via omit-destructuring; siblings are intentionally dropped */
+    files: ['packages/convex/convex/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
   {

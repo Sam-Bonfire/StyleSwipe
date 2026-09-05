@@ -4,6 +4,7 @@ import { createAuthClient } from 'better-auth/react';
 
 export class AuthAdapter {
    
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- client plugin surface (phone/organization paths, metadata shapes) drifts with better-auth versions; tracked in SS-088
   public client: any;
 
   constructor(baseURL: string) {

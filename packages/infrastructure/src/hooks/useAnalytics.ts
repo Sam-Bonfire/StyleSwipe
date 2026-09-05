@@ -1,3 +1,5 @@
+import type { Id } from '@app/convex';
+
 import { api } from '@app/convex';
 import { EventRepository, RepositoryError } from '@app/core';
 import { useMutation, useQuery } from 'convex/react';
@@ -8,7 +10,7 @@ export function useAnalytics() {
 
   const trackEvent = async (
     type: string,
-    metadata?: any,
+    metadata?: Record<string, unknown>,
     options?: { variant?: string; productId?: string }
   ) => {
     const layer = Layer.succeed(
@@ -20,7 +22,7 @@ export function useAnalytics() {
               const id = await trackEventMutation({
                 type: event.type,
                 userId: event.userId,
-                productId: event.productId as any,
+                productId: event.productId as Id<'products'> | undefined,
                 variant: event.variant,
                 isSampled: event.isSampled,
                 metadata: event.metadata,

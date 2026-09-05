@@ -4,6 +4,7 @@
  */
 
 import type { Id } from '@app/convex';
+import type { Doc } from '@app/convex';
 import type { QueueService, ScrapedProduct } from '@app/core';
 
 import { api } from '@app/convex';
@@ -63,7 +64,7 @@ export function createServer(config: ServerConfig) {
       const jobs = await client.query(api.scraper.getJobsSimple, { limit });
 
       // Filter by status if provided
-      const filteredJobs = status ? jobs.filter((j) => j.status === status) : jobs;
+      const filteredJobs = status ? jobs.filter((j: Doc<'scrape_jobs'>) => j.status === status) : jobs;
 
       return c.json({ jobs: filteredJobs });
     } catch (error) {

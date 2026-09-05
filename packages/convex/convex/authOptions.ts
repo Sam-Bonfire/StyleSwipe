@@ -17,7 +17,7 @@ export const getBaseAuthOptions = (): Omit<BetterAuthOptions, 'database'> => {
       'http://127.0.0.1:5173',
       'chrome-extension://*',
       ...(process.env.TRUSTED_ORIGINS
-        ? process.env.TRUSTED_ORIGINS.split(',').map((origin) => origin.trim())
+        ? process.env.TRUSTED_ORIGINS.split(',').map((origin: string) => origin.trim())
         : []),
     ],
     advanced: {

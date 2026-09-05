@@ -1,3 +1,5 @@
+import type { FilterBuilder, GenericTableInfo } from 'convex/server';
+
 import { v } from 'convex/values';
 
 import { mutation, query } from './_generated/server';
@@ -20,9 +22,9 @@ async function ensureUniqueSlug(
 ): Promise<string> {
   let slug = baseSlug;
   let suffix = 1;
-  // eslint-disable-next-line no-await-in-loop
+   
   while (true) {
-    // eslint-disable-next-line no-await-in-loop
+     
     const existing = await ctx.db
       .query('boards')
       // @ts-expect-error convex typing
@@ -35,8 +37,19 @@ async function ensureUniqueSlug(
   }
 }
 
+type BoardProductsDb = {
+  db: {
+    get: (id: string) => Promise<Record<string, unknown> | null>;
+    query: (table: string) => {
+      filter: (
+        predicate: (q: FilterBuilder<GenericTableInfo>) => unknown,
+      ) => { collect: () => Promise<Array<Record<string, unknown> & { _id: string }>> };
+    };
+  };
+};
+
 async function populateBoardProducts(
-  ctx: { db: { get: (id: string) => Promise<Record<string, unknown> | null>; query: (table: string) => unknown } },
+  ctx: BoardProductsDb,
   board: { _id: string; _creationTime?: number; userId: string; name: string; slug: string; isSystem?: boolean; createdAt: number; updatedAt: number },
   boardItems: Array<{ productId: string; addedAt: number }>,
 ): Promise<{
@@ -55,10 +68,9 @@ async function populateBoardProducts(
   }
   const sortedItems = [...boardItems].sort((a, b) => b.addedAt - a.addedAt);
   const productIds = sortedItems.map((item) => item.productId);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const productsDocs: Array<Record<string, unknown> & { _id: string }> = await (ctx.db as any)
+  const productsDocs: Array<Record<string, unknown> & { _id: string }> = await ctx.db
     .query('products')
-    .filter((q: any) =>
+    .filter((q) =>
       productIds.length === 1
         ? q.eq(q.field('_id'), productIds[0])
         : q.or(...productIds.map((id: string) => q.eq(q.field('_id'), id))),
@@ -525,7 +537,7 @@ export const getBoard = query({
       .collect();
     const activeItems = boardItems.filter((it) => !it.deletedAt);
     return populateBoardProducts(
-      ctx as unknown as { db: { get: (id: string) => Promise<Record<string, unknown> | null>; query: (t: string) => unknown } },
+      ctx as unknown as BoardProductsDb,
       board as { _id: string; _creationTime?: number; userId: string; name: string; slug: string; isSystem?: boolean; createdAt: number; updatedAt: number },
       activeItems as Array<{ productId: string; addedAt: number }>,
     );

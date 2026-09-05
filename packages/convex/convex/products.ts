@@ -1,9 +1,17 @@
 import { v } from 'convex/values';
 
-import { query, mutation, action } from './_generated/server';
-import { api } from './_generated/api';
+import type { Doc } from './_generated/dataModel';
 
-function projectProduct(p: any) {
+import { api } from './_generated/api';
+import { query, mutation, action } from './_generated/server';
+
+type ProjectableProduct = Doc<'products'> & {
+  embedding?: unknown;
+  embeddingVersions?: unknown;
+  meta?: Record<string, unknown> & { rawAttributes?: unknown };
+};
+
+function projectProduct(p: ProjectableProduct | null) {
   if (!p) return p;
   const { embedding, embeddingVersions, meta, ...rest } = p;
   let cleanMeta = meta;
@@ -113,34 +121,24 @@ export const findSimilar = action({
     brand: v.optional(v.string()),
     category: v.optional(v.string()),
   },
-  handler: async (ctx, args): Promise<any> => {
-    const { embedding, limit = 10 } = args;
+  handler: async (ctx, args) => {
+    const { embedding, limit = 10, brand, category } = args;
 
-    // Perform vector search
-    // Conditionally apply filter only if needed
-    const searchOptions: any = {
+    // Perform vector search. The vector index only supports category/gender/priceTier
+    // filters (single equality, no brand, no AND) — brand is applied post-fetch.
+    // The options literal is built inline so the filter builder is contextually typed.
+    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', {
       vector: embedding,
       limit,
-    };
-
-    if (args.brand || args.category) {
-      searchOptions.filter = (q: any) => {
-        const filters: any[] = [];
-        if (args.brand) filters.push(q.eq('brand', args.brand));
-        if (args.category) filters.push(q.eq('category', args.category));
-
-        if (filters.length === 1) return filters[0];
-        return filters.reduce((acc, curr) => q.and(acc, curr));
-      };
-    }
-
-    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', searchOptions);
+      ...(category ? { filter: (q) => q.eq('category', category) } : {}),
+    });
 
     // Fetch full product details
-    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id as any) });
-    const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
+    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id) });
+    const products: Doc<'products'>[] = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
 
-    return products;
+    const filtered = brand ? products.filter((p) => p?.brand === brand) : products;
+    return filtered.slice(0, limit);
   },
 });
 

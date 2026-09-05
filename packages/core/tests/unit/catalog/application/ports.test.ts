@@ -117,7 +117,7 @@ describe('Catalog Application Ports', () => {
 
     expect(errorResult._tag).toBe('Failure');
     if (errorResult._tag === 'Failure') {
-        const failureCause = errorResult.cause as any;
+        const failureCause = errorResult.cause as { _tag: string; error: { _tag?: unknown } };
         expect(failureCause._tag).toBe('Fail');
         expect(failureCause.error).toBeInstanceOf(AssetStorageError);
         expect(failureCause.error._tag).toBe('AssetStorageError');
