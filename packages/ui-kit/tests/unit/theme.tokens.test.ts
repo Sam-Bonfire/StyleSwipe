@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { config, tokens } from './theme';
+import { config, tokens } from '../../theme';
 
 describe('theme tokens', () => {
   it('exposes a tamagui config', () => {
