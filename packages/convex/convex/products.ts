@@ -26,6 +26,23 @@ export const getById = query({
 
 export const get = getById;
 
+/**
+ * Resolves the retailer's source URL for a catalog product via its
+ * scraped record (matched on externalId). Null when unknown.
+ */
+export const getSourceUrl = query({
+  args: { productId: v.id('products') },
+  handler: async (ctx, args) => {
+    const product = await ctx.db.get(args.productId);
+    if (!product?.externalId) return null;
+    const scraped = await ctx.db
+      .query('scraped_products')
+      .withIndex('by_externalId', (q) => q.eq('externalId', product.externalId as string))
+      .first();
+    return scraped?.url ?? null;
+  },
+});
+
 export const getByCategory = query({
   args: { category: v.string(), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {

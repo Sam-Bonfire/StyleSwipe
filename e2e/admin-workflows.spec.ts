@@ -48,10 +48,8 @@ test.describe('Admin App Workflows', () => {
       // Activity feed
       await expect(page.locator('text="Recent Activity"')).toBeVisible();
 
-      // Ensure requirements for "Orders" and "System Health" are tested,
-      // even if the UI doesn't have them, as per specific assignment requirements.
-      // E2E test will fail here, signaling missing features to developers.
-      await expect(page.locator('text="Orders"').first()).toBeVisible();
+      // Funnel ends at the aggregator conversion event (merchant redirect).
+      await expect(page.locator('text="Merchant Redirect"').first()).toBeVisible();
       await expect(page.locator('text="System Health"').first()).toBeVisible();
     });
   });
@@ -107,7 +105,7 @@ test.describe('Admin App Workflows', () => {
     });
   });
 
-  test.describe('TC5: User Management & Order Moderation', () => {
+  test.describe('TC5: User Management', () => {
     test.beforeEach(async ({ page }) => {
       await loginAsAdmin(page);
 
@@ -116,7 +114,7 @@ test.describe('Admin App Workflows', () => {
       await expect(page.locator('text="No users found"').or(page.locator('text="User Details"').first())).toBeVisible();
     });
 
-    test('search users, open modal, view orders, test transitions', async ({ page }) => {
+    test('search users and open inspection modal', async ({ page }) => {
       // Search users
       const searchInput = page.getByPlaceholder('Search users...');
       await searchInput.fill('testuser');
@@ -131,15 +129,6 @@ test.describe('Admin App Workflows', () => {
 
       // Assert modal opens
       await expect(page.locator('text="Edit User"').first()).toBeVisible();
-
-      // View order lifecycle list and transition statuses (per requirement)
-      await page.click('text="Orders"');
-      await expect(page.locator('text="Order Lifecycle"')).toBeVisible();
-
-      // Test status transition trigger
-      await page.click('button:has-text("Update Status")');
-      await page.click('text="Shipped"');
-      await expect(page.locator('text="Status updated successfully"')).toBeVisible();
     });
   });
 });

@@ -92,12 +92,11 @@ async function populateBoardProducts(
 }
 
 /**
- * mutation to track when a user clicks "Purchase" on an external marketplace item.
- * 1. Creates/Updates the "Your orders" system board for the user.
- * 2. Logs a high-fidelity "purchase_click" event in the events table.
- * 3. Removes the purchased item from the user's cart.
+ * mutation to track when a user taps "Shop on Merchant" for an external product.
+ * 1. Logs a high-fidelity "merchant_redirect" event in the events table.
+ * 2. Creates/Updates the "Merchant visits" system board for the user.
  */
-export const trackPurchaseClick = mutation({
+export const trackMerchantRedirect = mutation({
   args: {
     userId: v.string(),
     productId: v.id('products'),
@@ -107,7 +106,7 @@ export const trackPurchaseClick = mutation({
 
     // 1. Logs high-fidelity structured event for analytics
     await ctx.db.insert('events', {
-      type: 'purchase_click',
+      type: 'merchant_redirect',
       userId: args.userId,
       productId: args.productId,
       isSampled: true, // Sample these events for deep click-through analysis
@@ -117,7 +116,7 @@ export const trackPurchaseClick = mutation({
       },
     });
 
-    // 2. Add product to the default system board ("Your orders")
+    // 2. Add product to the default system board ("Merchant visits")
     const existingBoard = await ctx.db
       .query('boards')
       .withIndex('by_user_system', (q) => q.eq('userId', args.userId).eq('isSystem', true))
@@ -137,37 +136,23 @@ export const trackPurchaseClick = mutation({
       }
       await ctx.db.patch(existingBoard._id, { updatedAt: timestamp });
     } else {
-      // Create the default "Your orders" board
+      // Create the default "Merchant visits" board
       boardId = await ctx.db.insert('boards', {
         userId: args.userId,
-        name: 'Your orders',
-        slug: 'your-orders',
+        name: 'Merchant visits',
+        slug: 'merchant-visits',
         isSystem: true,
         createdAt: timestamp,
         updatedAt: timestamp,
       });
       await ctx.db.insert('board_items', { boardId, productId: args.productId, addedAt: timestamp });
     }
-
-    // 3. Remove the item from the user's shopping cart
-    const cart = await ctx.db
-      .query('carts')
-      .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .unique();
-
-    if (cart) {
-      const remainingItems = cart.items.filter((item) => item.productId !== args.productId);
-      await ctx.db.patch(cart._id, {
-        items: remainingItems,
-        updatedAt: timestamp,
-      });
-    }
   },
 });
 
 /**
- * query to fetch the "Your orders" system board and populate all product details.
- * Orders are returned in reverse chronological order based on purchase timestamp.
+ * query to fetch the "Merchant visits" system board and populate all product details.
+ * Items are returned in reverse chronological order based on redirect timestamp.
  */
 export const getSystemBoard = query({
   args: {

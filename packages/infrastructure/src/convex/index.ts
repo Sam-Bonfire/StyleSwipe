@@ -5,7 +5,6 @@
 
 export * from './repositories/AccountRepository';
 export * from './repositories/AdminRepository';
-export * from './repositories/ConvexCartRepository';
 export * from './repositories/ConvexProductSearchRepository';
 export * from './repositories/EventRepository';
 export * from './repositories/FeatureFlagRepository';
@@ -21,5 +20,3 @@ export * from './repositories/SessionRepository';
 export * from './repositories/UserRepository';
 export * from './repositories/VerificationRepository';
 export * from './repositories/CategoryRepository';
-export * from './repositories/ConvexOrderRepository';
-export * from './repositories/ConvexAddressRepository';
