@@ -59,6 +59,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     const isGatedRoute = (): boolean => {
       const flat = segments.join('/');
       return (
+        flat.includes('cart') ||
         flat.includes('wishlist') ||
         flat.includes('partner-sync')
       );

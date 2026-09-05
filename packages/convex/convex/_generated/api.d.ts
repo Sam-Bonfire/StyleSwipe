@@ -15,6 +15,7 @@ import type * as auth_permissions from "../auth/permissions.js";
 import type * as authOptions from "../authOptions.js";
 import type * as backfillTrustBadges from "../backfillTrustBadges.js";
 import type * as boards from "../boards.js";
+import type * as cart from "../cart.js";
 import type * as categories from "../categories.js";
 import type * as crons from "../crons.js";
 import type * as debug from "../debug.js";
@@ -59,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   authOptions: typeof authOptions;
   backfillTrustBadges: typeof backfillTrustBadges;
   boards: typeof boards;
+  cart: typeof cart;
   categories: typeof categories;
   crons: typeof crons;
   debug: typeof debug;

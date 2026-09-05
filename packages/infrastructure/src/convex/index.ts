@@ -5,6 +5,7 @@
 
 export * from './repositories/AccountRepository';
 export * from './repositories/AdminRepository';
+export * from './repositories/ConvexCartRepository';
 export * from './repositories/ConvexProductSearchRepository';
 export * from './repositories/EventRepository';
 export * from './repositories/FeatureFlagRepository';

@@ -289,8 +289,21 @@ const weekly_summaries = defineTable({
   createdAt: v.number(),
 }).index('by_user_period', ['userId', 'period']);
 
-// Collections (boards) live below; transactional commerce tables were removed:
-// StyleSwipe is a discovery aggregator, not a marketplace.
+// Bag (cart-as-list): the aggregator keeps a cross-retailer saved-items list.
+// Checkout, orders, and addresses were removed — purchase happens on merchants.
+
+const carts = defineTable({
+  userId: v.string(), // Foreign key to users
+  items: v.array(
+    v.object({
+      productId: v.id('products'),
+      quantity: v.number(),
+      price: v.number(),
+      attributes: v.optional(v.any()),
+    }),
+  ),
+  updatedAt: v.number(),
+}).index('by_user', ['userId']);
 
 const boards = defineTable({
   userId: v.string(),
@@ -444,6 +457,9 @@ export default defineSchema({
   // Collections
   boards,
   board_items,
+
+  // Bag (cart-as-list)
+  carts,
 
   // Scraper Context
   scraped_products,

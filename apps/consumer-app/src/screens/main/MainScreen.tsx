@@ -1,10 +1,11 @@
 import { NavigationBar } from '@app/ui-kit';
 import { useRoute } from '@react-navigation/native';
-import { Home, Search, Layers, User } from '@tamagui/lucide-icons';
+import { Home, Search, Layers, User, ShoppingCart } from '@tamagui/lucide-icons';
 import React, { useState } from 'react';
 import { YStack } from 'tamagui';
 
 import { HomeHeader } from '../../components/HomeHeader';
+import { CartScreen } from '../commerce/CartScreen';
 import { DiscoveryScreen } from '../discovery/DiscoveryScreen';
 import { HomeScreen } from '../home/HomeScreen';
 import { ProfileScreen } from '../profile/ProfileScreen';
@@ -43,6 +44,12 @@ export function MainScreen() {
       activeIcon: <Layers size={22} color="$primary" />,
     },
     {
+      key: 'cart',
+      label: 'Cart',
+      icon: <ShoppingCart size={22} color="$textSecondary" />,
+      activeIcon: <ShoppingCart size={22} color="$primary" />,
+    },
+    {
       key: 'profile',
       label: 'Profile',
       icon: <User size={22} color="$textSecondary" />,
@@ -58,6 +65,8 @@ export function MainScreen() {
         return <SearchScreen />;
       case 'discovery':
         return <DiscoveryScreen />;
+      case 'cart':
+        return <CartScreen />;
       case 'profile':
         return <ProfileScreen />;
       default:

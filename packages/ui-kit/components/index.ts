@@ -45,6 +45,13 @@ export type { SizeChipGroupProps, SizeField, SizeOption } from './SizeChipGroup'
 export { SwipeCardStack } from './SwipeCardStack';
 export type { SwipeCardStackProps, SwipeDirection } from './SwipeCardStack';
 
+// Bag Components
+export { CartItem } from './CartItem';
+export type { CartItemProps } from './CartItem';
+
+export { TransactionalFooter } from './TransactionalFooter';
+export type { TransactionalFooterProps } from './TransactionalFooter';
+
 // Feedback Components
 export { Toast } from './Toast';
 export type { ToastProps, ToastVariant } from './Toast';

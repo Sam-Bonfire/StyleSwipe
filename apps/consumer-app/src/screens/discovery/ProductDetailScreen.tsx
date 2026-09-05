@@ -1,23 +1,25 @@
+import type { CartItem } from '@app/core';
+
 import {
+  useAddToCart,
   useAnalytics,
   useCurrentUser,
   useMarkHelpful,
   useProduct,
-  useProductSourceUrl,
   useReviewBreakdown,
   useReviews,
   useAddReview,
   useSimilarProducts,
   useToggleWishlist,
-  useTrackMerchantRedirect,
   useWishlist,
 } from '@app/infrastructure';
 import { Button, CategoryChip, RatingStars, SizeChipGroup, TopBarIconButton, type SizeField } from '@app/ui-kit';
 import { ImageGallery } from '@app/ui-kit/components/ImageGallery';
-import { ArrowLeftRight, ChevronLeft, ExternalLink, Heart, Leaf, MapPin, ShieldCheck, Truck, TrendingUp, Share2, Ruler } from '@tamagui/lucide-icons';
+import { TransactionalFooter } from '@app/ui-kit/components/TransactionalFooter';
+import { ArrowLeftRight, ChevronLeft, Heart, Leaf, MapPin, ShieldCheck, Truck, TrendingUp, Share2, Ruler } from '@tamagui/lucide-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Alert, Linking, ScrollView, Share, View, useWindowDimensions } from 'react-native';
+import { Alert, ScrollView, Share, View, useWindowDimensions } from 'react-native';
 import { Separator, Spacer, Text, XStack, YStack, Spinner, useTheme } from 'tamagui';
 
 import { ProductCarousel } from '../../components/ProductCarousel';
@@ -28,20 +30,24 @@ export function ProductDetailScreen() {
   const { id: productId } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const theme = useTheme();
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const galleryHeight = windowWidth / 0.7;
+  const sizeSelectorYRef = React.useRef<number>(0);
 
   const productData = useProduct(productId);
 
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string[]>>({});
+  const [showSizeError, setShowSizeError] = useState<boolean>(false);
+  const [isAdded, setIsAdded] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState<boolean>(false);
 
+  const addToCart = useAddToCart();
   const { trackEvent } = useAnalytics();
-  const trackMerchantRedirect = useTrackMerchantRedirect();
 
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
-
-  const merchantUrl = useProductSourceUrl(productId);
+  const scrollViewRef = React.useRef<ScrollView>(null);
 
   const wishlist = useWishlist(userId);
   const toggleWishlist = useToggleWishlist();
@@ -181,20 +187,69 @@ export function ProductDetailScreen() {
 
   const handleSizeChange = (fieldId: string, selectedIds: string[]): void => {
     setSelectedSizes({ [fieldId]: selectedIds });
+    setShowSizeError(false);
   };
 
-  const handleMerchantRedirect = async (): Promise<void> => {
-    if (!merchantUrl) {
-      Alert.alert('Unavailable', 'The retailer link for this product is not available yet.');
+  const handleAddToCart = async (): Promise<void> => {
+    if (isAdded) {
+      router.push('/(app)/(tabs)/cart');
       return;
     }
-    try {
-      if (userId) await trackMerchantRedirect(userId, productId as string);
-      trackEvent('affiliate_redirect', undefined, { variant: 'macro_v1', productId: productId as string });
-      await Linking.openURL(merchantUrl);
-    } catch (e) {
-      console.error('Failed to open merchant link', e);
-      Alert.alert('Error', 'Could not open the retailer page.');
+    if (product.availableSizes.length > 0) {
+      const selectedSize = selectedSizes['product_size']?.[0];
+      if (!selectedSize) {
+        setShowSizeError(true);
+        const scrollY = Math.max(0, galleryHeight + sizeSelectorYRef.current - 40);
+        scrollViewRef.current?.scrollTo({ y: scrollY, animated: true });
+        return;
+      }
+      if (!userId) {
+        Alert.alert('Authentication Required', 'User is not authenticated. Please log in.');
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const item: CartItem = {
+          productId: product.id,
+          quantity: 1,
+          price: product.price,
+          selectedAttributes: { brand: product.brand, size: selectedSize, color: String(rawAttributes['color'] ?? 'Black') },
+        };
+        await addToCart(userId, item);
+        trackEvent('added_to_cart', undefined, { variant: 'macro_v1', productId: product.id });
+        setIsAdded(true);
+        Alert.alert('Success', 'Added to cart!');
+      } catch (e) {
+        console.error('Failed to add to cart', e);
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        Alert.alert('Error', 'Failed to add to cart: ' + message);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      if (!userId) {
+        Alert.alert('Authentication Required', 'User is not authenticated. Please log in.');
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const item: CartItem = {
+          productId: product.id,
+          quantity: 1,
+          price: product.price,
+          selectedAttributes: { brand: product.brand, color: String(rawAttributes['color'] ?? 'Black') },
+        };
+        await addToCart(userId, item);
+        trackEvent('added_to_cart', undefined, { variant: 'macro_v1', productId: product.id });
+        setIsAdded(true);
+        Alert.alert('Success', 'Added to cart!');
+      } catch (e) {
+        console.error('Failed to add to cart', e);
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        Alert.alert('Error', 'Failed to add to cart: ' + message);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -217,7 +272,7 @@ export function ProductDetailScreen() {
 
   return (
     <View style={{ height: windowHeight, backgroundColor: theme.background.val }}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator nestedScrollEnabled>
+      <ScrollView ref={scrollViewRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator nestedScrollEnabled>
         <ImageGallery images={product.images} />
 
         <YStack padding="$4" gap="$2">
@@ -300,11 +355,18 @@ export function ProductDetailScreen() {
           </XStack>
 
           {product.availableSizes.length > 0 ? (
-            <YStack marginBottom="$4">
+            <YStack marginBottom="$4" onLayout={(event) => {
+              sizeSelectorYRef.current = event.nativeEvent.layout.y;
+            }}>
               <SizeChipGroup fields={[sizeField]} selectedSizes={selectedSizes} onSizeChange={handleSizeChange} />
               <Text onPress={() => setSizeGuideOpen(true)} color="$primary" fontSize="$3" marginTop="$2" fontWeight="500">
                 Size guide available — Find my size →
               </Text>
+              {showSizeError && (
+                <Text color="$error" fontSize="$3" marginTop="$1">
+                  Please select a size to continue
+                </Text>
+              )}
             </YStack>
           ) : (
             <Text color="$textSecondary" fontSize="$3" marginBottom="$4">One size — no selection needed</Text>
@@ -372,30 +434,7 @@ export function ProductDetailScreen() {
         </TopBarIconButton>
       </View>
 
-      <XStack
-        backgroundColor="$surface"
-        padding="$3"
-        borderTopWidth={1}
-        borderColor="$borderColor"
-        justifyContent="space-between"
-        alignItems="center"
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-      >
-        <YStack flex={1}>
-          <Text fontSize="$2" color="$textSecondary" fontWeight="500">
-            Price on merchant
-          </Text>
-          <Text fontSize="$5" color="$textPrimary" fontWeight="700">
-            ₹{product.price}
-          </Text>
-        </YStack>
-        <Button variant="primary" icon={ExternalLink} onPress={handleMerchantRedirect}>
-          Shop on Merchant
-        </Button>
-      </XStack>
+      <TransactionalFooter price={product.price} originalPrice={product.originalPrice} onAddToCart={handleAddToCart} isAdded={isAdded} isLoading={isLoading} />
     </View>
   );
 }

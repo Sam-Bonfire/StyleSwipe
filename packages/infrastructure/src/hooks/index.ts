@@ -15,6 +15,13 @@ export {
   useUserSwipedIds,
   usePartnerLikes,
 } from './useDiscovery';
+export {
+  useCart,
+  useAddToCart,
+  useRemoveFromCart,
+  useUpdateCartQuantity,
+  useClearCart,
+} from './useCart';
 export { useMyFeedback, useCreateFeedback, useGenerateUploadUrl } from './useFeedback';
 export { useUpdateUser, useUpdateStyleProfile, useUpdatePushToken } from './useUsers';
 export * from './useOnboarding';
@@ -37,6 +44,7 @@ export {
   useMoveBoardItem,
 } from './useBoards';
 export type { UserBoardSummary } from './useBoards';
+export * from './useGuestCart';
 export * from './useCategories';
 export * from './useTrending';
 

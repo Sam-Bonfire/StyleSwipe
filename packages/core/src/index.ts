@@ -82,6 +82,11 @@ export * as ManageLogs from './identity/application/ManageLogs';
 export * as ManageAdminFeedback from './identity/application/ManageAdminFeedback';
 export * as IdentityUseCases from './identity/application/IdentityUseCases';
 export * as CompleteOnboarding from './identity/application/CompleteOnboarding';
+// Bag (cart-as-list domain; checkout/orders removed)
+export * from './commerce/domain/Cart';
+export * from './commerce/domain/errors';
+export * from './commerce/application/CartRepository';
+export * as ManageCart from './commerce/application/ManageCart';
 // Discovery
 export * from './discovery/domain';
 export * from './discovery/application/DiscoveryPorts';
