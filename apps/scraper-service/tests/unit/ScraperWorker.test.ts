@@ -1,7 +1,7 @@
 import type { QueueService, ScrapedProduct } from '@app/core';
 
-import { describe, expect, it, test, vi as mock, beforeEach, afterEach, vi } from 'vitest';
 import { Effect } from 'effect';
+import { describe, expect, test, beforeEach, afterEach, vi } from 'vitest';
 
 import { ScraperWorker } from '../../src/workers/ScraperWorker';
 

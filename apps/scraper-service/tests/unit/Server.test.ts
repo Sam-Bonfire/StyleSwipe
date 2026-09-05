@@ -1,5 +1,5 @@
-import { describe, expect, it, test, vi as mock, beforeEach, afterEach, vi } from 'vitest';
 import { Effect } from 'effect';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { createServer } from '../../src/server';
 
