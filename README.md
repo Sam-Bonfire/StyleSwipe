@@ -25,15 +25,15 @@ mise run task feat "My New Feature"
 
 ### 2. Snapshot (Work in Progress)
 ```bash
-# Backs up work to remote without a PR
+# Structured commit without a PR (commit-only; push explicitly for backup)
 # NEVER use `git commit` manually
 mise run snap feat "Refactoring auth"
 ```
 
 ### 3. Deliver
 ```bash
-# Lint, Test, and Submit Stack to GitHub
-mise run submit
+# Verify first, then submit stack to GitHub (submit does not run lint/test)
+mise run lint && mise run test && mise run submit
 ```
 
 ### 4. Release
@@ -45,16 +45,16 @@ mise run release
 ## Agent Instructions
 
 If you are an AI Agent working in this repo:
-1.  **Read the Rules**: Check `.agent/rules/` before touching code.
+1.  **Read the Rules**: Check `.agents/rules/` before touching code.
 2.  **Respect Boundaries**: Do not import `convex` into `core`. Do not put logic in `ui-kit`.
 3.  **Use Tokens**: Never hardcode colors in `ui-kit`.
 4.  **Test Core**: All logic in `@app/core` must have unit tests.
 
 ## Setup
 
-1.  **Install Tools**: `mise install` (Installs Bun, Node, Graphite).
-2.  **Install Deps**: `bun install`.
-3.  **Run Dev**: `bun run dev` (Starts Convex, Expo, and Admin).
+1.  **Install Tools**: `mise install` (Installs pnpm, Node, Graphite).
+2.  **Install Deps**: `pnpm install` (or `mise run init`).
+3.  **Run Dev**: `mise run dev` (Starts Convex, Expo, and Admin).
 
 ## CI/CD Secrets
 
