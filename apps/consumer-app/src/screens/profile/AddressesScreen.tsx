@@ -76,7 +76,7 @@ export function AddressesScreen() {
             </YStack>
           ) : (
             <YStack gap="$3">
-              {addresses.map((addr) => {
+              {addresses.map((addr: unknown) => {
                 const a = addr as unknown as {
                   _id: string;
                   fullName: string;

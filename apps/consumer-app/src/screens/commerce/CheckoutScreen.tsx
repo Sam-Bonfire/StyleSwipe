@@ -50,7 +50,7 @@ export const CheckoutScreen = () => {
   const resolvedAddress = useMemo((): FormAddress | null => {
     if (pendingAddress) return pendingAddress;
     if (selectedAddressId && addresses) {
-      const found = addresses.find((a) => a._id === selectedAddressId) as unknown as Record<string, unknown> | undefined;
+      const found = addresses.find((a: { _id: string }) => a._id === selectedAddressId) as unknown as Record<string, unknown> | undefined;
       if (found) {
         const f = found as { fullName: string; phone: string; line1: string; line2?: string; city: string; state: string; pincode: string; country: string; isDefault: boolean };
         return {
@@ -134,7 +134,7 @@ export const CheckoutScreen = () => {
     setIsProcessing(true);
     try {
       const items = cart.items.map((ci) => {
-        const prod = products?.find((p) => p._id === ci.productId) as unknown as { brand?: string; title?: string; images?: string[] } | undefined;
+        const prod = products?.find((p: { _id: string }) => p._id === ci.productId) as unknown as { brand?: string; title?: string; images?: string[] } | undefined;
         return {
           productId: ci.productId,
           quantity: ci.quantity,
@@ -271,7 +271,7 @@ export const CheckoutScreen = () => {
 
           {addresses && addresses.length > 0 ? (
             <YStack gap="$3">
-              {addresses.map((addr) => {
+              {addresses.map((addr: unknown) => {
                 const a = addr as unknown as { _id: string; fullName: string; line1: string; city: string; state: string; pincode: string; isDefault: boolean; phone: string };
                 const isSelected = selectedAddressId ? selectedAddressId === a._id : defaultAddress && (defaultAddress as unknown as { _id: string })._id === a._id;
                 return (
