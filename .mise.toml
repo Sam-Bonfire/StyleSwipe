@@ -247,8 +247,12 @@ description = "Install Playwright browsers with dependencies"
 run = "npx playwright install --with-deps chromium"
 
 [tasks."test:e2e"]
-description = "Run Playwright E2E tests"
-run = "npx playwright test"
+description = "Run Playwright E2E tests for consumer app"
+run = "npx playwright test --project=consumer-app"
+
+[tasks."test:e2e:admin"]
+description = "Run Playwright E2E tests for admin app"
+run = "npx playwright test --project=admin-app"
 
 [tasks."git:promote-dev"]
 description = "Fast-forward merge dev into main and push"

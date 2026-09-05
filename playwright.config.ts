@@ -13,7 +13,13 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'consumer-app',
+      testMatch: /smoke\.test\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'admin-app',
+      testMatch: /admin-workflows\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
   ],

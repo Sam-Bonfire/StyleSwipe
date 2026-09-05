@@ -14,6 +14,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:e2e:admin": "PLAYWRIGHT_TEST_BASE_URL=${PREVIEW_URL:-http://localhost:8081} playwright test --project=admin-app",
     "prepare": "node -e \"const fs = require('fs'); if (fs.existsSync('bin/setup-hooks.ts')) { require('child_process').execSync('npx tsx bin/setup-hooks.ts', { stdio: 'inherit' }); }\"",
     "postinstall": "npx tsx bin/fix-lightningcss.ts"
   },
