@@ -29,11 +29,10 @@ const apiToken = process.env.CLOUDFLARE_API_TOKEN;
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
 if (!apiToken || apiToken.trim() === '') {
-  console.warn(`⚠️ WARNING: CLOUDFLARE_API_TOKEN is not set or is empty.`);
-  console.warn(`⚠️ Skipping Cloudflare Pages deployment for "${projectName}".`);
-  console.warn(`👉 To enable Cloudflare Pages deployments, please set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in GitHub Secrets/Environment Secrets.`);
+  console.error(`❌ CLOUDFLARE_API_TOKEN is not set or is empty. Failing loudly: a green run must mean the deploy happened.`);
+  console.error(`👉 Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in GitHub Secrets/Environment Secrets.`);
   setGithubOutput('deployed', 'false');
-  process.exit(0);
+  process.exit(1);
 }
 
 console.log(`🚀 Deploying ${projectName} (${distDir}) to Cloudflare Pages (branch: ${branch})...`);
