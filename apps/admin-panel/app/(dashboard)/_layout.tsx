@@ -4,7 +4,7 @@ import React from 'react';
 
 import { DashboardLayout } from '../../src/components/DashboardLayout';
 
-type Page = 'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics';
+type Page = 'overview' | 'products' | 'categories' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics';
 
 /**
  * Maps URL pathname to Page type for the Sidebar active state.

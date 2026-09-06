@@ -11,6 +11,7 @@ import { DashboardLayout } from './components/DashboardLayout';
 import { GlobalErrorBoundary } from './components/GlobalErrorBoundary';
 import { authAdapter } from './lib/auth';
 import { AnalyticsScreen } from './screens/AnalyticsScreen';
+import { CategoriesScreen } from './screens/CategoriesScreen';
 import { FeedbackScreen } from './screens/FeedbackScreen';
 import { JobsScreen } from './screens/JobsScreen';
 import { LoginScreen } from './screens/LoginScreen';
@@ -27,7 +28,7 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
 
 function Main() {
   const user = useCurrentUser();
-  const [activePage, setActivePage] = useState<'overview' | 'products' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics'>('overview');
+  const [activePage, setActivePage] = useState<'overview' | 'products' | 'categories' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics'>('overview');
 
 
   // undefined = loading, null = not logged in, object = logged in
@@ -70,6 +71,8 @@ function Main() {
         return user.isCoreAdmin ? <AnalyticsScreen /> : <OverviewScreen />;
       case 'products':
         return user.isCoreAdmin ? <ProductsScreen /> : <OverviewScreen />;
+      case 'categories':
+        return user.isCoreAdmin ? <CategoriesScreen /> : <OverviewScreen />;
       case 'jobs':
         return user.isCoreAdmin ? <JobsScreen /> : <OverviewScreen />;
       case 'users':
