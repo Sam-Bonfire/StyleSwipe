@@ -475,6 +475,28 @@ const scrape_jobs = defineTable({
   .index('by_created', ['createdAt']);
 
 // -----------------------------------------------------------------------------
+// AGGREGATOR CONTEXT - Affiliate redirect rules
+// -----------------------------------------------------------------------------
+
+// Merchant-level tracking rules applied when resolving retailer URLs.
+// Managed from the admin panel; evaluated by products.getSourceUrl.
+const affiliate_links = defineTable({
+  merchantDomain: v.string(), // e.g. "myntra.com" — matched as URL hostname suffix
+  merchantName: v.string(),
+  network: v.union(
+    v.literal('DIRECT'),
+    v.literal('IMPACT'),
+    v.literal('CJ'),
+    v.literal('RAKUTEN'),
+    v.literal('CUSTOM'),
+  ),
+  trackingParams: v.array(v.object({ key: v.string(), value: v.string() })),
+  isEnabled: v.boolean(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+}).index('by_domain', ['merchantDomain']);
+
+// -----------------------------------------------------------------------------
 // SUPPORT CONTEXT - User Feedback & Support
 // -----------------------------------------------------------------------------
 
@@ -576,6 +598,9 @@ export default defineSchema({
   // Direct shopping (feature-flagged, off by default)
   orders,
   addresses,
+
+  // Aggregator Context
+  affiliate_links,
 
   // Scraper Context
   scraped_products,
