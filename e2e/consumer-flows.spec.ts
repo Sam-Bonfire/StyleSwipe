@@ -96,10 +96,11 @@ test.describe('Consumer App Core Flows', () => {
 
   test.describe('TC5: Partner Sync Lobby Gating', () => {
     test('guest access to partner sync redirects to auth', async ({ page }) => {
-      // Expo Router omits group segments from URLs: partner-sync, not /(app)/partner-sync
+      // Expo Router omits group segments from URLs: partner-sync, not /(app)/partner-sync.
+      // The guard bounces guests to the auth group, whose index renders at /.
       await page.goto('/partner-sync');
-      // Guest-browsing guard: partner sync requires an account
-      await expect(page).toHaveURL(/\(auth\)|login/, { timeout: 15000 });
+      await expect(page.locator('text="Continue with Phone"').first()).toBeVisible({ timeout: 15000 });
+      await expect(page.locator('text="An error occurred in the"')).not.toBeVisible();
     });
   });
 });
