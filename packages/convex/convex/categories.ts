@@ -80,3 +80,19 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+/**
+ * Product counts keyed by product category name, for the admin
+ * tree view. Single scan; admin-only.
+ */
+export const getProductCounts = query({
+  args: {},
+  handler: async (ctx) => {
+    const products = await ctx.db.query('products').collect();
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      if (p.category) counts[p.category] = (counts[p.category] ?? 0) + 1;
+    }
+    return counts;
+  },
+});
