@@ -4,7 +4,7 @@ import { XStack, YStack } from 'tamagui';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
-type Page = 'overview' | 'products' | 'categories' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics';
+type Page = 'overview' | 'products' | 'categories' | 'affiliates' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

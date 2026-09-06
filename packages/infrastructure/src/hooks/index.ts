@@ -48,6 +48,7 @@ export * from './useGuestCart';
 export * from './useOrders';
 export * from './useAddresses';
 export * from './useFeatureFlag';
+export * from './useAffiliate';
 export * from './useCategories';
 export * from './useTrending';
 

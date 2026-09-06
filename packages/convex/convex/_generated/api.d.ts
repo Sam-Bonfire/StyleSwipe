@@ -11,6 +11,7 @@
 import type * as accounts from "../accounts.js";
 import type * as addresses from "../addresses.js";
 import type * as admin from "../admin.js";
+import type * as affiliate from "../affiliate.js";
 import type * as auth from "../auth.js";
 import type * as auth_permissions from "../auth/permissions.js";
 import type * as authOptions from "../authOptions.js";
@@ -58,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
   addresses: typeof addresses;
   admin: typeof admin;
+  affiliate: typeof affiliate;
   auth: typeof auth;
   "auth/permissions": typeof auth_permissions;
   authOptions: typeof authOptions;

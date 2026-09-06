@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import type { Doc } from './_generated/dataModel';
 
 import { api } from './_generated/api';
-import { query, mutation, action } from './_generated/server';
+import { QueryCtx, query, mutation, action } from './_generated/server';
 
 type ProjectableProduct = Doc<'products'> & {
   embedding?: unknown;
@@ -47,9 +47,31 @@ export const getSourceUrl = query({
       .query('scraped_products')
       .withIndex('by_externalId', (q) => q.eq('externalId', product.externalId as string))
       .first();
-    return scraped?.url ?? null;
+    if (!scraped?.url) return null;
+    return await applyAffiliateRule(ctx, scraped.url);
   },
 });
+
+/**
+ * Applies the matching enabled affiliate rule (if any) by appending
+ * its tracking params to the retailer URL. No rule (or disabled) → raw URL.
+ */
+async function applyAffiliateRule(ctx: QueryCtx, rawUrl: string): Promise<string> {
+  let hostname = '';
+  try {
+    hostname = new URL(rawUrl).hostname.toLowerCase();
+  } catch {
+    return rawUrl;
+  }
+  const rules = await ctx.db.query('affiliate_links').collect();
+  const rule = rules.find((r) => r.isEnabled && (hostname === r.merchantDomain || hostname.endsWith(`.${r.merchantDomain}`)));
+  if (!rule || rule.trackingParams.length === 0) return rawUrl;
+  const url = new URL(rawUrl);
+  for (const { key, value } of rule.trackingParams) {
+    if (key) url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
 
 export const getByCategory = query({
   args: { category: v.string(), limit: v.optional(v.number()) },
