@@ -1,7 +1,7 @@
 import { api } from '@app/convex';
 import { useQuery } from 'convex/react';
 
-type FlagEnvironment = 'dev' | 'staging' | 'prod';
+export type FlagEnvironment = 'dev' | 'staging' | 'prod';
 
 function currentEnvironment(): FlagEnvironment {
   const raw = process.env.EXPO_PUBLIC_APP_ENV;

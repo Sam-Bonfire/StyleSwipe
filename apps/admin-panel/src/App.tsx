@@ -20,6 +20,7 @@ import { LogsScreen } from './screens/LogsScreen';
 import { OrganizationsScreen } from './screens/OrganizationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { ProductsScreen } from './screens/ProductsScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 import { UsersScreen } from './screens/UsersScreen';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {
@@ -29,7 +30,7 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
 
 function Main() {
   const user = useCurrentUser();
-  const [activePage, setActivePage] = useState<'overview' | 'products' | 'categories' | 'affiliates' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics'>('overview');
+  const [activePage, setActivePage] = useState<'overview' | 'products' | 'categories' | 'affiliates' | 'settings' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics'>('overview');
 
 
   // undefined = loading, null = not logged in, object = logged in
@@ -86,6 +87,8 @@ function Main() {
         return user.isCoreAdmin ? <FeedbackScreen /> : <OverviewScreen />;
       case 'logs':
         return user.isCoreAdmin ? <LogsScreen /> : <OverviewScreen />;
+      case 'settings':
+        return user.isCoreAdmin ? <SettingsScreen /> : <OverviewScreen />;
       default:
         return <OverviewScreen />;
     }
