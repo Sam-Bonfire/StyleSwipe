@@ -48,7 +48,7 @@ export function AnalyticsScreen() {
                   <Select.Viewport minWidth={200}>
             <Select.Group>
               <Select.Label>Select Variant</Select.Label>
-              {availableVariants.map((variant, index) => (
+              {availableVariants.map((variant: string, index: number) => (
                 <Select.Item key={variant} index={index} value={variant}>
                   <Select.ItemText>{variant}</Select.ItemText>
                   <Select.ItemIndicator marginLeft="auto"><Check size={16} /></Select.ItemIndicator>

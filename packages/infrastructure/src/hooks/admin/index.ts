@@ -49,7 +49,7 @@ export function useRetriggerScrape() {
     return (args: { url: string }) => {
         const program = ManageAdminDashboard.retriggerScrape(args.url);
         const layer = createAdminRepositoryLayer(convex as unknown as ConvexClient);
-        return Effect.runPromise(program.pipe(Effect.provide(layer as any)) as any);
+        return Effect.runPromise(program.pipe(Effect.provide(layer)));
     }
 }
 
@@ -83,7 +83,7 @@ export function useUpdateFeedbackStatus() {
     return (args: { id: string; status: string }) => {
         const program = ManageAdminFeedback.updateStatus(args.id, args.status as FeedbackStatus);
         const layer = createFeedbackRepositoryLayer(convex as unknown as ConvexClient);
-        return Effect.runPromise(program.pipe(Effect.provide(layer as any)) as any);
+        return Effect.runPromise(program.pipe(Effect.provide(layer)));
     }
 }
 
@@ -95,6 +95,6 @@ export function useReplyToFeedback() {
     return (args: { id: string; message: string; adminId?: string }) => {
         const program = ManageAdminFeedback.reply(args.id, args.adminId || '', args.message);
         const layer = createFeedbackRepositoryLayer(convex as unknown as ConvexClient);
-        return Effect.runPromise(program.pipe(Effect.provide(layer as any)) as any);
+        return Effect.runPromise(program.pipe(Effect.provide(layer)));
     }
 }

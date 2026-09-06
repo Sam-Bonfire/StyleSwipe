@@ -45,7 +45,7 @@ export const createCategoryRepositoryLayer = (client: ConvexClient) =>
         Effect.tryPromise({
           try: async () => {
             const docs = await client.query(api.categories.listTree, {});
-            return docs.map((doc) => mapToEntity(doc));
+            return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
           },
           catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
         }),
@@ -54,7 +54,7 @@ export const createCategoryRepositoryLayer = (client: ConvexClient) =>
         Effect.tryPromise({
           try: async () => {
             const docs = await client.query(api.categories.listRootCategories, {});
-            return docs.map((doc) => mapToEntity(doc));
+            return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
           },
           catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
         }),

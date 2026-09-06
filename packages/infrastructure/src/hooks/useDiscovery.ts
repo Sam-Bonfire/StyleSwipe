@@ -1,3 +1,5 @@
+import type { Id } from '@app/convex';
+
 import { api } from '@app/convex';
 import { SwipeRepository, RepositoryError, type SwipeAction } from '@app/core';
 import { ProcessSwipe } from '@app/core';
@@ -42,7 +44,7 @@ export function useProcessSwipe() {
         recordSwipe: (userId, productId, action: SwipeAction, timestamp, newPreferenceVector, partnerId) =>
           Effect.tryPromise({
             try: async () => {
-              const res = await swipeMutation({ productId: productId as any, action, newPreferenceVector, partnerId });
+              const res = await swipeMutation({ productId: productId as Id<'products'>, action, newPreferenceVector, partnerId });
               return { isMutualMatch: res?.isMutualMatch };
             },
             catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),

@@ -10,10 +10,10 @@ const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.litera
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 // Helper to get style profile
-const getStyleProfile = async (ctx: any, userId: string) => {
+const getStyleProfile = async (ctx: QueryCtx | MutationCtx, userId: string) => {
   return await ctx.db
     .query('style_profiles')
-    .withIndex('by_user', (q: any) => q.eq('userId', userId))
+    .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
 };
 
@@ -264,7 +264,7 @@ export const getCalibrationFeed = query({
     // Diverse calibration fetch
     // Note: A true production calibration would fetch randomly across categories.
     // For this MVP, we fetch recent items and filter by the user's gender preference to build the initial batch.
-    let productQuery = ctx.db.query('products').order('desc');
+    const productQuery = ctx.db.query('products').order('desc');
     const allProducts = await productQuery.take(100);
     
     let feed = allProducts.filter((p) => !swipedProductIds.has(p._id));

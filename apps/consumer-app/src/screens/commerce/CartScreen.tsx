@@ -97,7 +97,7 @@ export const CartScreen = () => {
 
   const productMap = React.useMemo(() => {
     if (!productsDocs) return new Map();
-    return new Map(productsDocs.map((p) => [p._id, p]));
+    return new Map(productsDocs.map((p: { _id: string }) => [p._id, p]));
   }, [productsDocs]);
 
   const handleUpdateQuantity = async (productId: string, quantity: number) => {

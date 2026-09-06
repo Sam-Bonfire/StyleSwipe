@@ -6,8 +6,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { createCategoryRepositoryLayer } from '../../../src/convex/repositories/CategoryRepository';
 
 describe('CategoryRepository', () => {
-  let mockClient: any;
-  let layer: any;
+  let mockClient: { query: ReturnType<typeof vi.fn>; mutation: ReturnType<typeof vi.fn> };
+  let layer: ReturnType<typeof createCategoryRepositoryLayer>;
 
   beforeEach(() => {
     mockClient = {

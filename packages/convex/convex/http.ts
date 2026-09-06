@@ -14,7 +14,7 @@ http.route({
 });
 
 // Register all Better Auth routes (GET, POST, OPTIONS) with built-in CORS support
-(authComponent as any).registerRoutes(http, getAuth, {
+authComponent.registerRoutes(http, getAuth, {
   cors: {
     allowedOrigins: [
       'http://localhost:8081',
@@ -26,7 +26,6 @@ http.route({
       '*', // Fallback for debugging, remove in prod
     ],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    allowedMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
   },
 });
 

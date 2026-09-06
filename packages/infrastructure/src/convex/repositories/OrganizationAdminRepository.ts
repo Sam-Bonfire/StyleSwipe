@@ -59,7 +59,7 @@ return {
     updateOrganization: (id: string, data: Partial<Organization>) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.organizationAdmin.updateOrganization, {
-    id: id as any,
+    id: id,
     name: data.name,
     slug: data.slug,
     logo: data.logo,
@@ -127,7 +127,7 @@ return {
     updateUserDetails: (id: string, data: Partial<User>) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.organizationAdmin.updateUserDetails, {
-    userId: id as any,
+    userId: id,
     name: data.name,
     email: data.email,
     image: data.image,

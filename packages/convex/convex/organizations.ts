@@ -75,7 +75,7 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
-    const data: any = {};
+    const data: Record<string, string> = {};
     if (updates.name) data.name = updates.name;
     if (updates.slug) data.slug = updates.slug;
     if (updates.logo) data.logo = updates.logo;

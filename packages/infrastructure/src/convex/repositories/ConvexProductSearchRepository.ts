@@ -14,16 +14,15 @@ export const createProductSearchRepositoryLayer = (client: ConvexReactClient) =>
       try: async () => {
           const result = await client.action(api.search.searchProducts, { vector, limit });
           return {
-              products: result.products.map((p: any) => ({
-                  id: p._id,
-                  title: p.title,
-                  brand: p.brand,
-                  price: p.price,
-                  mrp: p.mrp ?? p.price,
-                  images: p.images,
-                  description: p.description,
-                  category: p.category,
-              })) as any, // Typecast to satisfy complex domain model differences for now
+              products: result.products.map((p: Record<string, unknown>) => ({
+                  id: p._id as string,
+                  title: p.title as string,
+                  brand: p.brand as string,
+                  price: p.price as number,
+                  mrp: (p.mrp as number | undefined) ?? (p.price as number),
+                  images: p.images as string[],
+                  category: p.category as string,
+              })),
           };
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)

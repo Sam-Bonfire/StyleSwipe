@@ -1,5 +1,7 @@
 import { v } from 'convex/values';
 
+import type { Id } from './_generated/dataModel';
+
 import { api } from './_generated/api';
 import { action } from './_generated/server';
 
@@ -9,7 +11,7 @@ export const getVectorFeed = action({
     overrideVector: v.optional(v.array(v.float64())),
     influenceRatio: v.optional(v.number()),
   },
-  handler: async (ctx, args): Promise<any> => {
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       // Return public/trending products if not logged in
@@ -103,38 +105,31 @@ export const getVectorFeed = action({
     });
 
     // 3. Vector Search
-    // Construct filter based on user gender if specific
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let filter: any;
-    if (user.styleProfile?.gender && user.styleProfile.gender !== 'both') {
-      const gender = user.styleProfile.gender;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      filter = (q: any) => q.eq('gender', gender);
-    }
-
+    // Construct filter based on user gender if specific.
+    // The options literal is built inline so the filter builder is contextually typed.
+    const gender = user.styleProfile?.gender;
     const results = await ctx.vectorSearch(
       'product_embeddings',
       'by_embedding_v1',
       {
         vector: preferenceVector,
         limit: Math.min(256, (args.limit || 10) + swipedIds.length),
-        filter,
+        ...(gender && gender !== 'both' ? { filter: (q) => q.eq('gender', gender) } : {}),
       },
     );
 
     // We only have the Ids and scores. Need to fetch full docs.
-    const allProductIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id as any) });
+    const allProductIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id) });
 
     // Filter out swiped items
-    const filteredProductIds = allProductIds.filter((id: any) => !swipedIds.includes(id as any));
+    const filteredProductIds = allProductIds.filter((id: Id<'products'>) => !swipedIds.includes(id));
 
     // Slice
     const productIds = filteredProductIds.slice(0, args.limit || 10);
 
     // Bulk fetch details
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const products: any[] = await ctx.runQuery(api.helpers.getProductsByIds, {
-      ids: productIds as any,
+    const products = await ctx.runQuery(api.helpers.getProductsByIds, {
+      ids: productIds,
     });
 
     // Fallback: If vector search yields no results (e.g. no products have embeddings yet),

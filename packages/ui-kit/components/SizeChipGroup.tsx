@@ -243,7 +243,7 @@ export const SizeChipGroup = React.forwardRef<typeof ContainerFrame, SizeChipGro
       onSizeChange,
       onRegionChange,
       ...rest
-    } = props as any;
+    } = props;
 
     const handleChipPress = (field: SizeField, sizeId: string) => {
       const currentSelected = selectedSizes[field.id] || [];

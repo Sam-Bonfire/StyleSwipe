@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+
 import { components } from './_generated/api';
 import { mutation, query } from './_generated/server';
 
@@ -76,7 +77,7 @@ export const removeByIdentifier = mutation({
 
 export const deleteExpired = mutation({
     args: { now: v.number() },
-    handler: async (_ctx, _args) => {
+    handler: async () => {
         // Component should ideally handle its own cleanup, 
         // but we provide a placeholder to satisfy the repository.
         return 0;

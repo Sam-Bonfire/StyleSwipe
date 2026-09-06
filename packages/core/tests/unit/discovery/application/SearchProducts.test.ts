@@ -1,6 +1,6 @@
 import type { Vector384 } from '@app/core';
 
-import { Embedder, ProductSearchRepository } from '@app/core';
+import { Embedder, ProductSearchRepository, RepositoryError } from '@app/core';
 import { SearchProducts } from '@app/core';
 import { Effect, Exit, Layer } from 'effect';
 import { describe, expect, it } from 'vitest';
@@ -19,7 +19,7 @@ function createFailingEmbedderLayer(): Layer.Layer<Embedder, never, never> {
     return Layer.succeed(
         Embedder,
         Embedder.of({
-            generateEmbedding: () => Effect.fail(new Error('mock embedding failure') as any),
+            generateEmbedding: () => Effect.fail(new RepositoryError('mock embedding failure', new Error('mock embedding failure'))),
             getDimensions: () => Effect.succeed(384),
         })
     );

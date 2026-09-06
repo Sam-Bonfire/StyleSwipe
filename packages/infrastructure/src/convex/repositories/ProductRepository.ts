@@ -67,7 +67,7 @@ export const createProductRepositoryLayer = (client: ConvexClient) => Layer.succ
   category,
   limit,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -80,7 +80,7 @@ return docs.map((doc) => mapToEntity(doc));
   maxPrice,
   limit,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -91,7 +91,7 @@ return docs.map((doc) => mapToEntity(doc));
   brand,
   limit,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -103,7 +103,7 @@ return docs.map((doc) => mapToEntity(doc));
   brand: filters?.brand,
   category: filters?.category,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -116,7 +116,7 @@ return docs.map((doc) => mapToEntity(doc));
   category: filters?.category,
   brand: filters?.brand,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -179,7 +179,7 @@ return { ...product, id: id as string };
     getLatest: (limit: number) => Effect.tryPromise({
       try: async () => {
           const docs = await client.query(api.products.getLatest, { limit });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),

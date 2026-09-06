@@ -1,3 +1,4 @@
+import type { Id } from '@app/convex';
 import type { ScrapingJob, ScrapeJobType, ScrapeJobStatus, ScraperMode, PaginationOpts } from '@app/core';
 
 import { api } from '@app/convex';
@@ -73,7 +74,7 @@ return {
     getJobById: (id: string) => Effect.tryPromise({
       try: async () => {
           const doc = await client.query(api.scraper.getJob, {
-    jobId: id as any,
+    jobId: id as Id<'scrape_jobs'>,
 });
 return doc ? mapToEntity(doc) : null;
       },

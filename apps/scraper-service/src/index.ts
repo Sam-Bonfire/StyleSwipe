@@ -6,7 +6,7 @@
 import type { ScrapedProduct } from '@app/core';
 
 import { api } from '@app/convex';
-import { createQueue, type QueueType } from '@app/infrastructure';
+import { createQueue } from '@app/infrastructure';
 import { ConvexHttpClient } from 'convex/browser';
 
 import { MyntraAPIScraper } from './scrapers/MyntraAPIScraper';
@@ -33,35 +33,30 @@ interface CliArgs {
   mode: 'scrape' | 'category' | 'worker' | 'server' | 'daemon' | 'help';
   url?: string;
   pages?: number;
-  queueType: QueueType;
 }
 
 function parseArgs(): CliArgs {
   const args = process.argv.slice(2);
 
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
-    return { mode: 'help', queueType: 'memory' };
+    return { mode: 'help' };
   }
 
   const mode = args[0].replace(/^--/, '') as CliArgs['mode'];
   let url: string | undefined;
   let pages = 5;
-  let queueType: QueueType = 'memory';
 
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
     if (arg === '--pages' && args[i + 1]) {
       pages = parseInt(args[i + 1], 10);
       i++;
-    } else if (arg === '--queue' && args[i + 1]) {
-      queueType = args[i + 1] as QueueType;
-      i++;
     } else if (!arg.startsWith('--')) {
       url = arg;
     }
   }
 
-  return { mode, url, pages, queueType };
+  return { mode, url, pages };
 }
 
 function printHelp(): void {
@@ -80,13 +75,12 @@ MODES:
 
 OPTIONS:
   --pages <N>                 Number of pages for category scraping (default: 5)
-  --queue <memory|convex>     Queue backend (default: memory)
   --help                      Show this help
 
 EXAMPLES:
   bun run src/index.ts --scrape https://www.myntra.com/shirts/roadster/12345
   bun run src/index.ts --category https://www.myntra.com/men-casual-shirts --pages 3
-  bun run src/index.ts --daemon --queue convex
+  bun run src/index.ts --daemon
 
 ENVIRONMENT:
   VITE_CONVEX_URL            Convex deployment URL (required)
@@ -156,13 +150,10 @@ async function runCategory(url: string, maxPages: number): Promise<void> {
   await scraper.close();
 }
 
-async function runWorkers(queueType: QueueType): Promise<void> {
-  console.log(`[CLI] Starting workers with ${queueType} queue...`);
+async function runWorkers(): Promise<void> {
+  console.log('[CLI] Starting workers with in-memory queue...');
 
-  const queue = createQueue<ScrapedProduct>({
-    type: queueType,
-    convexUrl: CONVEX_URL,
-  });
+  const queue = createQueue<ScrapedProduct>();
 
   const scraperWorker = new ScraperWorker({
     convexUrl: CONVEX_URL!,
@@ -178,13 +169,10 @@ async function runWorkers(queueType: QueueType): Promise<void> {
   await Promise.all([scraperWorker.start(), vectorWorker.start()]);
 }
 
-async function runServer(queueType: QueueType): Promise<void> {
+async function runServer(): Promise<void> {
   console.log(`[CLI] Starting API server on port ${API_PORT}...`);
 
-  const queue = createQueue<ScrapedProduct>({
-    type: queueType,
-    convexUrl: CONVEX_URL,
-  });
+  const queue = createQueue<ScrapedProduct>();
 
   await startServer({
     convexUrl: CONVEX_URL!,
@@ -193,13 +181,10 @@ async function runServer(queueType: QueueType): Promise<void> {
   });
 }
 
-async function runDaemon(queueType: QueueType): Promise<void> {
+async function runDaemon(): Promise<void> {
   console.log(`[CLI] Starting daemon mode (server + workers)...`);
 
-  const queue = createQueue<ScrapedProduct>({
-    type: queueType,
-    convexUrl: CONVEX_URL,
-  });
+  const queue = createQueue<ScrapedProduct>();
 
   // Start server
   const serverPromise = startServer({
@@ -254,15 +239,15 @@ async function main(): Promise<void> {
       break;
 
     case 'worker':
-      await runWorkers(args.queueType);
+      await runWorkers();
       break;
 
     case 'server':
-      await runServer(args.queueType);
+      await runServer();
       break;
 
     case 'daemon':
-      await runDaemon(args.queueType);
+      await runDaemon();
       break;
 
     default:

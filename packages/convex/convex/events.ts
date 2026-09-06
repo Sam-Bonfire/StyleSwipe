@@ -1,3 +1,5 @@
+import type { FilterBuilder, GenericTableInfo } from 'convex/server';
+
 import { v } from 'convex/values';
 
 import { query, mutation } from './_generated/server';
@@ -64,7 +66,7 @@ export const getFunnelMetrics = query({
     if (args.timeRange === '7_days') threshold = now - 7 * 24 * 60 * 60 * 1000;
     else if (args.timeRange === '30_days') threshold = now - 30 * 24 * 60 * 60 * 1000;
 
-    const filterWithVariant = (q: any) => {
+    const filterWithVariant = (q: FilterBuilder<GenericTableInfo>) => {
       if (args.variant) {
         return q.and(
           q.gte(q.field('timestamp'), threshold),
@@ -119,7 +121,7 @@ export const getMacroFunnelMetrics = query({
     if (args.timeRange === '7_days') threshold = now - 7 * 24 * 60 * 60 * 1000;
     else if (args.timeRange === '30_days') threshold = now - 30 * 24 * 60 * 60 * 1000;
 
-    const filterWithVariant = (q: any) => {
+    const filterWithVariant = (q: FilterBuilder<GenericTableInfo>) => {
       if (args.variant) {
         return q.and(
           q.gte(q.field('timestamp'), threshold),
