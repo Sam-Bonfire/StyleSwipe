@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { useCurrentUser, ConvexReactClient } from '@app/infrastructure';
 import { Button, StyleSwipeProvider } from '@app/ui-kit';
-import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import { ConvexBetterAuthProvider, type AuthClient } from '@convex-dev/better-auth/react';
 import React, { useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -20,6 +20,7 @@ import { LogsScreen } from './screens/LogsScreen';
 import { OrganizationsScreen } from './screens/OrganizationsScreen';
 import { OverviewScreen } from './screens/OverviewScreen';
 import { ProductsScreen } from './screens/ProductsScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 import { UsersScreen } from './screens/UsersScreen';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {
@@ -29,7 +30,7 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
 
 function Main() {
   const user = useCurrentUser();
-  const [activePage, setActivePage] = useState<'overview' | 'products' | 'categories' | 'affiliates' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics'>('overview');
+  const [activePage, setActivePage] = useState<'overview' | 'products' | 'categories' | 'affiliates' | 'settings' | 'jobs' | 'users' | 'organizations' | 'feedback' | 'logs' | 'analytics'>('overview');
 
 
   // undefined = loading, null = not logged in, object = logged in
@@ -86,6 +87,8 @@ function Main() {
         return user.isCoreAdmin ? <FeedbackScreen /> : <OverviewScreen />;
       case 'logs':
         return user.isCoreAdmin ? <LogsScreen /> : <OverviewScreen />;
+      case 'settings':
+        return user.isCoreAdmin ? <SettingsScreen /> : <OverviewScreen />;
       default:
         return <OverviewScreen />;
     }
@@ -102,7 +105,11 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
+        {/* See app/_layout.tsx: cast bridges infra/app type identities. */}
+        <ConvexBetterAuthProvider
+          client={convex}
+          authClient={authAdapter.client as unknown as AuthClient}
+        >
           <StyleSwipeProvider theme="BrandIdentityLight">
             <GlobalErrorBoundary>
               <Main />

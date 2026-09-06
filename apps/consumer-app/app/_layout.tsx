@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { useCurrentUser, ConvexReactClient } from '@app/infrastructure';
 import { StyleSwipeProvider } from '@app/ui-kit';
-import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import { ConvexBetterAuthProvider, type AuthClient } from '@convex-dev/better-auth/react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
@@ -134,7 +134,12 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
+        {/* AuthClient comes from infra's better-auth instance while the provider
+            types come from the app's — cast at this seam (see admin _layout). */}
+        <ConvexBetterAuthProvider
+          client={convex}
+          authClient={authAdapter.client as unknown as AuthClient}
+        >
           <StyleSwipeProvider theme="BrandIdentityLight">
             <AuthGuard>
               <Slot />

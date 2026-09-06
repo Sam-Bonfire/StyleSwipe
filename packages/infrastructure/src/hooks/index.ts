@@ -1,8 +1,6 @@
-// =============================================================================
-// HOOKS BARREL EXPORT
+// ======================================================================// HOOKS BARREL EXPORT
 // Consumer-app hooks (use in apps/consumer-app)
-// =============================================================================
-
+// ======================================================================
 export * from './useConvexClient';
 export { useCurrentUser, useGetOrCreateUser, useAuthActions } from './useAuth';
 export { useLatestProducts, useProduct, useProductsByIds, useProductSourceUrl, useSimilarProducts } from './useProducts';
@@ -49,13 +47,12 @@ export * from './useOrders';
 export * from './useAddresses';
 export * from './useFeatureFlag';
 export * from './useAffiliate';
+export * from './useFeatureFlags';
 export * from './useCategories';
 export * from './useTrending';
 
-// =============================================================================
-// ADMIN HOOKS (use in apps/admin-panel)
-// =============================================================================
-
+// ======================================================================// ADMIN HOOKS (use in apps/admin-panel)
+// ======================================================================
 export * from './admin'; // Exports everything from admin/index.ts (Stats, Products, Jobs, Feedback)
 export * from './admin/useOrganizationAdmin'; // Orgs, Users
 export { useCreateScrapingJob } from './admin/useScraperJobs';
