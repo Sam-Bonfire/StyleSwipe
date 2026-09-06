@@ -194,13 +194,8 @@ jobs:
       - name: Build Android APK
         run: mise run android:build:apk
 
-      - name: Distribute Android via Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-          groups: testers
-          file: apps/consumer-app/android/app/build/outputs/apk/release/app-release.apk
+      # Tester distribution via workflow artifacts (Firebase App Distribution
+      # removed: unauthenticated, blocked staging, added no value over artifacts)
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v7
