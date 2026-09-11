@@ -425,6 +425,8 @@ const boards = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
   deletedAt: v.optional(v.number()),
+  // Legacy embedded items; live data moved to board_items. Optional so existing docs pass push validation.
+  items: v.optional(v.array(v.object({ addedAt: v.number(), productId: v.string() }))),
 })
   .index('by_user', ['userId'])
   .index('by_user_slug', ['userId', 'slug'])
