@@ -257,7 +257,7 @@ export const executePromotion = mutation({
           ? 'premium'
           : 'luxury') as 'budget' | 'mid' | 'premium' | 'luxury',
     onSale: price < (isMapped ? data.mrp || 0 : data.price?.mrp || 0),
-    embedding: activeEmbedding, // Use override first, then fallback to data (legacy)
+    // Embeddings live in product_embeddings (dual-write below), never on products.
     attributes: isMapped
       ? {
         ...(data.attributes || {}),
@@ -345,12 +345,6 @@ export const executePromotion = mutation({
 
   let productId: Id<'products'>;
   if (existingProduct) {
-    // If updating without new embedding, preserve old one?
-    // No, current logic overwrites. If embeddingOverride is undefined, productFields.embedding is undefined.
-    // But patch helper merges? No, patch updates keys present.
-    // Check if v.optional means explicit null or undefined deletes it?
-    // Convex patch: undefined fields in object are NOT updated. explicit null deletes.
-    // productFields.embedding is undefined if missing. So it won't overwrite existing embedding in DB. Good.
     await ctx.db.patch(existingProduct._id, productFields);
     productId = existingProduct._id;
   } else {
