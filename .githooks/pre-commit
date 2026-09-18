@@ -3,7 +3,7 @@
 echo "🔍 Running pre-commit validations (ESLint)..."
 
 # Run ESLint via turbo
-bun run lint
+pnpm run lint
 LINT_EXIT_CODE=$?
 
 if [ $LINT_EXIT_CODE -ne 0 ]; then

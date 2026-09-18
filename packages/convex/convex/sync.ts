@@ -1,16 +1,16 @@
 import { v } from 'convex/values';
 
 import { components } from './_generated/api';
-import { mutation } from './_generated/server';
+import { MutationCtx, QueryCtx, mutation } from './_generated/server';
 import { getAuth } from './auth';
 
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 // Helper to get style profile
-const getStyleProfile = async (ctx: any, userId: string) => {
+const getStyleProfile = async (ctx: QueryCtx | MutationCtx, userId: string) => {
   return await ctx.db
     .query('style_profiles')
-    .withIndex('by_user', (q: any) => q.eq('userId', userId))
+    .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
 };
 
@@ -67,7 +67,7 @@ export const syncBatch = mutation({
     }
 
     // Try getting user from Component
-    let user = null;
+    let user: { id?: string; _id?: string } | null = null;
 
     // Optimistic lookup by ID
     const usersByIdRes = await ctx.runQuery(components.auth.api.findMany, {
@@ -91,7 +91,7 @@ export const syncBatch = mutation({
       throw new Error('User not found');
     }
 
-    const realUserId = (user as any).id || (user as any)._id;
+    const realUserId = user.id ?? user._id ?? identity.subject;
 
     // 1. Insert Raw Swipes
     if (args.swipes.length > 0) {
@@ -133,7 +133,7 @@ export const syncBatch = mutation({
         budget: { min: 0, max: 1000 },
       };
 
-      let newDna = currentProfile.dna || {};
+      let newDna = ('dna' in currentProfile ? currentProfile.dna : undefined) || {};
 
       if (args.vectorUpdate.v1) {
         newDna = { ...newDna, v1: args.vectorUpdate.v1 };
@@ -144,7 +144,10 @@ export const syncBatch = mutation({
 
       const updates = {
         dna: newDna,
-        activeDNA: args.vectorUpdate.activeDNA || currentProfile.activeDNA || 'v1',
+        activeDNA:
+          args.vectorUpdate.activeDNA ||
+          ('activeDNA' in currentProfile ? currentProfile.activeDNA : undefined) ||
+          'v1',
         lastUpdated: Date.now(),
       };
 

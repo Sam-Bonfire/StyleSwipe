@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'bun:test';
 import { Effect } from 'effect';
+import { describe, expect, it } from 'vitest';
 
 import { initializeStyleProfile } from '../../../../src/identity/application/InitializeStyleProfile';
 
@@ -43,8 +43,8 @@ describe('InitializeStyleProfile', () => {
   it('should have default budget range', () => {
     const effect = initializeStyleProfile({});
     const profile = Effect.runSync(effect);
-    expect(profile.budget.min).toBe(0);
-    expect(profile.budget.max).toBe(10000);
+    expect(profile.budget?.min).toBe(0);
+    expect(profile.budget?.max).toBe(10000);
   });
 
   it('should return empty preferenceVector', () => {
@@ -66,8 +66,8 @@ describe('InitializeStyleProfile', () => {
     expect(profile.gender).toBe('women');
     expect(profile.vibes).toEqual(['adventure']);
     expect(profile.sizes.top).toBe('Oversized');
-    expect(profile.budget.min).toBe(0);
-    expect(profile.budget.max).toBe(10000);
+    expect(profile.budget?.min).toBe(0);
+    expect(profile.budget?.max).toBe(10000);
     expect(profile.preferenceVector).toEqual([]);
   });
 });

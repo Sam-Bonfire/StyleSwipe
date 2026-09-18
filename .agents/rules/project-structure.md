@@ -11,7 +11,7 @@ globs: ['**/*']
 - **`/apps`**: Deployable applications.
   - `consumer-app`: Mobile/Web client (Expo).
   - `admin-panel`: Internal dashboard (Vite).
-  - `scraper-service`: Data ingestion service (Bun).
+  - `scraper-service`: Data ingestion service (Node/tsx).
 - **`/packages`**: Shared libraries.
   - `core`: Domain logic (Pure TS).
   - `infrastructure`: Adapters (Convex, Auth).
@@ -21,8 +21,8 @@ globs: ['**/*']
   - `e2e`: End-to-end user flows.
   - `integration`: Adapter/API tests.
 - **`/convex`**: Backend functions and schema.
-- **`/bin`**: Workflow scripts (`snapshot.sh`, `task-start.sh`).
-- **`/.agent`**: AI Context and Rules.
+- **`/bin`**: Workflow scripts (`snapshot.ts`, `task-start.ts`, run via `tsx`).
+- **`/.agents`**: AI Context and Rules.
 
 ## Rules
 

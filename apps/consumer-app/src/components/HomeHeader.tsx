@@ -6,7 +6,7 @@
  * - Plus, Bell (with badge), Bag (with badge) on the right
  */
 
-import { useCurrentUser, useCart } from '@app/infrastructure';
+import { useCurrentUser, useCart, useUnreadCount } from '@app/infrastructure';
 import { TopBar, TopBarIconButton, TopBarBadgeCount, TopBarBadgeText, useToast } from '@app/ui-kit';
 import { Plus, Bell, ShoppingBag } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
@@ -25,17 +25,22 @@ export const HomeHeader = () => {
   const cart = useCart(userId);
 
   // Dynamic Counts
-  const notificationCount = 0; // No notifications system yet
+  const unread = useUnreadCount(userId);
+  const notificationCount: number = unread ?? 0;
   const bagCount = cart?.items?.length ?? 0;
 
-  const handlePlusPress = () => {
+  const handlePlusPress = (): void => {
     console.log('Plus pressed');
   };
 
-  const handleNotificationPress = () => {
+  const handleNotificationPress = (): void => {
+    if (notificationCount > 0) {
+      router.push('/(app)/notifications' as never);
+      return;
+    }
     showToast({
-      title: 'Hold your horses! 🐴',
-      message: 'Notifications are still in the oven. Brace yourself!',
+      title: 'No new notifications',
+      message: 'Price drops & partner likes will appear here.',
       variant: 'info',
     });
   };

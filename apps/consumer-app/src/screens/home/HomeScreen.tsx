@@ -36,7 +36,7 @@ export function HomeScreen() {
 
   const wishlistedIds = React.useMemo(() => {
     if (!wishlist || !wishlist.items) return new Set<string>();
-    return new Set<string>(wishlist.items.map((i) => i.productId));
+    return new Set<string>(wishlist.items.map((i: { productId: string }) => i.productId));
   }, [wishlist]);
 
   const handleWishlistToggle = React.useCallback(

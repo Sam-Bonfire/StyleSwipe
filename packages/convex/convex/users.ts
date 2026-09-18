@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 
 import { components } from './_generated/api';
-import { mutation, query } from './_generated/server';
+import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
 
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
@@ -9,10 +9,10 @@ const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
  * Get the style profile for a specific user.
  * Internal helper for queries and mutations in this file.
  */
-const getStyleProfileInternal = async (ctx: any, userId: string) => {
+const getStyleProfileInternal = async (ctx: QueryCtx | MutationCtx, userId: string) => {
   return await ctx.db
     .query('style_profiles')
-    .withIndex('by_user', (q: any) => q.eq('userId', userId))
+    .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
 };
 
@@ -132,8 +132,8 @@ export const getOrCreateUser = mutation({
 });
 
 // Helper for operator types
-function operatorMapping(op: string) {
-  return op as any;
+function operatorMapping(op: 'eq') {
+  return op;
 }
 
 export const getById = query({
@@ -340,6 +340,70 @@ export const remove = mutation({
     const profile = await getStyleProfileInternal(ctx, args.id);
     if (profile) {
       await ctx.db.delete(profile._id);
+    }
+  },
+});
+
+// Registers or refreshes the push token for the authenticated user's device.
+// Uses the join-table pattern (user_devices) so tokens live outside Better Auth's
+// managed users table, avoiding schema conflicts with the auth component.
+export const updatePushToken = mutation({
+  args: {
+    token: v.string(),
+    platform: v.union(v.literal('IOS'), v.literal('ANDROID'), v.literal('WEB')),
+    service: v.union(v.literal('APNS'), v.literal('FCM')),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Unauthenticated');
+    }
+
+    const userId = identity.subject;
+    const now = Date.now();
+
+    const existing = await ctx.db
+      .query('user_devices')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .filter((q) => q.eq(q.field('token'), args.token))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        isActive: true,
+        lastSeenAt: now,
+      });
+    } else {
+      await ctx.db.insert('user_devices', {
+        userId,
+        token: args.token,
+        platform: args.platform,
+        service: args.service,
+        isActive: true,
+        lastSeenAt: now,
+      });
+    }
+
+    // Mirror to push_tokens (Req 9.1 spec table)
+    const existingPush = await ctx.db
+      .query('push_tokens')
+      .withIndex('by_token', (q) => q.eq('token', args.token))
+      .first();
+    if (existingPush) {
+      await ctx.db.patch(existingPush._id, {
+        isActive: true,
+        lastSeenAt: now,
+      });
+    } else {
+      await ctx.db.insert('push_tokens', {
+        userId,
+        token: args.token,
+        platform: args.platform,
+        service: args.service,
+        isActive: true,
+        lastSeenAt: now,
+        createdAt: now,
+      });
     }
   },
 });

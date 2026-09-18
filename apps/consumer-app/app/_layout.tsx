@@ -1,15 +1,20 @@
 import 'react-native-gesture-handler';
 import { useCurrentUser, ConvexReactClient } from '@app/infrastructure';
 import { StyleSwipeProvider } from '@app/ui-kit';
-import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import { ConvexBetterAuthProvider, type AuthClient } from '@convex-dev/better-auth/react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { YStack, Spinner } from 'tamagui';
 
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { OfflineBanner } from '../src/components/OfflineBanner';
 import { authAdapter } from '../src/lib/auth';
+import { linkingConfig } from '../src/lib/linking';
 import { logger } from '../src/lib/logger';
+import { usePushNotifications } from '../src/lib/notifications';
+import { useDeepLinkHandler } from '../src/lib/useDeepLinkHandler';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string);
 
@@ -18,10 +23,22 @@ const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX
  * IMPORTANT: Must always render children (Slot) — never block the navigator.
  * Expo Router requires the navigator to always be rendered to maintain LinkingContext.
  */
+/**
+ * Deep linking config per Req 9.2
+ * Exported for expo-router linking and universal links verification
+ */
+export const linking = linkingConfig;
+
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useCurrentUser();
   const segments = useSegments();
   const router = useRouter();
+
+  // Register push notification listeners + token on app launch
+  usePushNotifications();
+
+  // Handle cold-start / background deep links (styleswipe:// + https://styleswipe.app)
+  useDeepLinkHandler();
 
   React.useEffect(() => {
     if (user) {
@@ -39,11 +56,31 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
 
+    const isGatedRoute = (): boolean => {
+      const flat = segments.join('/');
+      return (
+        flat.includes('cart') ||
+        flat.includes('wishlist') ||
+        flat.includes('checkout') ||
+        flat.includes('orders') ||
+        flat.includes('addresses') ||
+        flat.includes('partner-sync')
+      );
+    };
+
     if (!user) {
-      if (!inAuthGroup) {
+      if (inOnboarding) {
+        router.replace('/(app)/(tabs)');
+        return;
+      }
+      if (isGatedRoute() && !inAuthGroup) {
         router.replace('/(auth)');
       }
-    } else if (!user.styleProfile) {
+      // otherwise allow guest browsing (home, discover, search, product)
+      return;
+    }
+
+    if (!user.styleProfile) {
       if (!inOnboarding) {
         router.replace('/onboarding');
       }
@@ -91,22 +128,26 @@ export default function RootLayout() {
           console.error('Failed to register worker', e),
         );
       });
-    } else {
-      import('../src/workers/BackgroundWorker').then(({ registerBackgroundWorker }) => {
-        registerBackgroundWorker();
-      });
     }
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ConvexBetterAuthProvider client={convex} authClient={authAdapter.client}>
-        <StyleSwipeProvider theme="BrandIdentityLight">
-          <AuthGuard>
-            <Slot />
-          </AuthGuard>
-        </StyleSwipeProvider>
-      </ConvexBetterAuthProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        {/* AuthClient comes from infra's better-auth instance while the provider
+            types come from the app's — cast at this seam (see admin _layout). */}
+        <ConvexBetterAuthProvider
+          client={convex}
+          authClient={authAdapter.client as unknown as AuthClient}
+        >
+          <StyleSwipeProvider theme="BrandIdentityLight">
+            <AuthGuard>
+              <Slot />
+            </AuthGuard>
+            <OfflineBanner />
+          </StyleSwipeProvider>
+        </ConvexBetterAuthProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }

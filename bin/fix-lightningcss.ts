@@ -3,7 +3,7 @@
  *
  * Bun 1.x sometimes fails to install platform-specific optional native
  * dependencies. This script downloads and places the .node binary
- * in the expected location within the .bun store.
+ * in the expected location within the .pnpm store.
  */
 import { existsSync, mkdirSync, readdirSync, writeFileSync, copyFileSync } from "fs";
 import { join, dirname } from "path";
@@ -12,20 +12,20 @@ const TARGET_VERSION = "1.33.0";
 const PACKAGE_NAME = "lightningcss-win32-x64-msvc";
 
 function findLightningcssDir(): string | null {
-  // Search in .bun store
-  const bunStore = join(process.cwd(), "node_modules", ".bun");
-  if (existsSync(bunStore)) {
-    const dirs = readdirSync(bunStore);
+  // Search in .pnpm store
+  const pnpmStore = join(process.cwd(), "node_modules", ".pnpm");
+  if (existsSync(pnpmStore)) {
+    const dirs = readdirSync(pnpmStore);
     for (const dir of dirs) {
       if (dir.startsWith("lightningcss@") && dir !== PACKAGE_NAME) {
-        const candidate = join(bunStore, dir, "node_modules", "lightningcss");
+        const candidate = join(pnpmStore, dir, "node_modules", "lightningcss");
         if (existsSync(candidate)) {
           return candidate;
         }
       }
     }
   }
-  // Also try require.resolve for non-.bun setups
+  // Also try require.resolve for non-.pnpm setups
   try {
     const lcPath = require.resolve("lightningcss/package.json", { paths: [process.cwd()] });
     return dirname(lcPath);

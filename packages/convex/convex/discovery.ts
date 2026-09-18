@@ -10,10 +10,10 @@ const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.litera
 const DEFAULT_PAGINATION = { numItems: 100, cursor: null };
 
 // Helper to get style profile
-const getStyleProfile = async (ctx: any, userId: string) => {
+const getStyleProfile = async (ctx: QueryCtx | MutationCtx, userId: string) => {
   return await ctx.db
     .query('style_profiles')
-    .withIndex('by_user', (q: any) => q.eq('userId', userId))
+    .withIndex('by_user', (q) => q.eq('userId', userId))
     .first();
 };
 
@@ -146,6 +146,7 @@ export const processSwipe = mutation({
     productId: v.id('products'),
     action: SwipeActionSchema,
     newPreferenceVector: v.optional(v.array(v.float64())),
+    partnerId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -155,7 +156,7 @@ export const processSwipe = mutation({
 
     const userId = identity.subject;
 
-    const { productId, action } = args;
+    const { productId, action, partnerId } = args;
 
     const existingSwipe = await ctx.db
       .query('swipes')
@@ -163,7 +164,7 @@ export const processSwipe = mutation({
       .first();
 
     if (existingSwipe) {
-      return { status: 'duplicate', swipeId: existingSwipe._id };
+      return { status: 'duplicate', swipeId: existingSwipe._id, isMutualMatch: false };
     }
 
     const swipeId = await ctx.db.insert('swipes', {
@@ -172,6 +173,20 @@ export const processSwipe = mutation({
       action,
       timestamp: Date.now(),
     });
+
+    let isMutualMatch = false;
+
+    // Check for mutual match if swiped like or super and partnerId is provided
+    if (partnerId && (action === 'like' || action === 'super')) {
+      const partnerSwipe = await ctx.db
+        .query('swipes')
+        .withIndex('by_user_product', (q) => q.eq('userId', partnerId).eq('productId', productId))
+        .first();
+
+      if (partnerSwipe && (partnerSwipe.action === 'like' || partnerSwipe.action === 'super')) {
+        isMutualMatch = true;
+      }
+    }
 
     // ---------------------------------------------------------
     // CLIENT-SIDE VECTOR LEARNING UPDATE
@@ -196,7 +211,7 @@ export const processSwipe = mutation({
       }
     }
 
-    return { status: 'success', swipeId };
+    return { status: 'success', swipeId, isMutualMatch };
   },
 });
 
@@ -208,6 +223,20 @@ export const getUserSwipedIds = query({
     const swipes = await ctx.db
       .query('swipes')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .collect();
+    return swipes.map((s) => s.productId);
+  },
+});
+
+export const getPartnerLikes = query({
+  args: {
+    partnerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const swipes = await ctx.db
+      .query('swipes')
+      .withIndex('by_user', (q) => q.eq('userId', args.partnerId))
+      .filter((q) => q.or(q.eq(q.field('action'), 'like'), q.eq(q.field('action'), 'super')))
       .collect();
     return swipes.map((s) => s.productId);
   },
@@ -235,7 +264,7 @@ export const getCalibrationFeed = query({
     // Diverse calibration fetch
     // Note: A true production calibration would fetch randomly across categories.
     // For this MVP, we fetch recent items and filter by the user's gender preference to build the initial batch.
-    let productQuery = ctx.db.query('products').order('desc');
+    const productQuery = ctx.db.query('products').order('desc');
     const allProducts = await productQuery.take(100);
     
     let feed = allProducts.filter((p) => !swipedProductIds.has(p._id));

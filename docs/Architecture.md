@@ -2,20 +2,21 @@
 
 ## 1. Vision & Core Strategy
 
-StyleSwipe is a next-generation fashion discovery platform supporting two distinct shopping mentalities: an inspiration-heavy **Discover Mode** (Tinder-style) and a utility-heavy **Shop Mode** (Grid-based). The architecture is designed for **maximum solo-developer velocity** using AI-agent collaboration.
+StyleSwipe is a fashion discovery aggregator supporting two distinct shopping mentalities: an inspiration-heavy **Discover Mode** (Tinder-style) and a utility-heavy **Shop Mode** (Grid-based). We aggregate external products and redirect to retailers via affiliate links — there is no checkout or order system; the bag is a saved-items list. The architecture is designed for **maximum solo-developer velocity** using AI-agent collaboration.
 
 ## 2. The High-Velocity Stack
 
 We utilize an industrial-grade toolset to eliminate traditional Git bottlenecks and minimize manual overhead.
 
-- **Runtime**: **Bun (v1.2+)** for high-performance execution.
+- **Runtime**: **Node LTS** with **pnpm (v9.12.3)** for package management.
 - **Task Runner**: **Mise** for consistent environment and workflow execution.
 - **Orchestration**: **TurboRepo** for intelligent caching and pipeline execution.
 - **Auth**: **Better Auth** (with Convex & Organization plugins).
 - **Core Libs**: **Effect TS** for functional error handling.
 - **Primary VCS**: **Git** (via **Graphite CLI** for stacking).
 - **Persistence**: **Convex** for a reactive document store and native vector search.
-- **Frontend**: **Expo + Tamagui** for iOS and Android deployment via EAS.
+- **Frontend**: **Expo + Tamagui** for iOS and Android builds (local Gradle/xcodebuild) and web via Cloudflare Pages.
+- **Distribution**: **Cloudflare Pages** (web/admin) + **Firebase App Distribution** (Android). No EAS.
 
 ## 3. Hexagonal Layering Rules (The Physical Enforcement)
 
@@ -83,7 +84,7 @@ To a developer exploring the code, the rules are visible in the `package.json` o
 
 *   **Directional Flow**: Dependencies only move inward. You can import `Core` into `Mobile`, but you can never import `Mobile` into `Core`.
 *   **Interface Dependency**: The `Application` layer should depend on **interfaces**, not **classes**.
-*   **Testability**: You should be able to run unit tests on the entire `Core` package in milliseconds using `bun test` without mocking a database or starting an Expo server.
+*   **Testability**: You should be able to run unit tests on the entire `Core` package in milliseconds using `vitest run` without mocking a database or starting an Expo server.
 
 ## 6. The "Single Command" Workflow
 
@@ -92,6 +93,6 @@ All development activity, whether by the human architect or AI agents, must use 
 | Phase        | Command       | Logic                                                     |
 | ------------ | ------------- | --------------------------------------------------------- |
 | **Start**    | `mise run task`    | `gt branch create` (Stacked Branching).                   |
-| **Snapshot** | `mise run snap`    | Structured Commit + Push (Remote Backup).                 |
-| **Deliver**  | `mise run submit`  | `turbo lint/test` + `gt stack submit`.                    |
-| **Release**  | `mise run release` | `bun version patch` + `git tag` + `git push`.             |
+| **Snapshot** | `mise run snap`    | Structured Commit (no push; push explicitly).                 |
+| **Deliver**  | `mise run submit`  | `gt submit --stack` (run `mise run lint/test` first; submit does not verify). |
+| **Release**  | `mise run release` | `npm version patch` + `git tag` + `git push`.             |

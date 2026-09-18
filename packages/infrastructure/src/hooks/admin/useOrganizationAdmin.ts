@@ -1,5 +1,5 @@
 import { api } from '@app/convex';
-import { ManageOrganizations } from '@app/core';
+import { ManageOrganizations, type Organization, type User } from '@app/core';
 import { ConvexClient } from 'convex/browser';
 /**
  * Organization admin hooks
@@ -33,7 +33,7 @@ export function useSearchOrganizations(query: string, initialNumItems: number = 
  */
 export function useUpdateOrganization() {
     const convex = useConvex();
-    return (args: { id: string; data: any }) => {
+    return (args: { id: string; data: Partial<Organization> }) => {
         const program = ManageOrganizations.updateOrganization(args.id, args.data);
         const layer = createOrganizationAdminRepositoryLayer(convex as unknown as ConvexClient);
         return Effect.runPromise(program.pipe(Effect.provide(layer)));
@@ -63,7 +63,7 @@ export function useSearchUsers(query: string, initialNumItems: number = 20) {
  */
 export function useUpdateUserDetails() {
     const convex = useConvex();
-    return (args: { id: string; details: any }) => {
+    return (args: { id: string; details: Partial<User> }) => {
         const program = ManageOrganizations.updateUserDetails(args.id, args.details);
         const layer = createOrganizationAdminRepositoryLayer(convex as unknown as ConvexClient);
         return Effect.runPromise(program.pipe(Effect.provide(layer)));

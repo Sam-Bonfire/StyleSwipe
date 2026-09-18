@@ -14,7 +14,7 @@ export function useCompleteOnboarding(generateEmbedding: (text: string) => Promi
       UserRepository.of({
         updateStyleProfile: (id, profile) =>
           Effect.tryPromise({
-            try: () => updateStyleProfileMutation({ styleProfile: profile as any }),
+            try: () => updateStyleProfileMutation({ styleProfile: profile }),
             catch: (e) => new RepositoryError('updateStyleProfile', e),
           }),
         // Stubs for the rest of UserRepository since CompleteOnboarding doesn't use them

@@ -10,6 +10,8 @@ interface ConvexCartItem {
   productId: string;
   quantity: number;
   price: number;
+  variantId?: string;
+  selectedAttributes?: Record<string, string>;
   attributes?: Record<string, string>;
 }
 
@@ -25,7 +27,7 @@ export class ConvexCartRepository {
                         productId: item.productId as GenericId<'products'>,
                         quantity: item.quantity,
                         price: item.price,
-                        attributes: item.attributes,
+                        attributes: item.selectedAttributes,
                     })),
                 });
             },

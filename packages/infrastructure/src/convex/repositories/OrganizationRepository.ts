@@ -1,4 +1,4 @@
-import type { Organization } from '@app/core';
+import type { Organization, OrganizationMetadata } from '@app/core';
 
 import { OrganizationRepository, RepositoryError } from '@app/core';
 import { Layer, Effect } from 'effect';
@@ -18,7 +18,7 @@ const mapToEntity = (doc: Record<string, unknown>): Organization => {
   name: (doc.name as string) || '',
   slug: (doc.slug as string) || '',
   logo: doc.logo as string | undefined,
-  metadata: typeof doc.metadata === 'string' ? JSON.parse(doc.metadata) : (doc.metadata as any),
+  metadata: typeof doc.metadata === 'string' ? (JSON.parse(doc.metadata) as OrganizationMetadata) : (doc.metadata as OrganizationMetadata | undefined),
   createdAt: (doc.createdAt as number) || 0,
 };
 };
@@ -30,7 +30,7 @@ export const createOrganizationRepositoryLayer = (client: ConvexClient) => Layer
 
     findById: (id: string) => Effect.tryPromise({
       try: async () => {
-          const doc = await client.query(api.organizations.getById, { id } as any);
+          const doc = await client.query(api.organizations.getById, { id });
           return doc ? mapToEntity(doc) : null;
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
@@ -52,7 +52,7 @@ return doc ? mapToEntity(doc) : null;
   logo: org.logo,
   metadata: org.metadata,
   createdAt: org.createdAt,
-} as any);
+});
 return { ...org, id: id as string };
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
@@ -63,8 +63,8 @@ return { ...org, id: id as string };
           await client.mutation(api.organizations.update, {
               id,
               ...data,
-          } as any);
-          const doc = await client.query(api.organizations.getById, { id } as any);
+          });
+          const doc = await client.query(api.organizations.getById, { id });
           if (!doc) throw new Error(`Organization ${id} not found after update`);
           return mapToEntity(doc);
       },
@@ -75,7 +75,7 @@ return { ...org, id: id as string };
       try: async () => {
           await client.mutation(api.organizations.remove, {
   id,
-} as any);
+});
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),

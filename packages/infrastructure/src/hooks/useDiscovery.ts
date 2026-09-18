@@ -1,3 +1,5 @@
+import type { Id } from '@app/convex';
+
 import { api } from '@app/convex';
 import { SwipeRepository, RepositoryError, type SwipeAction } from '@app/core';
 import { ProcessSwipe } from '@app/core';
@@ -22,6 +24,14 @@ export function useCalibrationFeed(limit: number = 10) {
   return useQuery(api.discovery.getCalibrationFeed, { limit });
 }
 
+export function useUserSwipedIds(userId: string | undefined) {
+  return useQuery(api.discovery.getUserSwipedIds, userId ? { userId } : 'skip');
+}
+
+export function usePartnerLikes(partnerId: string | undefined) {
+  return useQuery(api.discovery.getPartnerLikes, partnerId ? { partnerId } : 'skip');
+}
+
 export function useProcessSwipe() {
   const swipeMutation = useMutation(api.discovery.processSwipe);
 
@@ -31,9 +41,12 @@ export function useProcessSwipe() {
     const layer = Layer.succeed(
       SwipeRepository,
       SwipeRepository.of({
-        recordSwipe: (userId, productId, action: SwipeAction, timestamp, newPreferenceVector) =>
+        recordSwipe: (userId, productId, action: SwipeAction, timestamp, newPreferenceVector, partnerId) =>
           Effect.tryPromise({
-            try: () => swipeMutation({ productId: productId as any, action, newPreferenceVector }),
+            try: async () => {
+              const res = await swipeMutation({ productId: productId as Id<'products'>, action, newPreferenceVector, partnerId });
+              return { isMutualMatch: res?.isMutualMatch };
+            },
             catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e),
           }),
         getSwipesByUser: () => Effect.succeed([]),

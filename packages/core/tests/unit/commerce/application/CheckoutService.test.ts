@@ -1,29 +1,34 @@
-import * as CheckoutService from '@app/core';
-import { Cart, CartItem, type Address } from '@app/core';
-import { describe, it, expect, mock } from 'bun:test';
 import { Effect, Exit, Layer } from 'effect';
+import { describe, expect, it, vi } from 'vitest';
 
-import { OrderRepository } from '../../../../src/commerce/application/CheckoutService';
+import * as CheckoutService from '../../../../src/commerce/application/CheckoutService';
+import { OrderRepository } from '../../../../src/commerce/application/OrderRepository';
+import { type Address } from '../../../../src/commerce/domain/Address';
+import { createCart, addCartItem } from '../../../../src/commerce/domain/Cart';
 
 describe('CheckoutService', () => {
   it('should create an order from a cart', async () => {
     const repoMock = OrderRepository.of({
-      save: mock(() => Effect.succeed(undefined)),
-      findById: mock(() => Effect.succeed(null)),
+      save: vi.fn(() => Effect.succeed(undefined)),
+      findById: vi.fn(() => Effect.succeed(null)),
+      listByUser: vi.fn(() => Effect.succeed([])),
+      updateStatus: vi.fn(() => Effect.succeed(undefined)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);
 
-    const cart = new Cart('user-1');
-    cart.addItem(new CartItem('prod-1', 1, 1000, { brand: 'Test' }));
+    let cart = createCart({ userId: 'user-1' });
+    cart = addCartItem(cart, { productId: 'prod-1', quantity: 1, price: 1000, selectedAttributes: { brand: 'Test' } });
 
     const address: Address = {
       fullName: 'Sam Altman',
-      street: '123 AI Blvd',
-      city: 'San Francisco',
-      state: 'CA',
-      zipCode: '94103',
-      phone: '555-0199',
+      addressLine1: '123 Linking Road, Bandra West',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      postalCode: '400050',
+      phoneNumber: '9876543210',
+      country: 'India',
+      isDefault: false
     };
 
     const order = await Effect.runPromise(
@@ -31,26 +36,30 @@ describe('CheckoutService', () => {
     );
 
     expect(order.id).toBe('order-123');
-    expect(order.totalAmount).toBeGreaterThan(1000); // Including tax/shipping
+    expect(order.pricing.totalAmount).toBeGreaterThan(1000); // Including tax/shipping
     expect(repoMock.save).toHaveBeenCalledTimes(1);
   });
 
   it('should fail with EmptyCartError on empty cart', async () => {
     const repoMock = OrderRepository.of({
-      save: mock(() => Effect.succeed(undefined)),
-      findById: mock(() => Effect.succeed(null)),
+      save: vi.fn(() => Effect.succeed(undefined)),
+      findById: vi.fn(() => Effect.succeed(null)),
+      listByUser: vi.fn(() => Effect.succeed([])),
+      updateStatus: vi.fn(() => Effect.succeed(undefined)),
     });
     
     const layer = Layer.succeed(OrderRepository, repoMock);
     
-    const cart = new Cart('user-1'); // Empty
+    const cart = createCart({ userId: 'user-1' }); // Empty
     const address: Address = {
       fullName: 'Sam Altman',
-      street: '123 AI Blvd',
-      city: 'San Francisco',
-      state: 'CA',
-      zipCode: '94103',
-      phone: '555-0199',
+      addressLine1: '123 Linking Road, Bandra West',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      postalCode: '400050',
+      phoneNumber: '9876543210',
+      country: 'India',
+      isDefault: false
     };
 
     const exit = await Effect.runPromiseExit(

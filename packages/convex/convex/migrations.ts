@@ -1,7 +1,16 @@
-import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
+import type { Doc } from './_generated/dataModel';
+
+import { mutation, query } from './_generated/server';
+
 const BATCH_SIZE = 50;
+
+/** Product document including legacy embedding fields this migration removes. */
+type LegacyProductDoc = Doc<'products'> & {
+  embedding?: number[];
+  embeddingVersions?: { v1?: number[] };
+};
 
 /**
  * Migration Step 1: Batch-fetch products that have an embedding on the main table
@@ -19,11 +28,11 @@ export const getUnmigratedProducts = query({
     }
     const products = await query.take(150);
     
-    const unmigrated: any[] = [];
+    const unmigrated: LegacyProductDoc[] = [];
     let lastCursor: number | undefined = args.cursor;
     for (const p of products) {
       lastCursor = p._creationTime;
-      if ((p as any).embedding || (p as any).embeddingVersions?.v1) {
+      if ((p as LegacyProductDoc).embedding || (p as LegacyProductDoc).embeddingVersions?.v1) {
         const embDoc = await ctx.db
           .query('product_embeddings')
           .withIndex('by_productId', (q) => q.eq('productId', p._id))
@@ -56,14 +65,14 @@ export const migrateBatch = mutation({
     let lastCursor: number | undefined = args.cursor;
     for (const p of products) {
       lastCursor = p._creationTime;
-      if ((p as any).embedding || (p as any).embeddingVersions?.v1) {
+      if ((p as LegacyProductDoc).embedding || (p as LegacyProductDoc).embeddingVersions?.v1) {
         const embDoc = await ctx.db
           .query('product_embeddings')
           .withIndex('by_productId', (q) => q.eq('productId', p._id))
           .first();
           
         if (!embDoc) {
-          const activeEmbedding = (p as any).embedding || (p as any).embeddingVersions?.v1;
+          const activeEmbedding = (p as LegacyProductDoc).embedding || (p as LegacyProductDoc).embeddingVersions?.v1;
           await ctx.db.insert('product_embeddings', {
             productId: p._id,
             embeddingVersions: {
@@ -100,8 +109,8 @@ export const purgeLegacyEmbeddings = mutation({
 
     for (const p of products) {
       if (
-        (p as any).embedding !== undefined ||
-        (p as any).embeddingVersions !== undefined ||
+        (p as LegacyProductDoc).embedding !== undefined ||
+        (p as LegacyProductDoc).embeddingVersions !== undefined ||
         (p.meta && p.meta.rawAttributes !== undefined)
       ) {
         // Verification: Ensure the new table has the embedding before we purge!
@@ -117,9 +126,9 @@ export const purgeLegacyEmbeddings = mutation({
           console.warn(`⚠️ Warning: Product ${p._id} has legacy embedding but no split entry found!`);
         }
 
-        const patches: any = {};
-        if ((p as any).embedding !== undefined) patches.embedding = undefined;
-        if ((p as any).embeddingVersions !== undefined) patches.embeddingVersions = undefined;
+        const patches: { embedding?: undefined; embeddingVersions?: undefined; meta?: Record<string, unknown> } = {};
+        if ((p as LegacyProductDoc).embedding !== undefined) patches.embedding = undefined;
+        if ((p as LegacyProductDoc).embeddingVersions !== undefined) patches.embeddingVersions = undefined;
         
         // Clean up duplicate rawAttributes in metadata
         if (p.meta && p.meta.rawAttributes !== undefined) {

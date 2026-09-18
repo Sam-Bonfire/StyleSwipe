@@ -40,16 +40,16 @@ export default tseslint.config(
   {
     /* Targeting core domain logic for strict hexagonal enforcement */
     files: ['packages/core/**/*.ts', 'packages/infrastructure/**/*.ts'],
-    ignores: ['packages/core/src/index.ts'],
+    ignores: ['packages/core/src/index.ts', 'packages/core/*.config.ts', 'packages/infrastructure/*.config.ts'],
     rules: {
       'hexagonal-architecture/enforce': ['error'],
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': ['error'],
     },
   },
   {
     /* CORE PURITY: Block infrastructure imports in domain layer */
     files: ['packages/core/**/*.ts'],
-    ignores: ['packages/core/src/index.ts'],
+    ignores: ['packages/core/src/index.ts', 'packages/core/*.config.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -116,6 +116,20 @@ export default tseslint.config(
           ],
         },
       ],
+    },
+  },
+  {
+    /* Auth adapter glue mirrors @convex-dev/better-auth template shapes; typing it adds no safety */
+    files: ['packages/convex/convex/betterAuth/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    /* Backend strips payload fields via omit-destructuring; siblings are intentionally dropped */
+    files: ['packages/convex/convex/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
   {

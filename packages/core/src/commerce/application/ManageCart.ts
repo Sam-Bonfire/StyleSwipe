@@ -1,7 +1,7 @@
 import { Effect } from 'effect';
 
 import { RepositoryError } from '../../../shared/domain/errors';
-import { Cart, CartItem } from '../domain/Cart';
+import { type Cart, type CartItem, createCart, addCartItem, updateCartItemQuantity, removeCartItem } from '../domain/Cart';
 import { CartNotFoundError } from '../domain/errors';
 import { CartRepository } from './CartRepository';
 
@@ -12,23 +12,24 @@ export const addToCart = (
   Effect.gen(function* (_) {
     const repo = yield* _(CartRepository);
     const existing = yield* _(repo.findByUserId(userId));
-    const cart = existing ?? new Cart(userId);
-    cart.addItem(item);
+    let cart = existing ?? createCart({ userId });
+    cart = addCartItem(cart, item);
     yield* _(repo.save(cart));
     return cart;
   });
 
 export const removeFromCart = (
   userId: string,
-  productId: string
+  productId: string,
+  variantId?: string
 ): Effect.Effect<Cart, CartNotFoundError | RepositoryError, CartRepository> =>
   Effect.gen(function* (_) {
     const repo = yield* _(CartRepository);
-    const cart = yield* _(repo.findByUserId(userId));
+    let cart = yield* _(repo.findByUserId(userId));
     if (!cart) {
       return yield* _(Effect.fail(new CartNotFoundError(userId)));
     }
-    cart.removeItem(productId);
+    cart = removeCartItem(cart, productId, variantId);
     yield* _(repo.save(cart));
     return cart;
   });
@@ -36,15 +37,16 @@ export const removeFromCart = (
 export const updateQuantity = (
   userId: string,
   productId: string,
-  quantity: number
+  quantity: number,
+  variantId?: string
 ): Effect.Effect<Cart, CartNotFoundError | RepositoryError, CartRepository> =>
   Effect.gen(function* (_) {
     const repo = yield* _(CartRepository);
-    const cart = yield* _(repo.findByUserId(userId));
+    let cart = yield* _(repo.findByUserId(userId));
     if (!cart) {
       return yield* _(Effect.fail(new CartNotFoundError(userId)));
     }
-    cart.updateItemQuantity(productId, quantity);
+    cart = updateCartItemQuantity(cart, productId, quantity, variantId);
     yield* _(repo.save(cart));
     return cart;
   });

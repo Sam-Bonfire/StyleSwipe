@@ -1,16 +1,21 @@
-import { describe, it, expect, mock } from "bun:test";
-import { VectorizationWorker } from "../../src/workers/VectorizationWorker";
+import type { Embedder } from "@app/core";
+import type { ConvexHttpClient } from "convex/browser";
+import type { Context } from "effect";
+
 import { Effect } from "effect";
+import { describe, expect, it, vi } from 'vitest';
+
+import { VectorizationWorker } from "../../src/workers/VectorizationWorker";
 
 describe("VectorizationWorker Benchmark", () => {
   it("should process items much faster with Promise.all", async () => {
     const queue = {
-      pull: mock().mockReturnValue(Effect.succeed([])),
-      complete: mock().mockImplementation((id) => Effect.succeed(undefined)),
-      fail: mock().mockImplementation((id, err) => Effect.succeed(undefined)),
-      push: mock().mockReturnValue(Effect.succeed(undefined)),
-      pushBatch: mock().mockReturnValue(Effect.succeed(undefined)),
-      size: mock().mockReturnValue(Effect.succeed(0)),
+      pull: vi.fn().mockReturnValue(Effect.succeed([])),
+      complete: vi.fn().mockImplementation(() => Effect.succeed(undefined)),
+      fail: vi.fn().mockImplementation(() => Effect.succeed(undefined)),
+      push: vi.fn().mockReturnValue(Effect.succeed(undefined)),
+      pushBatch: vi.fn().mockReturnValue(Effect.succeed(undefined)),
+      size: vi.fn().mockReturnValue(Effect.succeed(0)),
     };
 
     const worker = new VectorizationWorker({
@@ -20,12 +25,12 @@ describe("VectorizationWorker Benchmark", () => {
 
     // Mock the dependencies to simulate async work
     worker["embedder"] = {
-      generateEmbedding: mock().mockImplementation(() => Effect.promise(() => new Promise(r => setTimeout(() => r([0.1, 0.2]), 10))))
-    } as any;
+      generateEmbedding: vi.fn().mockImplementation(() => Effect.promise(() => new Promise(r => setTimeout(() => r([0.1, 0.2]), 10))))
+    } as unknown as Context.Tag.Service<Embedder>;
 
     worker["client"] = {
-      mutation: mock().mockImplementation(() => new Promise(r => setTimeout(r, 10)))
-    } as any;
+      mutation: vi.fn().mockImplementation(() => new Promise(r => setTimeout(r, 10)))
+    } as unknown as ConvexHttpClient;
 
     const items = Array.from({ length: 50 }).map((_, i) => ({
       id: `item-${i}`,

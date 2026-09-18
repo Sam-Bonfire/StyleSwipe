@@ -31,11 +31,11 @@ export interface BudgetRange {
  * PRD Ref: [cite: 112-135]
  */
 export interface StyleProfile {
-  gender: 'men' | 'women' | 'both';
+  gender: 'men' | 'women' | 'both' | 'unisex';
   age?: string;
   sizes: StyleSizes;
-  vibes: string[]; // e.g., ["party", "chill", "adventure"]
-  budget: BudgetRange;
+  vibes?: string[]; // e.g., ["party", "chill", "adventure"]
+  budget?: BudgetRange;
   preferenceVector?: number[]; // 512-dim embedding
 }
 
@@ -46,10 +46,10 @@ export interface StyleProfile {
 export interface User {
   id: string;
   name: string;
-  email: string;
-  emailVerified: boolean;
+  email?: string;
+  emailVerified?: boolean;
   image?: string;
-  phone: string; // Required, Unique - Primary auth identifier
+  phone?: string; // Required, Unique - Primary auth identifier
   activeOrgId?: string;
   styleProfile?: StyleProfile;
 }
@@ -225,6 +225,7 @@ export interface ProductAttributes {
   material?: string;
   fit?: string;
   occasion?: string[];
+  [key: string]: unknown;
 }
 
 /**
@@ -236,8 +237,8 @@ export interface Product {
   brand: string;
   title: string;
   price: number;
-  mrp: number;
-  category: string;
+  mrp?: number;
+  category?: string;
   images: string[];
   attributes?: ProductAttributes;
   embedding?: number[]; // 512-dim vector for similarity search

@@ -1,6 +1,6 @@
 import { ScrapedProduct } from '@app/core';
 
-import { MyntraFullData, mapToScrapedProduct } from './MyntraScraper';
+import { MyntraFullData, type MyntraRawData, mapToScrapedProduct } from './MyntraScraper';
 
 export interface ScrapeProgress {
   currentPage: number;
@@ -87,7 +87,7 @@ export class MyntraAPIScraper {
           // console.log(`[MyntraAPIScraper] Updated pagination-context for next page`);
         }
 
-        const data = (await response.json()) as MyntraFullData & { plaProducts?: any[] };
+        const data = (await response.json()) as MyntraFullData & { plaProducts?: MyntraRawData[] };
         const organicProducts = data.products || [];
         // PLAs might be in data.plaproducts or similar
         const plaProducts = data.plaProducts || [];

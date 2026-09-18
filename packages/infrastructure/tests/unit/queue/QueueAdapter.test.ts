@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'bun:test';
 import { Effect } from 'effect';
+import { describe, expect, it, beforeEach,  } from 'vitest';
 
 import { InMemoryQueueAdapter, createQueue } from '../../../src/queue/QueueAdapter';
 
@@ -150,12 +150,8 @@ describe('InMemoryQueueAdapter', () => {
 });
 
 describe('createQueue', () => {
-    it('should create InMemoryQueueAdapter for memory type', () => {
-        const queue = createQueue({ type: 'memory' });
+    it('should create InMemoryQueueAdapter', () => {
+        const queue = createQueue();
         expect(queue).toBeInstanceOf(InMemoryQueueAdapter);
-    });
-
-    it('should throw if convex type without convexUrl', () => {
-        expect(() => createQueue({ type: 'convex' })).toThrow('convexUrl is required');
     });
 });

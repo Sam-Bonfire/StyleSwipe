@@ -51,7 +51,7 @@ return doc ? mapToEntity(doc) : null;
           const docs = await client.query(api.members.getByOrg, {
   orgId,
 });
-return docs.map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -61,7 +61,7 @@ return docs.map((doc: any) => mapToEntity(doc));
           const docs = await client.query(api.members.getByUser, {
   userId,
 });
-return docs.map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),

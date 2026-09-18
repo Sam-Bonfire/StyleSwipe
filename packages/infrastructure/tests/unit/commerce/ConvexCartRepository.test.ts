@@ -1,14 +1,14 @@
-import { Cart, CartItem } from '@app/core';
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { createCart, addCartItem } from '@app/core';
 import { Effect } from 'effect';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { ConvexCartRepository } from '../../../src/convex/repositories/ConvexCartRepository';
 
 // Mock ConvexClient with typed method signatures
 function createMockClient() {
     return {
-        mutation: mock(() => Promise.resolve()),
-        query: mock(() => Promise.resolve(null)) as ReturnType<typeof mock>,
+        mutation: vi.fn(() => Promise.resolve()),
+        query: vi.fn(() => Promise.resolve(null)),
     };
 }
 
@@ -23,14 +23,14 @@ describe('ConvexCartRepository', () => {
 
     describe('save', () => {
         it('should call mutation with transformed cart data', async () => {
-            const cart = new Cart('user-1');
-            cart.addItem(new CartItem('prod-1', 2, 500, { size: 'M' }));
-            cart.addItem(new CartItem('prod-2', 1, 300, {}));
+            let cart = createCart({ userId: 'user-1' });
+            cart = addCartItem(cart, { productId: 'prod-1', quantity: 2, price: 500, selectedAttributes: { size: 'M' } });
+            cart = addCartItem(cart, { productId: 'prod-2', quantity: 1, price: 300, selectedAttributes: {} });
 
             await Effect.runPromise(repo.save(cart));
 
             expect(mockClient.mutation).toHaveBeenCalledTimes(1);
-            const callArgs = (mockClient.mutation as ReturnType<typeof mock>).mock.calls[0];
+            const callArgs = mockClient.mutation.mock.calls[0];
             expect(callArgs[1]).toEqual({
                 userId: 'user-1',
                 items: [
@@ -41,11 +41,11 @@ describe('ConvexCartRepository', () => {
         });
 
         it('should handle empty cart', async () => {
-            const cart = new Cart('user-1');
+            const cart = createCart({ userId: 'user-1' });
             await Effect.runPromise(repo.save(cart));
 
             expect(mockClient.mutation).toHaveBeenCalledTimes(1);
-            const callArgs = (mockClient.mutation as ReturnType<typeof mock>).mock.calls[0];
+            const callArgs = mockClient.mutation.mock.calls[0];
             expect(callArgs[1]).toEqual({
                 userId: 'user-1',
                 items: [],
@@ -55,13 +55,13 @@ describe('ConvexCartRepository', () => {
 
     describe('findByUserId', () => {
         it('should return null when no cart exists', async () => {
-            mockClient.query = mock(() => Promise.resolve(null));
+            mockClient.query = vi.fn(() => Promise.resolve(null));
             const result = await Effect.runPromise(repo.findByUserId('user-1'));
             expect(result).toBeNull();
         });
 
         it('should reconstruct Cart domain object from Convex data', async () => {
-            mockClient.query = mock(() =>
+            mockClient.query = vi.fn(() =>
                 Promise.resolve({
                     userId: 'user-1',
                     items: [
@@ -76,15 +76,14 @@ describe('ConvexCartRepository', () => {
             expect(result).not.toBeNull();
             expect(result!.userId).toBe('user-1');
             expect(result!.items).toHaveLength(2);
-            expect(result!.items[0]).toBeInstanceOf(CartItem);
             expect(result!.items[0].productId).toBe('prod-1');
             expect(result!.items[0].quantity).toBe(2);
             expect(result!.items[0].price).toBe(500);
-            expect(result!.items[0].attributes).toEqual({ size: 'M' });
+            expect(result!.items[0].selectedAttributes).toEqual({ size: 'M' });
         });
 
         it('should default missing attributes to empty object', async () => {
-            mockClient.query = mock(() =>
+            mockClient.query = vi.fn(() =>
                 Promise.resolve({
                     userId: 'user-1',
                     items: [{ productId: 'prod-1', quantity: 1, price: 100 }],
@@ -92,7 +91,7 @@ describe('ConvexCartRepository', () => {
             ) as never;
 
             const result = await Effect.runPromise(repo.findByUserId('user-1'));
-            expect(result!.items[0].attributes).toEqual({});
+            expect(result!.items[0].selectedAttributes).toEqual({});
         });
     });
 
@@ -101,7 +100,7 @@ describe('ConvexCartRepository', () => {
             await Effect.runPromise(repo.clear('user-1'));
 
             expect(mockClient.mutation).toHaveBeenCalledTimes(1);
-            const callArgs = (mockClient.mutation as ReturnType<typeof mock>).mock.calls[0];
+            const callArgs = mockClient.mutation.mock.calls[0];
             expect(callArgs[1]).toEqual({ userId: 'user-1' });
         });
     });

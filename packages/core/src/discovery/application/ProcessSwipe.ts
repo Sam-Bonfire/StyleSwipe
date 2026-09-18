@@ -17,6 +17,11 @@ export interface ProcessSwipeInput {
   timestamp: number;
   userPreferenceVector?: number[];
   productEmbedding?: number[];
+  partnerId?: string;
+}
+
+export interface ProcessSwipeResult extends ProcessSwipeInput {
+  isMutualMatch?: boolean;
 }
 
 export class SwipeError extends Error {
@@ -28,7 +33,7 @@ export class SwipeError extends Error {
 
 export const processSwipe = (
   input: ProcessSwipeInput,
-): Effect.Effect<ProcessSwipeInput, SwipeError | RepositoryError, SwipeRepository> =>
+): Effect.Effect<ProcessSwipeResult, SwipeError | RepositoryError, SwipeRepository> =>
   Effect.gen(function* (_) {
     if (!input.userId) {
       return yield* _(Effect.fail(new SwipeError('UserId is required')));
@@ -47,7 +52,7 @@ export const processSwipe = (
     }
 
     const swipeRepo = yield* _(SwipeRepository);
-    yield* _(swipeRepo.recordSwipe(input.userId, input.productId, input.action, input.timestamp, newPreferenceVector));
+    const result = yield* _(swipeRepo.recordSwipe(input.userId, input.productId, input.action, input.timestamp, newPreferenceVector, input.partnerId));
 
-    return input;
+    return { ...input, isMutualMatch: result?.isMutualMatch };
   });

@@ -10,14 +10,14 @@ import { ConvexClient as BaseConvexClient, ConvexHttpClient as BaseConvexHttpCli
 import { ConvexReactClient as BaseConvexReactClient } from 'convex/react';
 
 export class ConvexReactClient extends BaseConvexReactClient {
-  constructor(url: string, options?: any) {
+  constructor(url: string, options?: ConstructorParameters<typeof BaseConvexReactClient>[1]) {
     const sanitizedUrl = typeof url === 'string' ? url.replace(/\/+$/, '') : url;
     super(sanitizedUrl, options);
   }
 }
 
 export class ConvexClient extends BaseConvexClient {
-  constructor(url: string, options?: any) {
+  constructor(url: string, options?: ConstructorParameters<typeof BaseConvexClient>[1]) {
     const sanitizedUrl = typeof url === 'string' ? url.replace(/\/+$/, '') : url;
     super(sanitizedUrl, options);
   }

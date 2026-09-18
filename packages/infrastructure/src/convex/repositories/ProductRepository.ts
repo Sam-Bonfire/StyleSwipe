@@ -13,20 +13,39 @@ import { Layer, Effect } from 'effect';
 
 
 const mapToEntity = (doc: Record<string, unknown>): Product => {
+    const price = (doc.price as number) || 0;
+    const mrp = (doc.mrp as number) || price;
+    const originalMrp = (doc.originalMrp as number) || mrp;
+    const discountPercentage = typeof doc.discountPercentage === 'number'
+        ? (doc.discountPercentage as number)
+        : (originalMrp > 0 ? Math.max(0, Math.min(100, Math.round(((originalMrp - price) / originalMrp) * 100))) : 0);
+    const images = (doc.images as string[]) || [];
+    const rawEmbedding = doc.embedding as number[] | undefined;
+    const embedding = Array.isArray(rawEmbedding) && rawEmbedding.length === 384 ? rawEmbedding : new Array(384).fill(0);
+
     return {
-  id: (doc._id as string) || '',
-  brand: (doc.brand as string) || '',
-  title: (doc.title as string) || '',
-  price: (doc.price as number) || 0,
-  mrp: (doc.mrp as number) || 0,
-  category: (doc.category as string) || '',
-  images: (doc.images as string[]) || [],
-  attributes: doc.attributes as ProductAttributes | undefined,
-  embedding: doc.embedding as number[] | undefined,
-  meta: doc.meta as Record<string, unknown> | undefined,
-  createdAt: (doc.createdAt as number) || (doc._creationTime as number),
-  updatedAt: (doc.updatedAt as number) || (doc._creationTime as number),
-};
+        id: (doc._id as string) || (doc.id as string) || '',
+        brand: (doc.brand as string) || '',
+        title: (doc.title as string) || '',
+        description: doc.description as string | undefined,
+        price,
+        mrp,
+        originalMrp,
+        originalPrice: (doc.originalPrice as number) || price,
+        discountPercentage,
+        gender: (doc.gender as 'men' | 'women' | 'unisex') || 'unisex',
+        sizes: (doc.sizes as string[]) || ['Free Size'],
+        colors: (doc.colors as string[]) || ['Default'],
+        category: (doc.category as string) || '',
+        images: images.length > 0 ? images : ['https://placeholder.com/image.png'],
+        attributes: doc.attributes as ProductAttributes | undefined,
+        embedding,
+        affiliateUrl: (doc.affiliateUrl as string) || 'https://styleswipe.app',
+        inStock: doc.inStock !== false,
+        meta: doc.meta as Record<string, unknown> | undefined,
+        createdAt: (doc.createdAt as number) || (doc._creationTime as number),
+        updatedAt: (doc.updatedAt as number) || (doc._creationTime as number),
+    };
 };
 
 
@@ -48,7 +67,7 @@ export const createProductRepositoryLayer = (client: ConvexClient) => Layer.succ
   category,
   limit,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -61,7 +80,7 @@ return docs.map((doc) => mapToEntity(doc));
   maxPrice,
   limit,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -72,7 +91,7 @@ return docs.map((doc) => mapToEntity(doc));
   brand,
   limit,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -84,7 +103,7 @@ return docs.map((doc) => mapToEntity(doc));
   brand: filters?.brand,
   category: filters?.category,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -97,12 +116,12 @@ return docs.map((doc) => mapToEntity(doc));
   category: filters?.category,
   brand: filters?.brand,
 });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
 
-    create: (product: Omit<Product, 'id'>) => Effect.tryPromise({
+    create: (product) => Effect.tryPromise({
       try: async () => {
           const id = await client.mutation(api.products.create, {
   brand: product.brand,
@@ -121,7 +140,7 @@ return { ...product, id: id as string };
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
 
-    update: (id: string, data: Partial<Omit<Product, 'id'>>) => Effect.tryPromise({
+    update: (id: string, data) => Effect.tryPromise({
       try: async () => {
           await client.mutation(api.products.update, {
               id: id as Id<'products'>,
@@ -160,7 +179,7 @@ return { ...product, id: id as string };
     getLatest: (limit: number) => Effect.tryPromise({
       try: async () => {
           const docs = await client.query(api.products.getLatest, { limit });
-return docs.map((doc) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),

@@ -1,4 +1,4 @@
-import { pipeline } from '@xenova/transformers';
+import { pipeline, type FeatureExtractionPipeline } from '@xenova/transformers';
 
 // Configuration from env
 const MODEL_NAME = process.env.PRODUCT_EMBEDDING_MODEL_NAME || 'Xenova/bge-small-en-v1.5';
@@ -10,7 +10,7 @@ export interface EmbeddingResult {
 
 export class VectorizationService {
   private static instance: VectorizationService;
-  private extractor: any;
+  private extractor: FeatureExtractionPipeline | null = null;
 
   private constructor() {}
 
@@ -35,8 +35,11 @@ export class VectorizationService {
   public async generateEmbedding(text: string): Promise<number[]> {
     if (!this.extractor) await this.init();
 
+    const extractor = this.extractor;
+    if (!extractor) throw new Error('[VectorizationService] extractor failed to initialize');
+
     // output is a Tensor
-    const output = await this.extractor(text, { pooling: 'mean', normalize: true });
+    const output = await extractor(text, { pooling: 'mean', normalize: true });
     // Convert Tensor to standard array
     return Array.from(output.data);
   }

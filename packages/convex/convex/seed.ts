@@ -1,7 +1,10 @@
-import { mutation } from './_generated/server';
+import type { RegisteredMutation } from 'convex/server';
+
 import type { MutationCtx } from './_generated/server';
 
-export const run: any = mutation({
+import { mutation } from './_generated/server';
+
+export const run: RegisteredMutation<'public', Record<string, never>, Promise<void>> = mutation({
   handler: async (ctx: MutationCtx) => {
     console.log("Seeding preview database...");
 

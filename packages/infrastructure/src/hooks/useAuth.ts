@@ -27,7 +27,7 @@ export function useGetOrCreateUser() {
 export function useAuthActions(adapter: AuthAdapter) {
   const layer = createAuthServiceLayer(adapter);
 
-  const runHandler = <A, E>(program: Effect.Effect<A, E, any>) =>
+  const runHandler = <A, E, R>(program: Effect.Effect<A, E, R>) =>
     Effect.runPromise(program.pipe(Effect.provide(layer)) as Effect.Effect<A, E, never>);
 
   return {

@@ -405,8 +405,7 @@ export class MyntraScraper {
 
     // 2. Mock Chrome object
     await page.addInitScript(() => {
-      // @ts-ignore
-      (window as any).chrome = {
+      (window as unknown as Record<string, unknown>).chrome = {
         runtime: {},
         loadTimes: function () {},
         csi: function () {},
@@ -454,7 +453,7 @@ export class MyntraScraper {
       await page.waitForFunction(
         () => {
           return (
-            // @ts-ignore
+            // @ts-expect-error - __myx is injected by the retailer's page script
             !!window.__myx ||
             Array.from(document.querySelectorAll('script')).some((s) =>
               s.innerText.includes('window.__myx ='),
@@ -471,9 +470,9 @@ export class MyntraScraper {
     // Extract the data
     const data = await page.evaluate(() => {
       // Try direct access first
-      // @ts-ignore
+      // @ts-expect-error - __myx is injected by the retailer's page script
       if (window.__myx) {
-        // @ts-ignore
+        // @ts-expect-error - __myx is injected by the retailer's page script
         return window.__myx;
       }
 
@@ -599,7 +598,7 @@ export class MyntraScraper {
           await randomDelay(3000, 5000);
 
           const fullData = await this.extractMyntraData(page);
-          let productsRaw: any[] = [];
+          let productsRaw: MyntraRawData[] = [];
           // let useDomExample = false;
 
           if (fullData) {
@@ -679,7 +678,7 @@ export class MyntraScraper {
   private async scrapeCategoryFromDOM(page: Page): Promise<ScrapedProduct[]> {
     return page.evaluate(() => {
       const items = document.querySelectorAll('li.product-base');
-      const results: any[] = [];
+      const results: ScrapedProduct[] = [];
 
       items.forEach((item) => {
         try {
@@ -719,9 +718,11 @@ export class MyntraScraper {
             availableSizes: [],
             attributes: {},
             description: '',
-            scrapedAt: new Date().toISOString(),
+            rating: 0,
+            reviewCount: 0,
+            platform: 'Myntra',
           });
-        } catch (e) {
+        } catch {
           // Ignore item error
         }
       });

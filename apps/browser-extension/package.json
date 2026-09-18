@@ -4,9 +4,9 @@
   "version": "0.0.10",
   "type": "module",
   "scripts": {
-    "copy-assets": "bun scripts/copy-assets.ts",
-    "dev": "bun copy-assets && vite",
-    "build": "bun copy-assets && tsc -b && vite build",
+    "copy-assets": "tsx scripts/copy-assets.ts",
+    "dev": "pnpm run copy-assets && vite",
+    "build": "pnpm run copy-assets && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -15,6 +15,7 @@
     "@app/ui-kit": "workspace:*",
     "@app/convex": "workspace:*",
     "@whatwg-node/fetch": "^0.10.1",
+    "@xenova/transformers": "^2.17.2",
     "convex": "^1.42.3",
     "lucide-react": "^0.474.0",
     "@tamagui/lucide-icons": "2.0.0-rc.26",

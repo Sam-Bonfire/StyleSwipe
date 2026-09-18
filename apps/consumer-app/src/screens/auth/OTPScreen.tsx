@@ -1,26 +1,44 @@
-import { Button } from '@app/ui-kit';
+import { Button, InputOTP, useToast } from '@app/ui-kit';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import { YStack, Input, Text, H2 } from 'tamagui';
+import { YStack, Text, H2 } from 'tamagui';
 
 import { authAdapter } from '../../lib/auth';
 
 export function OTPScreen() {
-  const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [resendSeconds, setResendSeconds] = useState<number>(30);
   const { phone } = useLocalSearchParams<{ phone: string }>();
+  const { showToast } = useToast();
 
-  const handleVerify = async () => {
+  React.useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const t = setTimeout(() => setResendSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendSeconds]);
+
+  const handleVerify = async (): Promise<void> => {
     setLoading(true);
     try {
       await authAdapter.verifyOTP(phone, otp);
-      // NavigationGuard in App.tsx will handle the redirect automatically
     } catch (e) {
       console.error(e);
-      Alert.alert('Error', 'Invalid Code. Please try again.');
+      showToast({ message: 'Invalid code. Please try again.', variant: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async (): Promise<void> => {
+    if (resendSeconds > 0) return;
+    try {
+      await authAdapter.signInWithPhone(phone);
+      setResendSeconds(30);
+      showToast({ message: 'Code resent', variant: 'success' });
+    } catch (e) {
+      console.error(e);
+      showToast({ message: 'Failed to resend code', variant: 'error' });
     }
   };
 
@@ -36,24 +54,29 @@ export function OTPScreen() {
       </YStack>
 
       <YStack gap="$4">
-        <Input
-          borderWidth={1}
-          placeholder="123456"
-          value={otp}
-          onChangeText={setOtp}
-          keyboardType="number-pad"
-          maxLength={6}
-        />
+        <InputOTP value={otp} onChange={setOtp} length={6} autoFocus />
 
         <Button
           variant="primary"
           size="large"
           onPress={handleVerify}
           loading={loading}
-          disabled={otp.length < 4 || loading}
+          disabled={otp.length < 6 || loading}
         >
           Verify
         </Button>
+
+        <YStack alignItems="center" gap="$2">
+          {resendSeconds > 0 ? (
+            <Text color="$textSecondary" fontSize="$3">
+              Resend code in {resendSeconds}s
+            </Text>
+          ) : (
+            <Text color="$primary" fontWeight="600" onPress={handleResend} pressStyle={{ opacity: 0.6 }}>
+              Resend code
+            </Text>
+          )}
+        </YStack>
       </YStack>
     </YStack>
   );

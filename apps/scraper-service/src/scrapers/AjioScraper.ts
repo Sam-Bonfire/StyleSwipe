@@ -23,7 +23,7 @@ export class AjioScraper extends BaseScraper {
     try {
       const mrpText = await page.locator('.prod-cp').first().innerText();
       mrp = parseInt(mrpText.replace(/[^0-9]/g, ''), 10);
-    } catch (e) {
+    } catch {
       // No MRP override
     }
 

@@ -5,9 +5,6 @@
   },
   "references": [
     {
-      "path": "../../packages/infrastructure"
-    },
-    {
       "path": "../../packages/convex"
     }
   ],

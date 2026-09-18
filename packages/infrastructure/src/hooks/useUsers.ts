@@ -18,3 +18,10 @@ export function useUpdateUser() {
 export function useUpdateStyleProfile() {
     return useMutation(api.users.updateStyleProfile);
 }
+
+/**
+ * Write — registers/refreshes push token for current user's device.
+ */
+export function useUpdatePushToken() {
+    return useMutation(api.users.updatePushToken);
+}

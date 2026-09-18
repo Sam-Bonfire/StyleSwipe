@@ -74,14 +74,17 @@ export const getScrapedProducts = query({
 export const getScrapingJobs = query({
   args: {
     paginationOpts: paginationOptsValidator,
-    status: v.optional(v.string()),
+    status: v.optional(
+      v.union(v.literal('pending'), v.literal('processing'), v.literal('completed'), v.literal('failed')),
+    ),
   },
   handler: async (ctx, args) => {
     await requireCoreAdmin(ctx);
-    if (args.status) {
+    const status = args.status;
+    if (status) {
       return await ctx.db
         .query('scrape_jobs')
-        .withIndex('by_status', (q) => q.eq('status', args.status as any))
+        .withIndex('by_status', (q) => q.eq('status', status))
         .paginate(args.paginationOpts);
     }
 

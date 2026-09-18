@@ -1,4 +1,4 @@
-import { Cart } from './Cart';
+import { type Cart } from './Cart';
 
 export interface PriceBreakdown {
   subtotal: number;
@@ -14,7 +14,7 @@ export class PriceEstimator {
   private static readonly DEFAULT_SHIPPING = 100;
 
   static estimate(cart: Cart): PriceBreakdown {
-    const subtotal = cart.total;
+    const subtotal = cart.subtotal;
     const isFreeShipping = subtotal >= this.FREE_SHIPPING_THRESHOLD;
     const shipping = isFreeShipping ? 0 : this.DEFAULT_SHIPPING;
     const discount = 0; // Placeholder for future coupon logic

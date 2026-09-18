@@ -52,7 +52,7 @@ return doc ? mapToEntity(doc) : null;
           const docs = await client.query(api.partnerSync.getByInitiator, {
   initiatorId,
 });
-return (docs as any[]).map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -62,7 +62,7 @@ return (docs as any[]).map((doc: any) => mapToEntity(doc));
           const docs = await client.query(api.partnerSync.getByPartner, {
   partnerId,
 });
-return (docs as any[]).map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -72,7 +72,7 @@ return (docs as any[]).map((doc: any) => mapToEntity(doc));
           const docs = await client.query(api.partnerSync.getActiveByUser, {
   userId,
 });
-return (docs as any[]).map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -87,7 +87,7 @@ return (docs as any[]).map((doc: any) => mapToEntity(doc));
   expiresAt: sync.expiresAt,
   influenceRatio: sync.influenceRatio,
   createdAt: sync.createdAt,
-} as any);
+});
 return { ...sync, id: id as string };
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
@@ -100,7 +100,7 @@ return { ...sync, id: id as string };
               ...data,
               initiatorId: data.initiatorId,
               partnerId: data.partnerId,
-          } as any);
+          });
           const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partner_sync'> });
           if (!doc) throw new Error(`PartnerSync ${id} not found after update`);
           return mapToEntity(doc);
@@ -113,7 +113,7 @@ return { ...sync, id: id as string };
           await client.mutation(api.partnerSync.updateStatus, {
               id: id as Id<'partner_sync'>,
               status,
-          } as any);
+          });
           const doc = await client.query(api.partnerSync.getById, { id: id as Id<'partner_sync'> });
           if (!doc) throw new Error(`PartnerSync ${id} not found after update`);
           return mapToEntity(doc);
@@ -125,7 +125,7 @@ return { ...sync, id: id as string };
       try: async () => {
           await client.mutation(api.partnerSync.remove, {
   id: id as Id<'partner_sync'>,
-} as any);
+});
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -134,7 +134,7 @@ return { ...sync, id: id as string };
       try: async () => {
           return await client.mutation(api.partnerSync.deleteExpired, {
   now: Date.now(),
-} as any);
+});
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),

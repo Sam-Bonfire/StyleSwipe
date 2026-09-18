@@ -7,10 +7,10 @@
   "scripts": {
     "start": "expo start --web --lan --port 8082",
     "web": "expo start --web --lan --port 8082",
-    "build": "expo export -p web",
+    "build": "expo export -p web --clear",
     "dev": "expo start --web --lan --port 8082",
     "typecheck": "tsc --noEmit",
-    "lint": "NODE_OPTIONS='--max-old-space-size=4096' eslint . --rule 'no-undef: off' --rule '@typescript-eslint/no-require-imports: off'"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@app/convex": "workspace:*",
@@ -34,7 +34,8 @@
     "react-native-reanimated": "4.5.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
-    "react-native-web": "~0.21.0"
+    "react-native-web": "~0.21.0",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",

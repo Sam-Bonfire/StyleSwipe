@@ -59,7 +59,8 @@ export class SwipeRepository extends Context.Tag('SwipeRepository')<
       action: SwipeAction,
       timestamp: number,
       newPreferenceVector?: number[],
-    ) => Effect.Effect<void, RepositoryError>;
+      partnerId?: string,
+    ) => Effect.Effect<{ isMutualMatch?: boolean } | void, RepositoryError>;
     readonly getSwipesByUser: (
       userId: string,
       limit?: number,

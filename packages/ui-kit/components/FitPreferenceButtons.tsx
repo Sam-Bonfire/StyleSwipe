@@ -242,7 +242,7 @@ export const FitPreferenceButtons = React.forwardRef<
   typeof ContainerFrame,
   FitPreferenceButtonsProps
 >((props: FitPreferenceButtonsProps, ref) => {
-  const { groups = DEFAULT_FIT_GROUPS, selectedOptions, onSelectionChange, ...rest } = props as any;
+  const { groups = DEFAULT_FIT_GROUPS, selectedOptions, onSelectionChange, ...rest } = props;
 
   const handleOptionPress = (group: FitGroup, optionId: string) => {
     const currentSelected = selectedOptions[group.id] || [];

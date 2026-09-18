@@ -2,6 +2,11 @@
   "name": "@app/infrastructure",
   "version": "0.0.10",
   "main": "src/index.ts",
+  "source": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "publishConfig": {
     "registry": "https://git.yomite.in/api/packages/StyleSwipe/npm/"
   },
@@ -13,7 +18,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "lint": "eslint . --ignore-pattern dist",
-    "test": "bun test",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,8 +35,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/react": "~19.2.0",
     "ts-morph": "^27.0.2",
     "typescript": "~5.9.3",
-    "vitest": "^1.0.0"
+    "vitest": "^4.1.10"
   }
 }

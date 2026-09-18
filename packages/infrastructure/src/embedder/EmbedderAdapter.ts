@@ -32,7 +32,7 @@ const initEmbedder = async (): Promise<void> => {
       try {
         const { pipeline } = await import('@xenova/transformers');
         const pipelineExtractor = await pipeline('feature-extraction', MODEL_NAME, {
-          progress_callback: activeProgressCallback as any,
+          progress_callback: activeProgressCallback,
         });
         extractor = pipelineExtractor as unknown as FeatureExtractionPipeline;
         console.log(`[EmbedderLayer] Model loaded successfully.`);

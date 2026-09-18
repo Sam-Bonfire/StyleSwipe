@@ -61,7 +61,10 @@ export const createAuthServiceLayer = (adapter: AuthAdapter) => {
           catch: (e) =>
             new AuthError('setActiveOrganization', e instanceof Error ? e.message : String(e), e),
         }),
-      updateOrganization: (organizationId: string, data: any) =>
+      updateOrganization: (
+        organizationId: string,
+        data: { name?: string; slug?: string; logo?: string; metadata?: string },
+      ) =>
         Effect.tryPromise({
           try: () => adapter.updateOrganization(organizationId, data),
           catch: (e) =>

@@ -1,10 +1,12 @@
-import { paginationOptsValidator, FunctionReference, RegisteredQuery } from 'convex/server';
+import type { RegisteredQuery } from 'convex/server';
+
+import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 
+import { api } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { mutation, query, action } from './_generated/server';
 import { MutationCtx } from './_generated/server';
-import { api } from './_generated/api';
 import { requireCoreAdmin } from './permissions';
 
 export const createJob = mutation({
@@ -255,7 +257,7 @@ export const executePromotion = mutation({
           ? 'premium'
           : 'luxury') as 'budget' | 'mid' | 'premium' | 'luxury',
     onSale: price < (isMapped ? data.mrp || 0 : data.price?.mrp || 0),
-    embedding: activeEmbedding, // Use override first, then fallback to data (legacy)
+    // Embeddings live in product_embeddings (dual-write below), never on products.
     attributes: isMapped
       ? {
         ...(data.attributes || {}),
@@ -286,6 +288,7 @@ export const executePromotion = mutation({
     },
     externalId: scraped.externalId, // Top-level for indexing
     updatedAt: Date.now(),
+    trustBadges: [] as string[],
   };
 
   // ==========================================
@@ -320,7 +323,7 @@ export const executePromotion = mutation({
 
   const uniqueBadges = Array.from(new Set(badges));
   // Add to product fields
-  (productFields as any).trustBadges = uniqueBadges;
+  productFields.trustBadges = uniqueBadges;
 
   // Removed categoryId lookup - field no longer in schema
 
@@ -342,12 +345,6 @@ export const executePromotion = mutation({
 
   let productId: Id<'products'>;
   if (existingProduct) {
-    // If updating without new embedding, preserve old one?
-    // No, current logic overwrites. If embeddingOverride is undefined, productFields.embedding is undefined.
-    // But patch helper merges? No, patch updates keys present.
-    // Check if v.optional means explicit null or undefined deletes it?
-    // Convex patch: undefined fields in object are NOT updated. explicit null deletes.
-    // productFields.embedding is undefined if missing. So it won't overwrite existing embedding in DB. Good.
     await ctx.db.patch(existingProduct._id, productFields);
     productId = existingProduct._id;
   } else {
@@ -384,15 +381,15 @@ export const executePromotion = mutation({
 }
 });
 
-export const getPendingJobs: RegisteredQuery<"public", any, any> = query({
-  handler: async (ctx): Promise<any> => {
+export const getPendingJobs: RegisteredQuery<'public', Record<string, never>, Promise<Doc<'scrape_jobs'>[]>> = query({
+  handler: async (ctx) => {
     await requireCoreAdmin(ctx);
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .take(5);
   },
-}) as any;
+});
 
 export const getJobs = query({
   args: { paginationOpts: paginationOptsValidator },
@@ -466,14 +463,14 @@ export const getScrapedProducts = query({
  * Service endpoint: Get pending jobs without authentication
  * Used by the scraper worker to poll for jobs
  */
-export const servicePendingJobs: RegisteredQuery<"public", any, any> = query({
-  handler: async (ctx): Promise<any> => {
+export const servicePendingJobs: RegisteredQuery<'public', Record<string, never>, Promise<Doc<'scrape_jobs'>[]>> = query({
+  handler: async (ctx) => {
     return await ctx.db
       .query('scrape_jobs')
       .withIndex('by_status', (q) => q.eq('status', 'pending'))
       .take(5);
   },
-}) as any;
+});
 
 /**
  * Service endpoint: Update job status without authentication

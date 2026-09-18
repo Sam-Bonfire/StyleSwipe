@@ -52,14 +52,14 @@ export class AuthService extends Context.Tag('AuthService')<
       name: string,
       slug: string,
       metadata?: string,
-    ) => Effect.Effect<any, AuthError>;
-    readonly listOrganizations: () => Effect.Effect<any[], AuthError>;
-    readonly getActiveOrganization: () => Effect.Effect<any, AuthError>;
+    ) => Effect.Effect<Organization, AuthError>;
+    readonly listOrganizations: () => Effect.Effect<Organization[], AuthError>;
+    readonly getActiveOrganization: () => Effect.Effect<Organization | null, AuthError>;
     readonly setActiveOrganization: (organizationId: string) => Effect.Effect<void, AuthError>;
     readonly updateOrganization: (
       organizationId: string,
       data: { name?: string; slug?: string; logo?: string; metadata?: string },
-    ) => Effect.Effect<any, AuthError>;
+    ) => Effect.Effect<Organization, AuthError>;
     readonly deleteOrganization: (organizationId: string) => Effect.Effect<void, AuthError>;
 
     // Member Management
@@ -67,13 +67,13 @@ export class AuthService extends Context.Tag('AuthService')<
       organizationId: string,
       email: string,
       role?: string,
-    ) => Effect.Effect<any, AuthError>;
+    ) => Effect.Effect<Member, AuthError>;
     readonly removeMember: (membershipId: string) => Effect.Effect<void, AuthError>;
     readonly updateMemberRole: (
       membershipId: string,
       role: string,
     ) => Effect.Effect<void, AuthError>;
-    readonly listMembers: (organizationId: string) => Effect.Effect<any[], AuthError>;
+    readonly listMembers: (organizationId: string) => Effect.Effect<Member[], AuthError>;
   }
 >() {}
 
@@ -438,6 +438,9 @@ export interface QueueService<T> {
   readonly fail: (id: string, error?: string) => Effect.Effect<void, RepositoryError>;
   readonly size: () => Effect.Effect<number, RepositoryError>;
 }
+// GenericTag requires a concrete type argument; `any` here is the standard
+// Effect idiom for a generic service tag (implementations bind T at the layer).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const QueueTag = Context.GenericTag<QueueService<any>>('Queue');
 
 // -----------------------------------------------------------------------------

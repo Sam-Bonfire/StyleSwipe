@@ -14,7 +14,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --fix",
-    "test": "bun test"
+    "test": "vitest run"
   },
   "main": "src/index.ts",
   "source": "src/index.ts",
@@ -34,5 +34,8 @@
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-native": ">=0.72.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
   }
 }

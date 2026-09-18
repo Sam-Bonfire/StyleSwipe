@@ -1,40 +1,64 @@
-import { describe, it, expect, beforeEach, mock } from 'bun:test';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { AuthAdapter } from '../../../src/auth/AuthAdapter';
 
 // We test that AuthAdapter correctly delegates to its internal client.
 // The client is created by better-auth, so we mock it post-construction.
+// better-auth calls resolve { data, error } envelopes.
+
+const ok = <T>(data: T) => Promise.resolve({ data, error: null });
 
 function createMockAuthClient() {
     return {
         signIn: {
-            phone: mock(() => Promise.resolve()),
-            email: mock(() => Promise.resolve()),
+            email: vi.fn(() => ok({})),
         },
         signUp: {
-            email: mock(() => Promise.resolve()),
+            email: vi.fn(() => ok({})),
         },
-        signOut: mock(() => Promise.resolve()),
+        signOut: vi.fn(() => ok({})),
+        getSession: vi.fn(() => ok({ session: { activeOrganizationId: 'org-1' }, user: { id: 'user-1' } })),
+        phoneNumber: {
+            sendOtp: vi.fn(() => ok({})),
+            verify: vi.fn(() => ok({})),
+        },
         organization: {
-            create: mock(() => Promise.resolve({ id: 'org-1' })),
-            list: mock(() => Promise.resolve([])),
-            getActive: mock(() => Promise.resolve(null)),
-            setActive: mock(() => Promise.resolve()),
-            update: mock(() => Promise.resolve()),
-            delete: mock(() => Promise.resolve()),
-            inviteMember: mock(() => Promise.resolve()),
-            removeMember: mock(() => Promise.resolve()),
-            updateMemberRole: mock(() => Promise.resolve()),
-            listMembers: mock(() => Promise.resolve([])),
-            acceptInvitation: mock(() => Promise.resolve()),
-            rejectInvitation: mock(() => Promise.resolve()),
-            cancelInvitation: mock(() => Promise.resolve()),
-            listInvitations: mock(() => Promise.resolve([])),
-            createRole: mock(() => Promise.resolve()),
-            listRoles: mock(() => Promise.resolve([])),
-            updateRole: mock(() => Promise.resolve()),
-            deleteRole: mock(() => Promise.resolve()),
-            hasPermission: mock(() => Promise.resolve(true)),
+            create: vi.fn(() =>
+                ok({ id: 'org-1', name: 'Acme', slug: 'acme', createdAt: new Date(0) }),
+            ),
+            list: vi.fn(() => ok([])),
+            getFullOrganization: vi.fn(() =>
+                ok({ id: 'org-1', name: 'Acme', slug: 'acme', createdAt: new Date(0) }),
+            ),
+            setActive: vi.fn(() => ok({})),
+            update: vi.fn(() =>
+                ok({ id: 'org-1', name: 'Acme', slug: 'acme', createdAt: new Date(0) }),
+            ),
+            delete: vi.fn(() => ok({})),
+            inviteMember: vi.fn(() =>
+                ok({
+                    member: {
+                        id: 'member-1',
+                        organizationId: 'org-1',
+                        userId: 'user-1',
+                        role: 'admin',
+                        createdAt: new Date(0),
+                    },
+                }),
+            ),
+            removeMember: vi.fn(() => ok({})),
+            updateMemberRole: vi.fn(() =>
+                ok({
+                    member: {
+                        id: 'member-1',
+                        organizationId: 'org-1',
+                        userId: 'user-1',
+                        role: 'editor',
+                        createdAt: new Date(0),
+                    },
+                }),
+            ),
+            listMembers: vi.fn(() => ok({ members: [] })),
         },
     };
 }
@@ -47,22 +71,22 @@ describe('AuthAdapter', () => {
         adapter = new AuthAdapter('http://localhost:3000');
         mockClient = createMockAuthClient();
         // Replace the internal client with our mock
-        adapter.client = mockClient;
+        adapter.client = mockClient as unknown as typeof adapter.client;
     });
 
     describe('Authentication', () => {
         it('should delegate signInWithPhone to client', async () => {
             await adapter.signInWithPhone('+919876543210');
-            expect(mockClient.signIn.phone).toHaveBeenCalledWith({
+            expect(mockClient.phoneNumber.sendOtp).toHaveBeenCalledWith({
                 phoneNumber: '+919876543210',
             });
         });
 
         it('should delegate verifyOTP to client', async () => {
             await adapter.verifyOTP('+919876543210', '123456');
-            expect(mockClient.signIn.phone).toHaveBeenCalledWith({
+            expect(mockClient.phoneNumber.verify).toHaveBeenCalledWith({
                 phoneNumber: '+919876543210',
-                otp: '123456',
+                code: '123456',
             });
         });
 
@@ -91,17 +115,25 @@ describe('AuthAdapter', () => {
 
     describe('Organization Management', () => {
         it('should create organization with correct args', async () => {
-            await adapter.createOrganization('Acme', 'acme', 'metadata');
+            const org = await adapter.createOrganization('Acme', 'acme');
             expect(mockClient.organization.create).toHaveBeenCalledWith({
                 name: 'Acme',
                 slug: 'acme',
-                metadata: 'metadata',
             });
+            expect(org.id).toBe('org-1');
         });
 
         it('should list organizations', async () => {
             await adapter.listOrganizations();
             expect(mockClient.organization.list).toHaveBeenCalledTimes(1);
+        });
+
+        it('should resolve the active organization from the session', async () => {
+            const org = await adapter.getActiveOrganization();
+            expect(mockClient.organization.getFullOrganization).toHaveBeenCalledWith({
+                query: { organizationId: 'org-1' },
+            });
+            expect(org?.id).toBe('org-1');
         });
 
         it('should set active organization', async () => {
@@ -121,47 +153,29 @@ describe('AuthAdapter', () => {
 
     describe('Member Management', () => {
         it('should invite member with role', async () => {
-            await adapter.inviteMember('org-1', 'new@test.com', 'admin');
+            const member = await adapter.inviteMember('org-1', 'new@test.com', 'admin');
             expect(mockClient.organization.inviteMember).toHaveBeenCalledWith({
                 organizationId: 'org-1',
                 email: 'new@test.com',
                 role: 'admin',
             });
+            expect(member.id).toBe('member-1');
         });
 
         it('should remove member', async () => {
             await adapter.removeMember('member-1');
             expect(mockClient.organization.removeMember).toHaveBeenCalledWith({
-                membershipId: 'member-1',
+                memberIdOrEmail: 'member-1',
             });
         });
 
         it('should update member role', async () => {
-            await adapter.updateMemberRole('member-1', 'editor');
+            const member = await adapter.updateMemberRole('member-1', 'editor');
             expect(mockClient.organization.updateMemberRole).toHaveBeenCalledWith({
-                membershipId: 'member-1',
+                memberId: 'member-1',
                 role: 'editor',
             });
-        });
-    });
-
-    describe('Role Management', () => {
-        it('should create role with permissions', async () => {
-            await adapter.createRole('org-1', 'editor', ['read', 'write']);
-            expect(mockClient.organization.createRole).toHaveBeenCalledWith({
-                organizationId: 'org-1',
-                role: 'editor',
-                permissions: ['read', 'write'],
-            });
-        });
-
-        it('should check permissions', async () => {
-            await adapter.hasPermission('user-1', 'org-1', { post: ['create'] });
-            expect(mockClient.organization.hasPermission).toHaveBeenCalledWith({
-                userId: 'user-1',
-                organizationId: 'org-1',
-                permission: { post: ['create'] },
-            });
+            expect(member.role).toBe('editor');
         });
     });
 });

@@ -9,13 +9,16 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as addresses from "../addresses.js";
 import type * as admin from "../admin.js";
+import type * as affiliate from "../affiliate.js";
 import type * as auth from "../auth.js";
 import type * as auth_permissions from "../auth/permissions.js";
 import type * as authOptions from "../authOptions.js";
 import type * as backfillTrustBadges from "../backfillTrustBadges.js";
 import type * as boards from "../boards.js";
 import type * as cart from "../cart.js";
+import type * as categories from "../categories.js";
 import type * as crons from "../crons.js";
 import type * as debug from "../debug.js";
 import type * as discovery from "../discovery.js";
@@ -29,12 +32,15 @@ import type * as init from "../init.js";
 import type * as logs from "../logs.js";
 import type * as members from "../members.js";
 import type * as migrations from "../migrations.js";
+import type * as notifications from "../notifications.js";
+import type * as orders from "../orders.js";
 import type * as organizationAdmin from "../organizationAdmin.js";
 import type * as organizations from "../organizations.js";
 import type * as partnerSync from "../partnerSync.js";
 import type * as permissions from "../permissions.js";
 import type * as products from "../products.js";
 import type * as recommendations from "../recommendations.js";
+import type * as reviews from "../reviews.js";
 import type * as scraper from "../scraper.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
@@ -51,13 +57,16 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  addresses: typeof addresses;
   admin: typeof admin;
+  affiliate: typeof affiliate;
   auth: typeof auth;
   "auth/permissions": typeof auth_permissions;
   authOptions: typeof authOptions;
   backfillTrustBadges: typeof backfillTrustBadges;
   boards: typeof boards;
   cart: typeof cart;
+  categories: typeof categories;
   crons: typeof crons;
   debug: typeof debug;
   discovery: typeof discovery;
@@ -71,12 +80,15 @@ declare const fullApi: ApiFromModules<{
   logs: typeof logs;
   members: typeof members;
   migrations: typeof migrations;
+  notifications: typeof notifications;
+  orders: typeof orders;
   organizationAdmin: typeof organizationAdmin;
   organizations: typeof organizations;
   partnerSync: typeof partnerSync;
   permissions: typeof permissions;
   products: typeof products;
   recommendations: typeof recommendations;
+  reviews: typeof reviews;
   scraper: typeof scraper;
   search: typeof search;
   seed: typeof seed;

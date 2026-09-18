@@ -1,3 +1,5 @@
+import type { Id } from '@app/convex';
+
 import { api } from '@app/convex';
 import { useQuery, useMutation } from 'convex/react';
 
@@ -10,8 +12,8 @@ export function useAcceptPartnerSync() {
   
   return async (id: string, partnerId: string) => {
     return await updateSync({
-      id: id as any,
-      partnerId: partnerId as any,
+      id: id as Id<'partner_sync'>,
+      partnerId: partnerId,
       status: 'active',
     });
   };
@@ -23,7 +25,7 @@ export function useCreatePartnerSync() {
   return async (initiatorId: string, durationMs: number) => {
     const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const result = await createSync({
-      initiatorId: initiatorId as any,
+      initiatorId: initiatorId,
       inviteCode,
       status: 'pending',
       expiresAt: Date.now() + durationMs,
@@ -35,14 +37,14 @@ export function useCreatePartnerSync() {
 }
 
 export function useActivePartnerSync(userId?: string) {
-  return useQuery(api.partnerSync.getActiveByUser, userId ? { userId: userId as any } : 'skip');
+  return useQuery(api.partnerSync.getActiveByUser, userId ? { userId: userId } : 'skip');
 }
 
 export function useStopPartnerSync() {
   const updateStatus = useMutation(api.partnerSync.updateStatus);
   return async (id: string) => {
     return await updateStatus({
-      id: id as any,
+      id: id as Id<'partner_sync'>,
       status: 'expired',
     });
   };

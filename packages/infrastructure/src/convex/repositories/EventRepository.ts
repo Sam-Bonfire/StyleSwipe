@@ -54,7 +54,7 @@ return { ...event, id: id as string };
   type,
   limit,
 });
-return docs.map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -65,7 +65,7 @@ return docs.map((doc: any) => mapToEntity(doc));
   type,
   limit,
 });
-return docs.map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
@@ -76,7 +76,7 @@ return docs.map((doc: any) => mapToEntity(doc));
   type,
   limit,
 });
-return docs.map((doc: any) => mapToEntity(doc));
+return docs.map((doc: Record<string, unknown>) => mapToEntity(doc));
       },
       catch: (e) => new RepositoryError(e instanceof Error ? e.message : String(e), e)
     }),
