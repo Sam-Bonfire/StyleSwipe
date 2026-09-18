@@ -425,8 +425,6 @@ const boards = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
   deletedAt: v.optional(v.number()),
-  // Legacy embedded items; live data moved to board_items. Optional so existing docs pass push validation.
-  items: v.optional(v.array(v.object({ addedAt: v.number(), productId: v.string() }))),
 })
   .index('by_user', ['userId'])
   .index('by_user_slug', ['userId', 'slug'])
@@ -449,9 +447,7 @@ const board_items = defineTable({
 const scraped_products = defineTable({
   externalId: v.string(),
   url: v.string(),
-  // Optional: legacy rows were ingested before blob storage existed.
-  // Keep optional so `convex deploy` push validation passes on existing docs.
-  storageId: v.optional(v.id('_storage')), // Pointer to File Storage blob
+  storageId: v.id('_storage'), // Pointer to File Storage blob
   lastScrapedAt: v.number(),
   status: v.union(v.literal('active'), v.literal('out_of_stock')),
 })
