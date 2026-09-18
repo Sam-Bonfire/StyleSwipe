@@ -449,7 +449,9 @@ const board_items = defineTable({
 const scraped_products = defineTable({
   externalId: v.string(),
   url: v.string(),
-  storageId: v.id('_storage'), // Pointer to File Storage blob
+  // Optional: legacy rows were ingested before blob storage existed.
+  // Keep optional so `convex deploy` push validation passes on existing docs.
+  storageId: v.optional(v.id('_storage')), // Pointer to File Storage blob
   lastScrapedAt: v.number(),
   status: v.union(v.literal('active'), v.literal('out_of_stock')),
 })
