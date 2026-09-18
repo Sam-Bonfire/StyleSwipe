@@ -265,7 +265,7 @@ git push origin main
 """
 
 [tasks."version:bump"]
-description = "Promote dev to main, bump versions on dev, tag the release (main only ever fast-forwards)"
+description = "Promote dev to main, bump versions on dev, tag main tip (main only ever fast-forwards)"
 run = """
 git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"

@@ -1,9 +1,8 @@
 name: Tag Release
 
+# Manual trigger: run when dev is releasable. Tags main tip and builds production.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 5' # Run every Friday at midnight UTC
 
 permissions:
   contents: write
