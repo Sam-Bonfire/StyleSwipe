@@ -265,19 +265,31 @@ git push origin main
 """
 
 [tasks."version:bump"]
-description = "Bump patch version across package.json files and create git tag"
+description = "Promote dev to main, bump versions on dev, tag main tip (main only ever fast-forwards)"
 run = """
 git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
+git fetch origin --tags
 
-VERSION=$(jq -r .version package.json)
-echo "Current version: $VERSION"
+# main must only ever advance via dev; fail loudly if it diverged
+git checkout -B main origin/main
+git merge --ff-only origin/dev
 
-IFS='.' read -r -a parts <<< "$VERSION"
+# Next version derives from the highest tag (package.json converges via dev)
+LAST_TAG=$(git tag --list 'v[0-9]*' --sort=-v:refname | head -n 1)
+LAST_VERSION=${LAST_TAG#v}
+if [ -z "$LAST_VERSION" ]; then
+  LAST_VERSION=$(jq -r .version package.json)
+fi
+echo "Last version: $LAST_VERSION"
+
+IFS='.' read -r -a parts <<< "$LAST_VERSION"
 parts[2]=$((parts[2] + 1))
 NEW_VERSION="${parts[0]}.${parts[1]}.${parts[2]}"
 echo "New version: $NEW_VERSION"
 
+# Version bookkeeping lands on dev so the next promote carries it to main
+git checkout -B dev origin/dev
 jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > package.json.tmp && mv package.json.tmp package.json
 
 for pkg in apps/*/package.json packages/*/package.json; do
@@ -288,7 +300,11 @@ done
 
 git add package.json apps/*/package.json packages/*/package.json
 git commit -m "release: v$NEW_VERSION"
+git push origin dev
 
+# Fast-forward main onto the bump and tag it: tag and tree always agree
+git checkout main
+git merge --ff-only dev
 TAG="v$NEW_VERSION"
 git tag $TAG
 git push origin main
