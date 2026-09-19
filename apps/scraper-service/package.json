@@ -1,6 +1,6 @@
 {
   "name": "@app/scraper-service",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "scripts": {
     "start": "tsx src/index.ts",
     "lint": "eslint .",
@@ -25,7 +25,6 @@
     "playwright": "^1.61.1"
   },
   "devDependencies": {
-
     "typescript": "~5.9.3",
     "vitest": "^4.1.10"
   },

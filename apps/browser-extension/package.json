@@ -1,7 +1,7 @@
 {
   "name": "@app/browser-extension",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "copy-assets": "tsx scripts/copy-assets.ts",
