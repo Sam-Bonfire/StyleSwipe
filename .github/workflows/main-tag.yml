@@ -3,6 +3,15 @@ name: Tag Release
 # Manual trigger: run when dev is releasable. Tags main tip and builds production.
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version part to bump'
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
@@ -32,7 +41,7 @@ jobs:
 
       - name: Version and Tag
         id: version
-        run: mise run version:bump
+        run: mise run version:bump "${{ inputs.bump }}"
 
   trigger-production:
     needs: [tag-release]
