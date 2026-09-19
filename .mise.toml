@@ -345,16 +345,63 @@ git fetch --tags --unshallow || git fetch --tags || true
 PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
 if [ -n "$PREV_TAG" ]; then
   echo "Generating changelog between $PREV_TAG and HEAD"
-  CHANGELOG=$(git log "$PREV_TAG..HEAD" --pretty=format:"* %s (%h)" --no-merges || echo "")
+  RANGE="$PREV_TAG..HEAD"
 else
   echo "No previous tag found. Generating full log."
-  CHANGELOG=$(git log --pretty=format:"* %s (%h)" --no-merges || echo "")
+  RANGE="HEAD"
+fi
+LOG=$(git log "$RANGE" --pretty=format:"%h %s" --no-merges || echo "")
+
+CHANGELOG=""
+add_section() {
+  header="$1"
+  prefix="$2"
+  entries=$(echo "$LOG" | grep -E "^[0-9a-f]+ $prefix[( :]" 2>/dev/null | while IFS= read -r line; do
+    h=${line%% *}
+    subj=${line#* }
+    subj=$(echo "$subj" | sed -E "s/^$prefix(\\([^)]*\\))?: //")
+    echo "* $subj ($h)"
+  done || true)
+  if [ -n "$entries" ]; then
+    if [ -n "$CHANGELOG" ]; then
+      CHANGELOG="$CHANGELOG
+"
+    fi
+    CHANGELOG="$CHANGELOG### $header
+
+$entries"
+  fi
+}
+
+add_section "New Features" "feat"
+add_section "Bug Fixes" "fix"
+add_section "Tests" "test"
+add_section "Performance" "perf"
+add_section "Refactors" "refactor"
+add_section "Documentation" "docs"
+add_section "CI and Infrastructure" "ci"
+add_section "Maintenance" "chore"
+other=$(echo "$LOG" | grep -Ev "^[0-9a-f]+ (feat|fix|test|perf|refactor|docs|ci|chore|release)[( :]" 2>/dev/null | while IFS= read -r line; do
+  h=${line%% *}
+  subj=${line#* }
+  echo "* $subj ($h)"
+done || true)
+if [ -n "$other" ]; then
+  if [ -n "$CHANGELOG" ]; then
+    CHANGELOG="$CHANGELOG
+"
+  fi
+  CHANGELOG="$CHANGELOG### Other Changes
+
+$other"
 fi
 
-CLEAN_CHANGELOG=$(echo "$CHANGELOG" | grep -v -E "release: v|chore:|bot-commit" || echo "No changes listed.")
+if [ -z "$CHANGELOG" ]; then
+  CHANGELOG="No changes listed."
+fi
 
 echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
-echo "$CLEAN_CHANGELOG" >> "$GITHUB_OUTPUT"
+echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
 echo "EOF" >> "$GITHUB_OUTPUT"
 """
 
