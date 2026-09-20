@@ -10,7 +10,6 @@ import {
 } from '@expo-google-fonts/manrope';
 import { ReactNode } from 'react';
 import { TamaguiProvider, Theme, ThemeProps } from 'tamagui';
-import { Spinner, YStack } from 'tamagui';
 
 import { ToastProvider } from './components/ToastProvider';
 import { config } from './theme';
@@ -21,7 +20,7 @@ interface StyleSwipeProviderProps {
 }
 
 export function StyleSwipeProvider({ children, theme = 'BrandIdentityLight' }: StyleSwipeProviderProps) {
-    const [fontsLoaded] = useFonts({
+    useFonts({
         'Manrope-ExtraLight': Manrope_200ExtraLight,
         'Manrope-Light': Manrope_300Light,
         'Manrope-Regular': Manrope_400Regular,
@@ -30,18 +29,6 @@ export function StyleSwipeProvider({ children, theme = 'BrandIdentityLight' }: S
         'Manrope-Bold': Manrope_700Bold,
         'Manrope-ExtraBold': Manrope_800ExtraBold,
     });
-
-    if (!fontsLoaded) {
-        return (
-            <TamaguiProvider config={config} defaultTheme={theme as any}>
-                <Theme name={theme as any}>
-                    <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background">
-                        <Spinner size="large" color="$primary" />
-                    </YStack>
-                </Theme>
-            </TamaguiProvider>
-        );
-    }
 
     return (
         <TamaguiProvider config={config} defaultTheme={theme as any}>
