@@ -1,4 +1,4 @@
-import { useCurrentUser, useActivePartnerSync } from '@app/infrastructure';
+import { useCurrentUser, useActivePartnerSync, useFeatureFlag } from '@app/infrastructure';
 import { TopBar, TopBarIconButton } from '@app/ui-kit';
 import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
 import { Button } from '@app/ui-kit/components/Button';
@@ -25,6 +25,9 @@ export function DiscoveryScreen() {
   const activeSession = activeSyncs && activeSyncs.length > 0 ? activeSyncs[0] : null;
   const [influenceRatio, setInfluenceRatio] = useState<number>(50);
   const [viewMode, setViewMode] = useState<ViewMode>('deck');
+  // Grid view is experimental — hidden unless the discover_grid flag is on.
+  // Missing/disabled row means OFF, so deck is the default while loading too.
+  const gridEnabled = useFeatureFlag('discover_grid') === true;
 
   const handleRatioChange = (val: number) => {
     setInfluenceRatio(val);
@@ -69,14 +72,16 @@ export function DiscoveryScreen() {
             />
           </YStack>
         )}
-        <XStack justifyContent="center" alignItems="center" gap="$2" paddingBottom="$2">
-          <Button variant={viewMode === 'deck' ? 'primary' : 'outlined'} onPress={() => setViewMode('deck')}>
-            Deck
-          </Button>
-          <Button variant={viewMode === 'grid' ? 'primary' : 'outlined'} onPress={() => setViewMode('grid')}>
-            Grid
-          </Button>
-        </XStack>
+        {gridEnabled && (
+          <XStack justifyContent="center" alignItems="center" gap="$2" paddingBottom="$2">
+            <Button variant={viewMode === 'deck' ? 'primary' : 'outlined'} onPress={() => setViewMode('deck')}>
+              Deck
+            </Button>
+            <Button variant={viewMode === 'grid' ? 'primary' : 'outlined'} onPress={() => setViewMode('grid')}>
+              Grid
+            </Button>
+          </XStack>
+        )}
 
         <View style={{ flex: 1, display: viewMode === 'deck' ? 'flex' : 'none' }}>
           <SwipeDeck
@@ -85,9 +90,11 @@ export function DiscoveryScreen() {
             influenceRatio={activeSession ? influenceRatio / 100 : undefined}
           />
         </View>
-        <View style={{ flex: 1, display: viewMode === 'grid' ? 'flex' : 'none' }}>
-          <GridDiscovery />
-        </View>
+        {gridEnabled && (
+          <View style={{ flex: 1, display: viewMode === 'grid' ? 'flex' : 'none' }}>
+            <GridDiscovery />
+          </View>
+        )}
       </YStack>
 
       <SearchFilterOverlay
