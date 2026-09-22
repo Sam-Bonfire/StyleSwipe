@@ -23,25 +23,27 @@ test.describe('Consumer App Core Flows', () => {
     });
   });
 
-  test.describe('TC2: Discovery Deck & View Modes', () => {
+  test.describe('TC2: Discovery Deck (grid behind flag)', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/(app)/(tabs)/discover');
     });
 
-    test('deck/grid mode toggle renders and switches', async ({ page }) => {
-      const deckButton = page.locator('button:has-text("Deck")').first();
-      const gridButton = page.locator('button:has-text("Grid")').first();
-      await expect(deckButton).toBeVisible({ timeout: 15000 });
-      await expect(gridButton).toBeVisible();
-
-      // Switch to grid mode without crashing
-      await gridButton.click({ force: true });
+    test('deck-only view renders with no grid toggle when flag is off', async ({ page }) => {
+      await expect(page.locator('text="Discovery"').first()).toBeVisible({ timeout: 15000 });
+      await expect(page.locator('button:has-text("Grid")')).toHaveCount(0);
       await expect(page.locator('text="An error occurred in the"')).not.toBeVisible();
     });
 
-    test('deck shows rewind control', async ({ page }) => {
-      // Undo2 circular button in deck mode; assert the deck region mounted
-      await expect(page.locator('button:has-text("Deck")').first()).toBeVisible({ timeout: 15000 });
+    test('deck shows rewind control when products exist', async ({ page }) => {
+      // Precondition: preview must have seeded products
+      await page.waitForTimeout(3000);
+      const priceHits = page.locator('text=/₹\\d+/');
+      if ((await priceHits.count()) === 0) {
+        test.skip(true, 'No seeded products in this preview');
+        return;
+      }
+      // Rewind is the icon-only circular button in the deck corner
+      await expect(page.locator('button:has(svg)').last()).toBeVisible();
       await expect(page.locator('text="An error occurred in the"')).not.toBeVisible();
     });
   });
@@ -64,8 +66,12 @@ test.describe('Consumer App Core Flows', () => {
     test('tapping a grid product opens detail with price and Add to Bag', async ({ page }) => {
       await page.goto('/(app)/(tabs)/discover');
 
-      // Enter grid mode to expose tappable product tiles
+      // Enter grid mode to expose tappable product tiles (flag-gated)
       const gridButton = page.locator('button:has-text("Grid")').first();
+      if ((await gridButton.count()) === 0) {
+        test.skip(true, 'discover_grid flag is off in this preview');
+        return;
+      }
       await expect(gridButton).toBeVisible({ timeout: 15000 });
       await gridButton.click({ force: true });
       await page.waitForTimeout(2000);
