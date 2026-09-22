@@ -22,16 +22,12 @@ import { authAdapter } from '../lib/auth';
  */
 async function getAuthToken(): Promise<string | null> {
   try {
-    // 1. Try getting session from better-auth client (Works if persistence is set up)
-    const sessionData = await authAdapter.client.getSession();
-    if (sessionData?.data?.session?.token) {
-      // Check if token is directly available in the session object
-      return sessionData.data.session.token;
-    }
-
-    // 2. Fallback: Web LocalStorage (If client above didn't find it but it's there)
-    if (Platform.OS === 'web' && typeof localStorage !== 'undefined') {
-      return localStorage.getItem('better-auth.session_token');
+    // The convexClient() better-auth plugin mints the Convex JWT via the
+    // /convex/token endpoint — the same source ConvexBetterAuthProvider uses.
+    // (Session objects carry no .token field, so the old lookup always missed.)
+    const { data, error } = await authAdapter.client.convex.token({ fetchOptions: { throw: false } });
+    if (!error && data?.token) {
+      return data.token;
     }
   } catch (e) {
     console.warn('[BackgroundWorker] Failed to retrieve auth token:', e);
