@@ -1,9 +1,11 @@
 import { Button } from '@app/ui-kit';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { YStack, Text, XStack, Image } from 'tamagui';
+import { Image } from 'react-native';
+import { YStack, Text, XStack } from 'tamagui';
 
-import logo from '../../../../../assets/logo/logo.png';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const logoSource = require('../../../../../assets/logo/logo.png');
 
 export function AuthSelectionScreen() {
   const router = useRouter();
@@ -18,10 +20,8 @@ export function AuthSelectionScreen() {
       >
         <YStack width="80%" aspectRatio={3.13} alignItems="center">
           <Image
-            source={logo}
-            width="100%"
-            height="100%"
-            resizeMode="contain"
+            source={logoSource}
+            style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
           />
         </YStack>
         <Text
