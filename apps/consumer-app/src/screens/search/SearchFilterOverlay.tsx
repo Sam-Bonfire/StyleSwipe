@@ -1,7 +1,7 @@
 import { FilterState, FilterStateSchema, SortOption } from '@app/core';
 import { Modal, Button, BudgetSlider, CategoryChip, DEFAULT_BUDGET_BANDS, SearchBar } from '@app/ui-kit';
 import React, { useState, useEffect } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, useWindowDimensions } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 
 export interface SearchFilterOverlayProps {
@@ -29,6 +29,7 @@ export function SearchFilterOverlay({
   );
   const [localSort, setLocalSort] = useState<SortOption>(initialSort);
   const [brandSearch, setBrandSearch] = useState('');
+  const { height: windowHeight } = useWindowDimensions();
 
   // Sync when overlay opens
   useEffect(() => {
@@ -119,7 +120,8 @@ export function SearchFilterOverlay({
 
   return (
     <Modal open={isOpen} onClose={onClose} title="Filters" showCloseButton closeOnBackdrop>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      {/* Bounded height: an unbounded ScrollView collapses to zero inside the modal body on web */}
+      <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: windowHeight * 0.55 }}>
         <YStack gap="$4" paddingVertical="$2">
           {/* Gender */}
           <YStack gap="$2">

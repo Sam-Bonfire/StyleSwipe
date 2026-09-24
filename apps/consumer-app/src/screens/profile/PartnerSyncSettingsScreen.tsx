@@ -273,11 +273,11 @@ export function PartnerSyncSettingsScreen() {
               </XStack>
 
               <Text fontWeight="bold" fontSize="$4" marginBottom="$3">2. Invite Partner</Text>
-              <XStack gap="$3">
-                <Button flex={1} variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
+              <XStack flexWrap="wrap" gap="$3">
+                <Button flexGrow={1} flexBasis="40%" variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
                   Share Link
                 </Button>
-                <Button flex={1} variant="outlined" icon={<QrCode size={18} />} onPress={() => handleShowQR(selectedDuration)}>
+                <Button flexGrow={1} flexBasis="40%" variant="outlined" icon={<QrCode size={18} />} onPress={() => handleShowQR(selectedDuration)}>
                   Show QR Code
                 </Button>
               </XStack>

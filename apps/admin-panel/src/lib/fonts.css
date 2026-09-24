@@ -1,0 +1,53 @@
+/* Self-hosted Manrope for web static exports.
+ * Metro-emitted expo-google-fonts assets 404 on static hosts, leaving
+ * Tamagui's Manrope-* face names unresolvable (serif fallback). These
+ * plain static files are served as-is with the correct MIME type. */
+@font-face {
+  font-family: 'Manrope-ExtraLight';
+  src: url('/fonts/Manrope_200ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope-Light';
+  src: url('/fonts/Manrope_300Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope-Regular';
+  src: url('/fonts/Manrope_400Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope-Medium';
+  src: url('/fonts/Manrope_500Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope-SemiBold';
+  src: url('/fonts/Manrope_600SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope-Bold';
+  src: url('/fonts/Manrope_700Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Manrope-ExtraBold';
+  src: url('/fonts/Manrope_800ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
