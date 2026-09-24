@@ -91,8 +91,12 @@ export const CartScreen = () => {
 
   const isLoading = userId ? serverCart === undefined : guest.loading;
 
-  // Fetch full product items to display real images
-  const productIds = React.useMemo(() => cart?.items.map((i) => i.productId) ?? [], [cart?.items]);
+  // Fetch full product items to display real images.
+  // Legacy cart rows can carry empty productIds, which Convex v.id() rejects — drop them.
+  const productIds = React.useMemo(
+    () => cart?.items.map((i) => i.productId).filter((id): id is string => typeof id === 'string' && id.length > 0) ?? [],
+    [cart?.items],
+  );
   const productsDocs = useProductsByIds(productIds);
 
   const productMap = React.useMemo(() => {

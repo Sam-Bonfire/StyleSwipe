@@ -10,6 +10,7 @@ import { YStack, Spinner, Text } from 'tamagui';
 
 import { GlobalErrorBoundary } from '../src/components/GlobalErrorBoundary';
 import { authAdapter } from '../src/lib/auth';
+import '../src/lib/webfonts';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string, {
   unsavedChangesWarning: false,

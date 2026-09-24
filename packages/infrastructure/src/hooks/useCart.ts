@@ -13,7 +13,17 @@ import { CartMapper } from '../convex/mappers/CartMapper';
 export function useCart(userId: string | undefined) {
   const data = useQuery(api.cart.getCart, userId ? { userId } : 'skip');
 
-  return React.useMemo(() => (data ? CartMapper.toDomain(data) : null), [data]);
+  return React.useMemo(() => {
+    if (!data) return null;
+    try {
+      return CartMapper.toDomain(data);
+    } catch (e) {
+      // Legacy stored carts can violate the current schema — show empty
+      // instead of crashing the bag screen.
+      console.warn('[useCart] Dropping invalid stored cart', e);
+      return null;
+    }
+  }, [data]);
 }
 
 export function useAddToCart() {

@@ -89,7 +89,11 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
           {images.map((img, index) => (
             <Pressable key={index} onPress={() => openZoom(index)} style={{ width: windowWidth, height: galleryHeight }}>
               <YStack width={windowWidth} height={galleryHeight} justifyContent="center" alignItems="center" backgroundColor="$background">
-                <Image source={{ uri: img, width: windowWidth, height: galleryHeight }} resizeMode="cover" />
+                <Image
+                  source={{ uri: img }}
+                  style={{ width: windowWidth, height: galleryHeight }}
+                  resizeMode="cover"
+                />
               </YStack>
             </Pressable>
           ))}
@@ -144,7 +148,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                 }}
               >
                 <YStack width={48} height={64} borderRadius="$2" overflow="hidden" borderWidth={idx === zoomIndex ? 2 : 0} borderColor="$primary">
-                  <Image source={{ uri: images[idx], width: 48, height: 64 }} resizeMode="cover" />
+                  <Image source={{ uri: images[idx] }} style={{ width: 48, height: 64 }} resizeMode="cover" />
                 </YStack>
               </Pressable>
             ))}

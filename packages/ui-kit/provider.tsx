@@ -9,6 +9,7 @@ import {
     useFonts,
 } from '@expo-google-fonts/manrope';
 import { ReactNode } from 'react';
+import { Platform } from 'react-native';
 import { TamaguiProvider, Theme, ThemeProps } from 'tamagui';
 
 import { ToastProvider } from './components/ToastProvider';
@@ -20,15 +21,21 @@ interface StyleSwipeProviderProps {
 }
 
 export function StyleSwipeProvider({ children, theme = 'BrandIdentityLight' }: StyleSwipeProviderProps) {
-    useFonts({
-        'Manrope-ExtraLight': Manrope_200ExtraLight,
-        'Manrope-Light': Manrope_300Light,
-        'Manrope-Regular': Manrope_400Regular,
-        'Manrope-Medium': Manrope_500Medium,
-        'Manrope-SemiBold': Manrope_600SemiBold,
-        'Manrope-Bold': Manrope_700Bold,
-        'Manrope-ExtraBold': Manrope_800ExtraBold,
-    });
+    // Web serves Manrope via self-hosted @font-face (apps/*/public/fonts);
+    // the Metro-emitted expo-font assets 404 on static hosts, so skip them there.
+    useFonts(
+        Platform.OS === 'web'
+            ? {}
+            : {
+                  'Manrope-ExtraLight': Manrope_200ExtraLight,
+                  'Manrope-Light': Manrope_300Light,
+                  'Manrope-Regular': Manrope_400Regular,
+                  'Manrope-Medium': Manrope_500Medium,
+                  'Manrope-SemiBold': Manrope_600SemiBold,
+                  'Manrope-Bold': Manrope_700Bold,
+                  'Manrope-ExtraBold': Manrope_800ExtraBold,
+              },
+    );
 
     return (
         <TamaguiProvider config={config} defaultTheme={theme as any}>

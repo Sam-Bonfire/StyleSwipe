@@ -14,6 +14,7 @@ import { authAdapter } from '../src/lib/auth';
 import { linkingConfig } from '../src/lib/linking';
 import { logger } from '../src/lib/logger';
 import { usePushNotifications } from '../src/lib/notifications';
+import '../src/lib/webfonts';
 import { useDeepLinkHandler } from '../src/lib/useDeepLinkHandler';
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL as string);

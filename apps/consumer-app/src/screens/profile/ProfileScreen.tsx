@@ -50,7 +50,9 @@ export function ProfileScreen() {
           <YStack gap="$4" marginTop="$4">
             <Button variant="primary" onPress={() => router.push('/(app)/partner-sync')}>Partner Sync</Button>
             <Button variant="outlined" onPress={() => router.push('/(app)/edit-profile')}>Edit Profile</Button>
-            <Button variant="outlined" onPress={() => router.push('/onboarding')}>Personalize later</Button>
+            {user && !user.styleProfile ? (
+              <Button variant="outlined" onPress={() => router.push('/onboarding')}>Personalize later</Button>
+            ) : null}
             <Button variant="outlined" onPress={() => router.push('/(app)/wishlist')}>My Wishlist</Button>
             {directShopping === true ? (
               <>
