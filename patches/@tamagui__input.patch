@@ -1,0 +1,28 @@
+diff --git a/dist/esm/Input.js b/dist/esm/Input.js
+index 8beab4ae81ce51ea53ad8eb09de75bfd2a150617..6aa98b2ba0ba5d694249a9bd0eeac40bb9d80f84 100644
+--- a/dist/esm/Input.js
++++ b/dist/esm/Input.js
+@@ -102,6 +102,9 @@ const StyledInput = styled(View, styledBody[0], styledBody[1]), Input = StyledIn
+     disabled,
+     id,
+     rows,
++    // secureTextEntry is destructured above and would otherwise be
++    // dropped on web - map it to the native input type explicitly.
++    type: secureTextEntry ? "password" : void 0,
+     autoCorrect,
+     autoCapitalize,
+     onKeyDown: onSubmitEditing ? handleKeyDown : rest.onKeyDown,
+diff --git a/dist/esm/Input.mjs b/dist/esm/Input.mjs
+index 2482ff1c8f58c45a71835c89c4764bfcef441a18..cc3617688b2d9fec65f2ca03392ca7b56c5ff90c 100644
+--- a/dist/esm/Input.mjs
++++ b/dist/esm/Input.mjs
+@@ -113,6 +113,9 @@ const StyledInput = styled(View, styledBody[0], styledBody[1]),
+         disabled,
+         id,
+         rows,
++        // secureTextEntry is destructured above and would otherwise be
++        // dropped on web - map it to the native input type explicitly.
++        type: secureTextEntry ? "password" : void 0,
+         autoCorrect,
+         autoCapitalize,
+         onKeyDown: onSubmitEditing ? handleKeyDown : rest.onKeyDown,

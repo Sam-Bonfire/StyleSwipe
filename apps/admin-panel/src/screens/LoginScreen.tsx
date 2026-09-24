@@ -1,8 +1,10 @@
 import { Button } from '@app/ui-kit';
 import React from 'react';
-import { YStack, Text, Card, H3, Label, Input, Image } from 'tamagui';
+import { Image } from 'react-native';
+import { YStack, Text, Card, H3, Label, Input } from 'tamagui';
 
-import logo from '../../../../assets/logo/logo.png';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const logoSource = require('../../../../assets/logo/logo.png');
 import { authAdapter } from '../lib/auth';
 
 // Neuro-styled Login Component
@@ -31,10 +33,8 @@ export function LoginScreen() {
       <YStack marginBottom="$2" alignItems="center" gap="$2">
         <YStack width="80%" aspectRatio={3.13} alignItems="center">
           <Image
-            source={logo}
-            width="100%"
-            height="100%"
-            resizeMode="contain"
+            source={logoSource}
+            style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
           />
         </YStack>
         <H3 color="$color" fontSize="$8">
