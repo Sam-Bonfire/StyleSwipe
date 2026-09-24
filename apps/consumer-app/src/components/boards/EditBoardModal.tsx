@@ -56,17 +56,17 @@ export function EditBoardModal({ visible, onClose, userId, board, onRenamed }: E
       <YStack flex={1} backgroundColor="rgba(0,0,0,0.5)" alignItems="center" justifyContent="center" padding="$4">
         <YStack backgroundColor="$background" borderRadius="$4" padding="$5" width="100%" maxWidth={400} gap="$4">
           <XStack justifyContent="space-between" alignItems="center">
-            <Text fontSize="$6" fontWeight="700">Edit Collection</Text>
+            <Text fontFamily="$body" fontSize="$6" fontWeight="700">Edit Collection</Text>
             <XStack width={32} height={32} borderRadius={16} backgroundColor="$backgroundHover" alignItems="center" justifyContent="center" onPress={onClose}>
               <X size={18} />
             </XStack>
           </XStack>
           <YStack gap="$2">
-            <Text fontSize="$2" fontWeight="600">Name</Text>
+            <Text fontFamily="$body" fontSize="$2" fontWeight="600">Name</Text>
             <Input value={name} onChangeText={setName} maxLength={48} />
           </YStack>
           <YStack gap="$2">
-            <Text fontSize="$2" fontWeight="600">Slug</Text>
+            <Text fontFamily="$body" fontSize="$2" fontWeight="600">Slug</Text>
             <Input value={slug} onChangeText={(v) => setSlug(slugifyInput(v))} autoCapitalize="none" />
           </YStack>
           <XStack gap="$3" marginTop="$2">

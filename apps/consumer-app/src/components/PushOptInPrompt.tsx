@@ -43,14 +43,14 @@ export function PushOptInPrompt({ onGranted, onDismissed, onClose }: PushOptInPr
           <YStack backgroundColor="$primary" padding="$2" borderRadius="$4">
             <BellRing size={20} color="white" />
           </YStack>
-          <H3 fontSize="$5">Stay in the loop?</H3>
+          <H3 fontFamily="$heading" fontSize="$5">Stay in the loop?</H3>
         </XStack>
         <XStack pressStyle={{ opacity: 0.6 }} onPress={onClose} cursor="pointer" padding="$2">
           <X size={18} />
         </XStack>
       </XStack>
 
-      <Text color="$textSecondary" fontSize="$3">
+      <Text fontFamily="$body" color="$textSecondary" fontSize="$3">
         Get notified for price drops, back-in-stock alerts, partner likes and order updates. No spam — only the good stuff.
       </Text>
 

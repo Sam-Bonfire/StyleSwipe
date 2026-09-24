@@ -42,14 +42,14 @@ export function MoveItemSheet({ visible, onClose, userId, sourceBoardId, product
       <YStack flex={1} backgroundColor="rgba(0,0,0,0.4)" justifyContent="flex-end">
         <YStack backgroundColor="$background" borderTopLeftRadius="$5" borderTopRightRadius="$5" padding="$4" maxHeight="70%" gap="$4">
           <XStack justifyContent="space-between" alignItems="center">
-            <Text fontSize="$5" fontWeight="700">Move to Collection</Text>
-            <Text color="$primary" fontWeight="600" onPress={onClose}>Close</Text>
+            <Text fontFamily="$body" fontSize="$5" fontWeight="700">Move to Collection</Text>
+            <Text fontFamily="$body" color="$primary" fontWeight="600" onPress={onClose}>Close</Text>
           </XStack>
           {boards === undefined ? (
-            <Text color="$textSecondary">Loading boards...</Text>
+            <Text fontFamily="$body" color="$textSecondary">Loading boards...</Text>
           ) : candidates.length === 0 ? (
             <YStack gap="$2" alignItems="center" padding="$4">
-              <Text color="$textSecondary" textAlign="center">No other collections. Create one first.</Text>
+              <Text fontFamily="$body" color="$textSecondary" textAlign="center">No other collections. Create one first.</Text>
             </YStack>
           ) : (
             <ScrollView>
@@ -67,8 +67,8 @@ export function MoveItemSheet({ visible, onClose, userId, sourceBoardId, product
                     onPress={() => handleMove(board._id as string)}
                   >
                     <YStack flex={1}>
-                      <Text fontWeight="600">{board.name}</Text>
-                      <Text fontSize="$2" color="$textSecondary">{board.itemCount} items • {board.slug}</Text>
+                      <Text fontFamily="$body" fontWeight="600">{board.name}</Text>
+                      <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{board.itemCount} items • {board.slug}</Text>
                     </YStack>
                     <Button size="small" variant="primary" loading={movingId === (board._id as string)} disabled={movingId !== null}>
                       Move

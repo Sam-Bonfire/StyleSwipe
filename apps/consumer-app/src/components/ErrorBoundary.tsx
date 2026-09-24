@@ -74,10 +74,10 @@ export class ErrorBoundary extends Component<Props, State> {
             elevation="$2"
           >
             <AlertTriangle size={48} color="red" />
-            <Text fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
+            <Text fontFamily="$body" fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
               Oops! Something went wrong.
             </Text>
-            <Text fontSize="$4" color="$textSecondary" textAlign="center">
+            <Text fontFamily="$body" fontSize="$4" color="$textSecondary" textAlign="center">
               We encountered an unexpected error. Please try again or return home.
             </Text>
 
@@ -120,11 +120,11 @@ export class ErrorBoundary extends Component<Props, State> {
                     borderWidth={1}
                     borderColor="$borderColor"
                   >
-                    <Text fontSize="$2" color="red" fontWeight="bold">
+                    <Text fontFamily="$body" fontSize="$2" color="red" fontWeight="bold">
                       {this.state.error.message}
                     </Text>
                     {this.state.errorInfo?.componentStack && (
-                      <Text fontSize="$1" color="$textSecondary" marginTop="$2">
+                      <Text fontFamily="$body" fontSize="$1" color="$textSecondary" marginTop="$2">
                         {this.state.errorInfo.componentStack}
                       </Text>
                     )}

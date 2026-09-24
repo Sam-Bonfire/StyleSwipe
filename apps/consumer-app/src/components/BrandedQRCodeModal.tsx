@@ -76,7 +76,7 @@ export function BrandedQRCodeModal({ visible, onClose, url }: BrandedQRCodeModal
           elevation={5}
         >
           <XStack width="100%" justifyContent="space-between" alignItems="center" marginBottom="$4">
-            <Text fontSize="$6" fontWeight="bold" color="$textPrimary">
+            <Text fontFamily="$body" fontSize="$6" fontWeight="bold" color="$textPrimary">
               Partner Sync
             </Text>
             <Button
@@ -88,7 +88,7 @@ export function BrandedQRCodeModal({ visible, onClose, url }: BrandedQRCodeModal
             />
           </XStack>
 
-          <Text fontSize="$3" color="$textSecondary" textAlign="center" marginBottom="$6">
+          <Text fontFamily="$body" fontSize="$3" color="$textSecondary" textAlign="center" marginBottom="$6">
             Scan this QR code with your camera to instantly sync styles.
           </Text>
 
@@ -116,7 +116,7 @@ export function BrandedQRCodeModal({ visible, onClose, url }: BrandedQRCodeModal
             />
           </YStack>
 
-          <Text
+          <Text fontFamily="$body"
             fontSize="$2"
             color="$primary"
             fontWeight="600"

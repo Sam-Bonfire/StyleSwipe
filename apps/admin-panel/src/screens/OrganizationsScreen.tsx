@@ -44,8 +44,8 @@ export function OrganizationsScreen() {
             <YStack padding="$3" paddingBottom="$8" gap="$3">
                 <Header>
                     <YStack gap="$1">
-                        <H3 color="$color">Organization Management</H3>
-                        <Text fontSize="$2" color="$color" opacity={0.6} fontWeight="500">
+                        <H3 fontFamily="$heading" color="$color">Organization Management</H3>
+                        <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6} fontWeight="500">
                             Manage organizations and their members
                         </Text>
                     </YStack>
@@ -60,7 +60,7 @@ export function OrganizationsScreen() {
                 {isLoading ? (
                     <YStack alignItems="center" padding="$8">
                         <Spinner size="large" color="$primary" />
-                        <Text marginTop="$3" color="$color" opacity={0.6}>
+                        <Text fontFamily="$body" marginTop="$3" color="$color" opacity={0.6}>
                             Loading organizations...
                         </Text>
                     </YStack>
@@ -108,7 +108,7 @@ export function OrganizationsScreen() {
 
                                                     <YStack flex={1} gap="$1" alignItems="flex-start">
                                                         <XStack gap="$2" alignItems="center">
-                                                            <Text fontSize="$3" fontWeight="600" color="$color">
+                                                            <Text fontFamily="$body" fontSize="$3" fontWeight="600" color="$color">
                                                                 {org.name}
                                                             </Text>
                                                             {org.slug === 'core' ? (
@@ -121,20 +121,20 @@ export function OrganizationsScreen() {
                                                                     gap="$1"
                                                                 >
                                                                     <Crown size={10} color="white" />
-                                                                    <Text fontSize="$1" color="white" fontWeight="600" textTransform="uppercase">
+                                                                    <Text fontFamily="$body" fontSize="$1" color="white" fontWeight="600" textTransform="uppercase">
                                                                         CORE
                                                                     </Text>
                                                                 </XStack>
                                                             ) : null}
                                                         </XStack>
-                                                        <Text fontSize="$2" color="$color" opacity={0.6}>
+                                                        <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6}>
                                                             {org.slug}
                                                         </Text>
                                                     </YStack>
 
                                                     <XStack gap="$2" alignItems="center">
                                                         <Users size={14} color="#3b82f6" />
-                                                        <Text fontSize="$2" color="#3b82f6" fontWeight="600">
+                                                        <Text fontFamily="$body" fontSize="$2" color="#3b82f6" fontWeight="600">
                                                             {org.memberCount || 0} member{(org.memberCount || 0) !== 1 ? 's' : ''}
                                                         </Text>
                                                     </XStack>
@@ -157,7 +157,7 @@ export function OrganizationsScreen() {
                                             <YStack gap="$3">
                                                 <XStack gap="$6" flexWrap="wrap">
                                                     <YStack gap="$2" flex={1} minWidth={200}>
-                                                        <Text fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
+                                                        <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
                                                             Organization Details
                                                         </Text>
                                                         <DetailRow label="Org ID" value={org._id.slice(-12)} mono />
@@ -166,7 +166,7 @@ export function OrganizationsScreen() {
                                                     </YStack>
 
                                                     <YStack gap="$2" flex={1} minWidth={200}>
-                                                        <Text fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
+                                                        <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
                                                             Members
                                                         </Text>
                                                         {org.members && org.members.length > 0 ? (
@@ -174,22 +174,22 @@ export function OrganizationsScreen() {
                                                                 <XStack key={member._id} gap="$2" alignItems="center" justifyContent="space-between">
                                                                     <XStack gap="$2" alignItems="center">
                                                                         <Users size={12} color="$color" opacity={0.5} />
-                                                                        <Text fontSize="$2" color="$color">
+                                                                        <Text fontFamily="$body" fontSize="$2" color="$color">
                                                                             {member.name || member.email}
                                                                         </Text>
                                                                     </XStack>
-                                                                    <Text fontSize="$1" color="$primary" fontWeight="600" textTransform="uppercase">
+                                                                    <Text fontFamily="$body" fontSize="$1" color="$primary" fontWeight="600" textTransform="uppercase">
                                                                         {member.role}
                                                                     </Text>
                                                                 </XStack>
                                                             ))
                                                         ) : (
-                                                            <Text fontSize="$2" color="$color" opacity={0.5}>
+                                                            <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.5}>
                                                                 No members
                                                             </Text>
                                                         )}
                                                         {org.members && org.members.length > 5 ? (
-                                                            <Text fontSize="$2" color="$primary" fontWeight="600">
+                                                            <Text fontFamily="$body" fontSize="$2" color="$primary" fontWeight="600">
                                                                 +{org.members.length - 5} more
                                                             </Text>
                                                         ) : null}
@@ -258,10 +258,10 @@ export function OrganizationsScreen() {
                             )}
                         </YStack>
                         <YStack gap="$1" alignItems="center">
-                            <Text fontSize="$5" fontWeight="600" color="$color">
+                            <Text fontFamily="$body" fontSize="$5" fontWeight="600" color="$color">
                                 {debouncedSearch ? 'No organizations found' : 'No organizations yet'}
                             </Text>
-                            <Text fontSize="$3" color="$color" opacity={0.6} textAlign="center">
+                            <Text fontFamily="$body" fontSize="$3" color="$color" opacity={0.6} textAlign="center">
                                 {debouncedSearch
                                     ? `No organizations match "${debouncedSearch}"`
                                     : 'Organizations will appear here once created'}
@@ -285,7 +285,7 @@ function DetailRow({
 }) {
     return (
         <XStack justifyContent="space-between" alignItems="center">
-            <Text fontSize="$2" color="$color" opacity={0.6}>
+            <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6}>
                 {label}
             </Text>
             <Text

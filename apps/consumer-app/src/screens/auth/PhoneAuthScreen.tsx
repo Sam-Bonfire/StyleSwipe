@@ -27,8 +27,8 @@ export function PhoneAuthScreen() {
   return (
     <YStack flex={1} padding="$6" gap="$6" backgroundColor="$background">
       <YStack marginTop="$10" gap="$2">
-        <H2 color="$textPrimary">Welcome back</H2>
-        <Text color="$textSecondary">Enter your phone number to continue</Text>
+        <H2 fontFamily="$heading" color="$textPrimary">Welcome back</H2>
+        <Text fontFamily="$body" color="$textSecondary">Enter your phone number to continue</Text>
       </YStack>
 
       <YStack gap="$4">

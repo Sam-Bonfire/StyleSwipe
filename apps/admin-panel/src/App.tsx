@@ -52,10 +52,10 @@ function Main() {
           backgroundColor="$background"
           padding="$6"
         >
-          <Text fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
+          <Text fontFamily="$body" fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
             Access Denied
           </Text>
-          <Text fontSize="$4" color="$color" textAlign="center" marginTop="$2" marginBottom="$4">
+          <Text fontFamily="$body" fontSize="$4" color="$color" textAlign="center" marginTop="$2" marginBottom="$4">
             You do not have permission to access this application.
           </Text>
           <Button onPress={() => authAdapter.signOut()}>Sign Out</Button>

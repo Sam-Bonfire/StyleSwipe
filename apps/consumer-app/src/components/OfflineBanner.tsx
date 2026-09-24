@@ -69,7 +69,7 @@ export function OfflineBanner(): React.JSX.Element | null {
     >
       <XStack alignItems="center" gap="$2" justifyContent="center">
         <WifiOff size={18} color="white" />
-        <Text color="white" fontWeight="bold" fontSize="$3">
+        <Text fontFamily="$body" color="white" fontWeight="bold" fontSize="$3">
           {bufferedCount > 0
             ? `You're offline — ${bufferedCount} swipe${bufferedCount === 1 ? '' : 's'} will sync`
             : "You're offline — swipes will sync when you're back"}
@@ -78,7 +78,7 @@ export function OfflineBanner(): React.JSX.Element | null {
       {bufferedCount > 0 ? (
         <XStack alignItems="center" gap="$2" justifyContent="center" marginTop="$1">
           <CloudOff size={14} color="white" />
-          <Text color="white" fontSize="$2" opacity={0.9}>
+          <Text fontFamily="$body" color="white" fontSize="$2" opacity={0.9}>
             {bufferedCount} buffered • auto-sync on reconnect
           </Text>
         </XStack>

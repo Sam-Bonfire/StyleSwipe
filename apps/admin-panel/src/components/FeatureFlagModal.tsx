@@ -92,7 +92,7 @@ export function FeatureFlagModal({ open, onOpenChange, initial, onSubmit }: Feat
               </Button>
             </XStack>
             {error ? (
-              <Text color="$error" fontSize="$3">
+              <Text fontFamily="$body" color="$error" fontSize="$3">
                 {error}
               </Text>
             ) : null}

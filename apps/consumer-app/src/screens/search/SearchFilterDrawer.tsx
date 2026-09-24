@@ -173,7 +173,7 @@ export function SearchFilterDrawer({
                   Category
                 </Text>
                 {categoryItems.length === 0 ? (
-                  <Text color="$textSecondary" fontSize="$3">
+                  <Text fontFamily="$body" color="$textSecondary" fontSize="$3">
                     No categories available
                   </Text>
                 ) : (
@@ -215,10 +215,10 @@ export function SearchFilterDrawer({
               <YStack gap="$2">
                 <XStack justifyContent="space-between" alignItems="center" backgroundColor="$neutral100" padding="$3" borderRadius="$3">
                   <YStack>
-                    <Text fontWeight="600" color="$textPrimary">
+                    <Text fontFamily="$body" fontWeight="600" color="$textPrimary">
                       On Sale
                     </Text>
-                    <Text fontSize="$2" color="$textSecondary">
+                    <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                       Show only discounted items
                     </Text>
                   </YStack>

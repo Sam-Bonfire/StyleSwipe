@@ -173,8 +173,8 @@ export function OnboardingScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
         <YStack flex={1} padding="$4" gap="$6" justifyContent="center" alignItems="center">
           <Spinner size="large" color="$primary" />
-          <H2 textAlign="center">Designing Your Experience...</H2>
-          <Text textAlign="center" color="$textSecondary">
+          <H2 fontFamily="$heading" textAlign="center">Designing Your Experience...</H2>
+          <Text fontFamily="$body" textAlign="center" color="$textSecondary">
             We are analyzing your preferences to curate the best styles for you.
           </Text>
         </YStack>
@@ -188,20 +188,20 @@ export function OnboardingScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <YStack flex={1} padding="$4" gap="$6" justifyContent="center">
         <YStack gap="$2">
-          <H1 textAlign="center">Personalize Your Style</H1>
+          <H1 fontFamily="$heading" textAlign="center">Personalize Your Style</H1>
           <Progress value={progress} size="$2">
             <Progress.Indicator />
           </Progress>
           <XStack justifyContent="space-between" alignItems="center">
-            <Text color="$textSecondary">
+            <Text fontFamily="$body" color="$textSecondary">
               Question {step + 1} of {questions.length}
             </Text>
-            <Text color="$primary" onPress={handleSkip} pressStyle={{ opacity: 0.6 }}>
+            <Text fontFamily="$body" color="$primary" onPress={handleSkip} pressStyle={{ opacity: 0.6 }}>
               Skip
             </Text>
           </XStack>
           {step === 0 && Object.keys(answers).length > 0 && (
-            <Text color="$textSecondary" fontSize="$2" textAlign="center">
+            <Text fontFamily="$body" color="$textSecondary" fontSize="$2" textAlign="center">
               Continue where you left off
             </Text>
           )}

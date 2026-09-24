@@ -43,7 +43,7 @@ export function OrdersScreen() {
     if (userId && orders === undefined) {
       return (
         <YStack flex={1} alignItems="center" justifyContent="center">
-          <Text>Loading orders...</Text>
+          <Text fontFamily="$body">Loading orders...</Text>
         </YStack>
       );
     }
@@ -53,12 +53,12 @@ export function OrdersScreen() {
       return (
         <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
           <ShoppingBag size={48} color="$textSecondary" opacity={0.5} />
-          <Text fontSize="$5" fontWeight="600">No orders yet</Text>
-          <Text color="$textSecondary" textAlign="center" paddingHorizontal="$4">
+          <Text fontFamily="$body" fontSize="$5" fontWeight="600">No orders yet</Text>
+          <Text fontFamily="$body" color="$textSecondary" textAlign="center" paddingHorizontal="$4">
             Your real orders will appear here after checkout. Cart → Checkout → Orders.
           </Text>
           <Button marginTop="$4" backgroundColor="$primary" onPress={() => router.push('/(app)/(tabs)/discover')}>
-            <Text color="white" fontWeight="600">Discover Products</Text>
+            <Text fontFamily="$body" color="white" fontWeight="600">Discover Products</Text>
           </Button>
         </YStack>
       );
@@ -94,23 +94,23 @@ export function OrdersScreen() {
                 >
                   <XStack justifyContent="space-between" alignItems="center">
                     <YStack>
-                      <Text fontSize="$2" fontWeight="700" color="$textPrimary">{o.orderNumber}</Text>
-                      <Text fontSize="$2" color="$textSecondary">{formatDate(o.createdAt)} • {o.items.length} item{o.items.length > 1 ? 's' : ''}</Text>
+                      <Text fontFamily="$body" fontSize="$2" fontWeight="700" color="$textPrimary">{o.orderNumber}</Text>
+                      <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{formatDate(o.createdAt)} • {o.items.length} item{o.items.length > 1 ? 's' : ''}</Text>
                     </YStack>
                     <YStack backgroundColor={color as never} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2">
-                      <Text fontSize="$1" color="white" fontWeight="700" textTransform="uppercase">{o.status}</Text>
+                      <Text fontFamily="$body" fontSize="$1" color="white" fontWeight="700" textTransform="uppercase">{o.status}</Text>
                     </YStack>
                   </XStack>
 
                   <Separator borderColor="$borderColor" />
 
                   <YStack gap="$1">
-                    <Text fontSize="$2" color="$textSecondary" numberOfLines={2}>{o.items[0]?.brand ?? ''} {o.items[0]?.title ?? ''}{o.items.length > 1 ? ` +${o.items.length - 1} more` : ''}</Text>
-                    <Text fontSize="$3" fontWeight="bold">{formatCurrency(o.pricing.totalAmount)}</Text>
+                    <Text fontFamily="$body" fontSize="$2" color="$textSecondary" numberOfLines={2}>{o.items[0]?.brand ?? ''} {o.items[0]?.title ?? ''}{o.items.length > 1 ? ` +${o.items.length - 1} more` : ''}</Text>
+                    <Text fontFamily="$body" fontSize="$3" fontWeight="bold">{formatCurrency(o.pricing.totalAmount)}</Text>
                     {o.trackingId || o.tracking?.trackingNumber ? (
                       <XStack gap="$2" alignItems="center">
                         <Package size={14} color="$textSecondary" />
-                        <Text fontSize="$1" color="$textSecondary">{o.tracking?.carrier ?? 'Carrier'} • {o.tracking?.trackingNumber ?? o.trackingId}</Text>
+                        <Text fontFamily="$body" fontSize="$1" color="$textSecondary">{o.tracking?.carrier ?? 'Carrier'} • {o.tracking?.trackingNumber ?? o.trackingId}</Text>
                       </XStack>
                     ) : null}
                   </YStack>
@@ -139,7 +139,7 @@ export function OrdersScreen() {
         >
           <ChevronLeft size={24} color="$textPrimary" />
         </TopBarIconButton>
-        <Text fontSize="$5" fontWeight="bold">Your Orders</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Your Orders</Text>
       </XStack>
 
       {renderContent()}

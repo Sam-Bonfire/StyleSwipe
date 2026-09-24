@@ -42,7 +42,7 @@ const DirectCheckoutSection = ({ cart, onProceed }: { cart: Cart; onProceed: () 
         borderRadius="$3"
         icon={ShoppingBag}
       >
-        <Text color="white" fontWeight="bold">
+        <Text fontFamily="$body" color="white" fontWeight="bold">
           Proceed to Checkout
         </Text>
       </Button>
@@ -137,7 +137,7 @@ export const CartScreen = () => {
   if (isLoading) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center">
-        <Text>Loading Bag...</Text>
+        <Text fontFamily="$body">Loading Bag...</Text>
       </YStack>
     );
   }
@@ -145,10 +145,10 @@ export const CartScreen = () => {
   if (!cart || cart.items.length === 0) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
-        <Text fontSize="$5" fontWeight="600">
+        <Text fontFamily="$body" fontSize="$5" fontWeight="600">
           Your bag is empty
         </Text>
-        <Text color="$textSecondary" marginTop="$2">
+        <Text fontFamily="$body" color="$textSecondary" marginTop="$2">
           Start swiping to add items!
         </Text>
       </YStack>
@@ -159,7 +159,7 @@ export const CartScreen = () => {
     <YStack flex={1} backgroundColor="$background">
       <ScrollView backgroundColor="$background">
         <YStack padding="$4" gap="$4" paddingBottom="$10">
-          <Text fontSize="$6" fontWeight="bold" marginBottom="$2">
+          <Text fontFamily="$body" fontSize="$6" fontWeight="bold" marginBottom="$2">
             Shopping Bag ({cart.items.length})
           </Text>
 
@@ -196,7 +196,7 @@ export const CartScreen = () => {
           ) : null}
 
           {!userId ? (
-            <Text fontSize="$2" color="$textSecondary" textAlign="center" marginTop="$2">
+            <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textAlign="center" marginTop="$2">
               Sign in to save your bag across devices
             </Text>
           ) : null}

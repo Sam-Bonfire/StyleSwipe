@@ -26,7 +26,7 @@ export function BoardsSection({ title = 'Your Collections', compact = false }: B
   return (
     <YStack gap="$3">
       <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$4">
-        <Text fontSize="$5" fontWeight="700">{title}</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="700">{title}</Text>
         <Button size="small" variant="outlined" icon={Plus} onPress={() => setCreateVisible(true)}>New</Button>
       </XStack>
 
@@ -37,8 +37,8 @@ export function BoardsSection({ title = 'Your Collections', compact = false }: B
         </XStack>
       ) : boards.length === 0 ? (
         <YStack paddingHorizontal="$4" paddingVertical="$3" backgroundColor="$surface" borderRadius="$4" marginHorizontal="$4" gap="$2" borderWidth={1} borderColor="$borderColor">
-          <Text fontWeight="600">No collections yet</Text>
-          <Text fontSize="$2" color="$textSecondary">Create a board like "Summer Fits" to organize items you love.</Text>
+          <Text fontFamily="$body" fontWeight="600">No collections yet</Text>
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Create a board like "Summer Fits" to organize items you love.</Text>
           <Button size="small" variant="primary" onPress={() => setCreateVisible(true)} marginTop="$2">Create Collection</Button>
         </YStack>
       ) : compact ? (
@@ -46,14 +46,14 @@ export function BoardsSection({ title = 'Your Collections', compact = false }: B
           {boards.slice(0, 3).map((b) => (
             <XStack key={b._id as string} justifyContent="space-between" alignItems="center" backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" onPress={() => router.push({ pathname: '/(app)/board/[id]', params: { id: b._id as string } })}>
               <YStack>
-                <Text fontWeight="600">{b.name}</Text>
-                <Text fontSize="$2" color="$textSecondary">{b.itemCount} items</Text>
+                <Text fontFamily="$body" fontWeight="600">{b.name}</Text>
+                <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{b.itemCount} items</Text>
               </YStack>
-              <Text color="$primary" fontWeight="600">Open</Text>
+              <Text fontFamily="$body" color="$primary" fontWeight="600">Open</Text>
             </XStack>
           ))}
           {boards.length > 3 && (
-            <Text color="$primary" fontWeight="600" textAlign="center" onPress={() => router.push('/(app)/wishlist' as never)}>View all {boards.length} boards</Text>
+            <Text fontFamily="$body" color="$primary" fontWeight="600" textAlign="center" onPress={() => router.push('/(app)/wishlist' as never)}>View all {boards.length} boards</Text>
           )}
         </YStack>
       ) : (

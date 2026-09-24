@@ -148,7 +148,7 @@ export function NewJobModal({ open, onClose }: NewJobModalProps) {
 
             {/* Error Message */}
             {error && (
-              <Text color="$error" fontSize="$2">
+              <Text fontFamily="$body" color="$error" fontSize="$2">
                 {error}
               </Text>
             )}

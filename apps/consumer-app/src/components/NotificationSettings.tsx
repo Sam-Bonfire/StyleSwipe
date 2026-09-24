@@ -24,11 +24,11 @@ function ToggleRow({ label, description, value, onValueChange, disabled }: Toggl
   return (
     <XStack justifyContent="space-between" alignItems="center" paddingVertical="$2">
       <YStack flex={1} gap="$1">
-        <Text fontWeight="600" fontSize="$3">
+        <Text fontFamily="$body" fontWeight="600" fontSize="$3">
           {label}
         </Text>
         {description ? (
-          <Text fontSize="$2" color="$textSecondary">
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
             {description}
           </Text>
         ) : null}
@@ -50,7 +50,7 @@ export function NotificationSettings(): React.JSX.Element {
   if (userId === undefined) {
     return (
       <YStack padding="$4">
-        <Text color="$textSecondary">Sign in to manage notifications.</Text>
+        <Text fontFamily="$body" color="$textSecondary">Sign in to manage notifications.</Text>
       </YStack>
     );
   }
@@ -58,7 +58,7 @@ export function NotificationSettings(): React.JSX.Element {
   if (prefs === undefined) {
     return (
       <YStack padding="$4">
-        <Text color="$textSecondary">Loading preferences…</Text>
+        <Text fontFamily="$body" color="$textSecondary">Loading preferences…</Text>
       </YStack>
     );
   }
@@ -115,7 +115,7 @@ export function NotificationSettings(): React.JSX.Element {
 
   return (
     <YStack gap="$4" padding="$4" backgroundColor="$background" borderRadius="$4">
-      <H3 fontSize="$4">Notifications</H3>
+      <H3 fontFamily="$heading" fontSize="$4">Notifications</H3>
       <YStack gap="$1" borderWidth={1} borderColor="$borderColor" borderRadius="$3" padding="$3">
         <ToggleRow label="Push notifications" description="Price drops, restocks, order updates, partner likes" value={current.push} onValueChange={(v) => void handleToggle('push', v)} disabled={isToggling} />
         <ToggleRow label="Price drops" value={current.priceDrops} onValueChange={(v) => void handleToggle('priceDrops', v)} disabled={isToggling || !current.push} />

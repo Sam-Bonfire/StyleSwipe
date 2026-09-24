@@ -40,8 +40,8 @@ export function UsersScreen() {
             <YStack padding="$3" paddingBottom="$8" gap="$3">
                 <Header>
                     <YStack gap="$1">
-                        <H3 color="$color">User Management</H3>
-                        <Text fontSize="$2" color="$color" opacity={0.6} fontWeight="500">
+                        <H3 fontFamily="$heading" color="$color">User Management</H3>
+                        <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6} fontWeight="500">
                             Manage and monitor all platform users
                         </Text>
                     </YStack>
@@ -56,7 +56,7 @@ export function UsersScreen() {
                 {isLoading ? (
                     <YStack alignItems="center" padding="$8">
                         <Spinner size="large" color="$primary" />
-                        <Text marginTop="$3" color="$color" opacity={0.6}>
+                        <Text fontFamily="$body" marginTop="$3" color="$color" opacity={0.6}>
                             Loading users...
                         </Text>
                     </YStack>
@@ -99,12 +99,12 @@ export function UsersScreen() {
                                                     </Avatar>
 
                                                     <YStack flex={1} gap="$1" alignItems="flex-start">
-                                                        <Text fontSize="$3" fontWeight="600" color="$color">
+                                                        <Text fontFamily="$body" fontSize="$3" fontWeight="600" color="$color">
                                                             {user.name || 'Unnamed User'}
                                                         </Text>
                                                         <XStack gap="$2" alignItems="center">
                                                             <Mail size={12} color="$color" opacity={0.5} />
-                                                            <Text fontSize="$2" color="$color" opacity={0.6}>
+                                                            <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6}>
                                                                 {user.email}
                                                             </Text>
                                                         </XStack>
@@ -113,7 +113,7 @@ export function UsersScreen() {
                                                     {user.organizations && user.organizations.length > 0 ? (
                                                         <XStack gap="$2" alignItems="center">
                                                             <Building2 size={14} color="$primary" />
-                                                            <Text fontSize="$2" color="$primary" fontWeight="600">
+                                                            <Text fontFamily="$body" fontSize="$2" color="$primary" fontWeight="600">
                                                                 {user.organizations.length} org{user.organizations.length > 1 ? 's' : ''}
                                                             </Text>
                                                         </XStack>
@@ -137,7 +137,7 @@ export function UsersScreen() {
                                             <YStack gap="$3">
                                                 <XStack gap="$6" flexWrap="wrap">
                                                     <YStack gap="$2" flex={1}>
-                                                        <Text fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
+                                                        <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
                                                             User Details
                                                         </Text>
                                                         <DetailRow label="User ID" value={user._id.slice(-12)} mono />
@@ -145,7 +145,7 @@ export function UsersScreen() {
                                                         {user.emailVerified ? (
                                                             <XStack gap="$2" alignItems="center">
                                                                 <Shield size={12} color="$success" />
-                                                                <Text fontSize="$2" color="$success" fontWeight="600">
+                                                                <Text fontFamily="$body" fontSize="$2" color="$success" fontWeight="600">
                                                                     Email Verified
                                                                 </Text>
                                                             </XStack>
@@ -153,7 +153,7 @@ export function UsersScreen() {
                                                     </YStack>
 
                                                     <YStack gap="$2" flex={1} minWidth={200}>
-                                                        <Text fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
+                                                        <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$color" opacity={0.6} textTransform="uppercase" letterSpacing={0.5}>
                                                             Organizations
                                                         </Text>
                                                         {user.organizations && user.organizations.length > 0 ? (
@@ -161,17 +161,17 @@ export function UsersScreen() {
                                                                 <XStack key={org._id} gap="$2" alignItems="center" justifyContent="space-between">
                                                                     <XStack gap="$2" alignItems="center">
                                                                         <Building2 size={12} color="$color" opacity={0.5} />
-                                                                        <Text fontSize="$2" color="$color">
+                                                                        <Text fontFamily="$body" fontSize="$2" color="$color">
                                                                             {org.name}
                                                                         </Text>
                                                                     </XStack>
-                                                                    <Text fontSize="$1" color="$primary" fontWeight="600" textTransform="uppercase">
+                                                                    <Text fontFamily="$body" fontSize="$1" color="$primary" fontWeight="600" textTransform="uppercase">
                                                                         {org.role}
                                                                     </Text>
                                                                 </XStack>
                                                             ))
                                                         ) : (
-                                                            <Text fontSize="$2" color="$color" opacity={0.5}>
+                                                            <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.5}>
                                                                 No organizations
                                                             </Text>
                                                         )}
@@ -225,10 +225,10 @@ export function UsersScreen() {
                             )}
                         </YStack>
                         <YStack gap="$1" alignItems="center">
-                            <Text fontSize="$5" fontWeight="600" color="$color">
+                            <Text fontFamily="$body" fontSize="$5" fontWeight="600" color="$color">
                                 {debouncedSearch ? 'No users found' : 'No users yet'}
                             </Text>
-                            <Text fontSize="$3" color="$color" opacity={0.6} textAlign="center">
+                            <Text fontFamily="$body" fontSize="$3" color="$color" opacity={0.6} textAlign="center">
                                 {debouncedSearch
                                     ? `No users match "${debouncedSearch}"`
                                     : 'Users will appear here once they sign up'}
@@ -267,7 +267,7 @@ function DetailRow({
 }) {
     return (
         <XStack justifyContent="space-between" alignItems="center">
-            <Text fontSize="$2" color="$color" opacity={0.6}>
+            <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6}>
                 {label}
             </Text>
             <Text

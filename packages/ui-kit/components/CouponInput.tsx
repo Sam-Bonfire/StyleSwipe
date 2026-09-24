@@ -236,7 +236,7 @@ export const CouponInput = React.forwardRef<typeof InputFrame, CouponInputProps>
                   <Check size={18} color="$success" />
                   <AppliedText>{appliedCode}</AppliedText>
                   {discountAmount && (
-                    <Text fontSize="$3" color="$textSecondary">
+                    <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
                       (-{formatPrice(discountAmount as number)})
                     </Text>
                   )}

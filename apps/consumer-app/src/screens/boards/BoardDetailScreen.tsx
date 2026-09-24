@@ -105,8 +105,8 @@ export function BoardDetailScreen({ boardId }: BoardDetailScreenProps) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
         <YStack flex={1} alignItems="center" justifyContent="center" gap="$3" padding="$4">
-          <Text fontSize="$5" fontWeight="700">Collection not found</Text>
-          <Text color="$textSecondary" textAlign="center">This board may have been deleted or you don't have access.</Text>
+          <Text fontFamily="$body" fontSize="$5" fontWeight="700">Collection not found</Text>
+          <Text fontFamily="$body" color="$textSecondary" textAlign="center">This board may have been deleted or you don't have access.</Text>
           <Button variant="primary" onPress={() => router.back()}>Go Back</Button>
         </YStack>
       </SafeAreaView>
@@ -134,8 +134,8 @@ export function BoardDetailScreen({ boardId }: BoardDetailScreenProps) {
               <ChevronLeft size={20} />
             </YStack>
             <YStack>
-              <Text fontSize="$5" fontWeight="700" numberOfLines={1} maxWidth={180}>{board.name}</Text>
-              <Text fontSize="$2" color="$textSecondary">{board.items?.length ?? 0} items • {board.slug}</Text>
+              <Text fontFamily="$body" fontSize="$5" fontWeight="700" numberOfLines={1} maxWidth={180}>{board.name}</Text>
+              <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{board.items?.length ?? 0} items • {board.slug}</Text>
             </YStack>
           </XStack>
           <XStack gap="$2">
@@ -166,8 +166,8 @@ export function BoardDetailScreen({ boardId }: BoardDetailScreenProps) {
         <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
           {board.items.length === 0 ? (
             <YStack alignItems="center" padding="$6" gap="$3">
-              <Text fontSize="$5" fontWeight="600">No items yet</Text>
-              <Text color="$textSecondary" textAlign="center">Products you save to this collection will appear here in a 2-column grid.</Text>
+              <Text fontFamily="$body" fontSize="$5" fontWeight="600">No items yet</Text>
+              <Text fontFamily="$body" color="$textSecondary" textAlign="center">Products you save to this collection will appear here in a 2-column grid.</Text>
               <Button variant="primary" onPress={() => router.push('/(app)/(tabs)/discover' as never)}>Discover Products</Button>
             </YStack>
           ) : (
@@ -201,7 +201,7 @@ export function BoardDetailScreen({ boardId }: BoardDetailScreenProps) {
 
           <YStack marginTop="$4" gap="$2" alignItems="center">
             <Button variant="outlined" icon={ShareIcon} onPress={handleNativeShare}>Share Link</Button>
-            <Text fontSize="$2" color="$textTertiary" textAlign="center" paddingHorizontal="$4">Share this collection via QR or link. Recipients can view your curated items.</Text>
+            <Text fontFamily="$body" fontSize="$2" color="$textTertiary" textAlign="center" paddingHorizontal="$4">Share this collection via QR or link. Recipients can view your curated items.</Text>
           </YStack>
         </ScrollView>
       </YStack>

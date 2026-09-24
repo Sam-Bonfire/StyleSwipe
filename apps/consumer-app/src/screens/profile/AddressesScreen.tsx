@@ -61,17 +61,17 @@ export function AddressesScreen() {
         <TopBarIconButton onPress={() => router.back()} backgroundColor="$background">
           <ChevronLeft size={24} color="$textPrimary" />
         </TopBarIconButton>
-        <Text fontSize="$5" fontWeight="bold">Saved Addresses</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Saved Addresses</Text>
       </XStack>
 
       <ScrollView>
         <YStack padding="$4" gap="$4" paddingBottom="$10">
           {addresses === undefined ? (
-            <Text>Loading addresses...</Text>
+            <Text fontFamily="$body">Loading addresses...</Text>
           ) : addresses.length === 0 && !showForm ? (
             <YStack alignItems="center" gap="$3" padding="$4">
-              <Text fontSize="$5" fontWeight="600">No addresses yet</Text>
-              <Text color="$textSecondary" textAlign="center">Add your first delivery address (Indian pincode + state).</Text>
+              <Text fontFamily="$body" fontSize="$5" fontWeight="600">No addresses yet</Text>
+              <Text fontFamily="$body" color="$textSecondary" textAlign="center">Add your first delivery address (Indian pincode + state).</Text>
               <Button backgroundColor="$primary" onPress={() => setShowForm(true)}>Add Address</Button>
             </YStack>
           ) : (
@@ -92,7 +92,7 @@ export function AddressesScreen() {
                 if (editingId === a._id) {
                   return (
                     <YStack key={a._id} backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor">
-                      <Text fontWeight="600" marginBottom="$2">Edit Address</Text>
+                      <Text fontFamily="$body" fontWeight="600" marginBottom="$2">Edit Address</Text>
                       <AddressForm
                         initialAddress={{
                           fullName: a.fullName,
@@ -109,25 +109,25 @@ export function AddressesScreen() {
                         onSubmit={handleUpdate}
                         submitLabel="Update Address"
                       />
-                      <Button chromeless marginTop="$2" onPress={() => setEditingId(null)}><Text color="$textSecondary">Cancel</Text></Button>
+                      <Button chromeless marginTop="$2" onPress={() => setEditingId(null)}><Text fontFamily="$body" color="$textSecondary">Cancel</Text></Button>
                     </YStack>
                   );
                 }
                 return (
                   <YStack key={a._id} backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" gap="$2">
                     <XStack justifyContent="space-between" alignItems="center">
-                      <Text fontWeight="600">{a.fullName}</Text>
-                      {a.isDefault ? <XStack backgroundColor="$primary" paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2"><Text fontSize="$1" color="white" fontWeight="700">DEFAULT</Text></XStack> : null}
+                      <Text fontFamily="$body" fontWeight="600">{a.fullName}</Text>
+                      {a.isDefault ? <XStack backgroundColor="$primary" paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2"><Text fontFamily="$body" fontSize="$1" color="white" fontWeight="700">DEFAULT</Text></XStack> : null}
                     </XStack>
-                    <Text fontSize="$3" color="$textSecondary">{a.line1}{a.line2 ? `, ${a.line2}` : ''}, {a.city}, {a.state} - {a.pincode}</Text>
-                    <Text fontSize="$2" color="$textSecondary">{a.country} • {a.phone}</Text>
+                    <Text fontFamily="$body" fontSize="$3" color="$textSecondary">{a.line1}{a.line2 ? `, ${a.line2}` : ''}, {a.city}, {a.state} - {a.pincode}</Text>
+                    <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{a.country} • {a.phone}</Text>
                     <Separator borderColor="$borderColor" />
                     <XStack gap="$2">
                       <Button size="small" variant="outlined" onPress={() => setEditingId(a._id)}>Edit</Button>
                       <Button size="small" variant="outlined" onPress={() => deleteAddress(a._id)} icon={Trash2}>Delete</Button>
                       {!a.isDefault ? (
                         <Button size="small" backgroundColor="$primary" onPress={() => setDefault(a._id)} icon={Star}>
-                          <Text color="white" fontSize="$2">Set Default</Text>
+                          <Text fontFamily="$body" color="white" fontSize="$2">Set Default</Text>
                         </Button>
                       ) : null}
                     </XStack>
@@ -141,9 +141,9 @@ export function AddressesScreen() {
 
               {showForm ? (
                 <YStack backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor">
-                  <Text fontWeight="600" marginBottom="$2">Add Address</Text>
+                  <Text fontFamily="$body" fontWeight="600" marginBottom="$2">Add Address</Text>
                   <AddressForm onSubmit={handleCreate} submitLabel="Save Address" />
-                  <Button chromeless marginTop="$2" onPress={() => setShowForm(false)}><Text color="$textSecondary">Cancel</Text></Button>
+                  <Button chromeless marginTop="$2" onPress={() => setShowForm(false)}><Text fontFamily="$body" color="$textSecondary">Cancel</Text></Button>
                 </YStack>
               ) : null}
             </YStack>

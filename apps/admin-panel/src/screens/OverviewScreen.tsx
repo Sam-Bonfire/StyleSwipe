@@ -69,7 +69,7 @@ export function OverviewScreen() {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">
         <Spinner size="large" color="$primary" />
-        <Text marginTop="$3" color="$color" opacity={0.7}>Loading dashboard...</Text>
+        <Text fontFamily="$body" marginTop="$3" color="$color" opacity={0.7}>Loading dashboard...</Text>
       </YStack>
     );
   }
@@ -89,13 +89,13 @@ export function OverviewScreen() {
           <AlertCircle size={32} color="$error" />
         </YStack>
         <YStack gap="$1" alignItems="center">
-          <Text fontSize="$5" fontWeight="600" color="$color">
+          <Text fontFamily="$body" fontSize="$5" fontWeight="600" color="$color">
             Failed to Load Dashboard
           </Text>
-          <Text fontSize="$3" color="$color" opacity={0.6} textAlign="center">
+          <Text fontFamily="$body" fontSize="$3" color="$color" opacity={0.6} textAlign="center">
             There was an error loading the dashboard statistics.
           </Text>
-          <Text fontSize="$2" color="$color" opacity={0.5} textAlign="center" marginTop="$2">
+          <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.5} textAlign="center" marginTop="$2">
             Please refresh the page or try again later.
           </Text>
         </YStack>
@@ -107,8 +107,8 @@ export function OverviewScreen() {
     <ScrollView flex={1} showsVerticalScrollIndicator={false}>
       <YStack gap="$2" padding="$1" paddingBottom="$8">
         <YStack gap="$2" marginBottom="$2">
-          <H3 color="$color">Dashboard Overview</H3>
-          <Text fontSize="$3" color="$color" opacity={0.6}>
+          <H3 fontFamily="$heading" color="$color">Dashboard Overview</H3>
+          <Text fontFamily="$body" fontSize="$3" color="$color" opacity={0.6}>
             Monitor platform activity and key metrics
           </Text>
         </YStack>
@@ -140,7 +140,7 @@ export function OverviewScreen() {
         <XStack gap="$2" marginTop="$2" flexWrap="wrap">
           <ActivityCard>
             <XStack justifyContent="space-between" alignItems="center" marginBottom="$4">
-              <H3 fontSize="$5" color="$color">Recent Activity</H3>
+              <H3 fontFamily="$heading" fontSize="$5" color="$color">Recent Activity</H3>
               <Clock size={20} color="$color" opacity={0.5} />
             </XStack>
             <YStack gap="$2">
@@ -154,10 +154,10 @@ export function OverviewScreen() {
                       </Avatar.Fallback>
                     </Avatar>
                     <YStack flex={1}>
-                      <Text fontSize="$3" fontWeight="500" color="$color">
+                      <Text fontFamily="$body" fontSize="$3" fontWeight="500" color="$color">
                         New user joined
                       </Text>
-                      <Text fontSize="$2" color="$color" opacity={0.6}>
+                      <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6}>
                         {u.name || u.email}
                       </Text>
                     </YStack>
@@ -165,7 +165,7 @@ export function OverviewScreen() {
                   </ActivityItem>
                 ))
               ) : (
-                <Text color="$color" opacity={0.5} textAlign="center" paddingVertical="$4">
+                <Text fontFamily="$body" color="$color" opacity={0.5} textAlign="center" paddingVertical="$4">
                   No recent activity
                 </Text>
               )}
@@ -194,7 +194,7 @@ function StatsCard({
     <StatsCardStyled>
       <XStack justifyContent="space-between" alignItems="flex-start" marginBottom="$3">
         <YStack flex={1}>
-          <Text fontSize="$2" color="$color" opacity={0.6} textTransform="uppercase" fontWeight="600" letterSpacing={1}>
+          <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6} textTransform="uppercase" fontWeight="600" letterSpacing={1}>
             {title}
           </Text>
         </YStack>
@@ -206,14 +206,14 @@ function StatsCard({
           {icon}
         </YStack>
       </XStack>
-      <H2 marginVertical="$2" color="$color" fontSize="$9">
+      <H2 fontFamily="$heading" marginVertical="$2" color="$color" fontSize="$9">
         {value}
       </H2>
       <XStack alignItems="center" gap="$2">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <TrendingUp size={14} color={color as any} />
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <Text fontSize="$2" color={color as any} fontWeight="500">
+        <Text fontFamily="$body" fontSize="$2" color={color as any} fontWeight="500">
           {change}
         </Text>
       </XStack>

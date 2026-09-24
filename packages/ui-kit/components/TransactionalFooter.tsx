@@ -81,10 +81,10 @@ export const TransactionalFooter = ({
           <PriceText>{formatPrice(price)}</PriceText>
           {originalPrice && originalPrice > price && (
             <>
-              <Text fontSize="$3" color="$textSecondary" textDecorationLine="line-through">
+              <Text fontFamily="$body" fontSize="$3" color="$textSecondary" textDecorationLine="line-through">
                 {formatPrice(originalPrice)}
               </Text>
-              <Text fontSize="$3" color="$success" fontWeight="700">
+              <Text fontFamily="$body" fontSize="$3" color="$success" fontWeight="700">
                 {discountPercentage}% OFF
               </Text>
             </>

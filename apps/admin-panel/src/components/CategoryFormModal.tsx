@@ -137,7 +137,7 @@ export function CategoryFormModal({ open, onOpenChange, initial, categories, onS
                   onPress={() => setParentId(undefined)}
                   cursor="pointer"
                 >
-                  <Text fontSize="$3">(None — root category)</Text>
+                  <Text fontFamily="$body" fontSize="$3">(None — root category)</Text>
                 </YStack>
                 {parentOptions.map((c) => (
                   <YStack
@@ -148,13 +148,13 @@ export function CategoryFormModal({ open, onOpenChange, initial, categories, onS
                     onPress={() => setParentId(c._id)}
                     cursor="pointer"
                   >
-                    <Text fontSize="$3">{c.name}</Text>
+                    <Text fontFamily="$body" fontSize="$3">{c.name}</Text>
                   </YStack>
                 ))}
               </ScrollView>
             </YStack>
             {error ? (
-              <Text color="$error" fontSize="$3">
+              <Text fontFamily="$body" color="$error" fontSize="$3">
                 {error}
               </Text>
             ) : null}

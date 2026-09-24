@@ -88,7 +88,7 @@ export function SettingsScreen() {
   return (
     <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
-        <H3>Settings</H3>
+        <H3 fontFamily="$heading">Settings</H3>
         <Button size="small" variant="primary" icon={Plus} onPress={openCreate}>
           New Flag
         </Button>
@@ -116,7 +116,7 @@ export function SettingsScreen() {
         </YStack>
       ) : nodes.length === 0 ? (
         <Card padding="$4">
-          <Text color="$textSecondary">No flags for {environment} yet. Create the first one above.</Text>
+          <Text fontFamily="$body" color="$textSecondary">No flags for {environment} yet. Create the first one above.</Text>
         </Card>
       ) : (
         <YStack gap="$2">
@@ -132,11 +132,11 @@ export function SettingsScreen() {
               borderColor="$borderColor"
             >
               <YStack flex={1}>
-                <Text fontSize="$4" fontWeight="600">
+                <Text fontFamily="$body" fontSize="$4" fontWeight="600">
                   {node.name}
                 </Text>
                 {node.description ? (
-                  <Text fontSize="$2" color="$textSecondary">
+                  <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                     {node.description}
                   </Text>
                 ) : null}

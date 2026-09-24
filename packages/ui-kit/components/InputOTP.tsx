@@ -62,7 +62,7 @@ export const InputOTP: React.FC<InputOTPProps> = ({ length = 6, value, onChange,
           />
         ))}
       </XStack>
-      <Text fontSize="$2" color="$textSecondary" textAlign="center">
+      <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textAlign="center">
         Enter 6-digit code
       </Text>
     </YStack>

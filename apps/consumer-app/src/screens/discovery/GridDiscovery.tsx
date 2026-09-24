@@ -102,8 +102,8 @@ export function GridDiscovery() {
   if (error) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" padding="$4">
-        <H2 color="red">Error Loading Feed</H2>
-        <H2 fontSize="$4">{error}</H2>
+        <H2 fontFamily="$heading" color="red">Error Loading Feed</H2>
+        <H2 fontFamily="$heading" fontSize="$4">{error}</H2>
       </YStack>
     );
   }
@@ -128,7 +128,7 @@ export function GridDiscovery() {
   if (products.length === 0) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" padding="$4" gap="$4">
-        <H2 fontSize="$4" color="gray">
+        <H2 fontFamily="$heading" fontSize="$4" color="gray">
           No items match your preferences. Try resetting filters!
         </H2>
         <Button variant="primary" onPress={() => handleRefresh()}>Reset Filters</Button>

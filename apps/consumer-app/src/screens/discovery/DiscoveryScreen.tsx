@@ -59,7 +59,7 @@ export function DiscoveryScreen() {
               borderRadius="$full"
             >
               <YStack width={8} height={8} borderRadius={4} backgroundColor="$success" />
-              <Text fontSize="$3" fontWeight="600" color="$primary">
+              <Text fontFamily="$body" fontSize="$3" fontWeight="600" color="$primary">
                 Partner Syncing with {activeSession.partnerName || 'Partner'}
               </Text>
               <Users size={16} color="$primary" />

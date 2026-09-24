@@ -93,7 +93,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
         <YStack flex={1} alignItems="center" justifyContent="center">
-          <Text>Board not found.</Text>
+          <Text fontFamily="$body">Board not found.</Text>
           <Button onPress={() => router.back()}>Go Back</Button>
         </YStack>
       </SafeAreaView>
@@ -133,7 +133,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
           <XStack alignItems="center" justifyContent="space-between">
             <YStack>
               <Text fontSize="$6" fontWeight="bold" fontFamily="$heading">{board.name}</Text>
-              <Text fontSize="$3" color="$textSecondary" marginTop="$1">
+              <Text fontFamily="$body" fontSize="$3" color="$textSecondary" marginTop="$1">
                 {board.items?.length || 0} items
               </Text>
             </YStack>
@@ -171,7 +171,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
                     borderColor={item.matchStatus === 'Mutual Match' ? '$primary' : '$borderColor'}
                     zIndex={10}
                   >
-                    <Text
+                    <Text fontFamily="$body"
                       fontSize="$1"
                       fontWeight="bold"
                       color={item.matchStatus === 'Mutual Match' ? 'white' : '$textPrimary'}
@@ -211,7 +211,7 @@ export function StyleBoardScreen({ boardId }: { boardId: string }) {
 
         {board.items?.length === 0 && (
           <YStack padding="$6" alignItems="center">
-            <Text color="$textSecondary" textAlign="center">
+            <Text fontFamily="$body" color="$textSecondary" textAlign="center">
               This board is empty. Start swiping to add items!
             </Text>
           </YStack>
