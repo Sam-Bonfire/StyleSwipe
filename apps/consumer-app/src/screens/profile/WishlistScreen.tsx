@@ -74,9 +74,6 @@ export function WishlistScreen() {
           <ChevronLeft size={24} color="$textPrimary" />
         </TopBarIconButton>
         <Text fontSize="$5" fontWeight="bold" numberOfLines={1} flexShrink={1}>My Wishlist</Text>
-        <XStack flex={1} justifyContent="flex-end">
-          <Button size="small" variant="outlined" icon={Plus} onPress={() => setCreateVisible(true)}>New Collection</Button>
-        </XStack>
       </XStack>
 
       <ScrollView showsVerticalScrollIndicator={true}>
