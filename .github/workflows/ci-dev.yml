@@ -306,6 +306,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
       - name: Setup Mise
         uses: jdx/mise-action@v4
         with:
