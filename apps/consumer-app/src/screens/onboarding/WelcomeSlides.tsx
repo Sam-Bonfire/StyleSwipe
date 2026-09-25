@@ -46,7 +46,7 @@ export const WelcomeSlides: React.FC<Props> = ({ currentSlide, onNext, onSkip, o
     <YStack flex={1} backgroundColor="$background" padding="$4" justifyContent="space-between">
       <XStack justifyContent="space-between" alignItems="center" marginTop="$2">
         <AppLogo />
-        <Text color="$textSecondary" onPress={onSkip} pressStyle={{ opacity: 0.6 }}>
+        <Text fontFamily="$body" color="$textSecondary" onPress={onSkip} pressStyle={{ opacity: 0.6 }}>
           Skip
         </Text>
       </XStack>
@@ -60,10 +60,10 @@ export const WelcomeSlides: React.FC<Props> = ({ currentSlide, onNext, onSkip, o
           resizeMode="cover"
         />
         <YStack gap="$2" alignItems="center" paddingHorizontal="$4">
-          <H1 textAlign="center" color="$textPrimary">
+          <H1 fontFamily="$heading" textAlign="center" color="$textPrimary">
             {slide.title}
           </H1>
-          <Text textAlign="center" color="$textSecondary" fontSize="$4">
+          <Text fontFamily="$body" textAlign="center" color="$textSecondary" fontSize="$4">
             {slide.subtitle}
           </Text>
         </YStack>

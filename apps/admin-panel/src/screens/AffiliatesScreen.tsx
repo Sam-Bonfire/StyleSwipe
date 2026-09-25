@@ -99,7 +99,7 @@ export function AffiliatesScreen() {
   return (
     <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
-        <H3>Affiliate Redirects</H3>
+        <H3 fontFamily="$heading">Affiliate Redirects</H3>
         <Button size="small" variant="primary" icon={Plus} onPress={openCreate}>
           New Rule
         </Button>
@@ -107,18 +107,18 @@ export function AffiliatesScreen() {
 
       <XStack gap="$3">
         <Card flex={1} padding="$3">
-          <Text fontSize="$2" color="$textSecondary" textTransform="uppercase">
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textTransform="uppercase">
             Affiliate Redirects
           </Text>
-          <Text fontSize="$7" fontWeight="800">
+          <Text fontFamily="$body" fontSize="$7" fontWeight="800">
             {stats?.affiliateRedirect ?? '—'}
           </Text>
         </Card>
         <Card flex={1} padding="$3">
-          <Text fontSize="$2" color="$textSecondary" textTransform="uppercase">
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textTransform="uppercase">
             Merchant Redirects
           </Text>
-          <Text fontSize="$7" fontWeight="800">
+          <Text fontFamily="$body" fontSize="$7" fontWeight="800">
             {stats?.merchantRedirect ?? '—'}
           </Text>
         </Card>
@@ -128,7 +128,7 @@ export function AffiliatesScreen() {
 
       {nodes.length === 0 ? (
         <Card padding="$4">
-          <Text color="$textSecondary">
+          <Text fontFamily="$body" color="$textSecondary">
             No redirect rules yet. Outbound links pass through unchanged until a rule is enabled.
           </Text>
         </Card>
@@ -147,10 +147,10 @@ export function AffiliatesScreen() {
             >
               <ExternalLink size={18} color="$textSecondary" />
               <YStack flex={1}>
-                <Text fontSize="$4" fontWeight="600">
+                <Text fontFamily="$body" fontSize="$4" fontWeight="600">
                   {node.merchantName}
                 </Text>
-                <Text fontSize="$2" color="$textSecondary">
+                <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                   {node.merchantDomain} · {node.network} · {node.trackingParams.length} param
                   {node.trackingParams.length === 1 ? '' : 's'}
                 </Text>

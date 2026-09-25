@@ -27,18 +27,18 @@ export function ProfileScreen() {
                 <Avatar.Fallback backgroundColor="$primary" />
               </Avatar>
               <YStack>
-                <Text fontWeight="bold" fontSize="$5">
+                <Text fontFamily="$body" fontWeight="bold" fontSize="$5">
                   {user.name}
                 </Text>
-                <Text color="$textSecondary">{user.email}</Text>
+                <Text fontFamily="$body" color="$textSecondary">{user.email}</Text>
               </YStack>
             </XStack>
           ) : (
             <YStack gap="$2" alignItems="center">
-              <Text fontWeight="bold" fontSize="$5">
+              <Text fontFamily="$body" fontWeight="bold" fontSize="$5">
                 Welcome to StyleSwipe
               </Text>
-              <Text color="$textSecondary" textAlign="center">
+              <Text fontFamily="$body" color="$textSecondary" textAlign="center">
                 Sign in to personalize your style and save favorites.
               </Text>
               <Button variant="primary" onPress={() => router.push('/(auth)')}>
@@ -67,8 +67,8 @@ export function ProfileScreen() {
           </YStack>
 
           <YStack backgroundColor="$backgroundHover" padding="$4" borderRadius="$4" marginTop="auto" marginBottom="$4">
-            <Text fontSize="$4" fontWeight="bold" marginBottom="$2">Thank you for being here!</Text>
-            <Text fontSize="$3" opacity={0.8}>
+            <Text fontFamily="$body" fontSize="$4" fontWeight="bold" marginBottom="$2">Thank you for being here!</Text>
+            <Text fontFamily="$body" fontSize="$3" opacity={0.8}>
               We are working hard to build the best fashion experience for you.
               Your feedback helps us grow and improve StyleSwipe every day.
             </Text>

@@ -204,7 +204,7 @@ export const CheckoutScreen = () => {
         return (
           <YStack key={s} alignItems="center" opacity={active || past ? 1 : 0.4}>
             <Icon size={20} color={active ? '$primary' : past ? '$success' : '$textSecondary'} />
-            <Text fontSize="$1" textTransform="uppercase" fontWeight={active ? '700' : '400'}>
+            <Text fontFamily="$body" fontSize="$1" textTransform="uppercase" fontWeight={active ? '700' : '400'}>
               {s}
             </Text>
           </YStack>
@@ -216,8 +216,8 @@ export const CheckoutScreen = () => {
   if (!userId) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
-        <Text fontSize="$5" fontWeight="600">Sign in to checkout</Text>
-        <Text color="$textSecondary" textAlign="center">Please sign in to place your order securely.</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="600">Sign in to checkout</Text>
+        <Text fontFamily="$body" color="$textSecondary" textAlign="center">Please sign in to place your order securely.</Text>
         <Button backgroundColor="$primary" onPress={() => router.push('/(auth)')}>Sign In</Button>
       </YStack>
     );
@@ -226,7 +226,7 @@ export const CheckoutScreen = () => {
   if (!cart) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
-        <Text>Loading cart...</Text>
+        <Text fontFamily="$body">Loading cart...</Text>
       </YStack>
     );
   }
@@ -234,7 +234,7 @@ export const CheckoutScreen = () => {
   if (cart.items.length === 0 && step !== 'CONFIRMATION') {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
-        <Text fontSize="$5" fontWeight="600">Your cart is empty</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="600">Your cart is empty</Text>
         <Button backgroundColor="$primary" onPress={() => router.push('/(app)/(tabs)/cart')}>Go to Bag</Button>
       </YStack>
     );
@@ -244,11 +244,11 @@ export const CheckoutScreen = () => {
     return (
       <YStack flex={1} backgroundColor="$background" alignItems="center" justifyContent="center" padding="$4">
         <CheckCircle size={64} color="$success" />
-        <Text fontSize="$6" fontWeight="bold" marginTop="$4">Order Placed!</Text>
-        <Text fontSize="$4" color="$textSecondary" textAlign="center" marginTop="$2">
+        <Text fontFamily="$body" fontSize="$6" fontWeight="bold" marginTop="$4">Order Placed!</Text>
+        <Text fontFamily="$body" fontSize="$4" color="$textSecondary" textAlign="center" marginTop="$2">
           {orderNumber ? `Your order ${orderNumber}` : `Order ${orderId ?? ''}`} has been placed successfully.
         </Text>
-        <Text fontSize="$2" color="$textSecondary" marginTop="$1" textAlign="center">
+        <Text fontFamily="$body" fontSize="$2" color="$textSecondary" marginTop="$1" textAlign="center">
           Payment: {paymentMethod === 'COD' ? 'Cash on Delivery' : 'Razorpay (Pending)'} • Tracking will be updated soon.
         </Text>
         <Button marginTop="$6" backgroundColor="$primary" onPress={() => router.push('/(app)/orders')}>
@@ -267,7 +267,7 @@ export const CheckoutScreen = () => {
 
       {step === 'ADDRESS' && (
         <YStack gap="$4">
-          <Text fontSize="$5" fontWeight="bold">Shipping Address</Text>
+          <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Shipping Address</Text>
 
           {addresses && addresses.length > 0 ? (
             <YStack gap="$3">
@@ -286,11 +286,11 @@ export const CheckoutScreen = () => {
                     onPress={() => handleSelectAddress(a._id)}
                   >
                     <XStack justifyContent="space-between" alignItems="center">
-                      <Text fontWeight="600">{a.fullName}</Text>
-                      {a.isDefault ? <Text fontSize="$1" backgroundColor="$primary" color="white" paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2">DEFAULT</Text> : null}
+                      <Text fontFamily="$body" fontWeight="600">{a.fullName}</Text>
+                      {a.isDefault ? <Text fontFamily="$body" fontSize="$1" backgroundColor="$primary" color="white" paddingHorizontal="$2" paddingVertical="$1" borderRadius="$2">DEFAULT</Text> : null}
                     </XStack>
-                    <Text fontSize="$3" color="$textSecondary">{a.line1}, {a.city}, {a.state} - {a.pincode}</Text>
-                    <Text fontSize="$2" color="$textSecondary">{a.phone}</Text>
+                    <Text fontFamily="$body" fontSize="$3" color="$textSecondary">{a.line1}, {a.city}, {a.state} - {a.pincode}</Text>
+                    <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{a.phone}</Text>
                   </YStack>
                 );
               })}
@@ -301,7 +301,7 @@ export const CheckoutScreen = () => {
                 opacity={!resolvedAddress ? 0.5 : 1}
                 onPress={() => setStep('SHIPPING')}
               >
-                <Text color="white" fontWeight="600">Deliver Here</Text>
+                <Text fontFamily="$body" color="white" fontWeight="600">Deliver Here</Text>
               </Button>
 
               <Separator marginVertical="$2" />
@@ -310,15 +310,15 @@ export const CheckoutScreen = () => {
                 <Button variant="outlined" onPress={() => setShowNewForm(true)}>+ Add New Address</Button>
               ) : (
                 <YStack gap="$2">
-                  <Text fontSize="$3" fontWeight="600">Add New Address</Text>
+                  <Text fontFamily="$body" fontSize="$3" fontWeight="600">Add New Address</Text>
                   <AddressForm onSubmit={handleAddressSubmit} submitLabel="Save & Deliver Here" />
-                  <Button chromeless onPress={() => setShowNewForm(false)}><Text color="$textSecondary">Cancel</Text></Button>
+                  <Button chromeless onPress={() => setShowNewForm(false)}><Text fontFamily="$body" color="$textSecondary">Cancel</Text></Button>
                 </YStack>
               )}
             </YStack>
           ) : (
             <YStack gap="$2">
-              <Text color="$textSecondary" fontSize="$3">No saved addresses. Add one to continue.</Text>
+              <Text fontFamily="$body" color="$textSecondary" fontSize="$3">No saved addresses. Add one to continue.</Text>
               <AddressForm onSubmit={handleAddressSubmit} />
             </YStack>
           )}
@@ -327,15 +327,15 @@ export const CheckoutScreen = () => {
 
       {step === 'SHIPPING' && (
         <YStack gap="$4">
-          <Text fontSize="$5" fontWeight="bold">Shipping</Text>
+          <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Shipping</Text>
 
           <YStack backgroundColor="$surface" padding="$4" borderRadius="$3" borderWidth={1} borderColor="$borderColor" gap="$2">
-            <Text fontWeight="600">Deliver to:</Text>
-            <Text fontSize="$3" color="$textSecondary">
+            <Text fontFamily="$body" fontWeight="600">Deliver to:</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
               {resolvedAddress?.fullName}, {resolvedAddress?.street}, {resolvedAddress?.city}, {resolvedAddress?.state} - {resolvedAddress?.pincode}
             </Text>
-            <Text fontSize="$2" color="$textSecondary">Phone: {resolvedAddress?.phone}</Text>
-            <Text fontSize="$2" color="$success">✓ Pincode {resolvedAddress?.pincode} serviceable</Text>
+            <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Phone: {resolvedAddress?.phone}</Text>
+            <Text fontFamily="$body" fontSize="$2" color="$success">✓ Pincode {resolvedAddress?.pincode} serviceable</Text>
           </YStack>
 
           {priceBreakdown && (
@@ -348,18 +348,18 @@ export const CheckoutScreen = () => {
             />
           )}
 
-          <Text fontSize="$2" color="$textSecondary">Estimated delivery 3-5 days • Free shipping over ₹1000</Text>
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Estimated delivery 3-5 days • Free shipping over ₹1000</Text>
 
           <Button backgroundColor="$primary" onPress={() => setStep('PAYMENT')}>
-            <Text color="white" fontWeight="600">Continue to Payment</Text>
+            <Text fontFamily="$body" color="white" fontWeight="600">Continue to Payment</Text>
           </Button>
-          <Button chromeless onPress={() => setStep('ADDRESS')}><Text color="$textSecondary">Back to Address</Text></Button>
+          <Button chromeless onPress={() => setStep('ADDRESS')}><Text fontFamily="$body" color="$textSecondary">Back to Address</Text></Button>
         </YStack>
       )}
 
       {step === 'PAYMENT' && (
         <YStack gap="$4">
-          <Text fontSize="$5" fontWeight="bold">Payment Method</Text>
+          <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Payment Method</Text>
 
           <YStack
             backgroundColor="$surface"
@@ -373,11 +373,11 @@ export const CheckoutScreen = () => {
             <XStack gap="$3" alignItems="center">
               <Wallet size={22} color={paymentMethod === 'COD' ? '$primary' : '$textSecondary'} />
               <YStack>
-                <Text fontWeight="600">Cash on Delivery</Text>
-                <Text fontSize="$3" color="$textSecondary">Pay when you receive</Text>
+                <Text fontFamily="$body" fontWeight="600">Cash on Delivery</Text>
+                <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Pay when you receive</Text>
               </YStack>
               <YStack flex={1} alignItems="flex-end">
-                <Text fontSize="$2" color={paymentMethod === 'COD' ? '$primary' : '$textSecondary'}>{paymentMethod === 'COD' ? '● Selected' : '○'}</Text>
+                <Text fontFamily="$body" fontSize="$2" color={paymentMethod === 'COD' ? '$primary' : '$textSecondary'}>{paymentMethod === 'COD' ? '● Selected' : '○'}</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -395,25 +395,25 @@ export const CheckoutScreen = () => {
             <XStack gap="$3" alignItems="center">
               <CreditCard size={22} color={paymentMethod === 'RAZORPAY' ? '$primary' : '$textSecondary'} />
               <YStack flex={1}>
-                <Text fontWeight="600">Razorpay (UPI / Card / Netbanking)</Text>
-                <Text fontSize="$3" color="$textSecondary">Placeholder — will redirect to Razorpay checkout</Text>
-                <Text fontSize="$1" color="$warning">MVP: order created as pending, payment via webhook</Text>
+                <Text fontFamily="$body" fontWeight="600">Razorpay (UPI / Card / Netbanking)</Text>
+                <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Placeholder — will redirect to Razorpay checkout</Text>
+                <Text fontFamily="$body" fontSize="$1" color="$warning">MVP: order created as pending, payment via webhook</Text>
               </YStack>
-              <Text fontSize="$2" color={paymentMethod === 'RAZORPAY' ? '$primary' : '$textSecondary'}>{paymentMethod === 'RAZORPAY' ? '● Selected' : '○'}</Text>
+              <Text fontFamily="$body" fontSize="$2" color={paymentMethod === 'RAZORPAY' ? '$primary' : '$textSecondary'}>{paymentMethod === 'RAZORPAY' ? '● Selected' : '○'}</Text>
             </XStack>
           </YStack>
 
-          <Text color="$textSecondary" fontSize="$3">Shipping to: {resolvedAddress?.fullName}, {resolvedAddress?.city} • {resolvedAddress?.pincode}</Text>
+          <Text fontFamily="$body" color="$textSecondary" fontSize="$3">Shipping to: {resolvedAddress?.fullName}, {resolvedAddress?.city} • {resolvedAddress?.pincode}</Text>
 
           {priceBreakdown && (
-            <Text fontWeight="600" fontSize="$4">Total Payable: ₹{priceBreakdown.total}</Text>
+            <Text fontFamily="$body" fontWeight="600" fontSize="$4">Total Payable: ₹{priceBreakdown.total}</Text>
           )}
 
           <Button backgroundColor="$primary" onPress={handlePlaceOrder} disabled={isProcessing} opacity={isProcessing ? 0.7 : 1}>
-            <Text color="white" fontWeight="600">{isProcessing ? 'Placing Order...' : `Place Order • ${paymentMethod === 'COD' ? 'COD' : 'Razorpay'}`}</Text>
+            <Text fontFamily="$body" color="white" fontWeight="600">{isProcessing ? 'Placing Order...' : `Place Order • ${paymentMethod === 'COD' ? 'COD' : 'Razorpay'}`}</Text>
           </Button>
 
-          <Button chromeless onPress={() => setStep('SHIPPING')} disabled={isProcessing}><Text color="$textSecondary">Back to Shipping</Text></Button>
+          <Button chromeless onPress={() => setStep('SHIPPING')} disabled={isProcessing}><Text fontFamily="$body" color="$textSecondary">Back to Shipping</Text></Button>
         </YStack>
       )}
     </ScrollView>

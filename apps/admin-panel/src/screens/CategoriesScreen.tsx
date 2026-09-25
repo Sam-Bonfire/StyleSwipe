@@ -67,10 +67,10 @@ function CategoryRow({
       >
         <Icon size={18} color="$textSecondary" />
         <YStack flex={1}>
-          <Text fontSize="$4" fontWeight="600">
+          <Text fontFamily="$body" fontSize="$4" fontWeight="600">
             {node.name}
           </Text>
-          <Text fontSize="$2" color="$textSecondary">
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
             /{node.slug} · {node.productCount} product{node.productCount === 1 ? '' : 's'}
             {node.children.length > 0 ? ` · ${node.children.length} sub` : ''}
           </Text>
@@ -190,7 +190,7 @@ export function CategoriesScreen() {
   return (
     <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
-        <H3>Categories</H3>
+        <H3 fontFamily="$heading">Categories</H3>
         <Button size="small" variant="primary" icon={Plus} onPress={openCreate}>
           Create Category
         </Button>
@@ -198,7 +198,7 @@ export function CategoriesScreen() {
       <Separator borderColor="$borderColor" />
       {roots.length === 0 ? (
         <Card padding="$4">
-          <Text color="$textSecondary">No categories yet. Create the first root category.</Text>
+          <Text fontFamily="$body" color="$textSecondary">No categories yet. Create the first root category.</Text>
         </Card>
       ) : (
         <YStack gap="$2">

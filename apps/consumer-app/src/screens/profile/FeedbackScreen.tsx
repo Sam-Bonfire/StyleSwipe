@@ -89,11 +89,11 @@ export function FeedbackScreen() {
                 >
                     <ChevronLeft size={24} color="$textPrimary" />
                 </TopBarIconButton>
-                <Text fontSize="$5" fontWeight="bold">Send Feedback</Text>
+                <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Send Feedback</Text>
             </XStack>
             <ScrollView>
                 <YStack padding="$4" gap="$4" paddingBottom="$10">
-                    <Text color="$color" opacity={0.7}>We value your input! Let us know about bugs, features, or general improvements.</Text>
+                    <Text fontFamily="$body" color="$color" opacity={0.7}>We value your input! Let us know about bugs, features, or general improvements.</Text>
 
                     <YStack gap="$2">
                         <Label>Feedback Type</Label>
@@ -142,7 +142,7 @@ export function FeedbackScreen() {
                         {attachment && (
                             <XStack alignItems="center" gap="$2">
                                 <File size={16} />
-                                <Text fontSize="$2" numberOfLines={1} flex={1}>{attachment.name}</Text>
+                                <Text fontFamily="$body" fontSize="$2" numberOfLines={1} flex={1}>{attachment.name}</Text>
                             </XStack>
                         )}
                     </YStack>
@@ -153,18 +153,18 @@ export function FeedbackScreen() {
 
                     {myFeedback && myFeedback.length > 0 && (
                         <YStack marginTop="$6" gap="$3">
-                            <Text fontSize="$5" fontWeight="bold">My Feedback History</Text>
+                            <Text fontFamily="$body" fontSize="$5" fontWeight="bold">My Feedback History</Text>
                             {myFeedback.map((item: { _id: string; type: string; status: string; message: string; replies?: Array<{ message: string }> }) => (
                                 <YStack key={item._id} padding="$3" borderWidth={1} borderColor="$borderColor" borderRadius="$3" gap="$2">
                                     <XStack justifyContent="space-between">
-                                        <Text fontWeight="600" textTransform="capitalize">{item.type}</Text>
-                                        <Text color={item.status === 'Replied' ? '$success' : '$color'} opacity={0.7} fontSize="$2">{item.status}</Text>
+                                        <Text fontFamily="$body" fontWeight="600" textTransform="capitalize">{item.type}</Text>
+                                        <Text fontFamily="$body" color={item.status === 'Replied' ? '$success' : '$color'} opacity={0.7} fontSize="$2">{item.status}</Text>
                                     </XStack>
-                                    <Text numberOfLines={2} opacity={0.8}>{item.message}</Text>
+                                    <Text fontFamily="$body" numberOfLines={2} opacity={0.8}>{item.message}</Text>
                                     {item.replies && item.replies.length > 0 && (
                                         <YStack backgroundColor="$backgroundHover" padding="$2" borderRadius="$2" marginTop="$2">
-                                            <Text fontWeight="600" fontSize="$2" color="$primary">Admin Reply:</Text>
-                                            <Text fontSize="$2">{item.replies[item.replies.length - 1].message}</Text>
+                                            <Text fontFamily="$body" fontWeight="600" fontSize="$2" color="$primary">Admin Reply:</Text>
+                                            <Text fontFamily="$body" fontSize="$2">{item.replies[item.replies.length - 1].message}</Text>
                                         </YStack>
                                     )}
                                 </YStack>

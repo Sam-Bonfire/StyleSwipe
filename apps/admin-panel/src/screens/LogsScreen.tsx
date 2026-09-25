@@ -101,7 +101,7 @@ export function LogsScreen() {
                 <XStack gap="$4" alignItems="center" flexWrap="wrap">
                     <XStack alignItems="center" gap="$2">
                         <Filter size={16} />
-                        <Text fontWeight="bold">Filters:</Text>
+                        <Text fontFamily="$body" fontWeight="bold">Filters:</Text>
                     </XStack>
 
                     {/* Level Filter */}
@@ -165,12 +165,12 @@ export function LogsScreen() {
                 {status === 'LoadingFirstPage' ? (
                     <YStack flex={1} alignItems="center" justifyContent="center" padding="$8">
                         <Spinner size="large" />
-                        <Text marginTop="$3" opacity={0.6}>Loading logs...</Text>
+                        <Text fontFamily="$body" marginTop="$3" opacity={0.6}>Loading logs...</Text>
                     </YStack>
                 ) : logs.length === 0 ? (
                     <YStack flex={1} alignItems="center" justifyContent="center" padding="$8" gap="$3">
                         <Info size={48} opacity={0.2} />
-                        <Text fontSize="$5" fontWeight="bold" opacity={0.5}>No logs found</Text>
+                        <Text fontFamily="$body" fontSize="$5" fontWeight="bold" opacity={0.5}>No logs found</Text>
                     </YStack>
                 ) : (
                     <ScrollView
@@ -219,26 +219,26 @@ export function LogsScreen() {
                                                                         : '$neutral600')
                                                         }
                                                     >
-                                                        <Text color="white" fontSize="$1" fontWeight="bold">
+                                                        <Text fontFamily="$body" color="white" fontSize="$1" fontWeight="bold">
                                                             {item.level}
                                                         </Text>
                                                     </Badge>
-                                                    <Text fontSize="$3" opacity={0.5} width={80}>
+                                                    <Text fontFamily="$body" fontSize="$3" opacity={0.5} width={80}>
                                                         {new Date(item.timestamp).toLocaleTimeString()}
                                                     </Text>
-                                                    <Text fontWeight="600" fontSize="$4" flex={1} numberOfLines={open ? undefined : 1}>
+                                                    <Text fontFamily="$body" fontWeight="600" fontSize="$4" flex={1} numberOfLines={open ? undefined : 1}>
                                                         {item.message}
                                                     </Text>
                                                     {!open && (
                                                         <XStack gap="$2">
                                                             {item.app && (
                                                                 <Badge backgroundColor="$neutral200">
-                                                                    <Text fontSize="$1" opacity={0.6}>{item.app}</Text>
+                                                                    <Text fontFamily="$body" fontSize="$1" opacity={0.6}>{item.app}</Text>
                                                                 </Badge>
                                                             )}
                                                             {item.device?.model && (
                                                                 <Badge backgroundColor="$neutral200">
-                                                                    <Text fontSize="$1" opacity={0.6}>{item.device.model}</Text>
+                                                                    <Text fontFamily="$body" fontSize="$1" opacity={0.6}>{item.device.model}</Text>
                                                                 </Badge>
                                                             )}
                                                         </XStack>
@@ -259,7 +259,7 @@ export function LogsScreen() {
                                         >
                                             <YStack gap="$4">
                                                 <XStack justifyContent="space-between" alignItems="center">
-                                                    <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Log Entry Details</Text>
+                                                    <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Log Entry Details</Text>
                                                     <Button
                                                         size="small"
                                                         icon={Eye}
@@ -271,7 +271,7 @@ export function LogsScreen() {
                                                 </XStack>
                                                 <XStack justifyContent="space-between" flexWrap="wrap" gap="$6">
                                                     <YStack gap="$2" flex={1} minWidth={250}>
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Context</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Context</Text>
                                                         <DetailRow label="Trace ID" value={item.traceId} />
                                                         <DetailRow label="User ID" value={item.userId} />
                                                         <DetailRow label="Session ID" value={item.sessionId} />
@@ -280,7 +280,7 @@ export function LogsScreen() {
 
                                                     {item.device && (
                                                         <YStack gap="$2" flex={1} minWidth={250}>
-                                                            <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Device Info</Text>
+                                                            <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Device Info</Text>
                                                             <DetailRow label="Model" value={item.device.model} />
                                                             <DetailRow label="OS" value={item.device.osName && item.device.osVersion ? `${item.device.osName} ${item.device.osVersion}` : item.device.osName || item.device.osVersion} />
                                                             <DetailRow label="Network" value={item.device.networkType} />
@@ -293,7 +293,7 @@ export function LogsScreen() {
 
                                                 {item.error && (
                                                     <YStack gap="$2">
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Error Details</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Error Details</Text>
                                                         <YStack padding="$3" backgroundColor="$background" borderRadius="$4" borderWidth={1} borderColor="$error">
                                                             <Text color="$error" fontSize="$3" fontFamily="$mono">
                                                                 {JSON.stringify(item.error, null, 2)}
@@ -304,7 +304,7 @@ export function LogsScreen() {
 
                                                 {item.context && (
                                                     <YStack gap="$2">
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Full Context</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Full Context</Text>
                                                         <YStack padding="$3" backgroundColor="$background" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                                                             <Text fontSize="$3" fontFamily="$mono">
                                                                 {JSON.stringify(item.context, null, 2)}
@@ -315,15 +315,15 @@ export function LogsScreen() {
 
                                                 {item.breadcrumbs && item.breadcrumbs.length > 0 && (
                                                     <YStack gap="$2">
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Breadcrumbs</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Breadcrumbs</Text>
                                                         <YStack gap="$2" backgroundColor="$background" padding="$3" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
                                                             {item.breadcrumbs.map((crumb: { timestamp: number; category: string; message: string }, i: number) => (
                                                                 <XStack key={i} gap="$3" alignItems="center">
-                                                                    <Text fontSize="$2" opacity={0.5} width={70}>{new Date(crumb.timestamp).toLocaleTimeString()}</Text>
+                                                                    <Text fontFamily="$body" fontSize="$2" opacity={0.5} width={70}>{new Date(crumb.timestamp).toLocaleTimeString()}</Text>
                                                                     <Badge width={60} backgroundColor="$neutral200">
-                                                                        <Text fontSize="$1" fontWeight="bold">{crumb.category}</Text>
+                                                                        <Text fontFamily="$body" fontSize="$1" fontWeight="bold">{crumb.category}</Text>
                                                                     </Badge>
-                                                                    <Text fontSize="$3" flex={1}>{crumb.message}</Text>
+                                                                    <Text fontFamily="$body" fontSize="$3" flex={1}>{crumb.message}</Text>
                                                                 </XStack>
                                                             ))}
                                                         </YStack>
@@ -367,8 +367,8 @@ function DetailRow({ label, value }: { label: string; value?: string | number | 
     if (value === undefined || value === null) return null;
     return (
         <XStack gap="$2">
-            <Text fontSize="$2" fontWeight="600" width={100} color="$textSecondary">{label}:</Text>
-            <Text fontSize="$2" flex={1}>{value}</Text>
+            <Text fontFamily="$body" fontSize="$2" fontWeight="600" width={100} color="$textSecondary">{label}:</Text>
+            <Text fontFamily="$body" fontSize="$2" flex={1}>{value}</Text>
         </XStack>
     );
 }

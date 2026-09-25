@@ -162,7 +162,7 @@ export function AffiliateLinkModal({ open, onOpenChange, initial, onSubmit }: Af
               </Button>
             </XStack>
             {error ? (
-              <Text color="$error" fontSize="$3">
+              <Text fontFamily="$body" color="$error" fontSize="$3">
                 {error}
               </Text>
             ) : null}

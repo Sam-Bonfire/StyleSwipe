@@ -39,18 +39,18 @@ export function NotificationsScreen(): React.JSX.Element {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <YStack flex={1} padding="$4" gap="$4">
         <XStack justifyContent="space-between" alignItems="center">
-          <H2 fontSize="$6">Notifications</H2>
+          <H2 fontFamily="$heading" fontSize="$6">Notifications</H2>
           <Button variant="ghost" onPress={() => userId && void markAllRead({ userId })}>
             Mark all read
           </Button>
         </XStack>
 
         {notifications === undefined ? (
-          <Text color="$textSecondary">Loading…</Text>
+          <Text fontFamily="$body" color="$textSecondary">Loading…</Text>
         ) : notifications.length === 0 ? (
           <YStack flex={1} justifyContent="center" alignItems="center" gap="$3">
-            <Text fontSize="$5">No notifications yet</Text>
-            <Text color="$textSecondary" textAlign="center">
+            <Text fontFamily="$body" fontSize="$5">No notifications yet</Text>
+            <Text fontFamily="$body" color="$textSecondary" textAlign="center">
               Price drops, restocks and partner likes will appear here.
             </Text>
           </YStack>
@@ -67,13 +67,13 @@ export function NotificationsScreen(): React.JSX.Element {
                 pressStyle={{ backgroundColor: '$backgroundHover' }}
                 onPress={() => handlePress(item)}
               >
-                <Text fontWeight={item.isRead ? '400' : '700'} fontSize="$3">
+                <Text fontFamily="$body" fontWeight={item.isRead ? '400' : '700'} fontSize="$3">
                   {item.title}
                 </Text>
-                <Text fontSize="$3" color="$textSecondary">
+                <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
                   {item.body}
                 </Text>
-                <Text fontSize="$2" color="$textSecondary">
+                <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                   {new Date(item.createdAt).toLocaleString()}
                 </Text>
               </YStack>

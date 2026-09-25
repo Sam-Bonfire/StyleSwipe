@@ -473,7 +473,7 @@ export const SwipeCardStack = React.forwardRef(
   if (visibleData.length === 0) {
     return (
       <StackContainer {...props} backgroundColor="$background">
-        <Text fontSize="$6" color="black" textAlign="center" padding="$4">
+        <Text fontFamily="$body" fontSize="$6" color="black" textAlign="center" padding="$4">
           That's all for now!
         </Text>
       </StackContainer>

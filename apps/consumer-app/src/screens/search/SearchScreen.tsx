@@ -327,7 +327,7 @@ export function SearchScreen() {
             <XStack gap="$2" flexWrap="wrap" alignItems="center">
               <XStack alignItems="center" gap="$1" marginRight="$1">
                 <TrendingUp size={14} color="$textSecondary" />
-                <Text fontSize="$2" color="$textSecondary" fontWeight="600">
+                <Text fontFamily="$body" fontSize="$2" color="$textSecondary" fontWeight="600">
                   Trending
                 </Text>
               </XStack>
@@ -344,12 +344,12 @@ export function SearchScreen() {
             <XStack justifyContent="space-between" alignItems="center">
               <XStack alignItems="center" gap="$1">
                 <Clock size={14} color="$textSecondary" />
-                <Text fontSize="$3" fontWeight="600" color="$textPrimary">
+                <Text fontFamily="$body" fontSize="$3" fontWeight="600" color="$textPrimary">
                   Recent searches
                 </Text>
               </XStack>
               <Pressable onPress={() => void clearRecent()}>
-                <Text fontSize="$2" color="$primary" fontWeight="600">
+                <Text fontFamily="$body" fontSize="$2" color="$primary" fontWeight="600">
                   Clear
                 </Text>
               </Pressable>
@@ -367,7 +367,7 @@ export function SearchScreen() {
                   gap="$1"
                 >
                   <Pressable onPress={() => handleRecentPress(r)}>
-                    <Text fontSize="$3" color="$textPrimary">
+                    <Text fontFamily="$body" fontSize="$3" color="$textPrimary">
                       {r}
                     </Text>
                   </Pressable>
@@ -411,16 +411,16 @@ export function SearchScreen() {
                             <Image source={{ uri: cat.image }} width="100%" height={90} resizeMode="cover" />
                           ) : (
                             <YStack height={90} backgroundColor="$neutral200" alignItems="center" justifyContent="center">
-                              <Text color="$textSecondary" fontSize="$3">
+                              <Text fontFamily="$body" color="$textSecondary" fontSize="$3">
                                 {cat.name}
                               </Text>
                             </YStack>
                           )}
                           <YStack padding="$2" backgroundColor="$surface">
-                            <Text fontWeight="600" fontSize="$3" color="$textPrimary" numberOfLines={1}>
+                            <Text fontFamily="$body" fontWeight="600" fontSize="$3" color="$textPrimary" numberOfLines={1}>
                               {cat.name}
                             </Text>
-                            <Text fontSize="$2" color="$textSecondary">
+                            <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                               Explore
                             </Text>
                           </YStack>
@@ -429,7 +429,7 @@ export function SearchScreen() {
                     ))}
                   </XStack>
                 ) : (
-                  <Text color="$textSecondary">No categories yet</Text>
+                  <Text fontFamily="$body" color="$textSecondary">No categories yet</Text>
                 )}
               </YStack>
             </YStack>
@@ -452,7 +452,7 @@ export function SearchScreen() {
                   onAction={handleAlertCreate}
                 />
                 <YStack gap="$2" paddingHorizontal="$2">
-                  <Text fontWeight="600" color="$textPrimary">
+                  <Text fontFamily="$body" fontWeight="600" color="$textPrimary">
                     Try these searches
                   </Text>
                   <XStack gap="$2" flexWrap="wrap">
@@ -479,13 +479,13 @@ export function SearchScreen() {
             ) : query.length >= 3 ? (
               <YStack flex={1} justifyContent="center" alignItems="center">
                 <Search size={48} color="$textTertiary" />
-                <Text color="$textSecondary" marginTop="$4">
+                <Text fontFamily="$body" color="$textSecondary" marginTop="$4">
                   No results found
                 </Text>
               </YStack>
             ) : query.length > 0 ? (
               <YStack flex={1} justifyContent="center" alignItems="center">
-                <Text color="$textSecondary">Type at least 3 characters to search</Text>
+                <Text fontFamily="$body" color="$textSecondary">Type at least 3 characters to search</Text>
               </YStack>
             ) : null}
           </>

@@ -87,7 +87,7 @@ export function EditOrganizationModal({ organization, open, onOpenChange, onSucc
                                 disabled={isSubmitting || organization.slug === 'core'}
                             />
                             {organization.slug === 'core' && (
-                                <Text fontSize="$2" color="$color" opacity={0.6}>
+                                <Text fontFamily="$body" fontSize="$2" color="$color" opacity={0.6}>
                                     Core organization slug cannot be changed
                                 </Text>
                             )}

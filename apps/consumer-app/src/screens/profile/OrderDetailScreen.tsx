@@ -49,7 +49,7 @@ export function OrderDetailScreen() {
   if (order === undefined) {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center">
-        <Text>Loading order...</Text>
+        <Text fontFamily="$body">Loading order...</Text>
       </YStack>
     );
   }
@@ -58,7 +58,7 @@ export function OrderDetailScreen() {
     return (
       <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
         <XCircle size={48} color="$textSecondary" />
-        <Text fontSize="$5" fontWeight="600">Order not found</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="600">Order not found</Text>
         <Button onPress={() => router.back()}>Go back</Button>
       </YStack>
     );
@@ -87,14 +87,14 @@ export function OrderDetailScreen() {
         <TopBarIconButton onPress={() => router.back()} backgroundColor="$background">
           <ChevronLeft size={24} color="$textPrimary" />
         </TopBarIconButton>
-        <Text fontSize="$5" fontWeight="bold">Order Detail</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Order Detail</Text>
       </XStack>
 
       <ScrollView>
         <YStack padding="$4" gap="$4" paddingBottom="$10">
           <YStack gap="$1">
-            <Text fontSize="$6" fontWeight="bold">{o.orderNumber}</Text>
-            <Text fontSize="$2" color="$textSecondary">Placed on {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
+            <Text fontFamily="$body" fontSize="$6" fontWeight="bold">{o.orderNumber}</Text>
+            <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Placed on {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
             <YStack
               alignSelf="flex-start"
               backgroundColor={o.status.toLowerCase() === 'delivered' ? '$success' : o.status.toLowerCase() === 'cancelled' ? '$textSecondary' : '$primary'}
@@ -103,12 +103,12 @@ export function OrderDetailScreen() {
               borderRadius="$2"
               marginTop="$1"
             >
-              <Text color="white" fontWeight="700" fontSize="$2" textTransform="uppercase">{o.status}</Text>
+              <Text fontFamily="$body" color="white" fontWeight="700" fontSize="$2" textTransform="uppercase">{o.status}</Text>
             </YStack>
           </YStack>
 
           <YStack backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" gap="$3">
-            <Text fontWeight="600">Items ({o.items.length})</Text>
+            <Text fontFamily="$body" fontWeight="600">Items ({o.items.length})</Text>
             {o.items.map((item) => {
               const prod = productMap.get(item.productId) as unknown as { images?: string[]; platform?: string; meta?: Record<string, string> } | undefined;
               const imageUrl = item.image || prod?.images?.[0] || 'https://placehold.co/80x100';
@@ -118,10 +118,10 @@ export function OrderDetailScreen() {
                 <XStack key={item.productId} gap="$3" alignItems="center">
                   <Image source={{ uri: imageUrl }} width={64} height={80} borderRadius="$2" />
                   <YStack flex={1} gap="$1">
-                    <Text fontSize="$2" fontWeight="600" textTransform="uppercase">{item.brand}</Text>
-                    <Text fontSize="$3" numberOfLines={2}>{item.title}</Text>
-                    <Text fontSize="$2" color="$textSecondary">Qty {item.quantity} • {formatCurrency(item.price)}</Text>
-                    <Text fontSize="$1" color="$textSecondary">via {platform}</Text>
+                    <Text fontFamily="$body" fontSize="$2" fontWeight="600" textTransform="uppercase">{item.brand}</Text>
+                    <Text fontFamily="$body" fontSize="$3" numberOfLines={2}>{item.title}</Text>
+                    <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Qty {item.quantity} • {formatCurrency(item.price)}</Text>
+                    <Text fontFamily="$body" fontSize="$1" color="$textSecondary">via {platform}</Text>
                   </YStack>
                 </XStack>
               );
@@ -129,39 +129,39 @@ export function OrderDetailScreen() {
           </YStack>
 
           <YStack backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" gap="$2">
-            <Text fontWeight="600">Payment</Text>
-            <Text fontSize="$3" color="$textSecondary">Method: {o.paymentInfo?.method ?? 'COD'} • Status: {o.paymentInfo?.paymentStatus ?? 'PENDING'}</Text>
-            <Text fontSize="$3" color="$textSecondary">Total: {formatCurrency(o.pricing.totalAmount)} (Subtotal {formatCurrency(o.pricing.subtotal)} + Shipping {formatCurrency(o.pricing.shippingCost)} + Tax {formatCurrency(o.pricing.tax)})</Text>
+            <Text fontFamily="$body" fontWeight="600">Payment</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Method: {o.paymentInfo?.method ?? 'COD'} • Status: {o.paymentInfo?.paymentStatus ?? 'PENDING'}</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Total: {formatCurrency(o.pricing.totalAmount)} (Subtotal {formatCurrency(o.pricing.subtotal)} + Shipping {formatCurrency(o.pricing.shippingCost)} + Tax {formatCurrency(o.pricing.tax)})</Text>
           </YStack>
 
           <YStack backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" gap="$2">
-            <Text fontWeight="600">Delivery Address</Text>
-            <Text fontSize="$3" color="$textSecondary">{o.deliveryAddress.name}</Text>
-            <Text fontSize="$3" color="$textSecondary">{o.deliveryAddress.line1}{o.deliveryAddress.line2 ? `, ${o.deliveryAddress.line2}` : ''}</Text>
-            <Text fontSize="$3" color="$textSecondary">{o.deliveryAddress.city}, {o.deliveryAddress.state} - {o.deliveryAddress.postalCode}</Text>
-            <Text fontSize="$3" color="$textSecondary">{o.deliveryAddress.country} • {o.deliveryAddress.phone}</Text>
+            <Text fontFamily="$body" fontWeight="600">Delivery Address</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">{o.deliveryAddress.name}</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">{o.deliveryAddress.line1}{o.deliveryAddress.line2 ? `, ${o.deliveryAddress.line2}` : ''}</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">{o.deliveryAddress.city}, {o.deliveryAddress.state} - {o.deliveryAddress.postalCode}</Text>
+            <Text fontFamily="$body" fontSize="$3" color="$textSecondary">{o.deliveryAddress.country} • {o.deliveryAddress.phone}</Text>
           </YStack>
 
           <YStack backgroundColor="$surface" padding="$3" borderRadius="$3" borderWidth={1} borderColor="$borderColor" gap="$3">
             <XStack gap="$2" alignItems="center">
               <Truck size={18} color="$primary" />
-              <Text fontWeight="600">Tracking</Text>
+              <Text fontFamily="$body" fontWeight="600">Tracking</Text>
             </XStack>
             {o.trackingId || o.tracking?.trackingNumber ? (
               <YStack gap="$1">
-                <Text fontSize="$3">Carrier: {o.tracking?.carrier ?? 'Pending'}</Text>
-                <Text fontSize="$3" color="$primary">ID: {o.tracking?.trackingNumber ?? o.trackingId}</Text>
+                <Text fontFamily="$body" fontSize="$3">Carrier: {o.tracking?.carrier ?? 'Pending'}</Text>
+                <Text fontFamily="$body" fontSize="$3" color="$primary">ID: {o.tracking?.trackingNumber ?? o.trackingId}</Text>
                 {o.tracking?.estimatedDeliveryDate ? (
-                  <Text fontSize="$2" color="$textSecondary">Est. delivery: {new Date(o.tracking.estimatedDeliveryDate).toLocaleDateString('en-IN')}</Text>
+                  <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Est. delivery: {new Date(o.tracking.estimatedDeliveryDate).toLocaleDateString('en-IN')}</Text>
                 ) : null}
               </YStack>
             ) : (
-              <Text fontSize="$3" color="$textSecondary">Tracking will be available once shipped. Via product platform fulfillment.</Text>
+              <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Tracking will be available once shipped. Via product platform fulfillment.</Text>
             )}
           </YStack>
 
           <YStack gap="$2">
-            <Text fontWeight="600">Timeline</Text>
+            <Text fontFamily="$body" fontWeight="600">Timeline</Text>
             {o.statusHistory.map((h, idx) => (
               <XStack key={`${h.status}-${idx}`} gap="$3" alignItems="flex-start">
                 <YStack alignItems="center" width={24}>
@@ -175,9 +175,9 @@ export function OrderDetailScreen() {
                   {idx < o.statusHistory.length - 1 ? <YStack width={2} flex={1} backgroundColor="$borderColor" marginTop="$1" /> : null}
                 </YStack>
                 <YStack flex={1} paddingBottom="$3">
-                  <Text fontSize="$3" fontWeight="600" textTransform="capitalize">{h.status}</Text>
-                  <Text fontSize="$2" color="$textSecondary">{new Date(h.timestamp).toLocaleString('en-IN')}</Text>
-                  {h.reason ? <Text fontSize="$2" color="$textSecondary">Reason: {h.reason}</Text> : null}
+                  <Text fontFamily="$body" fontSize="$3" fontWeight="600" textTransform="capitalize">{h.status}</Text>
+                  <Text fontFamily="$body" fontSize="$2" color="$textSecondary">{new Date(h.timestamp).toLocaleString('en-IN')}</Text>
+                  {h.reason ? <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Reason: {h.reason}</Text> : null}
                 </YStack>
               </XStack>
             ))}
@@ -197,7 +197,7 @@ export function OrderDetailScreen() {
                 }}
                 icon={XCircle}
               >
-                <Text color="white" fontWeight="600">Cancel Order (24h window)</Text>
+                <Text fontFamily="$body" color="white" fontWeight="600">Cancel Order (24h window)</Text>
               </Button>
             ) : null}
 
@@ -215,12 +215,12 @@ export function OrderDetailScreen() {
                 }}
                 icon={RotateCcw}
               >
-                <Text color="$primary" fontWeight="600">Return Order (7 day window)</Text>
+                <Text fontFamily="$body" color="$primary" fontWeight="600">Return Order (7 day window)</Text>
               </Button>
             ) : null}
 
             {!canCancel && !canReturn ? (
-              <Text fontSize="$2" color="$textSecondary" textAlign="center">
+              <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textAlign="center">
                 {o.status.toLowerCase() === 'cancelled'
                   ? 'This order was cancelled.'
                   : o.status.toLowerCase() === 'returned'

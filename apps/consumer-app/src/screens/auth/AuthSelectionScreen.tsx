@@ -24,7 +24,7 @@ export function AuthSelectionScreen() {
             style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
           />
         </YStack>
-        <Text
+        <Text fontFamily="$body"
           textAlign="center"
           fontSize="$5"
           color="$textSecondary"
@@ -46,13 +46,13 @@ export function AuthSelectionScreen() {
         </Button>
 
         <XStack justifyContent="center" marginTop="$1">
-          <Text textAlign="center" fontSize="$2" color="$textTertiary" lineHeight="$3">
+          <Text fontFamily="$body" textAlign="center" fontSize="$2" color="$textTertiary" lineHeight="$3">
             By continuing, you agree to our{'\n'}
-            <Text color="$primary" fontWeight="600">
+            <Text fontFamily="$body" color="$primary" fontWeight="600">
               Terms of Service
             </Text>{' '}
             and{' '}
-            <Text color="$primary" fontWeight="600">
+            <Text fontFamily="$body" color="$primary" fontWeight="600">
               Privacy Policy
             </Text>
             .

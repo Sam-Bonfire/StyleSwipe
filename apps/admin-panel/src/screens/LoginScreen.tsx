@@ -37,7 +37,7 @@ export function LoginScreen() {
             resizeMode="contain"
           />
         </YStack>
-        <H3 color="$color" fontSize="$8">
+        <H3 fontFamily="$heading" color="$color" fontSize="$8">
           StyleSwipe Admin
         </H3>
       </YStack>
@@ -55,7 +55,7 @@ export function LoginScreen() {
               backgroundColor="$surface"
       >
         <YStack gap="$4">
-          <Text textAlign="center" color="$color">
+          <Text fontFamily="$body" textAlign="center" color="$color">
             Sign in to the Neural Command Center
           </Text>
 
@@ -87,7 +87,7 @@ export function LoginScreen() {
             </YStack>
 
             {error ? (
-              <Text color="red" fontSize="$3" textAlign="center">
+              <Text fontFamily="$body" color="red" fontSize="$3" textAlign="center">
                 {error}
               </Text>
             ) : null}
@@ -99,7 +99,7 @@ export function LoginScreen() {
         </YStack>
       </Card>
 
-      <Text marginTop="$6" color="$color" fontSize="$2">
+      <Text fontFamily="$body" marginTop="$6" color="$color" fontSize="$2">
         Secure Connection • 256-bit Encryption
       </Text>
     </YStack>

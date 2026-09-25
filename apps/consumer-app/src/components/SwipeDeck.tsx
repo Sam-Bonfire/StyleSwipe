@@ -63,8 +63,8 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
   if (error) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" padding="$4">
-        <H2 color="red">Error Loading Feed</H2>
-        <H2 fontSize="$4">{error}</H2>
+        <H2 fontFamily="$heading" color="red">Error Loading Feed</H2>
+        <H2 fontFamily="$heading" fontSize="$4">{error}</H2>
       </YStack>
     );
   }
@@ -73,7 +73,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">
         <ActivityIndicator size="large" />
-        <H3>Loading Feed...</H3>
+        <H3 fontFamily="$heading">Loading Feed...</H3>
       </YStack>
     );
   }
@@ -81,7 +81,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
   if (products.length === 0) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center" padding="$4">
-        <H2 fontSize="$4" color="gray">
+        <H2 fontFamily="$heading" fontSize="$4" color="gray">
           That's all for now!
         </H2>
       </YStack>
@@ -186,7 +186,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
       >
         {matchedProduct && (
           <YStack alignItems="center" gap="$4" padding="$4">
-            <Text fontSize="$4" textAlign="center" color="$textSecondary">
+            <Text fontFamily="$body" fontSize="$4" textAlign="center" color="$textSecondary">
               You and your partner both liked this item!
             </Text>
 
@@ -196,8 +196,8 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
               resizeMode="cover"
             />
 
-            <H3 textAlign="center">{matchedProduct.title}</H3>
-            <Text fontSize="$5" fontWeight="bold" color="$primary">${matchedProduct.price}</Text>
+            <H3 fontFamily="$heading" textAlign="center">{matchedProduct.title}</H3>
+            <Text fontFamily="$body" fontSize="$5" fontWeight="bold" color="$primary">${matchedProduct.price}</Text>
 
             <YStack gap="$3" width="100%" marginTop="$4">
               <Button variant="primary" onPress={() => {

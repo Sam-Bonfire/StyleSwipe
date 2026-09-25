@@ -45,7 +45,7 @@ function JobTypeBadge({ type }: { type: string }) {
       paddingVertical="$1"
       borderRadius="$2"
     >
-      <Text fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
+      <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
         {type}
       </Text>
     </XStack>
@@ -69,7 +69,7 @@ function DetailRow({
     <XStack justifyContent="space-between" alignItems="center">
       <XStack gap="$2" alignItems="center">
         {icon}
-        <Text fontSize="$2" color="$textSecondary">
+        <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
           {label}
         </Text>
       </XStack>
@@ -103,7 +103,7 @@ function StatusChip({ status }: { status: string }) {
       borderRadius="$2"
       alignItems="center"
     >
-      <Text fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
+      <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$textInverse" textTransform="uppercase">
         {text}
       </Text>
     </XStack>
@@ -122,8 +122,8 @@ export function JobsScreen() {
     <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
         <YStack>
-          <H3>Scraping Jobs</H3>
-          <Text fontSize="$2" color="$textSecondary">
+          <H3 fontFamily="$heading">Scraping Jobs</H3>
+          <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
             Manage and monitor your data collection tasks
           </Text>
         </YStack>
@@ -143,17 +143,17 @@ export function JobsScreen() {
         {isLoading ? (
           <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
             <Spinner size="large" color="$primary" />
-            <Text marginTop="$3" color="$textSecondary">
+            <Text fontFamily="$body" marginTop="$3" color="$textSecondary">
               Loading jobs...
             </Text>
           </YStack>
         ) : !jobs || jobs.length === 0 ? (
           <YStack padding="$6" alignItems="center" justifyContent="center" flex={1}>
             <FileStack size={48} color="$neutral400" />
-            <Text marginTop="$3" fontSize="$5" fontWeight="600">
+            <Text fontFamily="$body" marginTop="$3" fontSize="$5" fontWeight="600">
               No jobs yet
             </Text>
-            <Text marginTop="$1" color="$textSecondary" textAlign="center">
+            <Text fontFamily="$body" marginTop="$1" color="$textSecondary" textAlign="center">
               Create your first scraping job to start collecting product data
             </Text>
           </YStack>
@@ -185,7 +185,7 @@ export function JobsScreen() {
                         <YStack flex={1} gap="$2">
                           <XStack alignItems="center" gap="$2">
                             <JobTypeBadge type={job.type} />
-                            <Text
+                            <Text fontFamily="$body"
                               fontWeight="600"
                               numberOfLines={1}
                               flex={1}
@@ -199,14 +199,14 @@ export function JobsScreen() {
                           <XStack gap="$3" alignItems="center">
                             <XStack gap="$1" alignItems="center">
                               <Clock size={12} color="$textSecondary" />
-                              <Text fontSize="$2" color="$textSecondary">
+                              <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                                 {formatRelativeTime(job.createdAt)}
                               </Text>
                             </XStack>
                             {job.productsFound !== undefined && (
                               <XStack gap="$1" alignItems="center">
                                 <Package size={12} color="$textSecondary" />
-                                <Text fontSize="$2" color="$textSecondary">
+                                <Text fontFamily="$body" fontSize="$2" color="$textSecondary">
                                   {job.productsFound} products
                                 </Text>
                               </XStack>
@@ -229,7 +229,7 @@ export function JobsScreen() {
                     >
                       <XStack gap="$6" flexWrap="wrap">
                         <YStack gap="$3" flex={1} minWidth={200}>
-                          <Text
+                          <Text fontFamily="$body"
                             fontSize="$2"
                             fontWeight="600"
                             color="$textSecondary"
@@ -257,7 +257,7 @@ export function JobsScreen() {
                           )}
                         </YStack>
                         <YStack gap="$3" flex={1} minWidth={200}>
-                          <Text
+                          <Text fontFamily="$body"
                             fontSize="$2"
                             fontWeight="600"
                             color="$textSecondary"
@@ -291,10 +291,10 @@ export function JobsScreen() {
                           backgroundColor={"$red10" as ColorTokens}
                           borderRadius="$2"
                         >
-                          <Text fontSize="$2" fontWeight="600" color="$error">
+                          <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$error">
                             Error Details
                           </Text>
-                          <Text fontSize="$2" color="$error" marginTop="$1">
+                          <Text fontFamily="$body" fontSize="$2" color="$error" marginTop="$1">
                             {job.errorMessage}
                           </Text>
                         </YStack>

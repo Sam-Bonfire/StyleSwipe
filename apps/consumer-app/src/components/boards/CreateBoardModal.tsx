@@ -80,7 +80,7 @@ export function CreateBoardModal({ visible, onClose, userId, onCreated }: Create
       <YStack flex={1} backgroundColor="rgba(0,0,0,0.5)" alignItems="center" justifyContent="center" padding="$4">
         <YStack backgroundColor="$background" borderRadius="$4" padding="$5" width="100%" maxWidth={400} gap="$4">
           <XStack justifyContent="space-between" alignItems="center">
-            <Text fontSize="$6" fontWeight="700">Create Collection</Text>
+            <Text fontFamily="$body" fontSize="$6" fontWeight="700">Create Collection</Text>
             <XStack
               width={32}
               height={32}
@@ -94,9 +94,9 @@ export function CreateBoardModal({ visible, onClose, userId, onCreated }: Create
               <X size={18} />
             </XStack>
           </XStack>
-          <Text fontSize="$3" color="$textSecondary">Name your new board. E.g. "Summer Fits" or "Gift for Mom"</Text>
+          <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Name your new board. E.g. "Summer Fits" or "Gift for Mom"</Text>
           <YStack gap="$2">
-            <Text fontSize="$2" fontWeight="600">Name</Text>
+            <Text fontFamily="$body" fontSize="$2" fontWeight="600">Name</Text>
             <Input
               placeholder="Summer Fits"
               value={name}
@@ -106,9 +106,9 @@ export function CreateBoardModal({ visible, onClose, userId, onCreated }: Create
             />
           </YStack>
           <YStack gap="$2">
-            <Text fontSize="$2" fontWeight="600">Slug</Text>
+            <Text fontFamily="$body" fontSize="$2" fontWeight="600">Slug</Text>
             <Input placeholder="summer-fits" value={slug} onChangeText={handleSlugChange} autoCapitalize="none" />
-            <Text fontSize="$1" color="$textTertiary">URL-friendly identifier. Auto-generated from name.</Text>
+            <Text fontFamily="$body" fontSize="$1" color="$textTertiary">URL-friendly identifier. Auto-generated from name.</Text>
           </YStack>
           <XStack gap="$3" marginTop="$2">
             <Button variant="outlined" flex={1} onPress={onClose} disabled={submitting}>

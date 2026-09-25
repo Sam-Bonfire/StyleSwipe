@@ -103,9 +103,5 @@ module.exports = withTamagui(config, {
   components: ['tamagui', '@app/ui-kit'],
   config: './tamagui.config.ts',
   outputCSS: './tamagui.css',
-  // Static extraction mis-buckets numeric fontSize tokens to the space
-  // scale on web (e.g. $6 -> 48px) and drops font-family on bare Text
-  // (serif fallback). Runtime styles resolve correctly; revisit on
-  // Tamagui stable upgrade.
-  disableExtraction: true,
+  disableExtraction: process.env.NODE_ENV === 'development',
 });

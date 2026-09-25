@@ -88,8 +88,8 @@ export function FeedbackScreen() {
             {/* Header Section */}
             <YStack paddingHorizontal="$4" paddingTop="$4" paddingBottom="$2" gap="$4" borderBottomWidth={1} borderColor="$borderColor">
                 <YStack>
-                    <H3>Inbox</H3>
-                    <Text fontSize="$3" opacity={0.6}>Manage user feedback and support</Text>
+                    <H3 fontFamily="$heading">Inbox</H3>
+                    <Text fontFamily="$body" fontSize="$3" opacity={0.6}>Manage user feedback and support</Text>
                 </YStack>
 
                 <XStack gap="$3" alignItems="center">
@@ -134,7 +134,7 @@ export function FeedbackScreen() {
                 {status === 'LoadingFirstPage' ? (
                     <YStack flex={1} alignItems="center" justifyContent="center" padding="$8">
                         <Spinner size="large" />
-                        <Text marginTop="$3" opacity={0.6}>Loading feedback...</Text>
+                        <Text fontFamily="$body" marginTop="$3" opacity={0.6}>Loading feedback...</Text>
                     </YStack>
                 ) : (
                     <ScrollView
@@ -173,7 +173,7 @@ export function FeedbackScreen() {
                                                 <XStack gap="$4" flex={1} alignItems="flex-start">
                                                     <Avatar circular size="$4" backgroundColor="$backgroundHover">
                                                         <Avatar.Fallback backgroundColor="$infoLight" alignItems="center" justifyContent="center">
-                                                            <Text fontSize="$3" fontWeight="bold" color="$info">
+                                                            <Text fontFamily="$body" fontSize="$3" fontWeight="bold" color="$info">
                                                                 {item.name ? item.name.substring(0, 2).toUpperCase() : 'U'}
                                                             </Text>
                                                         </Avatar.Fallback>
@@ -181,20 +181,20 @@ export function FeedbackScreen() {
 
                                                     <YStack flex={1} gap="$1">
                                                         <XStack justifyContent="space-between" alignItems="center">
-                                                            <Text fontWeight="bold" fontSize="$4" color="$color">{item.name}</Text>
-                                                            <Text fontSize="$2" opacity={0.5}>
+                                                            <Text fontFamily="$body" fontWeight="bold" fontSize="$4" color="$color">{item.name}</Text>
+                                                            <Text fontFamily="$body" fontSize="$2" opacity={0.5}>
                                                                 {new Date(item.createdAt).toLocaleDateString()}
                                                             </Text>
                                                         </XStack>
 
                                                         <XStack gap="$2" alignItems="center">
-                                                            <Text fontSize="$2" fontWeight="600" opacity={0.6} textTransform="uppercase">{item.type}</Text>
+                                                            <Text fontFamily="$body" fontSize="$2" fontWeight="600" opacity={0.6} textTransform="uppercase">{item.type}</Text>
                                                             <Circle size={6} backgroundColor={getStatusColor(item.status)} />
-                                                            <Text fontSize="$2" fontWeight="600" color={getStatusColor(item.status)}>{item.status}</Text>
+                                                            <Text fontFamily="$body" fontSize="$2" fontWeight="600" color={getStatusColor(item.status)}>{item.status}</Text>
                                                         </XStack>
 
                                                         {!open && (
-                                                            <Text fontSize="$3" opacity={0.7} numberOfLines={1} ellipsizeMode="tail">
+                                                            <Text fontFamily="$body" fontSize="$3" opacity={0.7} numberOfLines={1} ellipsizeMode="tail">
                                                                 {item.message}
                                                             </Text>
                                                         )}
@@ -217,19 +217,19 @@ export function FeedbackScreen() {
                                             <YStack gap="$4">
                                                 <XStack justifyContent="space-between" flexWrap="wrap" gap="$4">
                                                     <YStack gap="$2" flex={1} minWidth={200}>
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Details</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Details</Text>
                                                         <XStack justifyContent="space-between">
-                                                            <Text fontSize="$3" opacity={0.6}>Contact</Text>
-                                                            <Text fontSize="$3" fontWeight="500">{item.contact}</Text>
+                                                            <Text fontFamily="$body" fontSize="$3" opacity={0.6}>Contact</Text>
+                                                            <Text fontFamily="$body" fontSize="$3" fontWeight="500">{item.contact}</Text>
                                                         </XStack>
                                                         <XStack justifyContent="space-between">
-                                                            <Text fontSize="$3" opacity={0.6}>ID</Text>
+                                                            <Text fontFamily="$body" fontSize="$3" opacity={0.6}>ID</Text>
                                                             <Text fontSize="$3" fontFamily="$mono">{item._id.slice(-12)}</Text>
                                                         </XStack>
                                                     </YStack>
 
                                                     <YStack gap="$2" flex={1} minWidth={200}>
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Status Control</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Status Control</Text>
                                                         <XStack gap="$2">
                                                             { }
                                                             {['Open', 'Read', 'Resolved'].map(s => (
@@ -247,21 +247,21 @@ export function FeedbackScreen() {
                                                 </XStack>
 
                                                 <YStack gap="$2">
-                                                    <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Message</Text>
+                                                    <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Message</Text>
                                                     <YStack padding="$4" backgroundColor="$backgroundPress" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
-                                                        <Text fontSize="$4" lineHeight={22}>{item.message}</Text>
+                                                        <Text fontFamily="$body" fontSize="$4" lineHeight={22}>{item.message}</Text>
                                                     </YStack>
                                                 </YStack>
 
                                                 {item.replies && item.replies.length > 0 && (
                                                     <YStack gap="$2">
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">History</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">History</Text>
                                                         {item.replies.map((r, i) => (
                                                             <XStack key={i} gap="$3">
                                                                 <Avatar circular size="$2" backgroundColor="$neutral200" />
                                                                 <YStack flex={1} backgroundColor="$background" padding="$3" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
-                                                                    <Text fontSize="$3">{r.message}</Text>
-                                                                    <Text fontSize="$2" opacity={0.5} marginTop="$1" textAlign="right">
+                                                                    <Text fontFamily="$body" fontSize="$3">{r.message}</Text>
+                                                                    <Text fontFamily="$body" fontSize="$2" opacity={0.5} marginTop="$1" textAlign="right">
                                                                         {new Date(r.timestamp).toLocaleString()}
                                                                     </Text>
                                                                 </YStack>
@@ -272,7 +272,7 @@ export function FeedbackScreen() {
 
                                                 {isCoreAdmin && (
                                                     <YStack gap="$2">
-                                                        <Text fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Reply</Text>
+                                                        <Text fontFamily="$body" fontSize="$2" fontWeight="600" color="$textSecondary" textTransform="uppercase">Reply</Text>
                                                         <XStack gap="$2" alignItems="flex-end">
                                                             <TextArea
                                                                 flex={1}

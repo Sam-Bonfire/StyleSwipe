@@ -57,7 +57,7 @@ export function Sidebar({
       >
         {!isCollapsed && (
           <XStack alignItems="center" gap="$2" padding="$2">
-            <Text fontSize="$6" fontWeight="bold" color="$color">
+            <Text fontFamily="$body" fontSize="$6" fontWeight="bold" color="$color">
               StyleSwipe
             </Text>
           </XStack>
@@ -119,10 +119,10 @@ export function Sidebar({
               <Avatar.Fallback backgroundColor="$primaryDark" />
             </Avatar>
             <YStack>
-              <Text fontSize="$3" fontWeight="bold" color="$color">
+              <Text fontFamily="$body" fontSize="$3" fontWeight="bold" color="$color">
                 Admin
               </Text>
-              <Text fontSize="$2" color="$color">
+              <Text fontFamily="$body" fontSize="$2" color="$color">
                 admin@styleswipe.com
               </Text>
             </YStack>
@@ -135,7 +135,7 @@ export function Sidebar({
           onPress={() => authAdapter.signOut()}
           justifyContent={isCollapsed ? 'center' : 'flex-start'}
         >
-          {!isCollapsed ? <Text>Sign Out</Text> : null}
+          {!isCollapsed ? <Text fontFamily="$body">Sign Out</Text> : null}
         </Button>
       </YStack>
     </YStack>

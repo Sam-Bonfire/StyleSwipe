@@ -22,8 +22,8 @@ export const VisualQuiz: React.FC<Props> = ({ question, value, onChange }) => {
     const selectedIds = value ? value.split(',').filter(Boolean) : [];
     return (
       <YStack gap="$3">
-        <H2 textAlign="center">{question.question}</H2>
-        <Text textAlign="center" color="$textSecondary" fontSize="$3">
+        <H2 fontFamily="$heading" textAlign="center">{question.question}</H2>
+        <Text fontFamily="$body" textAlign="center" color="$textSecondary" fontSize="$3">
           Select up to 4 styles you love
         </Text>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -51,7 +51,7 @@ export const VisualQuiz: React.FC<Props> = ({ question, value, onChange }) => {
     })();
     return (
       <YStack gap="$4">
-        <H2 textAlign="center">{question.question}</H2>
+        <H2 fontFamily="$heading" textAlign="center">{question.question}</H2>
         <BudgetSlider
           bands={bands}
           selectedBandId={selectedBandId}
@@ -71,7 +71,7 @@ export const VisualQuiz: React.FC<Props> = ({ question, value, onChange }) => {
     const selectedMap: Record<string, string[]> = value ? { top_size: value.split(',') } : {};
     return (
       <YStack gap="$3">
-        <H2 textAlign="center">{question.question}</H2>
+        <H2 fontFamily="$heading" textAlign="center">{question.question}</H2>
         <SizeChipGroup
           fields={[
             {
@@ -123,7 +123,7 @@ export const VisualQuiz: React.FC<Props> = ({ question, value, onChange }) => {
   // default text chip quiz
   return (
     <YStack gap="$4">
-      <H2 textAlign="center">{question.question}</H2>
+      <H2 fontFamily="$heading" textAlign="center">{question.question}</H2>
       <XStack flexWrap="wrap" justifyContent="center" gap="$3">
         {question.options.map((option) => (
           <CategoryChip

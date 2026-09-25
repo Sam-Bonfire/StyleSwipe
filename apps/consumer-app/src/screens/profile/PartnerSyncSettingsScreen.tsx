@@ -66,8 +66,8 @@ const FeatureRow = ({ icon: Icon, title, description }: { icon: React.ElementTyp
       <Icon size={24} color="$primary" />
     </YStack>
     <YStack flex={1}>
-      <Text fontWeight="bold" fontSize="$4" color="$textPrimary">{title}</Text>
-      <Text fontSize="$3" color="$textSecondary" marginTop="$1" lineHeight={20}>{description}</Text>
+      <Text fontFamily="$body" fontWeight="bold" fontSize="$4" color="$textPrimary">{title}</Text>
+      <Text fontFamily="$body" fontSize="$3" color="$textSecondary" marginTop="$1" lineHeight={20}>{description}</Text>
     </YStack>
   </XStack>
 );
@@ -192,7 +192,7 @@ export function PartnerSyncSettingsScreen() {
             <Text fontFamily="$heading" fontSize="$6" fontWeight="bold" color="white" textAlign="center">
               Collaborative Shopping
             </Text>
-            <Text fontSize="$4" color="white" opacity={0.9} textAlign="center" marginTop="$2" paddingHorizontal="$4">
+            <Text fontFamily="$body" fontSize="$4" color="white" opacity={0.9} textAlign="center" marginTop="$2" paddingHorizontal="$4">
               Connect your accounts to blend your Style DNA and discover outfits together.
             </Text>
           </YStack>
@@ -206,8 +206,8 @@ export function PartnerSyncSettingsScreen() {
                      <Users size={24} color="$primary" />
                    </YStack>
                    <YStack flex={1}>
-                     <Text fontWeight="bold" fontSize="$5" color="$primary">Active Sessions</Text>
-                     <Text fontSize="$3" color="$textSecondary">Your feed is currently blended</Text>
+                     <Text fontFamily="$body" fontWeight="bold" fontSize="$5" color="$primary">Active Sessions</Text>
+                     <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Your feed is currently blended</Text>
                    </YStack>
                  </XStack>
 
@@ -221,8 +221,8 @@ export function PartnerSyncSettingsScreen() {
                          borderRadius={20} 
                        />
                        <YStack flex={1}>
-                         <Text fontWeight="bold" fontSize="$4">Syncing with {sync.partnerName as string}</Text>
-                         <Text fontSize="$3" color="$textSecondary">
+                         <Text fontFamily="$body" fontWeight="bold" fontSize="$4">Syncing with {sync.partnerName as string}</Text>
+                         <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
                            Expires in {getRemainingTime(sync.expiresAt as number)}
                          </Text>
                        </YStack>
@@ -256,7 +256,7 @@ export function PartnerSyncSettingsScreen() {
             </YStack>
 
             <YStack backgroundColor="$surface" padding="$4" borderRadius="$4" borderWidth={1} borderColor="$borderColor">
-              <Text fontWeight="bold" fontSize="$4" marginBottom="$3">1. Select Duration</Text>
+              <Text fontFamily="$body" fontWeight="bold" fontSize="$4" marginBottom="$3">1. Select Duration</Text>
               <XStack flexWrap="wrap" gap="$3" marginBottom="$4">
                 {DURATIONS.map((d) => (
                   <DurationChip
@@ -272,7 +272,7 @@ export function PartnerSyncSettingsScreen() {
                 ))}
               </XStack>
 
-              <Text fontWeight="bold" fontSize="$4" marginBottom="$3">2. Invite Partner</Text>
+              <Text fontFamily="$body" fontWeight="bold" fontSize="$4" marginBottom="$3">2. Invite Partner</Text>
               <XStack flexWrap="wrap" gap="$3">
                 <Button flexGrow={1} flexBasis="40%" variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
                   Share Link

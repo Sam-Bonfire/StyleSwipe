@@ -57,10 +57,10 @@ export function WishlistScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
         <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
           <Heart size={48} color="$textSecondary" opacity={0.5} />
-          <Text fontSize="$5" fontWeight="600">Sign in to view wishlist</Text>
-          <Text color="$textSecondary" textAlign="center">Save your favorite styles by signing in.</Text>
+          <Text fontFamily="$body" fontSize="$5" fontWeight="600">Sign in to view wishlist</Text>
+          <Text fontFamily="$body" color="$textSecondary" textAlign="center">Save your favorite styles by signing in.</Text>
           <Button marginTop="$4" backgroundColor="$primary" onPress={() => router.push('/(auth)')}>
-            <Text color="white" fontWeight="600">Sign In</Text>
+            <Text fontFamily="$body" color="white" fontWeight="600">Sign In</Text>
           </Button>
         </YStack>
       </SafeAreaView>
@@ -73,23 +73,23 @@ export function WishlistScreen() {
         <TopBarIconButton onPress={() => router.back()} backgroundColor="$background" shadowColor="$shadowColor" shadowRadius={4} shadowOpacity={0.1}>
           <ChevronLeft size={24} color="$textPrimary" />
         </TopBarIconButton>
-        <Text fontSize="$5" fontWeight="bold" numberOfLines={1} flexShrink={1}>My Wishlist</Text>
+        <Text fontFamily="$body" fontSize="$5" fontWeight="bold" numberOfLines={1} flexShrink={1}>My Wishlist</Text>
       </XStack>
 
       <ScrollView showsVerticalScrollIndicator={true}>
         <YStack padding="$4" gap="$6" paddingBottom="$10">
           {/* Wishlist items */}
           <YStack gap="$3">
-            <Text fontSize="$4" fontWeight="700">Wishlist Items ({wishlist?.items?.length ?? 0})</Text>
+            <Text fontFamily="$body" fontSize="$4" fontWeight="700">Wishlist Items ({wishlist?.items?.length ?? 0})</Text>
             {userId && wishlist === undefined ? (
-              <YStack flex={1} alignItems="center" justifyContent="center"><Text color="$textSecondary">Loading wishlist...</Text></YStack>
+              <YStack flex={1} alignItems="center" justifyContent="center"><Text fontFamily="$body" color="$textSecondary">Loading wishlist...</Text></YStack>
             ) : !wishlist || !wishlist.items || wishlist.items.length === 0 ? (
               <YStack alignItems="center" justifyContent="center" padding="$4" gap="$3">
                 <Heart size={48} color="$textSecondary" opacity={0.5} />
-                <Text fontSize="$5" fontWeight="600">Your wishlist is empty</Text>
-                <Text color="$textSecondary" textAlign="center" paddingHorizontal="$4">Items you favorite while swiping or browsing will appear here.</Text>
+                <Text fontFamily="$body" fontSize="$5" fontWeight="600">Your wishlist is empty</Text>
+                <Text fontFamily="$body" color="$textSecondary" textAlign="center" paddingHorizontal="$4">Items you favorite while swiping or browsing will appear here.</Text>
                 <Button marginTop="$4" backgroundColor="$primary" onPress={() => router.push('/(app)/(tabs)/discover')}>
-                  <Text color="white" fontWeight="600">Start Swiping</Text>
+                  <Text fontFamily="$body" color="white" fontWeight="600">Start Swiping</Text>
                 </Button>
               </YStack>
             ) : (
@@ -111,9 +111,9 @@ export function WishlistScreen() {
                       <XStack gap="$3" alignItems="center">
                         <Image source={{ uri: imageUrl }} width={70} height={90} borderRadius="$2" resizeMode="cover" />
                         <YStack flex={1} gap="$1">
-                          <Text fontSize="$2" fontWeight="600" textTransform="uppercase" color="$textPrimary">{product.brand}</Text>
-                          <Text fontSize="$3" numberOfLines={2} color="$textSecondary">{product.title}</Text>
-                          <Text fontSize="$3" fontWeight="bold" color="$primary">
+                          <Text fontFamily="$body" fontSize="$2" fontWeight="600" textTransform="uppercase" color="$textPrimary">{product.brand}</Text>
+                          <Text fontFamily="$body" fontSize="$3" numberOfLines={2} color="$textSecondary">{product.title}</Text>
+                          <Text fontFamily="$body" fontSize="$3" fontWeight="bold" color="$primary">
                             {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(product.price)}
                           </Text>
                         </YStack>
@@ -121,10 +121,10 @@ export function WishlistScreen() {
                       <Separator borderColor="$borderColor" />
                       <XStack gap="$2" flexWrap="wrap">
                         <Button borderColor="$error" backgroundColor="transparent" borderWidth={1} size="small" borderRadius="$2" onPress={() => handleRemove(item.productId)} icon={Trash2} flex={1}>
-                          <Text color="$error" fontWeight="600" fontSize="$2">Remove</Text>
+                          <Text fontFamily="$body" color="$error" fontWeight="600" fontSize="$2">Remove</Text>
                         </Button>
                         <Button backgroundColor="$primary" size="small" borderRadius="$2" onPress={() => router.push({ pathname: '/(app)/product/[id]', params: { id: item.productId } })} icon={ExternalLink} flex={1}>
-                          <Text color="white" fontWeight="600" fontSize="$2">View</Text>
+                          <Text fontFamily="$body" color="white" fontWeight="600" fontSize="$2">View</Text>
                         </Button>
                       </XStack>
                       {wishlistBoardId && userBoards && userBoards.length > 0 && (
@@ -144,19 +144,19 @@ export function WishlistScreen() {
             <XStack justifyContent="space-between" alignItems="center">
               <XStack gap="$2" alignItems="center">
                 <LayoutGrid size={18} />
-                <Text fontSize="$4" fontWeight="700">Your Collections</Text>
+                <Text fontFamily="$body" fontSize="$4" fontWeight="700">Your Collections</Text>
               </XStack>
               {userBoards && userBoards.length > 0 && (
-                <Text color="$primary" fontWeight="600" fontSize="$2" onPress={() => setCreateVisible(true)}>+ Create</Text>
+                <Text fontFamily="$body" color="$primary" fontWeight="600" fontSize="$2" onPress={() => setCreateVisible(true)}>+ Create</Text>
               )}
             </XStack>
 
             {userId && userBoards === undefined ? (
-              <Text color="$textSecondary">Loading collections...</Text>
+              <Text fontFamily="$body" color="$textSecondary">Loading collections...</Text>
             ) : !userBoards || userBoards.length === 0 ? (
               <YStack backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$4" gap="$2">
-                <Text fontWeight="600">No collections yet</Text>
-                <Text fontSize="$2" color="$textSecondary">Create a collection like "Summer Fits" or "Gift for Mom" to organize items you love.</Text>
+                <Text fontFamily="$body" fontWeight="600">No collections yet</Text>
+                <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Create a collection like "Summer Fits" or "Gift for Mom" to organize items you love.</Text>
                 <Button size="small" variant="primary" icon={Plus} onPress={() => setCreateVisible(true)} marginTop="$2">Create Collection</Button>
               </YStack>
             ) : (

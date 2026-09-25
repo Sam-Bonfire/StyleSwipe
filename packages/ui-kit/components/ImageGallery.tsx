@@ -115,7 +115,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
           onPress={() => openZoom(activeIndex)}
           style={{ position: 'absolute', top: 12, right: 12, backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}
         >
-          <Text color="white" fontSize="$2">
+          <Text fontFamily="$body" color="white" fontSize="$2">
             {activeIndex + 1} / {images.length} • Tap to zoom
           </Text>
         </Pressable>
@@ -124,7 +124,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
       <Modal visible={zoomVisible} transparent animationType="fade" onRequestClose={() => setZoomVisible(false)}>
         <YStack flex={1} backgroundColor="rgba(0,0,0,0.95)" justifyContent="center" alignItems="center">
           <Pressable onPress={() => setZoomVisible(false)} style={{ position: 'absolute', top: 40, right: 16, zIndex: 10, padding: 12 }}>
-            <Text color="white" fontSize="$6">
+            <Text fontFamily="$body" color="white" fontSize="$6">
               ✕
             </Text>
           </Pressable>
@@ -153,7 +153,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
               </Pressable>
             ))}
           </XStack>
-          <Text color="white" fontSize="$2" marginTop="$2">
+          <Text fontFamily="$body" color="white" fontSize="$2" marginTop="$2">
             Pinch to zoom • Double-tap to toggle
           </Text>
         </YStack>

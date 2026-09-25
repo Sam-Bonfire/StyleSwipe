@@ -15,7 +15,7 @@ export const SectionHeader = ({ title, onSeeAll }: SectionHeaderProps) => {
       paddingHorizontal="$4"
       marginBottom="$2"
     >
-      <H3 fontSize="$6" fontWeight="700">
+      <H3 fontFamily="$heading" fontSize="$6" fontWeight="700">
         {title}
       </H3>
       {onSeeAll && (

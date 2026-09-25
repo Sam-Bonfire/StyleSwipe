@@ -53,10 +53,10 @@ export function ProductsScreen() {
           <AlertCircle size={32} color="$error" />
         </YStack>
         <YStack gap="$1" alignItems="center">
-          <Text fontSize="$5" fontWeight="600" color="$color">
+          <Text fontFamily="$body" fontSize="$5" fontWeight="600" color="$color">
             Failed to Load Products
           </Text>
-          <Text fontSize="$3" color="$color" opacity={0.6} textAlign="center">
+          <Text fontFamily="$body" fontSize="$3" color="$color" opacity={0.6} textAlign="center">
             There was an error loading the products.
           </Text>
         </YStack>
@@ -67,9 +67,9 @@ export function ProductsScreen() {
   return (
     <YStack gap="$4" flex={1} padding="$4">
       <XStack justifyContent="space-between" alignItems="center">
-        <H3>Scraped Products</H3>
+        <H3 fontFamily="$heading">Scraped Products</H3>
         <XStack gap="$2" alignItems="center">
-          <Text color="$textSecondary">Items per page:</Text>
+          <Text fontFamily="$body" color="$textSecondary">Items per page:</Text>
           {[20, 50, 100].map((size) => (
             <Button
               key={size}
@@ -106,7 +106,7 @@ export function ProductsScreen() {
           contentContainerStyle={{ gap: 16 }}
           ListEmptyComponent={
             <YStack alignItems="center" padding="$8" width="100%">
-              <Text color="$color" opacity={0.5} fontSize="$5">
+              <Text fontFamily="$body" color="$color" opacity={0.5} fontSize="$5">
                 No products found matching "{search}"
               </Text>
             </YStack>
@@ -131,12 +131,12 @@ export function ProductsScreen() {
                 />
               </Card.Header>
               <Card.Footer padding="$3" flexDirection="column" alignItems="flex-start" gap="$2">
-                <Text fontWeight="bold" fontSize="$4" numberOfLines={1}>
+                <Text fontFamily="$body" fontWeight="bold" fontSize="$4" numberOfLines={1}>
                   {item.title}
                 </Text>
                 <XStack justifyContent="space-between" width="100%">
-                  <Text color="$textSecondary">{item.brand}</Text>
-                  <Text fontWeight="bold">₹{item.price}</Text>
+                  <Text fontFamily="$body" color="$textSecondary">{item.brand}</Text>
+                  <Text fontFamily="$body" fontWeight="bold">₹{item.price}</Text>
                 </XStack>
                 <Button size="small" fullWidth onPress={() => handleRetrigger(item.url)}>
                   Retrigger Scrape

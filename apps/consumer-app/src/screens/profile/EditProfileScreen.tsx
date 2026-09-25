@@ -62,22 +62,22 @@ export function EditProfileScreen() {
                 >
                     <ChevronLeft size={24} color="$textPrimary" />
                 </TopBarIconButton>
-                <Text fontSize="$5" fontWeight="bold">Edit Profile</Text>
+                <Text fontFamily="$body" fontSize="$5" fontWeight="bold">Edit Profile</Text>
             </XStack>
             <YStack flex={1} padding="$4" gap="$4">
 
                 <YStack gap="$2">
-                    <Text fontSize="$3" fontWeight="600">Name</Text>
+                    <Text fontFamily="$body" fontSize="$3" fontWeight="600">Name</Text>
                     <Input value={name} onChangeText={setName} placeholder="Enter your name" />
                 </YStack>
 
                 <YStack gap="$2">
-                    <Text fontSize="$3" fontWeight="600">Phone Number</Text>
+                    <Text fontFamily="$body" fontSize="$3" fontWeight="600">Phone Number</Text>
                     <Input value={phoneNumber} onChangeText={setPhoneNumber} placeholder="Enter your phone number" keyboardType="phone-pad" />
                 </YStack>
 
                 <YStack gap="$2">
-                    <Text fontSize="$3" fontWeight="600" opacity={0.5}>Email (Cannot be changed)</Text>
+                    <Text fontFamily="$body" fontSize="$3" fontWeight="600" opacity={0.5}>Email (Cannot be changed)</Text>
                     <Input value={user.email} readOnly opacity={0.5} />
                 </YStack>
 

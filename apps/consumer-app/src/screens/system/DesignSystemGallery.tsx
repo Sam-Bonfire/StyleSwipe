@@ -39,7 +39,7 @@ import {
 // Section wrapper component
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <YStack gap="$2" marginBottom="$4">
-    <H2 fontSize="$7" fontWeight="700" color="$textPrimary">
+    <H2 fontFamily="$heading" fontSize="$7" fontWeight="700" color="$textPrimary">
       {title}
     </H2>
     <Separator borderColor="$borderColor" />
@@ -62,10 +62,10 @@ const ColorSwatch = ({ name, color }: { name: string; color: string }) => (
       borderWidth={1}
       borderColor="$borderColor"
     />
-    <Text fontSize="$2" color="$textSecondary" textAlign="center">
+    <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textAlign="center">
       {name}
     </Text>
-    <Text fontSize="$1" color="$textTertiary">
+    <Text fontFamily="$body" fontSize="$1" color="$textTertiary">
       {color}
     </Text>
   </YStack>
@@ -74,11 +74,11 @@ const ColorSwatch = ({ name, color }: { name: string; color: string }) => (
 // Spacing visualizer
 const SpacingSwatch = ({ name, size }: { name: string; size: number }) => (
   <XStack alignItems="center" gap="$2" marginBottom="$1">
-    <Text fontSize="$3" color="$textSecondary" width={60}>
+    <Text fontFamily="$body" fontSize="$3" color="$textSecondary" width={60}>
       {name}
     </Text>
     <YStack height={16} width={size} backgroundColor="$primary" borderRadius="$1" />
-    <Text fontSize="$2" color="$textTertiary">
+    <Text fontFamily="$body" fontSize="$2" color="$textTertiary">
       {size}px
     </Text>
   </XStack>
@@ -147,16 +147,16 @@ export function DesignSystemGallery() {
 
           <ScrollView flex={1}>
             <YStack padding="$3" gap="$4">
-              <H1 fontSize="$9" fontWeight="700" color="$textPrimary">
+              <H1 fontFamily="$heading" fontSize="$9" fontWeight="700" color="$textPrimary">
                 StyleSwipe Design System
               </H1>
-              <Text fontSize="$5" color="$textSecondary" marginBottom="$2">
+              <Text fontFamily="$body" fontSize="$5" color="$textSecondary" marginBottom="$2">
                 Token reference and component gallery for visual verification
               </Text>
 
               {/* Color Tokens */}
               <Section title="Color Palette">
-                <H3 fontSize="$5" color="$textSecondary">
+                <H3 fontFamily="$heading" fontSize="$5" color="$textSecondary">
                   Brand Colors
                 </H3>
                 <XStack flexWrap="wrap" gap="$2">
@@ -168,7 +168,7 @@ export function DesignSystemGallery() {
                   <ColorSwatch name="Secondary Dark" color="#276A7D" />
                 </XStack>
 
-                <H3 fontSize="$5" color="$textSecondary" marginTop="$2">
+                <H3 fontFamily="$heading" fontSize="$5" color="$textSecondary" marginTop="$2">
                   Semantic Colors
                 </H3>
                 <XStack flexWrap="wrap" gap="$2">
@@ -178,7 +178,7 @@ export function DesignSystemGallery() {
                   <ColorSwatch name="Info" color="#3B82F6" />
                 </XStack>
 
-                <H3 fontSize="$5" color="$textSecondary" marginTop="$2">
+                <H3 fontFamily="$heading" fontSize="$5" color="$textSecondary" marginTop="$2">
                   Neutral Scale
                 </H3>
                 <XStack flexWrap="wrap" gap="$2">
@@ -202,19 +202,19 @@ export function DesignSystemGallery() {
 
               {/* Typography */}
               <Section title="Typography (Manrope)">
-                <Text fontSize="$12" fontWeight="700">
+                <Text fontFamily="$body" fontSize="$12" fontWeight="700">
                   Display Large
                 </Text>
-                <Text fontSize="$9" fontWeight="700">
+                <Text fontFamily="$body" fontSize="$9" fontWeight="700">
                   Heading Large
                 </Text>
-                <Text fontSize="$7" fontWeight="600">
+                <Text fontFamily="$body" fontSize="$7" fontWeight="600">
                   Heading
                 </Text>
-                <Text fontSize="$5" fontWeight="400">
+                <Text fontFamily="$body" fontSize="$5" fontWeight="400">
                   Body Text
                 </Text>
-                <Text fontSize="$3" fontWeight="400" color="$textSecondary">
+                <Text fontFamily="$body" fontSize="$3" fontWeight="400" color="$textSecondary">
                   Label / Caption
                 </Text>
               </Section>
@@ -319,7 +319,7 @@ export function DesignSystemGallery() {
                   maxSelections={3}
                   itemSize="large"
                 />
-                <Text fontSize="$3" color="$textSecondary">
+                <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
                   Selected: {gridSelection.length}/3
                 </Text>
               </Section>

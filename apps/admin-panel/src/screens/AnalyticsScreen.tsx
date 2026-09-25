@@ -102,7 +102,7 @@ export function AnalyticsScreen() {
       return (
         <YStack padding="$4" alignItems="center" backgroundColor="$backgroundHover" borderRadius="$4" borderWidth={1} borderColor="$borderColor" marginTop="$2">
           <PieChart size={32} color="$textTertiary" opacity={0.5} />
-          <Text color="$textSecondary" marginTop="$2" fontSize="$3">No events for variant: {funnelVariant}.</Text>
+          <Text fontFamily="$body" color="$textSecondary" marginTop="$2" fontSize="$3">No events for variant: {funnelVariant}.</Text>
         </YStack>
       );
     }
@@ -111,8 +111,8 @@ export function AnalyticsScreen() {
       <YStack gap="$2" marginTop="$2">
         <XStack backgroundColor="$backgroundHover" padding="$2" paddingHorizontal="$3" borderRadius="$3" alignItems="center" justifyContent="space-between" marginBottom="$1">
           <YStack>
-            <Text color="$textSecondary" fontSize="$1" textTransform="uppercase" fontWeight="700" letterSpacing={1}>Overall Conversion</Text>
-            <Text color="$primary" fontSize="$5" fontWeight="900" lineHeight="$4">{overallConversion}%</Text>
+            <Text fontFamily="$body" color="$textSecondary" fontSize="$1" textTransform="uppercase" fontWeight="700" letterSpacing={1}>Overall Conversion</Text>
+            <Text fontFamily="$body" color="$primary" fontSize="$5" fontWeight="900" lineHeight="$4">{overallConversion}%</Text>
           </YStack>
           <Activity size={20} color="$primary" opacity={0.5} />
         </XStack>
@@ -155,19 +155,19 @@ export function AnalyticsScreen() {
                       <IconComponent size={14} color={isHighDropoff ? '$error' : '$primary'} />
                     </YStack>
                     <YStack>
-                      <Text fontWeight="bold" fontSize="$2" color="$textPrimary" lineHeight="$2">{step.label}</Text>
+                      <Text fontFamily="$body" fontWeight="bold" fontSize="$2" color="$textPrimary" lineHeight="$2">{step.label}</Text>
                       {index > 0 && dropOff > 0 ? (
-                        <Text color={isHighDropoff ? '$error' : '$textSecondary'} fontSize="$1" fontWeight={isHighDropoff ? '600' : '400'}>
+                        <Text fontFamily="$body" color={isHighDropoff ? '$error' : '$textSecondary'} fontSize="$1" fontWeight={isHighDropoff ? '600' : '400'}>
                           -{dropOffPercent}% drop ({dropOff})
                         </Text>
                       ) : (
-                        <Text color="$textTertiary" fontSize="$1">100% (Baseline)</Text>
+                        <Text fontFamily="$body" color="$textTertiary" fontSize="$1">100% (Baseline)</Text>
                       )}
                     </YStack>
                   </XStack>
                   <YStack alignItems="flex-end">
-                    <Text fontSize="$3" fontWeight="800" color="$textPrimary" lineHeight="$3">{step.value}</Text>
-                    <Text fontSize="$1" color="$textSecondary" fontWeight="500">{Math.round(widthPercent)}% retention</Text>
+                    <Text fontFamily="$body" fontSize="$3" fontWeight="800" color="$textPrimary" lineHeight="$3">{step.value}</Text>
+                    <Text fontFamily="$body" fontSize="$1" color="$textSecondary" fontWeight="500">{Math.round(widthPercent)}% retention</Text>
                   </YStack>
                 </XStack>
               </Card>
@@ -203,7 +203,7 @@ export function AnalyticsScreen() {
       return (
         <YStack padding="$4" alignItems="center" backgroundColor="$backgroundHover" borderRadius="$4" borderWidth={1} borderColor="$borderColor" marginTop="$2">
           <PieChart size={32} color="$textTertiary" opacity={0.5} />
-          <Text color="$textSecondary" marginTop="$2" fontSize="$3">No events for variant: {macroVariant}.</Text>
+          <Text fontFamily="$body" color="$textSecondary" marginTop="$2" fontSize="$3">No events for variant: {macroVariant}.</Text>
         </YStack>
       );
     }
@@ -212,8 +212,8 @@ export function AnalyticsScreen() {
       <YStack gap="$2" marginTop="$2">
         <XStack backgroundColor="$backgroundHover" padding="$2" paddingHorizontal="$3" borderRadius="$3" alignItems="center" justifyContent="space-between" marginBottom="$1">
           <YStack>
-            <Text color="$textSecondary" fontSize="$1" textTransform="uppercase" fontWeight="700" letterSpacing={1}>Full Journey Conversion</Text>
-            <Text color="$primary" fontSize="$5" fontWeight="900" lineHeight="$4">{overallConversion}%</Text>
+            <Text fontFamily="$body" color="$textSecondary" fontSize="$1" textTransform="uppercase" fontWeight="700" letterSpacing={1}>Full Journey Conversion</Text>
+            <Text fontFamily="$body" color="$primary" fontSize="$5" fontWeight="900" lineHeight="$4">{overallConversion}%</Text>
           </YStack>
           <Activity size={20} color="$primary" opacity={0.5} />
         </XStack>
@@ -256,19 +256,19 @@ export function AnalyticsScreen() {
                       <IconComponent size={14} color={isHighDropoff ? '$error' : '$primary'} />
                     </YStack>
                     <YStack>
-                      <Text fontWeight="bold" fontSize="$2" color="$textPrimary" lineHeight="$2">{step.label}</Text>
+                      <Text fontFamily="$body" fontWeight="bold" fontSize="$2" color="$textPrimary" lineHeight="$2">{step.label}</Text>
                       {index > 0 && dropOff > 0 ? (
-                        <Text color={isHighDropoff ? '$error' : '$textSecondary'} fontSize="$1" fontWeight={isHighDropoff ? '600' : '400'}>
+                        <Text fontFamily="$body" color={isHighDropoff ? '$error' : '$textSecondary'} fontSize="$1" fontWeight={isHighDropoff ? '600' : '400'}>
                           -{dropOffPercent}% drop ({dropOff})
                         </Text>
                       ) : (
-                        <Text color="$textTertiary" fontSize="$1">Starting Cohort</Text>
+                        <Text fontFamily="$body" color="$textTertiary" fontSize="$1">Starting Cohort</Text>
                       )}
                     </YStack>
                   </XStack>
                   <YStack alignItems="flex-end">
-                    <Text fontSize="$3" fontWeight="800" color="$textPrimary" lineHeight="$3">{step.value}</Text>
-                    <Text fontSize="$1" color="$textSecondary" fontWeight="500">{Math.round(widthPercent)}% retention</Text>
+                    <Text fontFamily="$body" fontSize="$3" fontWeight="800" color="$textPrimary" lineHeight="$3">{step.value}</Text>
+                    <Text fontFamily="$body" fontSize="$1" color="$textSecondary" fontWeight="500">{Math.round(widthPercent)}% retention</Text>
                   </YStack>
                 </XStack>
               </Card>
@@ -287,16 +287,16 @@ export function AnalyticsScreen() {
         {/* Header Section */}
         <XStack justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap="$4">
           <YStack flex={1} minWidth={250}>
-            <Text color="$primary" fontSize="$1" textTransform="uppercase" fontWeight="800" letterSpacing={1} marginBottom={0}>Dashboard</Text>
-            <H2 color="$textPrimary" fontWeight="800" size="$6" lineHeight="$6">Analytics & Conversion</H2>
-            <Text color="$textSecondary" fontSize="$2" marginTop="$1">
+            <Text fontFamily="$body" color="$primary" fontSize="$1" textTransform="uppercase" fontWeight="800" letterSpacing={1} marginBottom={0}>Dashboard</Text>
+            <H2 fontFamily="$heading" color="$textPrimary" fontWeight="800" size="$6" lineHeight="$6">Analytics & Conversion</H2>
+            <Text fontFamily="$body" color="$textSecondary" fontSize="$2" marginTop="$1">
               Track user progression across acquisition and product funnels side-by-side.
             </Text>
           </YStack>
 
           <XStack gap="$3" flexWrap="wrap" alignItems="center">
             <YStack gap="$1">
-                          <Text fontSize="$1" fontWeight="600" color="$textTertiary" textTransform="uppercase" paddingLeft="$1">Time Range</Text>
+                          <Text fontFamily="$body" fontSize="$1" fontWeight="600" color="$textTertiary" textTransform="uppercase" paddingLeft="$1">Time Range</Text>
               <Select value={timeRange} onValueChange={(val) => setTimeRange(val as TimeRange)} disablePreventBodyScroll size="$2">
                 <Select.Trigger width={120} iconAfter={ChevronDown} backgroundColor="$surface" borderColor="$borderColor" paddingVertical={0}>
                   <Select.Value placeholder="Time Range" fontSize="$2" />
@@ -347,8 +347,8 @@ export function AnalyticsScreen() {
                       <Card backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$3">
                                               <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$3" marginBottom="$1">
                                                 <YStack>
-                                                  <Text fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Onboarding</Text>
-                  <Text color="$textSecondary" fontSize="$2">New user setup wizard</Text>
+                                                  <Text fontFamily="$body" fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Onboarding</Text>
+                  <Text fontFamily="$body" color="$textSecondary" fontSize="$2">New user setup wizard</Text>
                 </YStack>
                 {renderVariantSelector(funnelVariant, setFunnelVariant, ['onboarding_v1'])}
               </XStack>
@@ -361,8 +361,8 @@ export function AnalyticsScreen() {
                       <Card backgroundColor="$surface" borderRadius="$3" borderWidth={1} borderColor="$borderColor" padding="$3">
                                               <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$3" marginBottom="$1">
                                                 <YStack>
-                                                  <Text fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Macro Journey</Text>
-                  <Text color="$textSecondary" fontSize="$2">Signup to checkout</Text>
+                                                  <Text fontFamily="$body" fontSize="$4" fontWeight="bold" color="$textPrimary" lineHeight="$4">Macro Journey</Text>
+                  <Text fontFamily="$body" color="$textSecondary" fontSize="$2">Signup to checkout</Text>
                 </YStack>
                 {renderVariantSelector(macroVariant, setMacroVariant, ['macro_v1'])}
               </XStack>

@@ -96,7 +96,7 @@ export function ProductDetailScreen() {
   if (productData === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background.val }}>
-        <Text fontSize="$6" color="$textSecondary">Product not found</Text>
+        <Text fontFamily="$body" fontSize="$6" color="$textSecondary">Product not found</Text>
         <Button
           variant="ghost"
           onPress={() => {
@@ -276,10 +276,10 @@ export function ProductDetailScreen() {
         <ImageGallery images={product.images} />
 
         <YStack padding="$4" gap="$2">
-          <Text fontSize="$3" color="$textSecondary" fontWeight="600" textTransform="uppercase">
+          <Text fontFamily="$body" fontSize="$3" color="$textSecondary" fontWeight="600" textTransform="uppercase">
             {product.brand}
           </Text>
-          <Text fontSize="$6" color="$textPrimary" fontWeight="700" lineHeight="$6">
+          <Text fontFamily="$body" fontSize="$6" color="$textPrimary" fontWeight="700" lineHeight="$6">
             {product.title}
           </Text>
 
@@ -287,22 +287,22 @@ export function ProductDetailScreen() {
             {hasRealRating && product.rating !== undefined ? (
               <RatingStars rating={product.rating} reviewCount={product.reviewCount} />
             ) : (
-              <Text fontSize="$3" color="$textSecondary">No ratings yet</Text>
+              <Text fontFamily="$body" fontSize="$3" color="$textSecondary">No ratings yet</Text>
             )}
             <YStack height={16} width={1} backgroundColor="$borderColor" />
-            <Text fontSize="$3" color="$primary" fontWeight="500">
+            <Text fontFamily="$body" fontSize="$3" color="$primary" fontWeight="500">
               {product.platform}
             </Text>
           </XStack>
 
           <XStack alignItems="baseline" gap="$2" marginTop="$2">
-            <Text fontSize="$6" color="$textPrimary" fontWeight="600">
+            <Text fontFamily="$body" fontSize="$6" color="$textPrimary" fontWeight="600">
               ₹{product.price}
             </Text>
-            <Text fontSize="$4" color="$textTertiary" textDecorationLine="line-through">
+            <Text fontFamily="$body" fontSize="$4" color="$textTertiary" textDecorationLine="line-through">
               ₹{product.originalPrice}
             </Text>
-            <Text fontSize="$4" color="$success" fontWeight="600">
+            <Text fontFamily="$body" fontSize="$4" color="$success" fontWeight="600">
               {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
             </Text>
           </XStack>
@@ -336,7 +336,7 @@ export function ProductDetailScreen() {
                 return (
                   <YStack key={badgeStr} alignItems="center" gap="$1" flex={1}>
                     <Icon size={20} color="$primary" />
-                    <Text fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">
+                    <Text fontFamily="$body" fontSize="$2" color="$textSecondary" textAlign="center" fontWeight="500">
                       {badgeConfig.label}
                     </Text>
                   </YStack>
@@ -347,10 +347,10 @@ export function ProductDetailScreen() {
 
           <XStack gap="$2" marginBottom="$2">
             <Button flex={1} size="small" variant="outlined" icon={Ruler} onPress={() => setSizeGuideOpen(true)}>
-              <Text fontSize="$3">Size Guide</Text>
+              <Text fontFamily="$body" fontSize="$3">Size Guide</Text>
             </Button>
             <Button flex={1} size="small" variant="outlined" icon={Share2} onPress={handleShare}>
-              <Text fontSize="$3">Share</Text>
+              <Text fontFamily="$body" fontSize="$3">Share</Text>
             </Button>
           </XStack>
 
@@ -359,29 +359,29 @@ export function ProductDetailScreen() {
               sizeSelectorYRef.current = event.nativeEvent.layout.y;
             }}>
               <SizeChipGroup fields={[sizeField]} selectedSizes={selectedSizes} onSizeChange={handleSizeChange} />
-              <Text onPress={() => setSizeGuideOpen(true)} color="$primary" fontSize="$3" marginTop="$2" fontWeight="500">
+              <Text fontFamily="$body" onPress={() => setSizeGuideOpen(true)} color="$primary" fontSize="$3" marginTop="$2" fontWeight="500">
                 Size guide available — Find my size →
               </Text>
               {showSizeError && (
-                <Text color="$error" fontSize="$3" marginTop="$1">
+                <Text fontFamily="$body" color="$error" fontSize="$3" marginTop="$1">
                   Please select a size to continue
                 </Text>
               )}
             </YStack>
           ) : (
-            <Text color="$textSecondary" fontSize="$3" marginBottom="$4">One size — no selection needed</Text>
+            <Text fontFamily="$body" color="$textSecondary" fontSize="$3" marginBottom="$4">One size — no selection needed</Text>
           )}
 
           <Separator marginBottom="$4" borderColor="$borderColor" />
 
-          <Text fontSize="$4" fontWeight="600" marginBottom="$2">Description</Text>
-          <Text fontSize="$3" color="$textSecondary" lineHeight="$5">
+          <Text fontFamily="$body" fontSize="$4" fontWeight="600" marginBottom="$2">Description</Text>
+          <Text fontFamily="$body" fontSize="$3" color="$textSecondary" lineHeight="$5">
             {product.description}
           </Text>
 
           <Spacer size="$4" />
 
-          <Text fontSize="$4" fontWeight="600" marginBottom="$3">Product Details</Text>
+          <Text fontFamily="$body" fontSize="$4" fontWeight="600" marginBottom="$3">Product Details</Text>
           <YStack gap="$2" flexWrap="wrap">
             {Object.entries(product.attributes).map(([key, value]) => {
               const formatAttributeKey = (k: string): string => {
@@ -392,10 +392,10 @@ export function ProductDetailScreen() {
               return (
                 <XStack key={key} alignItems="center" backgroundColor="$surface" padding="$3" borderRadius="$3" borderColor="$borderColor" borderWidth={1}>
                   <YStack width="35%" flexShrink={0}>
-                    <Text fontSize="$3" color="$textSecondary" fontWeight="500">{formatAttributeKey(key)}</Text>
+                    <Text fontFamily="$body" fontSize="$3" color="$textSecondary" fontWeight="500">{formatAttributeKey(key)}</Text>
                   </YStack>
                   <YStack flex={1} paddingLeft="$2">
-                    <Text fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">{value}</Text>
+                    <Text fontFamily="$body" fontSize="$3" color="$textPrimary" fontWeight="600" textAlign="right">{value}</Text>
                   </YStack>
                 </XStack>
               );
@@ -415,7 +415,7 @@ export function ProductDetailScreen() {
 
           <Separator marginVertical="$4" borderColor="$borderColor" />
 
-          <Text fontSize="$4" fontWeight="600" marginBottom="$2">Similar to this</Text>
+          <Text fontFamily="$body" fontSize="$4" fontWeight="600" marginBottom="$2">Similar to this</Text>
           <ProductCarousel data={similarData as unknown as Record<string, unknown>[]} isLoading={similarLoading} onProductPress={handleSimilarPress} emptyMessage="No similar items found" />
         </YStack>
       </ScrollView>

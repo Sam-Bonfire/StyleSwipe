@@ -149,7 +149,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
           value={formData.fullName}
           onChangeText={(val) => handleChange('fullName', val)}
         />
-        {errors['fullName'] ? <Text fontSize="$2" color="$error">{errors['fullName']}</Text> : null}
+        {errors['fullName'] ? <Text fontFamily="$body" fontSize="$2" color="$error">{errors['fullName']}</Text> : null}
       </InputGroup>
 
       <InputGroup>
@@ -161,7 +161,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
           value={formData.phone}
           onChangeText={(val) => handleChange('phone', val)}
         />
-        {errors['phone'] ? <Text fontSize="$2" color="$error">{errors['phone']}</Text> : null}
+        {errors['phone'] ? <Text fontFamily="$body" fontSize="$2" color="$error">{errors['phone']}</Text> : null}
       </InputGroup>
 
       <InputGroup>
@@ -172,7 +172,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
           value={formData.street}
           onChangeText={(val) => handleChange('street', val)}
         />
-        {errors['street'] ? <Text fontSize="$2" color="$error">{errors['street']}</Text> : null}
+        {errors['street'] ? <Text fontFamily="$body" fontSize="$2" color="$error">{errors['street']}</Text> : null}
       </InputGroup>
 
       <InputGroup>
@@ -194,7 +194,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
             value={formData.city}
             onChangeText={(val) => handleChange('city', val)}
           />
-          {errors['city'] ? <Text fontSize="$2" color="$error">{errors['city']}</Text> : null}
+          {errors['city'] ? <Text fontFamily="$body" fontSize="$2" color="$error">{errors['city']}</Text> : null}
         </InputGroup>
         <InputGroup flex={1}>
           <Label htmlFor="state">State</Label>
@@ -204,7 +204,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
             value={formData.state}
             onChangeText={(val) => handleChange('state', val)}
           />
-          {errors['state'] ? <Text fontSize="$2" color="$error">{errors['state']}</Text> : null}
+          {errors['state'] ? <Text fontFamily="$body" fontSize="$2" color="$error">{errors['state']}</Text> : null}
         </InputGroup>
       </XStack>
 
@@ -222,7 +222,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
               handleChange('zipCode', val);
             }}
           />
-          {errors['pincode'] ? <Text fontSize="$2" color="$error">{errors['pincode']}</Text> : null}
+          {errors['pincode'] ? <Text fontFamily="$body" fontSize="$2" color="$error">{errors['pincode']}</Text> : null}
         </InputGroup>
         <InputGroup flex={1}>
           <Label htmlFor="country">Country</Label>
@@ -239,7 +239,7 @@ export const AddressForm = ({ initialAddress, onSubmit, submitLabel = 'Save & Co
         >
           {formData.isDefault ? '✓ Default Address' : 'Set as Default'}
         </Button>
-        <Text fontSize="$2" color="$textSecondary">Default delivery address</Text>
+        <Text fontFamily="$body" fontSize="$2" color="$textSecondary">Default delivery address</Text>
       </XStack>
 
       <Button variant="primary" size="large" marginTop="$4" fullWidth onPress={handleSubmit} disabled={loading} opacity={loading ? 0.6 : 1}>

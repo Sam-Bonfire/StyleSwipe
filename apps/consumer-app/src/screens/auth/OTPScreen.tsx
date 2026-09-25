@@ -45,10 +45,10 @@ export function OTPScreen() {
   return (
     <YStack flex={1} justifyContent="center" padding="$4" gap="$4" backgroundColor="$background">
       <YStack gap="$2" alignItems="center">
-        <H2 textAlign="center" color="$textPrimary">
+        <H2 fontFamily="$heading" textAlign="center" color="$textPrimary">
           Verify Phone
         </H2>
-        <Text textAlign="center" color="$textSecondary">
+        <Text fontFamily="$body" textAlign="center" color="$textSecondary">
           Enter the code sent to {phone}
         </Text>
       </YStack>
@@ -68,11 +68,11 @@ export function OTPScreen() {
 
         <YStack alignItems="center" gap="$2">
           {resendSeconds > 0 ? (
-            <Text color="$textSecondary" fontSize="$3">
+            <Text fontFamily="$body" color="$textSecondary" fontSize="$3">
               Resend code in {resendSeconds}s
             </Text>
           ) : (
-            <Text color="$primary" fontWeight="600" onPress={handleResend} pressStyle={{ opacity: 0.6 }}>
+            <Text fontFamily="$body" color="$primary" fontWeight="600" onPress={handleResend} pressStyle={{ opacity: 0.6 }}>
               Resend code
             </Text>
           )}

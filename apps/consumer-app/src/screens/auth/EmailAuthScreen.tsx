@@ -40,8 +40,8 @@ export function EmailAuthScreen() {
   return (
     <YStack flex={1} padding="$6" gap="$6" backgroundColor="$background">
       <YStack marginTop="$10" gap="$2">
-        <H2 color="$textPrimary">{emailMode === 'signin' ? 'Sign In' : 'Create Account'}</H2>
-        <Text color="$textSecondary">
+        <H2 fontFamily="$heading" color="$textPrimary">{emailMode === 'signin' ? 'Sign In' : 'Create Account'}</H2>
+        <Text fontFamily="$body" color="$textSecondary">
           {emailMode === 'signin' ? 'Enter your email to continue' : 'Fill in the details below'}
         </Text>
       </YStack>

@@ -32,7 +32,7 @@ export const ProductCarousel = ({
   if (!data || data.length === 0) {
     return (
       <YStack height={100} justifyContent="center" alignItems="center" paddingHorizontal="$4">
-        <Text color="$textSecondary" fontSize="$3">
+        <Text fontFamily="$body" color="$textSecondary" fontSize="$3">
           {emptyMessage}
         </Text>
       </YStack>
