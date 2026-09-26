@@ -16,10 +16,16 @@ test.describe('Consumer App Core Flows', () => {
       // App laundry: unauthenticated onboarding visits bounce to the tabs.
       // Either the questionnaire (authenticated) or the redirect (guest)
       // is correct behavior; the failure mode is staying stuck or crashing.
+      // Guests land on Discover, the default tab.
       await page.waitForTimeout(3000);
       await expect(page.locator('text="An error occurred in the"')).not.toBeVisible();
       const url = page.url();
-      expect(url.includes('/onboarding') || url.includes('/tabs') || url.endsWith('/')).toBe(true);
+      expect(
+        url.includes('/onboarding') ||
+          url.includes('/tabs') ||
+          url.includes('/discover') ||
+          url.endsWith('/'),
+      ).toBe(true);
     });
   });
 
