@@ -248,7 +248,7 @@ export const PartnerSyncCard = React.forwardRef<typeof CardFrame, PartnerSyncCar
                 </Header>
 
                 <ActiveSession>
-                  <PartnerAvatar source={{ uri: partnerAvatar || 'https://picsum.photos/40' }} />
+                  <PartnerAvatar source={{ uri: partnerAvatar || 'https://picsum.photos/40' }} src={partnerAvatar || 'https://picsum.photos/40'} />
                   <SessionInfo>
                     <SessionText>Synced with {partnerName}</SessionText>
                     <TimerText>

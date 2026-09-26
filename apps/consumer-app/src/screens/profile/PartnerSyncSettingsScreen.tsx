@@ -214,12 +214,13 @@ export function PartnerSyncSettingsScreen() {
                  {activeSyncs.map(sync => (
                    <YStack key={sync._id as string} backgroundColor="$surface" padding="$4" borderRadius="$4" borderWidth={1} borderColor="$primaryLight" gap="$4">
                      <XStack backgroundColor="$backgroundHover" padding="$3" borderRadius="$3" alignItems="center" gap="$3">
-                       <Image 
-                         source={{ uri: (sync.partnerImage as string) || 'https://picsum.photos/40' }} 
-                         width={40} 
-                         height={40} 
-                         borderRadius={20} 
-                       />
+                        <Image 
+                          source={{ uri: (sync.partnerImage as string) || 'https://picsum.photos/40' }} 
+                          src={(sync.partnerImage as string) || 'https://picsum.photos/40'}
+                          width={40} 
+                          height={40} 
+                          borderRadius={20} 
+                        />
                        <YStack flex={1}>
                          <Text fontFamily="$body" fontWeight="bold" fontSize="$4">Syncing with {sync.partnerName as string}</Text>
                          <Text fontFamily="$body" fontSize="$3" color="$textSecondary">

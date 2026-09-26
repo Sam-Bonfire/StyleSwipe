@@ -91,6 +91,8 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
               <YStack width={windowWidth} height={galleryHeight} justifyContent="center" alignItems="center" backgroundColor="$background">
                 <Image
                   source={{ uri: img }}
+                  // @ts-ignore - src passes through to <img> on web where source resolution fails
+                  src={img}
                   style={{ width: windowWidth, height: galleryHeight }}
                   resizeMode="cover"
                 />
@@ -132,6 +134,8 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
             <Animated.View style={[{ width: windowWidth, height: windowHeight * 0.7, justifyContent: 'center', alignItems: 'center' }, animatedStyle]}>
               <Image
                 source={{ uri: images[zoomIndex], width: windowWidth, height: windowWidth / 0.7 }}
+                // @ts-ignore - src passes through to <img> on web where source resolution fails
+                src={images[zoomIndex]}
                 resizeMode="contain"
                 style={{ width: windowWidth, height: windowWidth / 0.7 } as unknown as Record<string, unknown>}
               />
@@ -148,7 +152,8 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                 }}
               >
                 <YStack width={48} height={64} borderRadius="$2" overflow="hidden" borderWidth={idx === zoomIndex ? 2 : 0} borderColor="$primary">
-                  <Image source={{ uri: images[idx] }} style={{ width: 48, height: 64 }} resizeMode="cover" />
+                  {/* @ts-ignore - src passes through to <img> on web where source resolution fails */}
+                  <Image source={{ uri: images[idx] }} src={images[idx]} style={{ width: 48, height: 64 }} resizeMode="cover" />
                 </YStack>
               </Pressable>
             ))}

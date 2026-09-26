@@ -408,7 +408,7 @@ export function SearchScreen() {
                           borderColor="$borderColor"
                         >
                           {cat.image ? (
-                            <Image source={{ uri: cat.image }} width="100%" height={90} resizeMode="cover" />
+                            <Image source={{ uri: cat.image }} src={cat.image} width="100%" height={90} resizeMode="cover" />
                           ) : (
                             <YStack height={90} backgroundColor="$neutral200" alignItems="center" justifyContent="center">
                               <Text fontFamily="$body" color="$textSecondary" fontSize="$3">
