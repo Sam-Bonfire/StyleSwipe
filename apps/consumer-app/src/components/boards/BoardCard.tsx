@@ -32,7 +32,7 @@ export function BoardCard({ board, onPress }: BoardCardProps) {
     >
       <YStack height={100} backgroundColor="$backgroundHover" alignItems="center" justifyContent="center">
         {board.previewImage ? (
-          <Image source={{ uri: board.previewImage }} width={160} height={100} resizeMode="cover" />
+          <Image source={{ uri: board.previewImage }} src={board.previewImage} width={160} height={100} resizeMode="cover" />
         ) : (
           <Text fontFamily="$body" fontSize="$8" opacity={0.2}>♡</Text>
         )}
@@ -66,7 +66,7 @@ export function BoardListCard({ board, onPress }: BoardCardProps) {
     >
       <YStack width={56} height={56} borderRadius="$2" backgroundColor="$backgroundHover" overflow="hidden" alignItems="center" justifyContent="center">
         {board.previewImage ? (
-          <Image source={{ uri: board.previewImage }} width={56} height={56} resizeMode="cover" />
+          <Image source={{ uri: board.previewImage }} src={board.previewImage} width={56} height={56} resizeMode="cover" />
         ) : (
           <Text fontFamily="$body" fontSize="$5" opacity={0.3}>♡</Text>
         )}

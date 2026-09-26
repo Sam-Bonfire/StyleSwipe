@@ -156,7 +156,7 @@ export const AvatarGroup = React.forwardRef<TamaguiElement, AvatarGroupProps>(
             >
               {
                 (avatar.imageUrl ? (
-                  <AvatarImage source={{ uri: avatar.imageUrl }} />
+                  <AvatarImage source={{ uri: avatar.imageUrl }} src={avatar.imageUrl} />
                 ) : (
                   <InitialsContainer>
                     <InitialsText size={size as any}>{getInitials(avatar.name)}</InitialsText>

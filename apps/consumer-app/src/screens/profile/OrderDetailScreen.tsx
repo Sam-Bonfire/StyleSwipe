@@ -116,7 +116,7 @@ export function OrderDetailScreen() {
               const platform = platformRaw || 'StyleSwipe';
               return (
                 <XStack key={item.productId} gap="$3" alignItems="center">
-                  <Image source={{ uri: imageUrl }} width={64} height={80} borderRadius="$2" />
+                  <Image source={{ uri: imageUrl }} src={imageUrl} width={64} height={80} borderRadius="$2" />
                   <YStack flex={1} gap="$1">
                     <Text fontFamily="$body" fontSize="$2" fontWeight="600" textTransform="uppercase">{item.brand}</Text>
                     <Text fontFamily="$body" fontSize="$3" numberOfLines={2}>{item.title}</Text>

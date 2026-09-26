@@ -124,6 +124,7 @@ export function ProductsScreen() {
               <Card.Header padding="$0" paddingBottom="$0">
                 <Image
                   source={{ uri: item.images?.[0] }}
+                  src={item.images?.[0]}
                   width="100%"
                   height={200}
                   borderRadius="$2"

@@ -217,7 +217,7 @@ export const CartItem = React.forwardRef<typeof ItemFrame, CartItemProps>(
 
     return (
       <ItemFrame ref={ref as any} {...props}>
-        {(<ItemImage source={{ uri: imageUrl }} resizeMode="cover" />) as any}
+        {(<ItemImage source={{ uri: imageUrl }} src={imageUrl} resizeMode="cover" />) as any}
 
         {
           (

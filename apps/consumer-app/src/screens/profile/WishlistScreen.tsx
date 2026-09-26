@@ -109,7 +109,7 @@ export function WishlistScreen() {
                       gap="$3"
                     >
                       <XStack gap="$3" alignItems="center">
-                        <Image source={{ uri: imageUrl }} width={70} height={90} borderRadius="$2" resizeMode="cover" />
+                        <Image source={{ uri: imageUrl }} src={imageUrl} width={70} height={90} borderRadius="$2" resizeMode="cover" />
                         <YStack flex={1} gap="$1">
                           <Text fontFamily="$body" fontSize="$2" fontWeight="600" textTransform="uppercase" color="$textPrimary">{product.brand}</Text>
                           <Text fontFamily="$body" fontSize="$3" numberOfLines={2} color="$textSecondary">{product.title}</Text>

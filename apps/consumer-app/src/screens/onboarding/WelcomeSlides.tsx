@@ -54,6 +54,7 @@ export const WelcomeSlides: React.FC<Props> = ({ currentSlide, onNext, onSkip, o
       <YStack flex={1} justifyContent="center" alignItems="center" gap="$4">
         <Image
           source={{ uri: slide.image }}
+          src={slide.image}
           width={280}
           height={320}
           borderRadius="$4"
