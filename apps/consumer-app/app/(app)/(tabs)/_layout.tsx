@@ -17,7 +17,8 @@ export default function TabsLayout() {
   else if (segment === 'search') activeKey = 'search';
   else if (segment === 'cart') activeKey = 'cart';
   else if (segment === 'profile') activeKey = 'profile';
-  else if (segment === 'index' || !segment) activeKey = 'home';
+  else if (segment === 'home') activeKey = 'home';
+  else if (segment === 'index' || !segment) activeKey = 'discovery';
 
   const navItems = [
     {
@@ -56,7 +57,7 @@ export default function TabsLayout() {
     if (key === 'discovery') {
       router.push('/(app)/(tabs)/discover');
     } else if (key === 'home') {
-      router.push('/(app)/(tabs)/');
+      router.push('/(app)/(tabs)/home');
     } else {
       router.push(`/(app)/(tabs)/${key}` as `/${string}`);
     }
@@ -76,7 +77,8 @@ export default function TabsLayout() {
           />
         )}
       >
-        <Tabs.Screen name="index" options={{ title: 'Home' }} />
+        <Tabs.Screen name="index" options={{ title: 'Discover' }} />
+        <Tabs.Screen name="home" options={{ title: 'Home' }} />
         <Tabs.Screen name="search" options={{ title: 'Search' }} />
         <Tabs.Screen name="discover" options={{ title: 'Discover' }} />
         <Tabs.Screen name="cart" options={{ title: 'Cart' }} />

@@ -25,6 +25,8 @@ const FooterFrame = styled(XStack, {
 const PriceContainer = styled(YStack, {
   name: 'FooterPriceContainer',
   flex: 1,
+  flexShrink: 1,
+  minWidth: 0,
 });
 
 const TotalLabel = styled(Text, {
@@ -77,14 +79,14 @@ export const TransactionalFooter = ({
     <FooterFrame {...props}>
       <PriceContainer>
         <TotalLabel>Total Price</TotalLabel>
-        <XStack alignItems="center" gap="$2">
-          <PriceText>{formatPrice(price)}</PriceText>
+        <XStack alignItems="center" gap="$2" flexWrap="nowrap">
+          <PriceText numberOfLines={1}>{formatPrice(price)}</PriceText>
           {originalPrice && originalPrice > price && (
             <>
-              <Text fontFamily="$body" fontSize="$3" color="$textSecondary" textDecorationLine="line-through">
+              <Text fontSize="$2" color="$textSecondary" textDecorationLine="line-through" numberOfLines={1}>
                 {formatPrice(originalPrice)}
               </Text>
-              <Text fontFamily="$body" fontSize="$3" color="$success" fontWeight="700">
+              <Text fontSize="$2" color="$success" fontWeight="700" numberOfLines={1}>
                 {discountPercentage}% OFF
               </Text>
             </>
@@ -98,6 +100,7 @@ export const TransactionalFooter = ({
         onPress={onAddToCart}
         disabled={isLoading}
         loading={isLoading}
+        flexShrink={0}
         icon={isAdded ? <ShoppingBag size={20} color="white" /> : undefined}
       >
         {isAdded ? 'Go to Bag' : 'Add to Bag'}

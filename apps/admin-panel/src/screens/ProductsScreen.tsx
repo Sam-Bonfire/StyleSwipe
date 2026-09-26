@@ -129,6 +129,7 @@ export function ProductsScreen() {
                   height={200}
                   borderRadius="$2"
                   resizeMode="cover"
+                  style={{ objectFit: 'cover' }}
                 />
               </Card.Header>
               <Card.Footer padding="$3" flexDirection="column" alignItems="flex-start" gap="$2">

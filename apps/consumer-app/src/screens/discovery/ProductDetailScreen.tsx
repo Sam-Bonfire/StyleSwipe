@@ -3,7 +3,9 @@ import type { CartItem } from '@app/core';
 import {
   useAddToCart,
   useAnalytics,
+  useCart,
   useCurrentUser,
+  useGuestCart,
   useMarkHelpful,
   useProduct,
   useReviewBreakdown,
@@ -48,6 +50,9 @@ export function ProductDetailScreen() {
   const user = useCurrentUser();
   const userId = user?._id ?? undefined;
   const scrollViewRef = React.useRef<ScrollView>(null);
+
+  const serverCart = useCart(userId);
+  const guestCart = useGuestCart();
 
   const wishlist = useWishlist(userId);
   const toggleWishlist = useToggleWishlist();
@@ -190,8 +195,16 @@ export function ProductDetailScreen() {
     setShowSizeError(false);
   };
 
+  // Bag state reflects the actual cart, not just this session's adds
+  const inBag = React.useMemo<boolean>(() => {
+    if (serverCart?.items?.some((i) => i.productId === product.id)) return true;
+    if (!userId && guestCart.items.some((g) => g.productId === product.id)) return true;
+    return false;
+  }, [serverCart, guestCart.items, userId, product.id]);
+  const showAdded = isAdded || inBag;
+
   const handleAddToCart = async (): Promise<void> => {
-    if (isAdded) {
+    if (showAdded) {
       router.push('/(app)/(tabs)/cart');
       return;
     }
@@ -434,7 +447,7 @@ export function ProductDetailScreen() {
         </TopBarIconButton>
       </View>
 
-      <TransactionalFooter price={product.price} originalPrice={product.originalPrice} onAddToCart={handleAddToCart} isAdded={isAdded} isLoading={isLoading} />
+      <TransactionalFooter price={product.price} originalPrice={product.originalPrice} onAddToCart={handleAddToCart} isAdded={showAdded} isLoading={isLoading} />
     </View>
   );
 }

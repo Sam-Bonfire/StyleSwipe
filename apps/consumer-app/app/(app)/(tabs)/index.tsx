@@ -1,5 +1,6 @@
-import { HomeScreen } from '../../../src/screens/home/HomeScreen';
+import { Redirect } from 'expo-router';
 
-export default function HomeRoute() {
-  return <HomeScreen />;
+// Discover is the default landing tab; Home lives at /home.
+export default function TabsIndexRoute() {
+  return <Redirect href="/(app)/(tabs)/discover" />;
 }
