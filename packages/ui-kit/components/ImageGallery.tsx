@@ -93,7 +93,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                   source={{ uri: img }}
                   // @ts-ignore - src passes through to <img> on web where source resolution fails
                   src={img}
-                  style={{ width: windowWidth, height: galleryHeight }}
+                  style={{ width: windowWidth, height: galleryHeight, objectFit: 'cover' }}
                   resizeMode="cover"
                 />
               </YStack>
@@ -137,7 +137,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                 // @ts-ignore - src passes through to <img> on web where source resolution fails
                 src={images[zoomIndex]}
                 resizeMode="contain"
-                style={{ width: windowWidth, height: windowWidth / 0.7 } as unknown as Record<string, unknown>}
+                style={{ width: windowWidth, height: windowWidth / 0.7, objectFit: 'contain' } as unknown as Record<string, unknown>}
               />
             </Animated.View>
           </GestureDetector>
@@ -153,7 +153,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
               >
                 <YStack width={48} height={64} borderRadius="$2" overflow="hidden" borderWidth={idx === zoomIndex ? 2 : 0} borderColor="$primary">
                   {/* @ts-ignore - src passes through to <img> on web where source resolution fails */}
-                  <Image source={{ uri: images[idx] }} src={images[idx]} style={{ width: 48, height: 64 }} resizeMode="cover" />
+                  <Image source={{ uri: images[idx] }} src={images[idx]} style={{ width: 48, height: 64, objectFit: 'cover' }} resizeMode="cover" />
                 </YStack>
               </Pressable>
             ))}

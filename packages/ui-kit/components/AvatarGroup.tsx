@@ -38,6 +38,7 @@ const AvatarImage = styled(Image, {
   name: 'AvatarGroupImage',
   width: '100%',
   height: '100%',
+  objectFit: 'cover',
 });
 
 const OverflowBadge = styled(YStack, {

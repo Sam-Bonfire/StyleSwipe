@@ -59,6 +59,7 @@ export const WelcomeSlides: React.FC<Props> = ({ currentSlide, onNext, onSkip, o
           height={320}
           borderRadius="$4"
           resizeMode="cover"
+          style={{ objectFit: 'cover' }}
         />
         <YStack gap="$2" alignItems="center" paddingHorizontal="$4">
           <H1 fontFamily="$heading" textAlign="center" color="$textPrimary">
