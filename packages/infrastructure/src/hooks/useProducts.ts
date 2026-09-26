@@ -33,7 +33,7 @@ export function useProductsByIds(ids: string[]) {
  * Resolves the retailer's source URL for a catalog product. Null when unknown.
  */
 export function useProductSourceUrl(id: string | undefined) {
-    return useQuery(api.products.getSourceUrl, id ? { id: id as Id<'products'> } : 'skip');
+  return useQuery(api.products.getSourceUrl, id ? { productId: id as Id<'products'> } : 'skip');
 }
 
 export function useSimilarProducts(productId: string | undefined, limit: number = 8) {
