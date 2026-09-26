@@ -284,6 +284,8 @@ export function SearchScreen() {
   const showEmptyRecovery = !loading && hasSearched && results.length === 0 && query.length >= 3;
 
   const trendingPills = useMemo(() => (suggestions.length > 0 && query.length >= 1 ? suggestions : trending), [suggestions, trending, query.length]);
+  // Once results arrive, they own the space — suggestions collapse until the query changes with no results
+  const showSuggestions = query.length >= 1 && suggestions.length > 0 && !(hasSearched && results.length > 0);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -299,8 +301,6 @@ export function SearchScreen() {
               value={query}
               onChangeText={(t) => {
                 setQuery(t);
-                if (t.length === 0) router.setParams({ q: '' } as never);
-                else router.setParams({ q: t } as never);
               }}
               returnKeyType="search"
               onSubmitEditing={() => {
@@ -316,8 +316,8 @@ export function SearchScreen() {
             />
           </XStack>
 
-          {/* Suggestions / Trending pills */}
-          {query.length >= 1 && suggestions.length > 0 ? (
+          {/* Suggestions pills — hidden once results take over */}
+          {showSuggestions ? (
             <XStack gap="$2" flexWrap="wrap">
               {suggestions.map((s, i) => (
                 <CategoryChip key={`${s}-${i}`} label={s} onToggle={() => handleSuggestionPress(s)} />
@@ -408,7 +408,7 @@ export function SearchScreen() {
                           borderColor="$borderColor"
                         >
                           {cat.image ? (
-                            <Image source={{ uri: cat.image }} src={cat.image} width="100%" height={90} resizeMode="cover" />
+                            <Image source={{ uri: cat.image }} src={cat.image} width="100%" height={90} resizeMode="cover" style={{ objectFit: 'cover' }} />
                           ) : (
                             <YStack height={90} backgroundColor="$neutral200" alignItems="center" justifyContent="center">
                               <Text fontFamily="$body" color="$textSecondary" fontSize="$3">

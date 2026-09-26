@@ -220,6 +220,7 @@ export function PartnerSyncSettingsScreen() {
                           width={40} 
                           height={40} 
                           borderRadius={20} 
+                          style={{ objectFit: 'cover' }}
                         />
                        <YStack flex={1}>
                          <Text fontFamily="$body" fontWeight="bold" fontSize="$4">Syncing with {sync.partnerName as string}</Text>
@@ -274,14 +275,14 @@ export function PartnerSyncSettingsScreen() {
               </XStack>
 
               <Text fontFamily="$body" fontWeight="bold" fontSize="$4" marginBottom="$3">2. Invite Partner</Text>
-              <XStack flexWrap="wrap" gap="$3">
-                <Button flexGrow={1} flexBasis="40%" variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
+              <YStack gap="$3">
+                <Button variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
                   Share Link
                 </Button>
-                <Button flexGrow={1} flexBasis="40%" variant="outlined" icon={<QrCode size={18} />} onPress={() => handleShowQR(selectedDuration)}>
+                <Button variant="outlined" icon={<QrCode size={18} />} onPress={() => handleShowQR(selectedDuration)}>
                   Show QR Code
                 </Button>
-              </XStack>
+              </YStack>
             </YStack>
 
           </YStack>

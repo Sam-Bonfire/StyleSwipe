@@ -162,6 +162,7 @@ const PartnerAvatar = styled(Image, {
   height: 40,
   borderRadius: '$full',
   backgroundColor: '$neutral200',
+  objectFit: 'cover',
 });
 
 const SessionInfo = styled(YStack, {

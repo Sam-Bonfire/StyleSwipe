@@ -25,11 +25,13 @@ const ItemImage = styled(Image, {
   height: 120,
   borderRadius: '$2',
   backgroundColor: '$neutral100',
+  objectFit: 'cover',
 });
 
 const ContentContainer = styled(YStack, {
   name: 'CartItemContent',
   flex: 1,
+  minWidth: 0,
   justifyContent: 'space-between',
 });
 
@@ -70,6 +72,7 @@ const PriceRow = styled(XStack, {
   alignItems: 'center',
   justifyContent: 'space-between',
   marginTop: '$1',
+  gap: '$2',
 });
 
 const PriceText = styled(Text, {
@@ -93,6 +96,7 @@ const OriginalPriceText = styled(Text, {
 const QuantityContainer = styled(XStack, {
   name: 'CartItemQuantity',
   alignItems: 'center',
+  flexShrink: 0,
   gap: '$1.5',
   backgroundColor: '$neutral100',
   borderRadius: '$2',
@@ -233,8 +237,8 @@ export const CartItem = React.forwardRef<typeof ItemFrame, CartItemProps>(
               </YStack>
 
               <PriceRow>
-                <XStack alignItems="baseline">
-                  <PriceText>{formatPrice((price as number) * (quantity as number))}</PriceText>
+                <XStack alignItems="baseline" flexShrink={1} flexWrap="wrap">
+                  <PriceText numberOfLines={1}>{formatPrice((price as number) * (quantity as number))}</PriceText>
                   {(originalPrice as number) && (originalPrice as number) > (price as number) && (
                     <OriginalPriceText>
                       {formatPrice((originalPrice as number) * (quantity as number))}

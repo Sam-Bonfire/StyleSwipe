@@ -24,7 +24,11 @@ export function ProfileScreen() {
             <XStack alignItems="center" gap="$4">
               <Avatar circular size="$10">
                 <Avatar.Image src={user.image} />
-                <Avatar.Fallback backgroundColor="$primary" />
+                <Avatar.Fallback backgroundColor="$primary" alignItems="center" justifyContent="center">
+                  <Text fontFamily="$body" color="white" fontSize="$6" fontWeight="700">
+                    {(user.name || user.email || '?').trim().charAt(0).toUpperCase()}
+                  </Text>
+                </Avatar.Fallback>
               </Avatar>
               <YStack>
                 <Text fontFamily="$body" fontWeight="bold" fontSize="$5">
