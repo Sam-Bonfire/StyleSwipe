@@ -26,7 +26,7 @@ overrides:
 
 patchedDependencies:
   '@tamagui/input':
-    hash: 4rwxo7zhxv5zsht3ph4trj3dhu
+    hash: brrrichlehcxqje36w2slbpo5a
     path: patches/@tamagui__input.patch
   expo-modules-core@57.0.11:
     hash: 3czmmyubpwlxmvsqlmk6tffnai
