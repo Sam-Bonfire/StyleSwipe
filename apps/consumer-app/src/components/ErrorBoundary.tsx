@@ -1,8 +1,6 @@
-import { AlertTriangle, Home, RefreshCw, ChevronDown, ChevronUp } from '@tamagui/lucide-icons';
 import { router } from 'expo-router';
 import React, { Component, ErrorInfo } from 'react';
-import { Platform } from 'react-native';
-import { YStack, XStack, Text, Button, ScrollView } from 'tamagui';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { logger } from '../lib/logger';
 
@@ -61,82 +59,135 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      // NOTE: this fallback must stay free of Tamagui (and any other
+      // theme-context component). ErrorBoundary wraps StyleSwipeProvider,
+      // so themed components here throw "Missing theme", unmount the app,
+      // and mask the original error. Plain react-native primitives only.
       return (
-        <YStack flex={1} justifyContent="center" alignItems="center" backgroundColor="$background" padding="$4">
-          <YStack
-            backgroundColor="$surface"
-            padding="$6"
-            borderRadius="$4"
-            width="100%"
-            maxWidth={400}
-            alignItems="center"
-            gap="$4"
-            elevation="$2"
-          >
-            <AlertTriangle size={48} color="red" />
-            <Text fontFamily="$body" fontSize="$6" fontWeight="bold" color="$color" textAlign="center">
-              Oops! Something went wrong.
-            </Text>
-            <Text fontFamily="$body" fontSize="$4" color="$textSecondary" textAlign="center">
+        <View style={styles.screen}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Oops! Something went wrong.</Text>
+            <Text style={styles.message}>
               We encountered an unexpected error. Please try again or return home.
             </Text>
 
-            <XStack gap="$3" marginTop="$4" width="100%" justifyContent="center">
-              <Button
-                flex={1}
-                variant="outlined"
-                icon={<Home size={18} />}
-                onPress={this.handleGoHome}
-              >
-                Go Home
-              </Button>
-              <Button
-                flex={1}
-                backgroundColor="$primary"
-                icon={<RefreshCw size={18} />}
-                onPress={this.handleTryAgain}
-              >
-                Try Again
-              </Button>
-            </XStack>
+            <View style={styles.actions}>
+              <Pressable style={[styles.button, styles.buttonSecondary]} onPress={this.handleGoHome}>
+                <Text style={styles.buttonSecondaryText}>Go Home</Text>
+              </Pressable>
+              <Pressable style={[styles.button, styles.buttonPrimary]} onPress={this.handleTryAgain}>
+                <Text style={styles.buttonPrimaryText}>Try Again</Text>
+              </Pressable>
+            </View>
 
             {__DEV__ && this.state.error && (
-              <YStack width="100%" marginTop="$4">
-                <Button
-                  variant="outlined"
-                  size="$3"
-                  iconAfter={this.state.isDetailsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  onPress={this.toggleDetails}
-                >
-                  Error Details
-                </Button>
+              <View style={styles.details}>
+                <Pressable style={[styles.button, styles.buttonSecondary]} onPress={this.toggleDetails}>
+                  <Text style={styles.buttonSecondaryText}>
+                    {this.state.isDetailsExpanded ? 'Hide Details' : 'Error Details'}
+                  </Text>
+                </Pressable>
                 {this.state.isDetailsExpanded && (
-                  <ScrollView
-                    maxHeight={200}
-                    marginTop="$2"
-                    backgroundColor="$background"
-                    padding="$2"
-                    borderRadius="$2"
-                    borderWidth={1}
-                    borderColor="$borderColor"
-                  >
-                    <Text fontFamily="$body" fontSize="$2" color="red" fontWeight="bold">
-                      {this.state.error.message}
-                    </Text>
+                  <ScrollView style={styles.detailsBox}>
+                    <Text style={styles.detailsError}>{this.state.error.message}</Text>
                     {this.state.errorInfo?.componentStack && (
-                      <Text fontFamily="$body" fontSize="$1" color="$textSecondary" marginTop="$2">
-                        {this.state.errorInfo.componentStack}
-                      </Text>
+                      <Text style={styles.detailsStack}>{this.state.errorInfo.componentStack}</Text>
                     )}
                   </ScrollView>
                 )}
-              </YStack>
+              </View>
             )}
-          </YStack>
-        </YStack>
+          </View>
+        </View>
       );
     }
 
     return this.props.children;
   }
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    gap: 16,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#212739',
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 14,
+    color: '#6C757D',
+    textAlign: 'center',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonPrimary: {
+    backgroundColor: '#CD0268',
+  },
+  buttonPrimaryText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  buttonSecondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
+  },
+  buttonSecondaryText: {
+    color: '#212739',
+    fontWeight: '600',
+  },
+  details: {
+    width: '100%',
+    marginTop: 16,
+  },
+  detailsBox: {
+    maxHeight: 200,
+    marginTop: 8,
+    backgroundColor: '#F8F9FA',
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DEE2E6',
+  },
+  detailsError: {
+    fontSize: 12,
+    color: '#EF4444',
+    fontWeight: 'bold',
+  },
+  detailsStack: {
+    fontSize: 10,
+    color: '#6C757D',
+    marginTop: 8,
+  },
+});
