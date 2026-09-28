@@ -113,14 +113,6 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
             />
           ))}
         </XStack>
-        <Pressable
-          onPress={() => openZoom(activeIndex)}
-          style={{ position: 'absolute', top: 12, right: 12, backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}
-        >
-          <Text fontFamily="$body" color="white" fontSize="$2">
-            {activeIndex + 1} / {images.length} • Tap to zoom
-          </Text>
-        </Pressable>
       </YStack>
 
       <Modal visible={zoomVisible} transparent animationType="fade" onRequestClose={() => setZoomVisible(false)}>

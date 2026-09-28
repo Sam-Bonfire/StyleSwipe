@@ -20,6 +20,19 @@ async function unwrap<T>(promise: Promise<{ data: T | null; error: { message?: s
   return data;
 }
 
+/**
+ * Null-tolerant unwrap for read operations: logged-out (or stale-session)
+ * calls legitimately resolve `{ data: null, error: null }` — surface null
+ * instead of throwing so guests get empty states, not exceptions.
+ */
+async function unwrapOptional<T>(
+  promise: Promise<{ data: T | null; error: { message?: string } | null }>,
+): Promise<T | null> {
+  const { data, error } = await promise;
+  if (error) throw new Error(error.message ?? 'Authentication request failed');
+  return data ?? null;
+}
+
 function toOrganization(o: {
   id: string;
   name: string;
@@ -106,7 +119,7 @@ export class AuthAdapter {
   }
 
   async listOrganizations(): Promise<Organization[]> {
-    const orgs = await unwrap(this.client.organization.list());
+    const orgs = await unwrapOptional(this.client.organization.list());
     return (orgs ?? []).map((o) => toOrganization(o as unknown as Parameters<typeof toOrganization>[0]));
   }
 
@@ -116,7 +129,7 @@ export class AuthAdapter {
       session as unknown as { session?: { activeOrganizationId?: string } } | null
     )?.session?.activeOrganizationId;
     if (!activeOrganizationId) return null;
-    const full = await unwrap(
+    const full = await unwrapOptional(
       this.client.organization.getFullOrganization({
         query: { organizationId: activeOrganizationId },
       }),
@@ -192,7 +205,7 @@ export class AuthAdapter {
   }
 
   async listMembers(organizationId: string): Promise<Member[]> {
-    const res = await unwrap(
+    const res = await unwrapOptional(
       this.client.organization.listMembers({
         query: { organizationId },
       }),

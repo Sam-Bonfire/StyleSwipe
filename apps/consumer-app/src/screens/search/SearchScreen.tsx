@@ -57,6 +57,7 @@ export function SearchScreen() {
 
   const [query, setQuery] = useState<string>(initialQuery);
   const [results, setResults] = useState<SearchResult['products']>([]);
+  const [submittedQuery, setSubmittedQuery] = useState<string>('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [trending, setTrending] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,24 +78,15 @@ export function SearchScreen() {
     }
   }, [params.q]);
 
-  // Trending pills from getSuggestions + popular events
+  // Trending pills from popular search events (real user queries),
+  // falling back to static topics. Never title-search results.
   const fetchTrending = useCallback(async () => {
-    try {
-      const repoLayer = makeSuggestionLayers(convex);
-      const s = await Effect.runPromise(
-        SearchProducts.getSuggestions('a', 6).pipe(Effect.provide(repoLayer)),
-      );
-      const fromSuggestions = s.length > 0 ? s : TRENDING_FALLBACK;
-      const fromEvents: string[] = (popularEvents ?? [])
-        .map((e: { metadata?: { title?: string; query?: string } }) => (e.metadata?.title as string) || (e.metadata?.query as string) || '')
-        .filter(Boolean)
-        .slice(0, 3);
-      const merged = Array.from(new Set([...fromSuggestions, ...fromEvents])).slice(0, 8);
-      setTrending(merged.length > 0 ? merged : TRENDING_FALLBACK);
-    } catch {
-      setTrending(TRENDING_FALLBACK);
-    }
-  }, [convex, popularEvents]);
+    const fromEvents: string[] = (popularEvents ?? [])
+      .map((e: { metadata?: { title?: string; query?: string } }) => (e.metadata?.title as string) || (e.metadata?.query as string) || '')
+      .filter(Boolean)
+      .slice(0, 6);
+    setTrending(fromEvents.length > 0 ? fromEvents : TRENDING_FALLBACK);
+  }, [popularEvents]);
 
   useEffect(() => {
     void fetchTrending();
@@ -109,6 +101,7 @@ export function SearchScreen() {
       }
       setLoading(true);
       setHasSearched(true);
+      setSubmittedQuery(text.trim());
       try {
         const result = await Effect.runPromise(
           SearchProducts.execute(text, 10).pipe(
@@ -152,9 +145,12 @@ export function SearchScreen() {
     const timer = setTimeout(() => {
       if (query.length >= 3) {
         void performSearch(query);
+      } else if (query.length === 0) {
+        // Keep the last results visible (with a header + clear action)
+        // instead of dropping back to the idle page.
+        setHasSearched(false);
       } else {
         setResults([]);
-        if (query.length === 0) setHasSearched(false);
       }
       if (query.length >= 1) {
         void fetchSuggestions(query);
@@ -252,8 +248,8 @@ export function SearchScreen() {
     [handleProductPress],
   );
 
-  const showRecent = query.length === 0 && recent.length > 0;
-  const showBrowse = query.length === 0;
+  const showRecent = query.length === 0 && results.length === 0 && recent.length > 0;
+  const showBrowse = query.length === 0 && results.length === 0;
   const showEmptyRecovery = !loading && hasSearched && results.length === 0 && query.length >= 3;
 
   const trendingPills = useMemo(() => (suggestions.length > 0 && query.length >= 1 ? suggestions : trending), [suggestions, trending, query.length]);
@@ -296,7 +292,7 @@ export function SearchScreen() {
                 <CategoryChip key={`${s}-${i}`} label={s} onToggle={() => handleSuggestionPress(s)} />
               ))}
             </XStack>
-          ) : trendingPills.length > 0 && query.length === 0 ? (
+          ) : trendingPills.length > 0 && query.length === 0 && results.length === 0 ? (
             <XStack gap="$2" flexWrap="wrap" alignItems="center">
               <XStack alignItems="center" gap="$1" marginRight="$1">
                 <TrendingUp size={14} color="$textSecondary" />
@@ -441,14 +437,33 @@ export function SearchScreen() {
                 </YStack>
               </YStack>
             ) : results.length > 0 ? (
-              <FlatList
-                data={results}
-                renderItem={renderItem}
-                keyExtractor={(item) => String(item.id)}
-                numColumns={2}
-                onEndReachedThreshold={0.5}
-                contentContainerStyle={{ paddingBottom: 16 }}
-              />
+              <>
+                <XStack justifyContent="space-between" alignItems="center" paddingHorizontal="$2">
+                  <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
+                    {results.length} result{results.length === 1 ? '' : 's'}
+                    {submittedQuery ? ` for "${submittedQuery}"` : ''}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      setResults([]);
+                      setHasSearched(false);
+                      setSubmittedQuery('');
+                    }}
+                  >
+                    <Text fontFamily="$body" fontSize="$2" color="$primary" fontWeight="600">
+                      Clear
+                    </Text>
+                  </Pressable>
+                </XStack>
+                <FlatList
+                  data={results}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => String(item.id)}
+                  numColumns={2}
+                  onEndReachedThreshold={0.5}
+                  contentContainerStyle={{ paddingBottom: 16 }}
+                />
+              </>
             ) : query.length >= 3 ? (
               <YStack flex={1} justifyContent="center" alignItems="center">
                 <Search size={48} color="$textTertiary" />
