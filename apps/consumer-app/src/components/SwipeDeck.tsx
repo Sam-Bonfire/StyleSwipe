@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { type Vector384, FilterState, discountPercentage } from '@app/core';
+import { type Vector384, FilterState, discountPercentage, applyProductFilters, sortProducts, type SortOption } from '@app/core';
 import { useVectorFeed, useProcessSwipe, useAnalytics } from '@app/infrastructure';
 import { Button } from '@app/ui-kit/components/Button';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
@@ -8,7 +8,7 @@ import { Modal } from '@app/ui-kit/components/Modal';
 import { SwipeCardStack, SwipeCardStackRef } from '@app/ui-kit/components/SwipeCardStack';
 import { Undo2 } from '@tamagui/lucide-icons';
 import { useRouter } from 'expo-router';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ActivityIndicator, Image } from 'react-native';
 import { YStack, H2, H3, Text } from 'tamagui';
 
@@ -29,12 +29,22 @@ interface SwipeDeckProduct {
 
 export interface SwipeDeckProps {
   filterState?: FilterState;
+  sort?: SortOption;
   partnerId?: string;
   influenceRatio?: number;
 }
 
-export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckProps) {
+const FEED_PAGE_SIZE = 30;
+const REFILL_THRESHOLD = 5;
+
+export function SwipeDeck({ filterState, sort, partnerId, influenceRatio }: SwipeDeckProps) {
   const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
+  // Cards swiped in the current feed (the stack advances its own index;
+  // this mirrors it so we know when to refill).
+  const [swipedCount, setSwipedCount] = useState(0);
+  const seenIds = useRef<Set<string>>(new Set());
+  const exhaustedRef = useRef(false);
+  const loadingMoreRef = useRef(false);
   const [matchedProduct, setMatchedProduct] = useState<SwipeDeckProduct | null>(null);
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
@@ -46,19 +56,59 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
   const [error, setError] = useState<string | null>(null);
   const [superLikeTrigger, setSuperLikeTrigger] = useState(0);
 
+  const fetchFeed = useCallback(
+    async (append: boolean) => {
+      if (append) {
+        if (loadingMoreRef.current || exhaustedRef.current) return;
+        loadingMoreRef.current = true;
+      }
+      try {
+        const data = await getVectorFeed({ limit: FEED_PAGE_SIZE, influenceRatio });
+        let items = ((data ?? []) as unknown as SwipeDeckProduct[]).filter(
+          (p) => p && typeof p._id === 'string' && !seenIds.current.has(p._id),
+        );
+        if (filterState) {
+          items = sortProducts(applyProductFilters(items, filterState), sort ?? 'RELEVANCE');
+        }
+        if (items.length === 0) {
+          exhaustedRef.current = true;
+          if (!append) setProducts([]);
+          return;
+        }
+        for (const item of items) seenIds.current.add(item._id);
+        setProducts((prev) => (append && prev ? [...prev, ...items] : items));
+        console.log('Feed data received:', items.length);
+      } catch (e) {
+        if (!append) {
+          console.error('Feed Error:', e);
+          setError(e instanceof Error ? e.message : 'Unknown error fetching feed');
+          setProducts([]); // Stop loading
+        }
+      } finally {
+        if (append) loadingMoreRef.current = false;
+      }
+    },
+    [getVectorFeed, filterState, sort, influenceRatio],
+  );
+
+  // Initial load + refetch when filters/sort/blend change
   useEffect(() => {
+    seenIds.current.clear();
+    exhaustedRef.current = false;
+    loadingMoreRef.current = false;
+    setSwipedCount(0);
+    setError(null);
     setProducts(null); // Reset before fetching
-    getVectorFeed({ limit: 10, influenceRatio })
-      .then((data) => {
-        console.log('Feed data received:', data?.length);
-        setProducts(data as SwipeDeckProduct[]);
-      })
-      .catch((e) => {
-        console.error('Feed Error:', e);
-        setError(e.message || 'Unknown error fetching feed');
-        setProducts([]); // Stop loading
-      });
-  }, [getVectorFeed, filterState, influenceRatio]);
+    void fetchFeed(false);
+  }, [fetchFeed]);
+
+  // Quietly refill as the stack runs low; the stack keeps its own index
+  // over the (only ever appended-to) array, so appending is safe.
+  useEffect(() => {
+    if (products && products.length > 0 && products.length - swipedCount <= REFILL_THRESHOLD) {
+      void fetchFeed(true);
+    }
+  }, [products, swipedCount, fetchFeed]);
 
   if (error) {
     return (
@@ -89,6 +139,8 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
   }
 
   const handleSwipe = async (item: SwipeDeckProduct, direction: 'left' | 'right' | 'up' | 'down') => {
+    // The stack advances its own index for every swipe; mirror it for refill.
+    setSwipedCount((c) => c + 1);
     if (direction === 'down') {
       router.push({ pathname: '/(app)/product/[id]', params: { id: item._id } });
       return;
@@ -164,7 +216,10 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
         size="medium"
         circular
         icon={Undo2}
-        onPress={() => stackRef.current?.rewind()}
+        onPress={() => {
+          stackRef.current?.rewind();
+          setSwipedCount((c) => Math.max(0, c - 1));
+        }}
         backgroundColor="$background"
         borderColor="$borderColor"
         borderWidth={1}

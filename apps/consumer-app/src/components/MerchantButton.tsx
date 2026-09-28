@@ -20,8 +20,16 @@ export const MerchantButton = ({ productId }: { productId: string }) => {
       Alert.alert('Unavailable', 'The retailer link for this product is not available yet.');
       return;
     }
+    // Analytics must never block the redirect: track best-effort first,
+    // then open even if tracking throws.
+    if (userId) {
+      try {
+        await trackMerchantRedirect(userId, productId);
+      } catch (e) {
+        console.error('Failed to track merchant redirect', e);
+      }
+    }
     try {
-      if (userId) await trackMerchantRedirect(userId, productId);
       trackEvent('affiliate_redirect', undefined, { variant: 'macro_v1', productId });
       await Linking.openURL(merchantUrl);
     } catch (e) {

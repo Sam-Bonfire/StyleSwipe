@@ -237,10 +237,10 @@ export const CartItem = React.forwardRef<typeof ItemFrame, CartItemProps>(
               </YStack>
 
               <PriceRow>
-                <XStack alignItems="baseline" flexShrink={1} flexWrap="wrap">
-                  <PriceText numberOfLines={1}>{formatPrice((price as number) * (quantity as number))}</PriceText>
+                <XStack alignItems="baseline" flex={1} minWidth={0} flexShrink={1} flexWrap="wrap">
+                  <PriceText numberOfLines={1} flexShrink={1}>{formatPrice((price as number) * (quantity as number))}</PriceText>
                   {(originalPrice as number) && (originalPrice as number) > (price as number) && (
-                    <OriginalPriceText>
+                    <OriginalPriceText numberOfLines={1} flexShrink={1}>
                       {formatPrice((originalPrice as number) * (quantity as number))}
                     </OriginalPriceText>
                   )}
