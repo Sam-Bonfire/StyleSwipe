@@ -61,7 +61,16 @@ const DurationChipText = styled(Text, {
 });
 
 const FeatureRow = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
-  <XStack gap="$3" alignItems="flex-start" marginBottom="$4">
+  <XStack
+    gap="$3"
+    alignItems="flex-start"
+    marginBottom="$3"
+    backgroundColor="$surface"
+    padding="$4"
+    borderRadius="$4"
+    borderWidth={1}
+    borderColor="$borderColor"
+  >
     <YStack padding="$3" backgroundColor="$backgroundHover" borderRadius="$full">
       <Icon size={24} color="$primary" />
     </YStack>

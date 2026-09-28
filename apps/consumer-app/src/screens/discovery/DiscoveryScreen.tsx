@@ -86,6 +86,7 @@ export function DiscoveryScreen() {
         <View style={{ flex: 1, display: viewMode === 'deck' ? 'flex' : 'none' }}>
           <SwipeDeck
             filterState={filterState}
+            sort={sort}
             partnerId={activeSession?.partnerId || activeSession?.initiatorId}
             influenceRatio={activeSession ? influenceRatio / 100 : undefined}
           />
