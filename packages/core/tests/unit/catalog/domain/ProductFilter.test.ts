@@ -15,6 +15,7 @@ const filter: FilterState = {
   merchantNames: [],
   inStockOnly: false,
   genders: [],
+  onSale: false,
 };
 
 const tee = { gender: 'men', brand: 'BrandA', category: 'T-Shirts', price: 50, mrp: 60, onSale: false };
