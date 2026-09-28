@@ -1,4 +1,4 @@
-import { PriceEstimator, type Cart } from '@app/core';
+import { PriceEstimator, calculateCartTotals, type Cart } from '@app/core';
 import {
   useCurrentUser,
   useCart,
@@ -77,16 +77,15 @@ export const CartScreen = () => {
       price: g.price,
       selectedAttributes: g.attributes,
     }));
-    return {
+    // Totals come from the domain (no zeroed/hand-cast synthesis)
+    return calculateCartTotals({
       userId: 'guest',
       items,
       currency: 'INR',
-      subtotal: 0,
       discountTotal: 0,
       estimatedTax: 0,
-      total: 0,
       updatedAt: Date.now(),
-    } as Cart;
+    });
   }, [userId, serverCart, guest.items, guest.loading]);
 
   const isLoading = userId ? serverCart === undefined : guest.loading;

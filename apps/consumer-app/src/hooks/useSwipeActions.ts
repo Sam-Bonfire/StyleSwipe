@@ -1,3 +1,5 @@
+import type { SwipeAction } from '@app/core';
+
 import { useCallback } from 'react';
 
 import { LocalDatabase } from '../infrastructure/LocalDatabase';
@@ -6,7 +8,7 @@ export function useSwipeActions() {
   const bufferSwipe = useCallback(
     async (
       productId: string,
-      action: 'like' | 'dislike' | 'superlike',
+      action: SwipeAction,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       productPayload?: any, // Should include text for vectorization if needed
     ) => {

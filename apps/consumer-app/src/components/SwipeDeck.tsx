@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { type Vector384, FilterState } from '@app/core';
-import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
+import { type Vector384, FilterState, discountPercentage } from '@app/core';
+import { useVectorFeed, useProcessSwipe, useAnalytics } from '@app/infrastructure';
 import { Button } from '@app/ui-kit/components/Button';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { Modal } from '@app/ui-kit/components/Modal';
@@ -12,7 +12,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, Image } from 'react-native';
 import { YStack, H2, H3, Text } from 'tamagui';
 
-import { LocalDatabase } from '../infrastructure/LocalDatabase';
+import { useSwipeActions } from '../hooks/useSwipeActions';
 import { SuperLikeStarburst } from './SwipeAnimations';
 
 
@@ -38,7 +38,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
   const [matchedProduct, setMatchedProduct] = useState<SwipeDeckProduct | null>(null);
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
-  const user = useCurrentUser();
+  const { bufferSwipe } = useSwipeActions();
   const router = useRouter();
   const { trackEvent } = useAnalytics();
 
@@ -102,14 +102,10 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
     }
 
     try {
-      // 1. Process Online via use case (validates + persists)
+      // Server runs the swipe use case (validates + persists + matches)
       const result = await processSwipe({
-        userId: user?._id || '',
         productId: item._id,
         action: action,
-        timestamp: Date.now(),
-        userPreferenceVector: user?.styleProfile?.preferenceVector,
-        productEmbedding: item.embedding,
         partnerId,
       });
       console.log(`Synced ${action} for ${item.title} to Convex. Mutual match: ${result.isMutualMatch}`);
@@ -119,10 +115,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
       }
 
       // 2. Offline-first: Buffer locally for redundancy/worker analysis
-      const db = await LocalDatabase.getInstance();
-      await db.bufferEvent('swipe', {
-        productId: item._id,
-        action,
+      await bufferSwipe(item._id, action, {
         // We add metadata for the worker to generate embeddings if needed
         description: item.description || item.title,
         title: item.title,
@@ -146,9 +139,7 @@ export function SwipeDeck({ filterState, partnerId, influenceRatio }: SwipeDeckP
         keyExtractor={(item: SwipeDeckProduct) => item._id}
         renderCard={(item: SwipeDeckProduct) => {
           const discount =
-            item.mrp && item.price < item.mrp
-              ? Math.round(((item.mrp - item.price) / item.mrp) * 100)
-              : undefined;
+            discountPercentage(item.price, item.mrp) || undefined;
 
           return (
             <FashionCard

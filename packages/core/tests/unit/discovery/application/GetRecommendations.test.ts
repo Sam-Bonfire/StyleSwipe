@@ -92,13 +92,15 @@ describe('GetRecommendations', () => {
   const mockSwipeRepository = Layer.succeed(
     SwipeRepository,
     SwipeRepository.of({
+      findExistingSwipe: () => Effect.succeed(null),
+      savePreferenceVector: () => Effect.succeed(undefined),
       getSwipesByUser: (userId) =>
         Effect.succeed(
           userId === 'user-1'
             ? [{ userId, productId: 'prod-2', action: 'pass', timestamp: Date.now() }]
             : []
         ),
-      recordSwipe: () => Effect.succeed(undefined),
+      recordSwipe: () => Effect.succeed({ swipeId: 'swipe-1' }),
     })
   );
 

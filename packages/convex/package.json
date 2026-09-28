@@ -25,9 +25,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@app/core": "workspace:*",
     "better-auth": "^1.6.29",
     "convex": "^1.42.3",
-    "convex-helpers": "^0.1.120"
+    "convex-helpers": "^0.1.120",
+    "effect": "^3.22.0",
+    "zod": "^3.25.0 || ^4.0.0"
   },
   "devDependencies": {
     "typescript": "~5.9.3"

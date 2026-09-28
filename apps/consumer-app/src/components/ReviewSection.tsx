@@ -1,3 +1,4 @@
+import { distributionPercent, isValidReviewText } from '@app/core';
 import { RatingStars } from '@app/ui-kit';
 import React, { useState } from 'react';
 import { Button, Text, TextArea, XStack, YStack, Separator } from 'tamagui';
@@ -41,7 +42,7 @@ export function ReviewSection({ reviews, breakdown, onSubmit, onHelpful, isAuthe
       setError('Please log in to submit a review.');
       return;
     }
-    if (text.trim().length < 3) {
+    if (!isValidReviewText(text)) {
       setError('Write at least 3 characters.');
       return;
     }
@@ -77,7 +78,7 @@ export function ReviewSection({ reviews, breakdown, onSubmit, onHelpful, isAuthe
           <YStack gap="$1" marginTop="$2">
             {[5, 4, 3, 2, 1].map((star) => {
               const c = breakdown?.distribution?.[star] ?? 0;
-              const pct = count > 0 ? (c / count) * 100 : 0;
+              const pct = distributionPercent(c, count);
               return (
                 <XStack key={star} alignItems="center" gap="$2">
                   <Text fontFamily="$body" width={30} fontSize="$2">{star} ★</Text>

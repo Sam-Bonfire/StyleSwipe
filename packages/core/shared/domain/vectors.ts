@@ -1,0 +1,95 @@
+/**
+ * Shared kernel: dense-vector math for style-preference learning.
+ *
+ * Lives in shared/ (not identity/) because multiple bounded contexts
+ * (identity, discovery) operate on these vectors. Pure functions only —
+ * no framework, effect, or I/O imports.
+ */
+
+export type Vector384 = number[];
+
+export const TOPIC_DIMENSIONS = 384;
+
+// Default Learning Rates
+export const DEFAULT_LEARNING_RATE_ALPHA = 0.1;
+export const DEFAULT_PENALTY_RATE_BETA = 0.05;
+export const SUPER_LIKE_MULTIPLIER = 3;
+
+// Interface for configuration to allow overrides
+export interface DisplacementConfig {
+  alpha?: number;
+  beta?: number;
+  superLikeMultiplier?: number; // Added this one too just in case
+}
+
+/**
+ * Calculates the mean vector of multiple style clusters.
+ * Used for Cold Start initialization.
+ */
+export function calculateCentroid(vectors: Vector384[]): Vector384 {
+  if (vectors.length === 0) {
+    return new Array(TOPIC_DIMENSIONS).fill(0);
+  }
+
+  const sum = new Array(TOPIC_DIMENSIONS).fill(0);
+  for (const vec of vectors) {
+    for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
+      sum[i] += vec[i];
+    }
+  }
+
+  return sum.map((val) => val / vectors.length);
+}
+
+/**
+ * Applies vector displacement based on user action.
+ *
+ * Right Swipe (Affinity): Vnew = Vold + alpha * (Vitem - Vold)
+ * Left Swipe (Aversion): Vnew = Vold - beta * (Vitem - Vold)
+ * Super Like: alpha = alpha * 3
+ */
+export function applyDisplacement(
+  currentProfile: Vector384,
+  itemVector: Vector384,
+  action: 'like' | 'pass' | 'super',
+  config: { alpha?: number; beta?: number } = {},
+): Vector384 {
+  const alpha = config.alpha ?? DEFAULT_LEARNING_RATE_ALPHA;
+  const beta = config.beta ?? DEFAULT_PENALTY_RATE_BETA;
+
+  const result = [...currentProfile];
+
+  if (action === 'like' || action === 'super') {
+    const learningRate = action === 'super' ? alpha * SUPER_LIKE_MULTIPLIER : alpha;
+    for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
+      result[i] = currentProfile[i] + learningRate * (itemVector[i] - currentProfile[i]);
+    }
+  } else if (action === 'pass') {
+    for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
+      result[i] = currentProfile[i] - beta * (itemVector[i] - currentProfile[i]);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Calculates cosine similarity between two vectors.
+ */
+export function cosineSimilarity(vecA: Vector384, vecB: Vector384): number {
+  if (vecA.length !== vecB.length || vecA.length === 0) {
+    return 0;
+  }
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  if (normA === 0 || normB === 0) {
+    return 0;
+  }
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}

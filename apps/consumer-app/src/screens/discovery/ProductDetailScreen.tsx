@@ -1,5 +1,6 @@
 import type { CartItem } from '@app/core';
 
+import { describeStock, discountPercentage } from '@app/core';
 import {
   useAddToCart,
   useAnalytics,
@@ -163,12 +164,10 @@ export function ProductDetailScreen() {
     return parts.join(' ');
   };
 
-  type InventoryItem = { available: boolean; brandSizeLabel: string; inventory: number; label: string; skuId: number };
-  const inventorySizes: string[] = Array.isArray(rawAttributes['inventoryInfo'])
-    ? (rawAttributes['inventoryInfo'] as unknown as InventoryItem[]).filter((item) => item.available && item.inventory > 0).map((item) => item.label)
-    : [];
+  const stock = describeStock(rawAttributes['inventoryInfo']);
+  const inventorySizes: string[] = stock.labels;
 
-  const stockStatus: string = inventorySizes.length > 0 ? `In Stock (${inventorySizes.join(', ')})` : 'Out of Stock';
+  const stockStatus: string = stock.label;
 
   const availableSizes: string[] = Array.isArray(rawAttributes['size']) ? (rawAttributes['size'] as string[]) : [];
 
@@ -321,7 +320,7 @@ export function ProductDetailScreen() {
               ₹{product.originalPrice}
             </Text>
             <Text fontFamily="$body" fontSize="$4" color="$success" fontWeight="600">
-              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+              {discountPercentage(product.price, product.originalPrice)}% OFF
             </Text>
           </XStack>
 

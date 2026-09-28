@@ -1,3 +1,4 @@
+import { discountPercentage } from '@app/core';
 import { ProductTile } from '@app/ui-kit';
 import React from 'react';
 import { ScrollView } from 'react-native';
@@ -58,9 +59,7 @@ export const ProductCarousel = ({
             product.images && product.images[0] ? product.images[0] : 'https://placehold.co/200x300'
           }
           discountPercentage={
-            product.mrp > product.price
-              ? Math.round(((product.mrp - product.price) / product.mrp) * 100)
-              : undefined
+            discountPercentage(product.price, product.mrp) || undefined
           }
           onPress={() => onProductPress(product._id)}
         />

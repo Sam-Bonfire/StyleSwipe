@@ -1,6 +1,5 @@
-import { Embedder, SearchProducts, type SearchResult } from '@app/core';
+import { SearchProducts, applyProductFilters, discountPercentage, sortProducts, type SearchResult } from '@app/core';
 import {
-  createProductSearchRepositoryLayer,
   useAnalytics,
   useConvexClient,
   usePopularEvents,
@@ -9,14 +8,14 @@ import {
 } from '@app/infrastructure';
 import { Button, CategoryChip, EmptyState, ProductTile } from '@app/ui-kit';
 import { Clock, Search, SlidersHorizontal, TrendingUp, X } from '@tamagui/lucide-icons';
-import { Effect, Layer } from 'effect';
+import { Effect } from 'effect';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, SafeAreaView } from 'react-native';
 import { Image, Input, ScrollView, Spinner, Text, XStack, YStack } from 'tamagui';
 
 import { useRecentSearches } from '../../hooks/useRecentSearches';
-import { OnnxEmbedder } from '../../infrastructure/adapters/OnnxEmbedder';
+import { makeSearchLayers, makeSuggestionLayers } from '../../lib/composition';
 import { useFilterStore } from '../../store/useFilterStore';
 import { SearchFilterDrawer } from './SearchFilterDrawer';
 
@@ -81,7 +80,7 @@ export function SearchScreen() {
   // Trending pills from getSuggestions + popular events
   const fetchTrending = useCallback(async () => {
     try {
-      const repoLayer = createProductSearchRepositoryLayer(convex as unknown as never);
+      const repoLayer = makeSuggestionLayers(convex);
       const s = await Effect.runPromise(
         SearchProducts.getSuggestions('a', 6).pipe(Effect.provide(repoLayer)),
       );
@@ -111,38 +110,15 @@ export function SearchScreen() {
       setLoading(true);
       setHasSearched(true);
       try {
-        const embedderLayer = Layer.succeed(Embedder, Embedder.of(new OnnxEmbedder()));
-        const repoLayer = createProductSearchRepositoryLayer(convex as unknown as never);
-        const layer = Layer.merge(embedderLayer, repoLayer);
         const result = await Effect.runPromise(
           SearchProducts.execute(text, 10).pipe(
-            Effect.provide(layer),
+            Effect.provide(makeSearchLayers(convex)),
           ),
         );
+        // Client-side result shaping lives in core (applied after vector fetch)
         let filtered = result.products;
-        // Client-side filter application for gender/price/onSale/brand/category (hexagonal: domain filters applied after vector fetch)
         if (filterState) {
-          const genders = (filterState as unknown as { genders?: string[] }).genders ?? [];
-          const onSale = (filterState as unknown as { onSale?: boolean }).onSale ?? false;
-          const priceRange = filterState.priceRange;
-          filtered = filtered.filter((p) => {
-            const prod = p as unknown as Record<string, unknown>;
-            if (genders.length > 0 && prod.gender && !genders.includes(String(prod.gender))) return false;
-            if (filterState.brandIds.length > 0 && !filterState.brandIds.includes(String(prod.brand))) return false;
-            if (filterState.categoryIds.length > 0 && !filterState.categoryIds.includes(String(prod.category))) return false;
-            if (priceRange?.min !== undefined && (prod.price as number) < priceRange.min) return false;
-            if (priceRange?.max !== undefined && (prod.price as number) > priceRange.max) return false;
-            if (onSale && !(prod.onSale as boolean) && !((prod.mrp as number) > (prod.price as number))) {
-              // if onSale true, require discount
-              const mrp = prod.mrp as number;
-              const price = prod.price as number;
-              if (!(mrp > price)) return false;
-            }
-            return true;
-          });
-          // Sort
-          if (sort === 'PRICE_ASC') filtered = [...filtered].sort((a, b) => (a.price as number) - (b.price as number));
-          if (sort === 'PRICE_DESC') filtered = [...filtered].sort((a, b) => (b.price as number) - (a.price as number));
+          filtered = sortProducts(applyProductFilters(filtered, filterState), sort);
         }
         setResults(filtered);
         // Persist recent only for meaningful queries
@@ -159,11 +135,10 @@ export function SearchScreen() {
 
   const fetchSuggestions = useCallback(
     async (text: string) => {
-      try {
-        const repoLayer = createProductSearchRepositoryLayer(convex as unknown as never);
-        const s = await Effect.runPromise(
-          SearchProducts.getSuggestions(text, 6).pipe(Effect.provide(repoLayer)),
-        );
+    try {
+      const s = await Effect.runPromise(
+        SearchProducts.getSuggestions(text, 6).pipe(Effect.provide(makeSuggestionLayers(convex))),
+      );
         setSuggestions(s);
       } catch (e) {
         console.error('Suggestions failed', e);
@@ -258,9 +233,7 @@ export function SearchScreen() {
   const renderItem = useCallback(
     ({ item }: { item: SearchResult['products'][number] }) => {
       const discount =
-        (item as unknown as { mrp?: number }).mrp && (item.price as number) < ((item as unknown as { mrp: number }).mrp as number)
-          ? Math.round((((item as unknown as { mrp: number }).mrp - (item.price as number)) / (item as unknown as { mrp: number }).mrp) * 100)
-          : undefined;
+        discountPercentage(item.price as number, (item as unknown as { mrp?: number }).mrp ?? 0) || undefined;
       return (
         <YStack width="50%" padding="$1">
           <ProductTile

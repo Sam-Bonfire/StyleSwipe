@@ -1,9 +1,13 @@
+import { applyAffiliateRule } from '@app/core/affiliate/domain/AffiliateRule';
+import { findSimilarProductIds } from '@app/core/discovery/application/FindSimilarProducts';
 import { v } from 'convex/values';
+import { Effect } from 'effect';
 
 import type { Doc } from './_generated/dataModel';
 
 import { api } from './_generated/api';
-import { QueryCtx, query, mutation, action } from './_generated/server';
+import { query, mutation, action } from './_generated/server';
+import { makeSimilarProductStore } from './layers';
 
 type ProjectableProduct = Doc<'products'> & {
   embedding?: unknown;
@@ -48,30 +52,11 @@ export const getSourceUrl = query({
       .withIndex('by_externalId', (q) => q.eq('externalId', product.externalId as string))
       .first();
     if (!scraped?.url) return null;
-    return await applyAffiliateRule(ctx, scraped.url);
+    // Rule matching + URL building live in core; this adapter supplies rules.
+    const rules = await ctx.db.query('affiliate_links').collect();
+    return applyAffiliateRule(scraped.url, rules);
   },
 });
-
-/**
- * Applies the matching enabled affiliate rule (if any) by appending
- * its tracking params to the retailer URL. No rule (or disabled) → raw URL.
- */
-async function applyAffiliateRule(ctx: QueryCtx, rawUrl: string): Promise<string> {
-  let hostname = '';
-  try {
-    hostname = new URL(rawUrl).hostname.toLowerCase();
-  } catch {
-    return rawUrl;
-  }
-  const rules = await ctx.db.query('affiliate_links').collect();
-  const rule = rules.find((r) => r.isEnabled && (hostname === r.merchantDomain || hostname.endsWith(`.${r.merchantDomain}`)));
-  if (!rule || rule.trackingParams.length === 0) return rawUrl;
-  const url = new URL(rawUrl);
-  for (const { key, value } of rule.trackingParams) {
-    if (key) url.searchParams.set(key, value);
-  }
-  return url.toString();
-}
 
 export const getByCategory = query({
   args: { category: v.string(), limit: v.optional(v.number()) },
@@ -146,21 +131,15 @@ export const findSimilar = action({
   handler: async (ctx, args) => {
     const { embedding, limit = 10, brand, category } = args;
 
-    // Perform vector search. The vector index only supports category/gender/priceTier
-    // filters (single equality, no brand, no AND) — brand is applied post-fetch.
-    // The options literal is built inline so the filter builder is contextually typed.
-    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', {
-      vector: embedding,
-      limit,
-      ...(category ? { filter: (q) => q.eq('category', category) } : {}),
-    });
-
-    // Fetch full product details
-    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, { ids: results.map((r) => r._id) });
-    const products: Doc<'products'>[] = await ctx.runQuery(api.helpers.getProductsByIds, { ids: productIds });
-
-    const filtered = brand ? products.filter((p) => p?.brand === brand) : products;
-    return filtered.slice(0, limit);
+    // Shaping (brand filter, limit) lives in the core use case; the
+    // adapter fetches full docs for the ordered ids it returns.
+    const ids = await Effect.runPromise(
+      findSimilarProductIds({ embedding, limit, brand, category }).pipe(
+        Effect.provide(makeSimilarProductStore(ctx)),
+      ),
+    );
+    const products: Doc<'products'>[] = await ctx.runQuery(api.helpers.getProductsByIds, { ids: ids as never });
+    return products.slice(0, limit);
   },
 });
 
@@ -248,29 +227,13 @@ export const getSimilarByProductId = action({
   },
   handler: async (ctx, args): Promise<unknown[]> => {
     const limit = args.limit ?? 10;
-    const embeddingDoc = await ctx.runQuery(api.helpers.getEmbeddingByProductId, {
-      productId: args.productId,
-    });
-    const vector = (embeddingDoc as unknown as { embeddingVersions?: { v1?: number[] } } | null)?.embeddingVersions?.v1;
-    if (!vector) {
-      // fallback to category-based listing
-      const product = await ctx.runQuery(api.products.getById, { id: args.productId });
-      const category = (product as { category?: string } | null)?.category;
-      if (category) {
-        const byCat = await ctx.runQuery(api.products.getByCategory, { category, limit: limit + 1 });
-        return (byCat as unknown[]).filter((p: unknown) => (p as { _id: string })._id !== args.productId).slice(0, limit);
-      }
-      return [];
-    }
-    const results = await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', {
-      vector,
-      limit: limit + 1,
-    });
-    const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, {
-      ids: results.map((r) => r._id as never),
-    });
-    const filteredIds = (productIds as string[]).filter((id) => id !== args.productId).slice(0, limit);
-    const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: filteredIds as never });
+    // Ordering + category fallback live in the core use case.
+    const ids = await Effect.runPromise(
+      findSimilarProductIds({ productId: args.productId as string, limit }).pipe(
+        Effect.provide(makeSimilarProductStore(ctx)),
+      ),
+    );
+    const products = await ctx.runQuery(api.helpers.getProductsByIds, { ids: ids as never });
     return products as unknown[];
   },
 });

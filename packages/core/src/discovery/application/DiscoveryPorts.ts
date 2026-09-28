@@ -50,9 +50,17 @@ export interface SwipeRecord {
   timestamp: number;
 }
 
+export interface RecordedSwipe {
+  swipeId: string;
+}
+
 export class SwipeRepository extends Context.Tag('SwipeRepository')<
   SwipeRepository,
   {
+    readonly findExistingSwipe: (
+      userId: string,
+      productId: string,
+    ) => Effect.Effect<SwipeRecord | null, RepositoryError>;
     readonly recordSwipe: (
       userId: string,
       productId: string,
@@ -60,7 +68,11 @@ export class SwipeRepository extends Context.Tag('SwipeRepository')<
       timestamp: number,
       newPreferenceVector?: number[],
       partnerId?: string,
-    ) => Effect.Effect<{ isMutualMatch?: boolean } | void, RepositoryError>;
+    ) => Effect.Effect<RecordedSwipe, RepositoryError>;
+    readonly savePreferenceVector: (
+      userId: string,
+      vector: number[],
+    ) => Effect.Effect<void, RepositoryError>;
     readonly getSwipesByUser: (
       userId: string,
       limit?: number,
@@ -80,5 +92,28 @@ export class RecommendationService extends Context.Tag('RecommendationService')<
       userId: string,
       limit: number,
     ) => Effect.Effect<Product[], RepositoryError>;
+  }
+>() {}
+
+export interface SimilarProductView {
+  id: string;
+  brand?: string;
+  category?: string;
+}
+
+export class SimilarProductStore extends Context.Tag('SimilarProductStore')<
+  SimilarProductStore,
+  {
+    readonly getEmbedding: (productId: string) => Effect.Effect<number[] | null, RepositoryError>;
+    readonly searchSimilar: (
+      vector: number[],
+      limit: number,
+      category?: string,
+    ) => Effect.Effect<string[], RepositoryError>;
+    readonly getViews: (ids: string[]) => Effect.Effect<SimilarProductView[], RepositoryError>;
+    readonly getViewsByCategory: (
+      category: string,
+      limit: number,
+    ) => Effect.Effect<SimilarProductView[], RepositoryError>;
   }
 >() {}
