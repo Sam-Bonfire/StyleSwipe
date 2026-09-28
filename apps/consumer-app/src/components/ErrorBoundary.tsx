@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.primary.val,
   },
   buttonPrimaryText: {
-    color: '#FFFFFF',
+    color: tokens.color.textOnPrimary.val,
     fontWeight: '600',
   },
   buttonSecondary: {
