@@ -1,3 +1,4 @@
+import { tokens } from '@app/ui-kit/theme';
 import { router } from 'expo-router';
 import React, { Component, ErrorInfo } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -111,11 +112,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: tokens.color.background.val,
     padding: 16,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: tokens.color.surface.val,
     padding: 24,
     borderRadius: 16,
     width: '100%',
@@ -123,17 +124,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     borderWidth: 1,
-    borderColor: '#DEE2E6',
+    borderColor: tokens.color.neutral300.val,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#212739',
+    color: tokens.color.textPrimary.val,
     textAlign: 'center',
   },
   message: {
     fontSize: 14,
-    color: '#6C757D',
+    color: tokens.color.textSecondary.val,
     textAlign: 'center',
   },
   actions: {
@@ -152,19 +153,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonPrimary: {
-    backgroundColor: '#CD0268',
+    backgroundColor: tokens.color.primary.val,
   },
   buttonPrimaryText: {
-    color: '#FFFFFF',
+    color: tokens.color.textOnPrimary.val,
     fontWeight: '600',
   },
   buttonSecondary: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#DEE2E6',
+    borderColor: tokens.color.neutral300.val,
   },
   buttonSecondaryText: {
-    color: '#212739',
+    color: tokens.color.textPrimary.val,
     fontWeight: '600',
   },
   details: {
@@ -174,20 +175,20 @@ const styles = StyleSheet.create({
   detailsBox: {
     maxHeight: 200,
     marginTop: 8,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: tokens.color.backgroundSecondary.val,
     padding: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#DEE2E6',
+    borderColor: tokens.color.neutral300.val,
   },
   detailsError: {
     fontSize: 12,
-    color: '#EF4444',
+    color: tokens.color.error.val,
     fontWeight: 'bold',
   },
   detailsStack: {
     fontSize: 10,
-    color: '#6C757D',
+    color: tokens.color.textSecondary.val,
     marginTop: 8,
   },
 });
