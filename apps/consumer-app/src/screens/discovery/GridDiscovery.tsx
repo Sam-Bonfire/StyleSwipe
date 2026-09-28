@@ -1,5 +1,5 @@
 import { type Vector384 } from '@app/core';
-import { useVectorFeed, useProcessSwipe, useCurrentUser, useAnalytics } from '@app/infrastructure';
+import { useVectorFeed, useProcessSwipe, useAnalytics } from '@app/infrastructure';
 import { Button } from '@app/ui-kit/components/Button';
 import { ProductTileSkeleton } from '@app/ui-kit/components/LoadingSkeleton';
 import { ProductTile } from '@app/ui-kit/components/ProductTile';
@@ -9,7 +9,7 @@ import { FlatList } from 'react-native';
 import { RefreshControl } from 'react-native';
 import { YStack, H2, View, Spinner } from 'tamagui';
 
-import { LocalDatabase } from '../../infrastructure/LocalDatabase';
+import { useSwipeActions } from '../../hooks/useSwipeActions';
 
 interface GridProduct {
   _id: string;
@@ -29,7 +29,7 @@ export function GridDiscovery() {
 
   const getVectorFeed = useVectorFeed();
   const processSwipe = useProcessSwipe();
-  const user = useCurrentUser();
+  const { bufferSwipe } = useSwipeActions();
   const router = useRouter();
   const { trackEvent } = useAnalytics();
 
@@ -75,21 +75,14 @@ export function GridDiscovery() {
 
   const handleQuickLike = async (item: GridProduct) => {
     try {
-      const db = await LocalDatabase.getInstance();
-      await db.bufferEvent('swipe', {
-        productId: item._id,
-        action: 'like',
+      await bufferSwipe(item._id, 'like', {
         description: item.description || item.title,
         title: item.title,
       });
 
       await processSwipe({
-        userId: user?._id || '',
         productId: item._id,
         action: 'like',
-        timestamp: Date.now(),
-        userPreferenceVector: user?.styleProfile?.preferenceVector,
-        productEmbedding: item.embedding,
       });
       console.log(`Synced like for ${item.title} to Convex.`);
 

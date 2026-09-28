@@ -39,7 +39,7 @@ const TotalLabel = styled(Text, {
 
 const PriceText = styled(Text, {
   name: 'FooterPriceText',
-  fontSize: '$5',
+  fontSize: '$4',
   color: '$textPrimary',
   fontWeight: '700',
 });
@@ -79,19 +79,17 @@ export const TransactionalFooter = ({
     <FooterFrame {...props}>
       <PriceContainer>
         <TotalLabel>Total Price</TotalLabel>
-        <XStack alignItems="center" gap="$2" flexWrap="nowrap">
-          <PriceText numberOfLines={1}>{formatPrice(price)}</PriceText>
-          {originalPrice && originalPrice > price && (
-            <>
-              <Text fontSize="$2" color="$textSecondary" textDecorationLine="line-through" numberOfLines={1}>
-                {formatPrice(originalPrice)}
-              </Text>
-              <Text fontSize="$2" color="$success" fontWeight="700" numberOfLines={1}>
-                {discountPercentage}% OFF
-              </Text>
-            </>
-          )}
-        </XStack>
+        <PriceText>{formatPrice(price)}</PriceText>
+        {originalPrice && originalPrice > price && (
+          <XStack alignItems="center" gap="$2" flexWrap="wrap">
+            <Text fontSize="$2" color="$textSecondary" textDecorationLine="line-through">
+              {formatPrice(originalPrice)}
+            </Text>
+            <Text fontSize="$2" color="$success" fontWeight="700">
+              {discountPercentage}% OFF
+            </Text>
+          </XStack>
+        )}
       </PriceContainer>
 
       <Button

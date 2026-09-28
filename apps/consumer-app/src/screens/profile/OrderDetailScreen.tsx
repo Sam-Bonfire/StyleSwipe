@@ -1,3 +1,4 @@
+import { canCancelOrder, canReturnOrder } from '@app/core';
 import { useOrder, useCancelOrder, useReturnOrder, useProductsByIds } from '@app/infrastructure';
 import { Button, TopBarIconButton } from '@app/ui-kit';
 import { ChevronLeft, Truck, XCircle, RotateCcw } from '@tamagui/lucide-icons';
@@ -28,22 +29,14 @@ export function OrderDetailScreen() {
 
   const canCancel = useMemo(() => {
     if (!order) return false;
-    const o = order as unknown as { status: string; createdAt: number };
-    const lower = o.status.toLowerCase();
-    if (['shipped', 'delivered', 'cancelled', 'returned'].includes(lower)) return false;
-    if (Date.now() - o.createdAt > 24 * 60 * 60 * 1000) return false;
-    return true;
+    return canCancelOrder(order as unknown as { status: string; createdAt: number });
   }, [order]);
 
   const canReturn = useMemo(() => {
     if (!order) return false;
-    const o = order as unknown as { status: string; statusHistory: { status: string; timestamp: number }[]; createdAt: number };
-    const lower = o.status.toLowerCase();
-    if (lower !== 'delivered' && lower !== 'shipped') return false;
-    const last = [...o.statusHistory].reverse().find((h) => ['delivered', 'shipped'].includes(h.status.toLowerCase()));
-    const base = last?.timestamp ?? o.createdAt;
-    if (Date.now() - base > 7 * 24 * 60 * 60 * 1000) return false;
-    return true;
+    return canReturnOrder(
+      order as unknown as { status: string; statusHistory: { status: string; timestamp: number }[]; createdAt: number },
+    );
   }, [order]);
 
   if (order === undefined) {

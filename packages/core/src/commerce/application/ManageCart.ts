@@ -62,3 +62,43 @@ export const clearCart = (userId: string): Effect.Effect<void, RepositoryError, 
     const repo = yield* _(CartRepository);
     return yield* _(repo.clear(userId));
   });
+
+export interface GuestCartItemInput {
+  productId: string;
+  quantity: number;
+  price: number;
+  selectedAttributes?: Record<string, string>;
+}
+
+/**
+ * Merges guest (unauthenticated) items into the user's cart.
+ * Rows that cannot satisfy the CartItem invariant are dropped
+ * (legacy junk must not fail the merge).
+ */
+export const mergeGuestCarts = (
+  userId: string,
+  guestItems: GuestCartItemInput[],
+): Effect.Effect<Cart, RepositoryError, CartRepository> =>
+  Effect.gen(function* (_) {
+    const repo = yield* _(CartRepository);
+    const existing = yield* _(repo.findByUserId(userId));
+    let cart = existing ?? createCart({ userId });
+    const sane = guestItems.filter(
+      (g) =>
+        g.productId &&
+        Number.isInteger(g.quantity) &&
+        g.quantity >= 1 &&
+        g.price >= 0 &&
+        (!g.selectedAttributes || Object.values(g.selectedAttributes).every((v) => typeof v === 'string')),
+    );
+    for (const item of sane) {
+      cart = addCartItem(cart, {
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        ...(item.selectedAttributes ? { selectedAttributes: item.selectedAttributes } : {}),
+      });
+    }
+    yield* _(repo.save(cart));
+    return cart;
+  });

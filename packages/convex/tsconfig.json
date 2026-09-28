@@ -1,7 +1,7 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "rootDir": "convex",
+        "rootDir": "../..",
         "outDir": "dist",
         "composite": true,
         "noEmit": false,
@@ -9,7 +9,9 @@
         "checkJs": false
     },
     "include": [
-        "convex/**/*"
+        "convex/**/*",
+        "../core/src/**/*",
+        "../core/shared/**/*"
     ],
     "exclude": [
         "node_modules",

@@ -1,8 +1,11 @@
+import { processSwipe as processSwipeUseCase } from '@app/core/discovery/application/ProcessSwipe';
 import { v } from 'convex/values';
+import { Effect } from 'effect';
 
 import { components } from './_generated/api';
 import { Id } from './_generated/dataModel';
 import { MutationCtx, QueryCtx, mutation, query } from './_generated/server';
+import { makeSwipeRepository } from './layers';
 
 /** Swipe action validator — defined here in infrastructure, not in core */
 const SwipeActionSchema = v.union(v.literal('like'), v.literal('pass'), v.literal('super'));
@@ -145,7 +148,6 @@ export const processSwipe = mutation({
   args: {
     productId: v.id('products'),
     action: SwipeActionSchema,
-    newPreferenceVector: v.optional(v.array(v.float64())),
     partnerId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -155,63 +157,35 @@ export const processSwipe = mutation({
     }
 
     const userId = identity.subject;
-
     const { productId, action, partnerId } = args;
 
-    const existingSwipe = await ctx.db
-      .query('swipes')
-      .withIndex('by_user_product', (q) => q.eq('userId', userId).eq('productId', productId))
+    // Inputs the server owns: current preference vector + product embedding.
+    // Deduplication, mutual-match, displacement, and profile persistence
+    // all live in the core use case; this adapter only provides the repo.
+    const profile = await getStyleProfile(ctx, userId);
+    const embeddingDoc = await ctx.db
+      .query('product_embeddings')
+      .withIndex('by_productId', (q) => q.eq('productId', productId))
       .first();
+    const productEmbedding = embeddingDoc?.embeddingVersions?.v1 as number[] | undefined;
 
-    if (existingSwipe) {
-      return { status: 'duplicate', swipeId: existingSwipe._id, isMutualMatch: false };
-    }
+    const result = await Effect.runPromise(
+      processSwipeUseCase({
+        userId,
+        productId: productId as string,
+        action,
+        timestamp: Date.now(),
+        userPreferenceVector: profile?.preferenceVector as number[] | undefined,
+        productEmbedding,
+        partnerId,
+      }).pipe(Effect.provide(makeSwipeRepository(ctx))),
+    );
 
-    const swipeId = await ctx.db.insert('swipes', {
-      userId: userId,
-      productId,
-      action,
-      timestamp: Date.now(),
-    });
-
-    let isMutualMatch = false;
-
-    // Check for mutual match if swiped like or super and partnerId is provided
-    if (partnerId && (action === 'like' || action === 'super')) {
-      const partnerSwipe = await ctx.db
-        .query('swipes')
-        .withIndex('by_user_product', (q) => q.eq('userId', partnerId).eq('productId', productId))
-        .first();
-
-      if (partnerSwipe && (partnerSwipe.action === 'like' || partnerSwipe.action === 'super')) {
-        isMutualMatch = true;
-      }
-    }
-
-    // ---------------------------------------------------------
-    // CLIENT-SIDE VECTOR LEARNING UPDATE
-    // ---------------------------------------------------------
-    if (args.newPreferenceVector) {
-      const currentProfileDoc = await getStyleProfile(ctx, userId);
-      if (currentProfileDoc) {
-        await ctx.db.patch(currentProfileDoc._id, {
-          preferenceVector: args.newPreferenceVector,
-          lastUpdated: Date.now(),
-        });
-      } else {
-        await ctx.db.insert('style_profiles', {
-          userId: userId,
-          gender: 'both',
-          vibes: [],
-          sizes: {},
-          budget: { min: 0, max: 20000 },
-          preferenceVector: args.newPreferenceVector,
-          lastUpdated: Date.now(),
-        });
-      }
-    }
-
-    return { status: 'success', swipeId, isMutualMatch };
+    return {
+      status: result.duplicate ? ('duplicate' as const) : ('success' as const),
+      swipeId: result.swipeId,
+      isMutualMatch: result.isMutualMatch ?? false,
+    };
   },
 });
 

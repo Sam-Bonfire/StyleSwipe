@@ -7,9 +7,8 @@ import {
   useCreateAddress,
   usePlaceOrder,
   useProductsByIds,
-  createEventRepositoryLayer,
 } from '@app/infrastructure';
-import { ConvexClient, useConvexClient } from '@app/infrastructure';
+import { useConvexClient } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { AddressForm, type Address as FormAddress } from '@app/ui-kit/components/AddressForm';
 import PriceSummary from '@app/ui-kit/components/PriceSummary';
@@ -18,6 +17,8 @@ import { Effect } from 'effect';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { YStack, Text, XStack, ScrollView, Separator } from 'tamagui';
+
+import { makeEventLayers } from '../../lib/composition';
 
 type CheckoutStep = 'ADDRESS' | 'SHIPPING' | 'PAYMENT' | 'CONFIRMATION';
 
@@ -164,7 +165,7 @@ export const CheckoutScreen = () => {
       });
 
       // Analytics event wired to Order domain via CheckoutService concept
-      const eventLayer = createEventRepositoryLayer(convex as unknown as ConvexClient);
+      const eventLayer = makeEventLayers(convex);
       await Effect.runPromise(
         Effect.gen(function* (_) {
           const repo = yield* _(EventRepository);

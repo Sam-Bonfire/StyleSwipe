@@ -6,8 +6,8 @@ import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 import { YStack, XStack, H1, H2, Text, Progress, Spinner } from 'tamagui';
 
+import { useOnboardingProgress } from '../../hooks/useOnboardingProgress';
 import { generateEmbedding } from '../../infrastructure/InferenceEngine';
-import { LocalDatabase } from '../../infrastructure/LocalDatabase';
 import { VisualQuiz } from './VisualQuiz';
 import { WelcomeSlides } from './WelcomeSlides';
 
@@ -19,48 +19,18 @@ export function OnboardingScreen() {
   const { showToast } = useToast();
   const updateStyleProfile = useUpdateStyleProfile();
 
-  const [welcomeDone, setWelcomeDone] = useState<boolean>(false);
   const [welcomeSlide, setWelcomeSlide] = useState<number>(0);
-  const [step, setStep] = useState<number>(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [loaded, setLoaded] = useState<boolean>(false);
-
-  // Load persisted state
-  React.useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const db = await LocalDatabase.getInstance();
-        const saved = await db.getOnboardingState();
-        if (!cancelled && saved) {
-          setStep(saved.step);
-          setAnswers(saved.answers);
-          setWelcomeDone(saved.welcomeDone);
-        }
-      } catch {
-        // ignore
-      } finally {
-        if (!cancelled) setLoaded(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Persist on change
-  React.useEffect(() => {
-    if (!loaded) return;
-    (async () => {
-      try {
-        const db = await LocalDatabase.getInstance();
-        await db.saveOnboardingState({ step, answers, welcomeDone });
-      } catch {
-        // ignore
-      }
-    })();
-  }, [step, answers, welcomeDone, loaded]);
+  const {
+    loaded,
+    step,
+    setStep,
+    answers,
+    setAnswers,
+    welcomeDone,
+    setWelcomeDone,
+    clear: clearOnboardingProgress,
+  } = useOnboardingProgress();
 
   React.useEffect(() => {
     trackEvent('onboarding_started', undefined, { variant: 'onboarding_v1' });
@@ -110,8 +80,7 @@ export function OnboardingScreen() {
           await completeOnboarding(user._id, answers);
         }
         await trackEvent('onboarding_completed', { answers }, { variant: 'onboarding_v1' });
-        const db = await LocalDatabase.getInstance();
-        await db.clearOnboardingState();
+        await clearOnboardingProgress();
       } catch (e) {
         console.error('Failed to save onboarding', e);
         showToast({ message: 'Failed to save preferences. Please try again.', variant: 'error' });
@@ -128,8 +97,7 @@ export function OnboardingScreen() {
         // Use default vector via infrastructure hook directly (Convex mutation)
         await updateStyleProfile({ styleProfile: profile as unknown as never });
       }
-      const db = await LocalDatabase.getInstance();
-      await db.clearOnboardingState();
+      await clearOnboardingProgress();
       showToast({ message: 'You can personalize later in Profile', variant: 'info' });
     } catch (e) {
       console.error('Skip failed', e);

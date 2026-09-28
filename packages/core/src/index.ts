@@ -53,6 +53,7 @@ export * from './catalog/domain/FilterState';
 export * from './catalog/domain/Product';
 export * from './catalog/domain/Category';
 export * from './catalog/domain/Review';
+export * from './catalog/domain/Inventory';
 export * from './catalog/domain/SizeGuide';
 export * from './catalog/domain/TaggingService';
 export * as TagProduct from './catalog/application/TagProduct';
@@ -100,6 +101,7 @@ export * as CheckoutService from './commerce/application/CheckoutService';
 export * from './discovery/domain';
 export * from './discovery/application/DiscoveryPorts';
 export * as SearchProducts from './discovery/application/SearchProducts';
+export * as FindSimilarProducts from './discovery/application/FindSimilarProducts';
 export * as ProcessSwipe from './discovery/application/ProcessSwipe';
 export * as RecordInteraction from './discovery/application/RecordInteraction';
 export * as GetRecommendations from './discovery/application/GetRecommendations';
@@ -118,6 +120,7 @@ export * from './social/domain/StyleBoard';
 
 // Affiliate
 export * from './affiliate/domain/AffiliateRedirect';
+export * from './affiliate/domain/AffiliateRule';
 // Discovery Domain
 export * from './discovery/domain/SwipeEvent';
 export * from './discovery/domain/RecommendationScore';

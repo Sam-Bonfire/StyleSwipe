@@ -143,4 +143,44 @@ describe('ManageCart', () => {
             expect(mockContext._repoMock.clear).toHaveBeenCalledWith('user-1');
         });
     });
+
+    describe('mergeGuestCarts', () => {
+        it('should merge guest items into an empty cart', async () => {
+            const cart = await Effect.runPromise(
+                ManageCart.mergeGuestCarts('user-1', [
+                    { productId: 'prod-1', quantity: 2, price: 100 },
+                    { productId: 'prod-2', quantity: 1, price: 200, selectedAttributes: { size: 'M' } },
+                ]).pipe(Effect.provide(mockContext.layer)),
+            );
+            expect(cart.items).toHaveLength(2);
+            expect(cart.total).toBe(400);
+        });
+
+        it('should sum quantities with existing items', async () => {
+            mockContext._store.set('user-1', (() => {
+                let c = createCart({ userId: 'user-1' });
+                c = addCartItem(c, { productId: 'prod-1', quantity: 1, price: 100, selectedAttributes: {} });
+                return c;
+            })());
+
+            const cart = await Effect.runPromise(
+                ManageCart.mergeGuestCarts('user-1', [{ productId: 'prod-1', quantity: 2, price: 100 }]).pipe(
+                    Effect.provide(mockContext.layer),
+                ),
+            );
+            expect(cart.items).toHaveLength(1);
+            expect(cart.items[0].quantity).toBe(3);
+        });
+
+        it('should drop rows that violate the CartItem invariant', async () => {
+            const cart = await Effect.runPromise(
+                ManageCart.mergeGuestCarts('user-1', [
+                    { productId: '', quantity: 1, price: 100 },
+                    { productId: 'prod-9', quantity: 0, price: 100 },
+                    { productId: 'prod-1', quantity: 1, price: 100 },
+                ]).pipe(Effect.provide(mockContext.layer)),
+            );
+            expect(cart.items.map((i) => i.productId)).toEqual(['prod-1']);
+        });
+    });
 });

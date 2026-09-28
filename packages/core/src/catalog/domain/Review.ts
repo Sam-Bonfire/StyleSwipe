@@ -41,3 +41,16 @@ export function computeBreakdown(reviews: Review[]): RatingBreakdown {
   }
   return { average: sum / reviews.length, count: reviews.length, distribution };
 }
+
+export const MIN_REVIEW_TEXT_LENGTH = 3;
+
+/** Mirrors CreateReviewInputSchema's text rule for client-side gating. */
+export function isValidReviewText(text: string): boolean {
+  return text.trim().length >= MIN_REVIEW_TEXT_LENGTH;
+}
+
+/** Share of `count` within `total` as a percent (0 when total is 0). */
+export function distributionPercent(count: number, total: number): number {
+  if (total <= 0) return 0;
+  return (count / total) * 100;
+}

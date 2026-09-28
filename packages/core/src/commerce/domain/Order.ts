@@ -102,3 +102,36 @@ export const updateOrderStatus = (order: Order, newStatus: OrderStatus, reason?:
     updatedAt: Date.now(),
   });
 };
+
+// -----------------------------------------------------------------------------
+// Eligibility rules (pure; `now` injectable for tests)
+// -----------------------------------------------------------------------------
+
+export const CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
+export const RETURN_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+export interface OrderEligibilityInput {
+  status: string;
+  createdAt: number;
+  statusHistory?: { status: string; timestamp: number }[];
+}
+
+/** Cancellable unless shipped/delivered/cancelled/returned and within 24h of creation. */
+export function canCancelOrder(order: OrderEligibilityInput, now: number = Date.now()): boolean {
+  const status = order.status.toUpperCase();
+  if (['SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'].includes(status)) return false;
+  if (now - order.createdAt > CANCEL_WINDOW_MS) return false;
+  return true;
+}
+
+/** Returnable when delivered/shipped and within 7d of the last delivered/shipped event. */
+export function canReturnOrder(order: OrderEligibilityInput, now: number = Date.now()): boolean {
+  const status = order.status.toUpperCase();
+  if (status !== 'DELIVERED' && status !== 'SHIPPED') return false;
+  const last = [...(order.statusHistory ?? [])]
+    .reverse()
+    .find((h) => ['DELIVERED', 'SHIPPED'].includes(h.status.toUpperCase()));
+  const base = last?.timestamp ?? order.createdAt;
+  if (now - base > RETURN_WINDOW_MS) return false;
+  return true;
+}
