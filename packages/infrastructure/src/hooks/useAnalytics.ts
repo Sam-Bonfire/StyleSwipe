@@ -4,15 +4,19 @@ import { api } from '@app/convex';
 import { EventRepository, RepositoryError } from '@app/core';
 import { useMutation, useQuery } from 'convex/react';
 import { Effect, Layer } from 'effect';
+import React from 'react';
 
 export function useAnalytics() {
   const trackEventMutation = useMutation(api.events.track);
 
-  const trackEvent = async (
-    type: string,
-    metadata?: Record<string, unknown>,
-    options?: { variant?: string; productId?: string }
-  ) => {
+  // Stable across renders: screens hold this in effect/callback deps,
+  // and a fresh closure every render retriggers debounced searches.
+  const trackEvent = React.useCallback(
+    async (
+      type: string,
+      metadata?: Record<string, unknown>,
+      options?: { variant?: string; productId?: string }
+    ) => {
     const layer = Layer.succeed(
       EventRepository,
       EventRepository.of({
@@ -56,7 +60,8 @@ export function useAnalytics() {
     } catch (e) {
       console.warn(`[Analytics] Failed to track ${type}`, e);
     }
-  };
+  },
+  [trackEventMutation]);
 
   return { trackEvent };
 }

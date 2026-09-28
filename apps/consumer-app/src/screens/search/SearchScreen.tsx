@@ -22,6 +22,14 @@ import { SearchFilterDrawer } from './SearchFilterDrawer';
 const TRENDING_FALLBACK = ['Oversized Tee', 'Korean Street', 'Sneakers', 'Cargo Pants', 'Linen Shirt', 'Summer Dress'];
 const EMPTY_RECOVERY_SUGGESTIONS = ['Oversized Tee', 'Korean Street', 'Sneakers', 'Denim Jacket'];
 
+const MAX_PILL_LABEL = 32;
+
+/** Suggestion pills stay compact: small chip + truncated single-line label. */
+function pillLabel(s: string): string {
+  const trimmed = s.trim();
+  return trimmed.length > MAX_PILL_LABEL ? `${trimmed.slice(0, MAX_PILL_LABEL).trimEnd()}…` : trimmed;
+}
+
 function buildQueryParams(query: string, filterState: ReturnType<typeof useFilterStore.getState>['filterState'], sort: string): Record<string, string> {
   const params: Record<string, string> = {};
   if (query) params.q = query;
@@ -289,7 +297,7 @@ export function SearchScreen() {
           {showSuggestions ? (
             <XStack gap="$2" flexWrap="wrap">
               {suggestions.map((s, i) => (
-                <CategoryChip key={`${s}-${i}`} label={s} onToggle={() => handleSuggestionPress(s)} />
+                <CategoryChip key={`${s}-${i}`} label={pillLabel(s)} size="small" onToggle={() => handleSuggestionPress(s)} />
               ))}
             </XStack>
           ) : trendingPills.length > 0 && query.length === 0 && results.length === 0 ? (
@@ -301,7 +309,7 @@ export function SearchScreen() {
                 </Text>
               </XStack>
               {trendingPills.slice(0, 6).map((s, i) => (
-                <CategoryChip key={`${s}-${i}`} label={s} variant="filter" onToggle={() => handleSuggestionPress(s)} />
+                <CategoryChip key={`${s}-${i}`} label={pillLabel(s)} variant="filter" size="small" onToggle={() => handleSuggestionPress(s)} />
               ))}
             </XStack>
           ) : null}
@@ -426,7 +434,7 @@ export function SearchScreen() {
                   </Text>
                   <XStack gap="$2" flexWrap="wrap">
                     {EMPTY_RECOVERY_SUGGESTIONS.map((s) => (
-                      <CategoryChip key={s} label={s} onToggle={() => handleSuggestionPress(s)} />
+                      <CategoryChip key={s} label={s} size="small" onToggle={() => handleSuggestionPress(s)} />
                     ))}
                   </XStack>
                   {filterState && (filterState.categoryIds.length > 0 || filterState.brandIds.length > 0) && (
