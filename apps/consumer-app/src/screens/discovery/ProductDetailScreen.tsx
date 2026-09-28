@@ -90,6 +90,19 @@ export function ProductDetailScreen() {
     }
   }, [productData, productId, trackEvent]);
 
+  // Bag state reflects the actual cart, not just this session's adds.
+  // NOTE: this hook must run before the early returns below — a useMemo
+  // past them changes the hook count once data arrives (React error #310).
+  const resolvedProductId: string =
+    (productData?._id as string) || (productData?.externalId as string) || (productId as string) || '';
+  const inBag = React.useMemo<boolean>(() => {
+    if (!resolvedProductId) return false;
+    if (serverCart?.items?.some((i) => i.productId === resolvedProductId)) return true;
+    if (!userId && guestCart.items.some((g) => g.productId === resolvedProductId)) return true;
+    return false;
+  }, [serverCart, guestCart.items, userId, resolvedProductId]);
+  const showAdded = isAdded || inBag;
+
   if (productData === undefined) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background.val }}>
@@ -194,14 +207,6 @@ export function ProductDetailScreen() {
     setSelectedSizes({ [fieldId]: selectedIds });
     setShowSizeError(false);
   };
-
-  // Bag state reflects the actual cart, not just this session's adds
-  const inBag = React.useMemo<boolean>(() => {
-    if (serverCart?.items?.some((i) => i.productId === product.id)) return true;
-    if (!userId && guestCart.items.some((g) => g.productId === product.id)) return true;
-    return false;
-  }, [serverCart, guestCart.items, userId, product.id]);
-  const showAdded = isAdded || inBag;
 
   const handleAddToCart = async (): Promise<void> => {
     if (showAdded) {
