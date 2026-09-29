@@ -1,12 +1,15 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        // No composite: nothing runs tsc -b; per-package --noEmit checks must
-        // not demand portable declaration names across pnpm peer layouts.
+        // composite:true is required: dependents (browser-extension) build
+        // with tsc -b, which demands referenced projects be composite.
+        // TS2742 (portable declaration names) is handled with explicit
+        // annotations in convex/auth.ts instead of dropping composite.
         // rootDir/include mirror packages/infrastructure so backend files can
         // import @app/core use cases (hexagonal delegation).
         "rootDir": "../..",
         "outDir": "dist",
+        "composite": true,
         "noEmit": false,
         "allowJs": true,
         "checkJs": false

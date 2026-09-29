@@ -75,7 +75,15 @@ vi.mock('react-native-svg', () => ({
   Mask: 'Mask',
 }));
 
-// The real icon package pulls Flow-typed sources Node cannot parse.
+// tamagui/linear-gradient resolves yet another @tamagui/core copy in some
+// installs (same multi-copy theme split, but through a subpath the dedupe
+// alias does not cover). It is pure decoration — stub it.
+// If a new component pulls another tamagui/* subpath and tests fail with
+// "Missing theme" only in CI, mock that subpath here the same way.
+vi.mock('tamagui/linear-gradient', () => ({
+  __esModule: true,
+  LinearGradient: () => null,
+}));
 // Every icon used in ui-kit/app is stubbed as a recording null-component;
 // usage is asserted through globalThis.__iconCalls. NOTE: plain object,
 // not a Proxy — Vitest's mocker cannot wrap a Proxy factory result.
