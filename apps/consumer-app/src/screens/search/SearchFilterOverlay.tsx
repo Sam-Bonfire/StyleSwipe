@@ -123,12 +123,13 @@ export function SearchFilterOverlay({
       {/* Definite, non-flexing height: inside ui-kit's auto-height Modal body
           the ScrollView's flex basis resolves to zero on web (verified live:
           inline height alone still computes to 0px), clipping the whole
-          filter list away. Floor guards SSR zero. */}
+          filter list away. Sized to leave room for the Modal header + sticky
+          footer inside the frame's 90% cap, so Apply stays on screen.
+          Floor guards SSR zero. */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
-          height: Math.max(320, windowHeight * 0.55),
-          maxHeight: windowHeight * 0.55,
+          height: Math.max(240, windowHeight * 0.9 - 260),
           flexGrow: 0,
           flexShrink: 0,
         }}
