@@ -27,11 +27,15 @@ async function priceHitCount(page: Page): Promise<number> {
  * Content inside a fixed subtree only counts when its own box intersects the
  * viewport; normal-flow content (the page can scroll to reveal it) counts
  * with any non-zero box. Any opacity:0 ancestor (Tamagui Sheet's closed
- * frame) hides the whole subtree regardless of layout boxes. And any
- * non-scrollable clipping ancestor (overflow hidden, or a scroll container
- * too small to swipe, e.g. a collapsed 0px scroller) hides content outside
- * its box — Playwright's isVisible does not see overflow clipping, so
- * clipped-away modal content would otherwise count as visible.
+ * frame) hides the whole subtree regardless of layout boxes. Clipping
+ * ancestors (overflow hidden, or a scroll container too small to swipe)
+ * hide content outside their box — Playwright's isVisible does not see
+ * overflow clipping, so clipped-away modal content would otherwise count
+ * as visible — UNLESS the content scrolls with the page and an inner
+ * usable scroll container can reveal it (e.g. below-fold results inside
+ * the page scroller, still under expo-router's overflow-hidden screen
+ * wrapper). Fixed subtrees never scroll with the page, so closed sheets
+ * stay hidden.
  */
 async function isTrulyVisible(target: Locator): Promise<boolean> {
   try {
@@ -41,13 +45,15 @@ async function isTrulyVisible(target: Locator): Promise<boolean> {
       if (r.width === 0 || r.height === 0) return false;
       let p: Element | null = el;
       let inFixed = false;
+      let movesWithPage = true;
+      let canScroll = false;
       while (p && p !== document.body) {
         const cs = getComputedStyle(p);
         if (cs.opacity === '0') return false;
-        if (cs.position === 'fixed') inFixed = true;
-        // Overflow clipping (each axis independently): reachable content
-        // inside a usable scroll container is fine; anything else must
-        // lie within the ancestor's box.
+        if (cs.position === 'fixed') {
+          inFixed = true;
+          movesWithPage = false;
+        }
         const pr = (p as HTMLElement).getBoundingClientRect();
         const axes: Array<{
           overflow: string;
@@ -55,8 +61,7 @@ async function isTrulyVisible(target: Locator): Promise<boolean> {
           end: number;
           pStart: number;
           pEnd: number;
-          scroll: number;
-          client: number;
+          scrollable: boolean;
         }> = [
           {
             overflow: cs.overflowY,
@@ -64,8 +69,9 @@ async function isTrulyVisible(target: Locator): Promise<boolean> {
             end: r.bottom,
             pStart: pr.top,
             pEnd: pr.bottom,
-            scroll: (p as HTMLElement).scrollHeight,
-            client: (p as HTMLElement).clientHeight,
+            scrollable:
+              (p as HTMLElement).scrollHeight > (p as HTMLElement).clientHeight + 1 &&
+              (p as HTMLElement).clientHeight >= 24,
           },
           {
             overflow: cs.overflowX,
@@ -73,16 +79,20 @@ async function isTrulyVisible(target: Locator): Promise<boolean> {
             end: r.right,
             pStart: pr.left,
             pEnd: pr.right,
-            scroll: (p as HTMLElement).scrollWidth,
-            client: (p as HTMLElement).clientWidth,
+            scrollable:
+              (p as HTMLElement).scrollWidth > (p as HTMLElement).clientWidth + 1 &&
+              (p as HTMLElement).clientWidth >= 24,
           },
         ];
         for (const a of axes) {
-          if (a.overflow === 'visible') continue;
-          const usableScroll = a.scroll > a.client + 1 && a.client >= 24;
-          if (usableScroll) continue;
-          if (a.end <= a.pStart || a.start >= a.pEnd) return false;
+          if (a.overflow === 'visible' || a.scrollable) continue;
+          if (a.end <= a.pStart || a.start >= a.pEnd) {
+            if (!(movesWithPage && canScroll)) return false;
+          }
         }
+        const elm = p as HTMLElement;
+        if (elm.scrollHeight > elm.clientHeight + 1 && elm.clientHeight >= 24) canScroll = true;
+        if (elm.scrollWidth > elm.clientWidth + 1 && elm.clientWidth >= 24) canScroll = true;
         p = p.parentElement;
       }
       if (!inFixed) return true;
