@@ -241,6 +241,7 @@ export function SearchScreen() {
       return (
         <YStack width="50%" padding="$1">
           <ProductTile
+            testID="search-result-tile"
             imageUrl={(item.images as string[])[0]}
             brand={item.brand as string}
             title={item.title as string}

@@ -58,9 +58,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     const inOnboarding = segments[0] === 'onboarding';
 
     const isGatedRoute = (): boolean => {
+      // NOTE: cart stays guest-accessible — CartScreen renders the local
+      // guest bag with a sign-in upsell; auth is enforced at checkout.
       const flat = segments.join('/');
       return (
-        flat.includes('cart') ||
         flat.includes('wishlist') ||
         flat.includes('checkout') ||
         flat.includes('orders') ||

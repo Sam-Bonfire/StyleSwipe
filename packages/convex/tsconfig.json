@@ -1,6 +1,12 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
+        // composite:true is required: dependents (browser-extension) build
+        // with tsc -b, which demands referenced projects be composite.
+        // TS2742 (portable declaration names) is handled with explicit
+        // annotations in convex/auth.ts instead of dropping composite.
+        // rootDir/include mirror packages/infrastructure so backend files can
+        // import @app/core use cases (hexagonal delegation).
         "rootDir": "../..",
         "outDir": "dist",
         "composite": true,

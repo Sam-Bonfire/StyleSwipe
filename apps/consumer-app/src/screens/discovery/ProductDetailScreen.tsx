@@ -440,13 +440,13 @@ export function ProductDetailScreen() {
       <SizeGuideSheet open={sizeGuideOpen} onOpenChange={setSizeGuideOpen} attributes={rawAttributes} brand={product.brand} onSelectSize={(size) => setSelectedSizes({ product_size: [size] })} />
 
       <View style={{ position: 'absolute', top: 10, left: 10, zIndex: 100 }}>
-        <TopBarIconButton onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/(app)/(tabs)'); }} backgroundColor="$background" shadowColor="$shadowColor" shadowRadius={4} shadowOpacity={0.1}>
+        <TopBarIconButton testID="pdp-back" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/(app)/(tabs)'); }} backgroundColor="$background" shadowColor="$shadowColor" shadowRadius={4} shadowOpacity={0.1}>
           <ChevronLeft size={24} color="$textPrimary" />
         </TopBarIconButton>
       </View>
 
       <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 100 }}>
-        <TopBarIconButton onPress={handleWishlistToggle} backgroundColor="$background" shadowColor="$shadowColor" shadowRadius={4} shadowOpacity={0.1}>
+        <TopBarIconButton testID="pdp-wishlist" onPress={handleWishlistToggle} backgroundColor="$background" shadowColor="$shadowColor" shadowRadius={4} shadowOpacity={0.1}>
           <Heart size={24} color={isWishlisted ? '$primary' : '$textPrimary'} fill={isWishlisted ? '$primary' : 'transparent'} />
         </TopBarIconButton>
       </View>

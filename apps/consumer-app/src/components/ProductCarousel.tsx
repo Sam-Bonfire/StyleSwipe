@@ -1,5 +1,5 @@
 import { discountPercentage } from '@app/core';
-import { ProductTile } from '@app/ui-kit';
+import { ProductTile } from '@app/ui-kit/components/ProductTile'; // Deep import: avoids the barrel's expo-font chain in unit tests.
 import React from 'react';
 import { ScrollView } from 'react-native';
 import { YStack, Spinner, Text } from 'tamagui';
@@ -49,6 +49,7 @@ export const ProductCarousel = ({
       {data.map((product) => (
         <ProductTile
           key={product._id}
+          testID="similar-product-tile"
           title={product.title}
           brand={product.brand}
           price={product.price}
