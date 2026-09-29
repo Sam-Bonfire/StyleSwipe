@@ -181,6 +181,19 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Pre-install Android NDK with retry
+        # Gradle auto-installs the NDK on first use, but a corrupted partial
+        # download (ZipException) fails the whole build with no retry. Install
+        # it here explicitly so transient SDK hiccups are retried, not fatal.
+        env:
+          NDK_VERSION: 27.1.12297006
+        run: |
+          for i in 1 2 3; do
+            echo "NDK install attempt $i..."
+            yes | sdkmanager --install "ndk;$NDK_VERSION" && break || sleep 20
+          done
+          test -d "$ANDROID_HOME/ndk/$NDK_VERSION" || test -d "$ANDROID_SDK_ROOT/ndk/$NDK_VERSION"
+
       - name: Extract App Version
         id: version
         run: mise run app:extract-version

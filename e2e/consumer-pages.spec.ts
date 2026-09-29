@@ -106,7 +106,6 @@ async function tap(page: Page, locator: Locator): Promise<void> {
 /** Open a real PDP by id (deterministic, no UI dependency). Returns the url or null. */
 async function openSeedPdp(page: Page): Promise<string | null> {
   const id = await getSeedProductId(page);
-  // eslint-disable-next-line no-console
   console.log(`[seed] product id: ${id ?? 'NONE'}`);
   if (!id) return null;
   await page.goto(`/product/${id}`);
@@ -124,13 +123,11 @@ async function openSeedPdp(page: Page): Promise<string | null> {
       .count()
       .catch(() => 0);
     if (state > 0) {
-      // eslint-disable-next-line no-console
       console.log('[seed] PDP settled without product content');
       return null;
     }
     await page.waitForTimeout(1000);
   }
-  // eslint-disable-next-line no-console
   console.log(`[seed] PDP Description not visible for ${id}`);
   return null;
 }
