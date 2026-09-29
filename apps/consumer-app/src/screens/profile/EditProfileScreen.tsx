@@ -42,10 +42,24 @@ export function EditProfileScreen() {
         }
     };
 
-    if (!user) {
+    if (user === undefined) {
         return (
             <SafeAreaView style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
                 <Spinner size="large" color="$primary" />
+            </SafeAreaView>
+        );
+    }
+
+    if (user === null) {
+        return (
+            <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+                <YStack flex={1} alignItems="center" justifyContent="center" padding="$4" gap="$3">
+                    <Text fontFamily="$body" fontSize="$5" fontWeight="600">Sign in to edit profile</Text>
+                    <Text fontFamily="$body" color="$textSecondary" textAlign="center">Save your details by signing in.</Text>
+                    <Button marginTop="$4" backgroundColor="$primary" onPress={() => router.push('/(auth)')}>
+                        <Text fontFamily="$body" color="white" fontWeight="600">Sign In</Text>
+                    </Button>
+                </YStack>
             </SafeAreaView>
         );
     }

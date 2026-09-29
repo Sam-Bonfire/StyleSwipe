@@ -247,13 +247,14 @@ export const CartItem = React.forwardRef<typeof ItemFrame, CartItemProps>(
                 </XStack>
 
                 <QuantityContainer>
-                  <QuantityButton onPress={handleDecrease} disabled={(quantity as number) <= 1}>
+                  <QuantityButton testID="cart-decrease" onPress={handleDecrease} disabled={(quantity as number) <= 1}>
                     <Minus size={16} color="$textPrimary" />
                   </QuantityButton>
 
                   <QuantityText>{quantity}</QuantityText>
 
                   <QuantityButton
+                    testID="cart-increase"
                     onPress={handleIncrease}
                     disabled={(quantity as number) >= (maxQuantity as number)}
                   >
@@ -267,7 +268,7 @@ export const CartItem = React.forwardRef<typeof ItemFrame, CartItemProps>(
 
         {
           (
-            <RemoveButton onPress={onRemove}>
+            <RemoveButton testID="cart-remove" onPress={onRemove}>
               <Trash2 size={18} color="$textSecondary" />
             </RemoveButton>
           ) as any

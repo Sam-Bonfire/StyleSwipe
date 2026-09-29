@@ -196,7 +196,11 @@ export function makeSimilarProductStore(ctx: ActionCtx) {
                   filter: (q) => q.eq('category', category),
                 })
               : await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', { vector, limit });
-            return results.map((r) => r._id as string);
+            // vectorSearch yields product_embeddings ids — translate to product ids.
+            const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, {
+              ids: results.map((r) => r._id),
+            });
+            return productIds as string[];
           },
           catch: toRepositoryError,
         }),

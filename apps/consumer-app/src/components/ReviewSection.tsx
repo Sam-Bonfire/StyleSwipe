@@ -1,5 +1,7 @@
 import { distributionPercent, isValidReviewText } from '@app/core';
-import { RatingStars } from '@app/ui-kit';
+// Deep import: the ui-kit barrel pulls expo-font, which cannot load in the
+// unit-test runtime. Same pattern as SwipeDeck/ProductCarousel.
+import { RatingStars } from '@app/ui-kit/components/RatingStars';
 import React, { useState } from 'react';
 import { Button, Text, TextArea, XStack, YStack, Separator } from 'tamagui';
 

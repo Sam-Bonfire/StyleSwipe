@@ -2,7 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "composite": true,
+    // No composite: nothing runs tsc -b; per-package --noEmit checks must
+    // not demand portable declaration names across pnpm peer layouts
+    // (better-auth deep types break TS2742 after any peer reshuffle).
     "noEmit": false,
     "rootDir": "../.."
   },

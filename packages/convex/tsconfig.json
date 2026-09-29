@@ -1,9 +1,12 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
+        // No composite: nothing runs tsc -b; per-package --noEmit checks must
+        // not demand portable declaration names across pnpm peer layouts.
+        // rootDir/include mirror packages/infrastructure so backend files can
+        // import @app/core use cases (hexagonal delegation).
         "rootDir": "../..",
         "outDir": "dist",
-        "composite": true,
         "noEmit": false,
         "allowJs": true,
         "checkJs": false
