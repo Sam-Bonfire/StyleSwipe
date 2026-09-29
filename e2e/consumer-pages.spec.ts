@@ -204,14 +204,14 @@ test.describe('Consumer Pages', () => {
         test.skip(true, 'Need several seeded products for swipe assertions');
         return;
       }
-      const first = await page.locator('text=/₹\\d+/').first().textContent();
+      const first = await firstVisible(page, /₹\d+/).then((n) => n.textContent());
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(1200);
       await page.keyboard.press('ArrowRight');
       await page.waitForTimeout(1200);
       // Deck still shows cards (refill keeps it alive) and never crashes.
-      expect(await priceHitCount(page)).toBeGreaterThan(0);
-      expect(await page.locator('text=/₹\\d+/').first().textContent()).not.toBe(first);
+      expect(await visibleCount(page, /₹\d+/)).toBeGreaterThan(0);
+      expect(await firstVisible(page, /₹\d+/).then((n) => n.textContent())).not.toBe(first);
       await expectNoCrash(page);
     });
 
@@ -320,8 +320,7 @@ test.describe('Consumer Pages', () => {
     test('renders brand, price, bag CTA, and sections without crashing', async ({ page }) => {
       await firstVisible(page, 'Description');
       await firstVisible(page, 'Product Details');
-      const cta = page.locator('button:has-text("Add to Bag"), button:has-text("Go to Bag")').first();
-      await expect(cta).toBeVisible();
+      await resolveVisible(page.locator('button:has-text("Add to Bag"), button:has-text("Go to Bag")'));
       await expectNoCrash(page);
     });
 
