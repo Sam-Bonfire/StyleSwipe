@@ -272,8 +272,9 @@ test.describe('Consumer Pages', () => {
     test('filter overlay opens, applies, and deck keeps rendering', async ({ page }) => {
       await page.waitForTimeout(3000);
       await tap(page, page.getByTestId('discover-filter-button'));
-      // Overlay opens (footer action) or at worst nothing breaks.
+      // Overlay opens with its body content, not just the chrome.
       await firstVisible(page, 'Apply Filters');
+      await firstVisible(page, 'Price Range');
       await expectNoCrash(page);
       await page.keyboard.press('Escape');
       await page.waitForTimeout(500);
@@ -359,8 +360,9 @@ test.describe('Consumer Pages', () => {
       await expect(page.getByPlaceholder('Search for items...')).toBeVisible({ timeout: 15000 });
       // Icon-only button beside the search box (single visible instance).
       await tap(page, page.locator('button:has(svg)'));
-      // Drawer opens (footer action visible, centered in viewport).
+      // Drawer opens with its body content, not just the chrome.
       await firstVisible(page, 'Apply Filters');
+      await firstVisible(page, 'Price Range');
       await expectNoCrash(page);
       // Tamagui Sheet ignores Escape on web — dismiss via the overlay above it.
       await dismissSheet(page);
