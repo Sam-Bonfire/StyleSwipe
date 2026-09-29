@@ -42,7 +42,7 @@ export function DiscoveryScreen() {
         showCart={false}
         showAddress={false}
         rightContent={
-          <TopBarIconButton onPress={() => setIsFilterOpen(true)}>
+          <TopBarIconButton onPress={() => setIsFilterOpen(true)} testID="discover-filter-button" accessibilityLabel="Open filters">
             <SlidersHorizontal size={22} color="$textPrimary" />
           </TopBarIconButton>
         }

@@ -14,7 +14,44 @@ async function expectNoCrash(page: Page) {
 }
 
 async function priceHitCount(page: Page): Promise<number> {
-  return page.locator('text=/₹\\d+/').count();
+  return visibleCount(page, /₹\d+/);
+}
+
+/**
+ * True visibility for the mobile web build. Playwright's isVisible() alone
+ * is not enough here:
+ * - closed Tamagui Sheets stay mounted in fixed containers translated below
+ *   the viewport (real layout boxes, so isVisible() passes), and
+ * - expo-router keeps a hidden twin of route content with zero-size nodes
+ *   (already excluded by isVisible, kept as a fast path).
+ * Content inside a fixed subtree only counts when its own box intersects the
+ * viewport; normal-flow content (the page can scroll to reveal it) counts
+ * with any non-zero box. Any opacity:0 ancestor (Tamagui Sheet's closed
+ * frame) hides the whole subtree regardless of layout boxes.
+ */
+async function isTrulyVisible(target: Locator): Promise<boolean> {
+  try {
+    if (!(await target.isVisible())) return false;
+    const ok = await target.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return false;
+      let p: Element | null = el;
+      let inFixed = false;
+      while (p && p !== document.body) {
+        const cs = getComputedStyle(p);
+        if (cs.opacity === '0') return false;
+        if (cs.position === 'fixed') inFixed = true;
+        p = p.parentElement;
+      }
+      if (!inFixed) return true;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      return r.left < vw && r.left + r.width > 0 && r.top < vh && r.top + r.height > 0;
+    });
+    return ok === true;
+  } catch {
+    return false;
+  }
 }
 
 /** Polls until any of the texts is visibly present (hidden twins excluded). */
@@ -30,26 +67,30 @@ async function seesAny(page: Page, texts: string[], timeout = 15000): Promise<bo
   return false;
 }
 
-/** First VISIBLE match among a locator's results (see firstVisible). */
+/**
+ * First TRULY-VISIBLE match among a locator's results (see firstVisible).
+ * NOTE: pass an unpinned locator (no .first()/.nth()) — pinning collapses
+ * the search to one instance, which is often expo-router's hidden twin.
+ */
 async function resolveVisible(locator: Locator, timeout = 15000): Promise<Locator> {
   const start = Date.now();
   while (Date.now() - start < timeout) {
     const n = await locator.count();
     for (let i = 0; i < n; i++) {
-      if (await locator.nth(i).isVisible().catch(() => false)) return locator.nth(i);
+      if (await isTrulyVisible(locator.nth(i))) return locator.nth(i);
     }
     await new Promise((r) => setTimeout(r, 500));
   }
   throw new Error('no visible element for locator');
 }
 
-/** Count of VISIBLE matches (hidden transition twins excluded). */
+/** Count of TRULY-VISIBLE matches (hidden twins and closed sheets excluded). */
 async function visibleCount(page: Page, text: string | RegExp): Promise<number> {
   const all = page.getByText(text);
   const n = await all.count();
   let visible = 0;
   for (let i = 0; i < n; i++) {
-    if (await all.nth(i).isVisible().catch(() => false)) visible += 1;
+    if (await isTrulyVisible(all.nth(i))) visible += 1;
   }
   return visible;
 }
@@ -94,10 +135,24 @@ async function getSeedProductId(page: Page): Promise<string | null> {
 /**
  * Tap via the touchscreen (trusted touch sequence) so the RN gesture
  * responder fires onPress — mouse clicks do not reliably satisfy it.
- * Resolves to the first visible match (hidden expo-router twins included).
+ * Resolves to the first truly-visible match; pass an unpinned locator
+ * (no .first()/.nth() — pinning selects expo-router's hidden twin).
+ * Scrolls the target into view first (touchscreen taps never auto-scroll,
+ * so below-fold and carousel targets would otherwise miss).
  */
+/**
+ * Dismiss an open Tamagui Sheet (filter drawer, size guide) by tapping the
+ * overlay above its frame. Keyboard Escape is a no-op for Sheets on web.
+ */
+async function dismissSheet(page: Page): Promise<void> {
+  const vp = page.viewportSize() ?? { width: 1280, height: 720 };
+  await page.touchscreen.tap(vp.width / 2, Math.max(40, vp.height * 0.05));
+  await page.waitForTimeout(1000);
+}
+
 async function tap(page: Page, locator: Locator): Promise<void> {
   const target = await resolveVisible(locator);
+  await target.scrollIntoViewIfNeeded().catch(() => {});
   const box = await target.boundingBox();
   if (!box) throw new Error('tap target has no bounding box');
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
@@ -182,8 +237,10 @@ test.describe('Consumer Pages', () => {
     test('profile shows the guest upsell with working links', async ({ page }) => {
       await page.goto('/(app)/(tabs)/profile');
       await firstVisible(page, 'Sign in to personalize');
-      await tap(page, page.locator('button:has-text("My Wishlist")').first());
-      const prompted = await seesAny(page, ['Sign in to view wishlist', 'Continue with Phone'], 10000);
+      await tap(page, page.locator('button:has-text("My Wishlist")'));
+      // Guests are routed to the auth gate (wishlist is auth-gated) — either
+      // prompt proves the link works. Cold previews are slow to redirect.
+      const prompted = await seesAny(page, ['Sign in to view wishlist', 'Continue with Phone'], 25000);
       expect(prompted).toBe(true);
       await expectNoCrash(page);
     });
@@ -214,10 +271,9 @@ test.describe('Consumer Pages', () => {
 
     test('filter overlay opens, applies, and deck keeps rendering', async ({ page }) => {
       await page.waitForTimeout(3000);
-      const filterButtons = page.locator('button:has(svg)');
-      await tap(page, filterButtons.first());
-      await page.waitForTimeout(1000);
-      // Overlay opens (Filters title) or at worst nothing breaks.
+      await tap(page, page.getByTestId('discover-filter-button'));
+      // Overlay opens (footer action) or at worst nothing breaks.
+      await firstVisible(page, 'Apply Filters');
       await expectNoCrash(page);
       await page.keyboard.press('Escape');
       await page.waitForTimeout(500);
@@ -230,7 +286,7 @@ test.describe('Consumer Pages', () => {
         test.skip(true, 'No seeded products in this preview');
         return;
       }
-      await tap(page, page.locator('text=/₹\\d+/').first());
+      await tap(page, page.locator('text=/₹\\d+/'));
       await expect(page).toHaveURL(/\/product\//, { timeout: 10000 });
       await expectNoCrash(page);
     });
@@ -238,36 +294,42 @@ test.describe('Consumer Pages', () => {
 
   test.describe('Search flows', () => {
     test('typing shows suggestions, results settle without refetching', async ({ page }) => {
+      test.setTimeout(90000);
       await page.goto('/(app)/(tabs)/search');
       const input = page.getByPlaceholder('Search for items...');
       await expect(input).toBeVisible({ timeout: 15000 });
       await input.fill('kurta');
-      const firstTile = await resolveVisible(page.locator('text=/₹\\d+/'));
+      // Scoped to result tiles: the closed filter sheet keeps price-band
+      // chips (₹0 - ₹999…) mounted below the viewport, which a global ₹
+      // matcher picks up first. Cold vector search can take ~30s.
+      const prices = page.getByTestId('search-result-tile').locator('text=/₹\\d+/');
+      const firstTile = await resolveVisible(prices, 30000);
       const firstTitle = await firstTile.textContent();
       // Refetch-loop regression: results must settle — same first tile and
       // no loading indicator returning across a quiet window.
       await page.waitForTimeout(3500);
-      const settledTile = await resolveVisible(page.locator('text=/₹\\d+/'));
+      const settledTile = await resolveVisible(prices, 15000);
       expect(await settledTile.textContent()).toBe(firstTitle);
       await expectNoCrash(page);
     });
 
     test('recent searches persist, then clear with the results', async ({ page }) => {
+      test.setTimeout(90000);
       await page.goto('/(app)/(tabs)/search');
       const input = page.getByPlaceholder('Search for items...');
       await expect(input).toBeVisible({ timeout: 15000 });
       await input.fill('kurta');
-      await firstVisible(page, /₹\d+/);
+      await resolveVisible(page.getByTestId('search-result-tile').locator('text=/₹\\d+/'), 30000);
       // Clearing keeps the last results (with header) instead of dropping them.
       await input.fill('');
       await expect.poll(() => visibleCount(page, 'Recent searches'), { timeout: 10000 }).toBe(0);
       await firstVisible(page, /result.*for "kurta"/);
       // Clearing results reveals recent searches, including this query.
-      await tap(page, page.locator('text="Clear"').first());
+      await tap(page, page.locator('text="Clear"'));
       await firstVisible(page, 'Recent searches');
       await firstVisible(page, 'kurta');
       // Remove one entry via its X button.
-      const remove = page.getByRole('button', { name: /Remove kurta/ }).first();
+      const remove = page.getByRole('button', { name: /Remove kurta/ });
       if ((await remove.count()) > 0) {
         await tap(page, remove);
         await expect.poll(() => visibleCount(page, 'kurta'), { timeout: 10000 }).toBe(0);
@@ -292,21 +354,24 @@ test.describe('Consumer Pages', () => {
     });
 
     test('filter drawer opens and applies without crashing', async ({ page }) => {
+      test.setTimeout(90000);
       await page.goto('/(app)/(tabs)/search');
       await expect(page.getByPlaceholder('Search for items...')).toBeVisible({ timeout: 15000 });
-      await tap(page, page.locator('button[aria-label="Open filters"]').first()).catch(async () => {
-        // Fallback: sliders icon button beside the search box.
-        await tap(page, page.locator('button:has(svg)').nth(1));
-      });
-      await page.waitForTimeout(1000);
+      // Icon-only button beside the search box (single visible instance).
+      await tap(page, page.locator('button:has(svg)'));
+      // Drawer opens (footer action visible, centered in viewport).
+      await firstVisible(page, 'Apply Filters');
       await expectNoCrash(page);
-      await page.keyboard.press('Escape');
+      // Tamagui Sheet ignores Escape on web — dismiss via the overlay above it.
+      await dismissSheet(page);
+      await expect.poll(() => visibleCount(page, 'Apply Filters'), { timeout: 5000 }).toBe(0);
       await expectNoCrash(page);
     });
   });
 
   test.describe('PDP', () => {
     test.beforeEach(async ({ page }) => {
+      test.setTimeout(90000);
       const url = await openSeedPdp(page);
       if (!url) {
         test.skip(true, 'No seeded products in this preview');
@@ -341,14 +406,15 @@ test.describe('Consumer Pages', () => {
 
     test('size guide opens and closes', async ({ page }) => {
       await firstVisible(page, 'Description');
-      const guide = page.locator('button:has-text("Size Guide")').first();
+      const guide = page.locator('button:has-text("Size Guide")');
       if ((await guide.count()) === 0) {
         test.skip(true, 'No size guide on this product');
         return;
       }
       await tap(page, guide);
       await firstVisible(page, 'Model Measurements');
-      await page.keyboard.press('Escape');
+      // Tamagui Sheet ignores Escape on web — dismiss via the overlay above it.
+      await dismissSheet(page);
       await expect.poll(() => visibleCount(page, 'Model Measurements'), { timeout: 5000 }).toBe(0);
       await expectNoCrash(page);
     });
@@ -366,9 +432,9 @@ test.describe('Consumer Pages', () => {
 
     test('gallery zoom opens and closes', async ({ page }) => {
       await firstVisible(page, 'Description');
-      await tap(page, page.locator('img').first());
+      await tap(page, page.locator('img'));
       await page.waitForTimeout(1000);
-      const close = page.locator('text="✕"').first();
+      const close = page.locator('text="✕"');
       if ((await close.count()) > 0) {
         await tap(page, close);
         await page.waitForTimeout(500);
@@ -379,17 +445,28 @@ test.describe('Consumer Pages', () => {
     test('similar product navigates to another PDP', async ({ page }) => {
       await firstVisible(page, 'Similar to this');
       const before = page.url();
-      const tiles = page.locator('text=/₹\\d+/');
+      // Scoped to the carousel (the sticky footer also renders ₹ prices).
+      // Carousel tiles scroll horizontally — tap the first tile that is
+      // actually on screen (touchscreen taps never auto-scroll).
+      await page.getByText('Similar to this').scrollIntoViewIfNeeded().catch(() => {});
+      const tiles = page.getByTestId('similar-product-tile');
       const total = await tiles.count();
-      const visible: Locator[] = [];
+      const vp = page.viewportSize();
+      let tapped = false;
       for (let i = 0; i < total; i++) {
-        if (await tiles.nth(i).isVisible().catch(() => false)) visible.push(tiles.nth(i));
+        const tile = tiles.nth(i);
+        if (!(await isTrulyVisible(tile))) continue;
+        await tile.scrollIntoViewIfNeeded().catch(() => {});
+        const box = await tile.boundingBox().catch(() => null);
+        if (!box || !vp || box.x + box.width <= 0 || box.x >= vp.width) continue;
+        await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+        tapped = true;
+        break;
       }
-      if (visible.length <= 1) {
+      if (!tapped) {
         test.skip(true, 'No similar products rendered');
         return;
       }
-      await tap(page, visible[visible.length - 1]);
       await page.waitForTimeout(3000);
       expect(page.url()).toMatch(/\/product\//);
       expect(page.url()).not.toBe(before);
@@ -401,7 +478,7 @@ test.describe('Consumer Pages', () => {
       page.on('dialog', async (dialog) => {
         await dialog.dismiss();
       });
-      const cta = page.locator('button:has-text("Add to Bag"), button:has-text("Go to Bag")').first();
+      const cta = page.locator('button:has-text("Add to Bag"), button:has-text("Go to Bag")');
       await tap(page, cta);
       await page.waitForTimeout(1500);
       // Guest without a size, or auth prompt: must not land in cart/checkout.
@@ -412,6 +489,7 @@ test.describe('Consumer Pages', () => {
 
   test.describe('Bag with seeded guest items', () => {
     test.beforeEach(async ({ page }) => {
+      test.setTimeout(90000);
       const url = await openSeedPdp(page);
       if (!url) {
         test.skip(true, 'No seeded products in this preview');
@@ -444,7 +522,7 @@ test.describe('Consumer Pages', () => {
     });
 
     test('quantity steppers update and remove clears the row', async ({ page }) => {
-      const plus = page.getByTestId('cart-increase').first();
+      const plus = page.getByTestId('cart-increase');
       if ((await plus.count()) === 0) {
         test.skip(true, 'No stepper rendered');
         return;
@@ -464,7 +542,7 @@ test.describe('Consumer Pages', () => {
           { timeout: 10000 },
         )
         .toBe(2);
-      await tap(page, page.getByTestId('cart-remove').first());
+      await tap(page, page.getByTestId('cart-remove'));
       await firstVisible(page, 'Your bag is empty');
       await expectNoCrash(page);
     });
@@ -488,9 +566,11 @@ test.describe('Consumer Pages', () => {
       }
       await tap(page, merchant);
       await page.waitForTimeout(2000);
-      // Either a retailer tab/popup or an explanatory alert — a quiet
-      // no-op means the dead-button bug is back.
-      expect(popupOpened || dialogSeen).toBe(true);
+      // A retailer tab/popup, a native dialog, or the inline explanatory
+      // alert ("retailer link not available yet") — a quiet no-op means
+      // the dead-button bug is back.
+      const alertSeen = await seesAny(page, ['Unavailable', 'not available yet'], 5000);
+      expect(popupOpened || dialogSeen || alertSeen).toBe(true);
       await expectNoCrash(page);
     });
   });
@@ -525,7 +605,7 @@ test.describe('Consumer Pages', () => {
         await expectNoCrash(page);
         return;
       }
-      await tap(page, page.locator('text="Go Home"').first());
+      await tap(page, page.locator('text="Go Home"'));
       await page.waitForTimeout(3000);
       expect(page.url()).not.toMatch(/\/board\//);
       await expectNoCrash(page);

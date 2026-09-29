@@ -49,6 +49,7 @@ export const ProductCarousel = ({
       {data.map((product) => (
         <ProductTile
           key={product._id}
+          testID="similar-product-tile"
           title={product.title}
           brand={product.brand}
           price={product.price}

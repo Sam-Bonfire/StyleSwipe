@@ -2,7 +2,7 @@ import { useProductSourceUrl, useTrackMerchantRedirect, useAnalytics, useCurrent
 import { Button } from '@app/ui-kit';
 import { ExternalLink } from '@tamagui/lucide-icons';
 import React from 'react';
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 
 /**
  * MerchantButton — opens the retailer's page for a product and logs
@@ -17,7 +17,14 @@ export const MerchantButton = ({ productId }: { productId: string }) => {
 
   const handlePress = async (): Promise<void> => {
     if (!merchantUrl) {
-      Alert.alert('Unavailable', 'The retailer link for this product is not available yet.');
+      // RN's Alert is a no-op on web: fall back to window.alert so the
+      // shopper still gets the explanatory prompt instead of a dead button.
+      const message = 'The retailer link for this product is not available yet.';
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && typeof window.alert === 'function') {
+        window.alert(`Unavailable: ${message}`);
+      } else {
+        Alert.alert('Unavailable', message);
+      }
       return;
     }
     // Analytics must never block the redirect: track best-effort first,

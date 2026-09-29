@@ -188,6 +188,7 @@ jobs:
         env:
           NDK_VERSION: 27.1.12297006
         run: |
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
           for i in 1 2 3; do
             echo "NDK install attempt $i..."
             yes | sdkmanager --install "ndk;$NDK_VERSION" && break || sleep 20

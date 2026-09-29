@@ -93,7 +93,9 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                   source={{ uri: img }}
                   // @ts-ignore - src passes through to <img> on web where source resolution fails
                   src={img}
-                  style={{ width: windowWidth, height: galleryHeight, objectFit: 'cover' }}
+                  width={windowWidth}
+                  height={galleryHeight}
+                  style={{ objectFit: 'cover' }}
                   resizeMode="cover"
                 />
               </YStack>
@@ -128,8 +130,10 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
                 source={{ uri: images[zoomIndex], width: windowWidth, height: windowWidth / 0.7 }}
                 // @ts-ignore - src passes through to <img> on web where source resolution fails
                 src={images[zoomIndex]}
+                width={windowWidth}
+                height={windowWidth / 0.7}
                 resizeMode="contain"
-                style={{ width: windowWidth, height: windowWidth / 0.7, objectFit: 'contain' } as unknown as Record<string, unknown>}
+                style={{ objectFit: 'contain' } as unknown as Record<string, unknown>}
               />
             </Animated.View>
           </GestureDetector>
@@ -145,7 +149,7 @@ export const ImageGallery = ({ images, initialIndex = 0 }: ImageGalleryProps) =>
               >
                 <YStack width={48} height={64} borderRadius="$2" overflow="hidden" borderWidth={idx === zoomIndex ? 2 : 0} borderColor="$primary">
                   {/* @ts-ignore - src passes through to <img> on web where source resolution fails */}
-                  <Image source={{ uri: images[idx] }} src={images[idx]} style={{ width: 48, height: 64, objectFit: 'cover' }} resizeMode="cover" />
+                  <Image source={{ uri: images[idx] }} src={images[idx]} width={48} height={64} style={{ objectFit: 'cover' }} resizeMode="cover" />
                 </YStack>
               </Pressable>
             ))}
