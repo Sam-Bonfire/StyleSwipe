@@ -1,4 +1,4 @@
-import { useCurrentUser, usePartnerSyncByInviteCode, useAcceptPartnerSync, useStopPartnerSync } from '@app/infrastructure';
+import { useCurrentUser, usePartnerSyncByInviteCode, useAcceptPartnerSync, useStopPartnerSync, useNotifySyncJoined } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -13,6 +13,7 @@ export default function PartnerSyncScreen() {
   const syncDoc = usePartnerSyncByInviteCode(inviteCode);
   const acceptSync = useAcceptPartnerSync();
   const declineSync = useStopPartnerSync();
+  const notifyJoined = useNotifySyncJoined();
 
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -25,6 +26,11 @@ export default function PartnerSyncScreen() {
     setError(null);
     try {
       await acceptSync(syncDoc._id, user._id);
+      await notifyJoined(
+        syncDoc.initiatorId as string,
+        (user.name as string) || 'Your partner',
+        inviteCode,
+      );
       router.replace('/(app)/(tabs)');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to accept sync request.');

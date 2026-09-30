@@ -1,4 +1,4 @@
-import { useCurrentUser, useCreatePartnerSync, useActivePartnerSync, useStopPartnerSync } from '@app/infrastructure';
+import { useCurrentUser, useCreatePartnerSync, useActivePartnerSync, useStopPartnerSync, usePendingInvites, useNotifySyncEnded } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { Users, Clock, Link2, QrCode, Sparkles, HeartHandshake, ChevronLeft } from '@tamagui/lucide-icons';
 import * as Clipboard from 'expo-clipboard';
@@ -86,18 +86,31 @@ export function PartnerSyncSettingsScreen() {
   const user = useCurrentUser();
   const createSync = useCreatePartnerSync();
   const activeSyncs = useActivePartnerSync(user?._id) as Record<string, unknown>[]; // cast since type might not be synced
+  const pendingInvites = usePendingInvites(user?._id) as Record<string, unknown>[] | undefined;
   const stopSync = useStopPartnerSync();
+  const notifyEnded = useNotifySyncEnded();
 
   const [selectedDuration, setSelectedDuration] = useState<Duration>('1h');
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [currentUrl, setCurrentUrl] = useState('');
 
-  const generateLink = async (duration: string) => {
+  const buildInviteUrl = (inviteCode: string): string => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      return `${window.location.origin}/sync/${inviteCode}`;
+    }
+    const baseUrl = process.env.EXPO_PUBLIC_APP_URL || Linking.createURL('/');
+    return `${baseUrl.replace(/\/$/, '')}/sync/${inviteCode}`;
+  };
+
+  /** Reuse the waiting invite instead of minting a duplicate row per tap. */
+  const getOrCreateInviteCode = async (duration: string): Promise<string | null> => {
     if (!user) {
       Alert.alert('Login Required', 'Please log in to sync your style.');
       return null;
     }
-    
+    const waiting = Array.isArray(pendingInvites) && pendingInvites.length > 0 ? pendingInvites[0] : null;
+    if (waiting?.inviteCode) return waiting.inviteCode as string;
+
     let durationMs = 60 * 60 * 1000;
     if (duration === '30m') durationMs = 30 * 60 * 1000;
     if (duration === '2h') durationMs = 2 * 60 * 60 * 1000;
@@ -105,21 +118,17 @@ export function PartnerSyncSettingsScreen() {
 
     try {
       const { inviteCode } = await createSync(user._id, durationMs);
-      
-      let url = '';
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        url = `${window.location.origin}/sync/${inviteCode}`;
-      } else {
-        const baseUrl = process.env.EXPO_PUBLIC_APP_URL || Linking.createURL('/');
-        url = `${baseUrl.replace(/\/$/, '')}/sync/${inviteCode}`;
-      }
-      
-      return url;
+      return inviteCode;
     } catch (e) {
       console.error(e);
-      Alert.alert('Error', 'Failed to generate sync link.');
+      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to generate sync link.');
       return null;
     }
+  };
+
+  const generateLink = async (duration: string) => {
+    const inviteCode = await getOrCreateInviteCode(duration);
+    return inviteCode ? buildInviteUrl(inviteCode) : null;
   };
 
   const handleShareLink = async (duration: string) => {
@@ -148,8 +157,40 @@ export function PartnerSyncSettingsScreen() {
   };
 
   const handleStopSharing = async (syncId: string) => {
+    if (!syncId || !user) return;
+    const row = Array.isArray(activeSyncs)
+      ? (activeSyncs.find((s) => s._id === syncId) as Record<string, unknown> | undefined)
+      : undefined;
+    await stopSync(syncId);
+    // Tell the other side (if anyone joined) — best effort.
+    const partnerId = row?.partnerId as string | undefined;
+    const initiatorId = row?.initiatorId as string | undefined;
+    const otherId = partnerId === user._id ? initiatorId : partnerId;
+    if (otherId) {
+      await notifyEnded(otherId, (user.name as string) || 'Your partner');
+    }
+  };
+
+  const handleCancelInvite = async (syncId: string) => {
     if (syncId) {
       await stopSync(syncId);
+    }
+  };
+
+  const handleCopyInviteLink = async (inviteCode: string) => {
+    const url = buildInviteUrl(inviteCode);
+    try {
+      if (Platform.OS === 'web') {
+        await Clipboard.setStringAsync(url);
+        Alert.alert('Link Copied', 'The sync link has been copied to your clipboard!');
+      } else {
+        await Share.share({
+          message: `Let's sync our style on StyleSwipe! Click here to join my session: ${url}`,
+          url: Platform.OS === 'ios' ? url : undefined,
+        });
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -163,6 +204,7 @@ export function PartnerSyncSettingsScreen() {
   };
 
   const hasActiveSyncs = Array.isArray(activeSyncs) && activeSyncs.length > 0;
+  const waitingInvites = Array.isArray(pendingInvites) ? pendingInvites : [];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -244,6 +286,41 @@ export function PartnerSyncSettingsScreen() {
                      </Button>
                    </YStack>
                  ))}
+              </YStack>
+            )}
+
+            {waitingInvites.length > 0 && (
+              <YStack gap="$3" marginBottom="$2">
+                <XStack alignItems="center" gap="$3">
+                  <YStack padding="$2" backgroundColor="$backgroundHover" borderRadius="$full">
+                    <Clock size={24} color="$textSecondary" />
+                  </YStack>
+                  <YStack flex={1}>
+                    <Text fontFamily="$body" fontWeight="bold" fontSize="$5" color="$textPrimary">Waiting for Partner</Text>
+                    <Text fontFamily="$body" fontSize="$3" color="$textSecondary">Share the link again or cancel</Text>
+                  </YStack>
+                </XStack>
+
+                {waitingInvites.map((invite) => (
+                  <YStack key={invite._id as string} backgroundColor="$surface" padding="$4" borderRadius="$4" borderWidth={1} borderColor="$borderColor" gap="$3">
+                    <XStack justifyContent="space-between" alignItems="center">
+                      <Text fontFamily="$body" fontWeight="700" fontSize="$5" letterSpacing={2}>
+                        {invite.inviteCode as string}
+                      </Text>
+                      <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
+                        Expires in {getRemainingTime(invite.expiresAt as number)}
+                      </Text>
+                    </XStack>
+                    <XStack gap="$2">
+                      <Button variant="outlined" flex={1} icon={<Link2 size={18} />} onPress={() => handleCopyInviteLink(invite.inviteCode as string)}>
+                        Copy Link
+                      </Button>
+                      <Button variant="ghost" flex={1} onPress={() => handleCancelInvite(invite._id as string)}>
+                        Cancel
+                      </Button>
+                    </XStack>
+                  </YStack>
+                ))}
               </YStack>
             )}
 

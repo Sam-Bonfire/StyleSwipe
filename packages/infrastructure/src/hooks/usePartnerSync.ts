@@ -49,6 +49,45 @@ export function useActivePartnerSync(userId?: string) {
   return useQuery(api.partnerSync.getActiveByUser, userId ? { userId: userId } : 'skip');
 }
 
+export function usePendingInvites(userId?: string) {
+  return useQuery(api.partnerSync.getPendingByInitiator, userId ? { initiatorId: userId } : 'skip');
+}
+
+export function useUpdateSyncInfluence() {
+  const updateSync = useMutation(api.partnerSync.update);
+
+  return async (id: string, influenceRatio: number) => {
+    return await updateSync({
+      id: id as Id<'partner_sync'>,
+      influenceRatio: Math.max(0, Math.min(1, influenceRatio)),
+    });
+  };
+}
+
+export function useNotifySyncJoined() {
+  const dispatch = useMutation(api.notifications.dispatchSyncJoined);
+
+  return async (userId: string, partnerName: string, inviteCode?: string) => {
+    try {
+      await dispatch({ userId, partnerName, inviteCode });
+    } catch (e) {
+      console.error('Failed to dispatch sync-joined notification', e);
+    }
+  };
+}
+
+export function useNotifySyncEnded() {
+  const dispatch = useMutation(api.notifications.dispatchSyncEnded);
+
+  return async (userId: string, partnerName: string) => {
+    try {
+      await dispatch({ userId, partnerName });
+    } catch (e) {
+      console.error('Failed to dispatch sync-ended notification', e);
+    }
+  };
+}
+
 export function useStopPartnerSync() {
   const updateStatus = useMutation(api.partnerSync.updateStatus);
   return async (id: string) => {

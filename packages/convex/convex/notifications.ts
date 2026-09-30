@@ -175,6 +175,43 @@ export const dispatchOrderUpdate = mutation({
   },
 });
 
+export const dispatchSyncJoined = mutation({
+  args: {
+    userId: v.string(),
+    partnerName: v.string(),
+    inviteCode: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<string> => {
+    const title = `${args.partnerName} joined your sync! 🎉`;
+    const body = `You're now blending Style DNAs — discover outfits together.`;
+    return dispatchNotification(ctx, {
+      userId: args.userId,
+      type: 'PARTNER_INVITE',
+      title,
+      body,
+      data: { inviteCode: args.inviteCode, partnerName: args.partnerName },
+    });
+  },
+});
+
+export const dispatchSyncEnded = mutation({
+  args: {
+    userId: v.string(),
+    partnerName: v.string(),
+  },
+  handler: async (ctx, args): Promise<string> => {
+    const title = `Sync session ended`;
+    const body = `${args.partnerName} stopped sharing — you're back to your own feed.`;
+    return dispatchNotification(ctx, {
+      userId: args.userId,
+      type: 'SYSTEM',
+      title,
+      body,
+      data: { partnerName: args.partnerName },
+    });
+  },
+});
+
 // Generic dispatch (admin / internal)
 export const dispatchGeneric = mutation({
   args: {

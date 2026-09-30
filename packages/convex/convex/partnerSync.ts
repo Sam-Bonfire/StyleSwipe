@@ -1,7 +1,12 @@
 import { v } from 'convex/values';
 
+import type { QueryCtx } from './_generated/server';
+
 import { components } from './_generated/api';
 import { query, mutation } from './_generated/server';
+
+/** Minimal surface shared by query and mutation handlers. */
+type DbCtx = { db: QueryCtx['db'] };
 
 export const getById = query({
   args: { id: v.id('partner_sync') },
@@ -39,6 +44,38 @@ export const getByPartner = query({
       .collect();
   },
 });
+
+/** Pending, unexpired outgoing invites for the initiator (waiting room). */
+export const getPendingByInitiator = query({
+  args: { initiatorId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query('partner_sync')
+      .withIndex('by_initiator', (q) => q.eq('initiatorId', args.initiatorId))
+      .filter((q) => q.eq(q.field('status'), 'pending'))
+      .filter((q) => q.gt(q.field('expiresAt'), Date.now()))
+      .collect();
+  },
+});
+
+/** Any live (active or pending, unexpired) session involving the user. */
+async function liveSessionsFor(ctx: DbCtx, userId: string, excludeId?: string) {
+  const now = Date.now();
+  const asInitiator = await ctx.db
+    .query('partner_sync')
+    .withIndex('by_initiator', (q) => q.eq('initiatorId', userId))
+    .collect();
+  const asPartner = await ctx.db
+    .query('partner_sync')
+    .withIndex('by_partner', (q) => q.eq('partnerId', userId))
+    .collect();
+  return [...asInitiator, ...asPartner].filter(
+    (s) =>
+      s._id !== excludeId &&
+      (s.status === 'active' || s.status === 'pending') &&
+      s.expiresAt > now,
+  );
+}
 
 export const getActiveByUser = query({
   args: { userId: v.string() },
@@ -106,6 +143,11 @@ export const create = mutation({
       .withIndex('by_inviteCode', (q) => q.eq('inviteCode', args.inviteCode))
       .first();
     if (existing) throw new Error('Invite code already in use. Please try again.');
+    // One live session per user: the client reuses pending invites, this is the backstop.
+    const live = await liveSessionsFor(ctx, args.initiatorId);
+    if (live.length > 0) {
+      throw new Error('You already have an active sync session. Stop it before starting a new one.');
+    }
     return await ctx.db.insert('partner_sync', args);
   },
 });
@@ -126,6 +168,10 @@ export const accept = mutation({
     }
     if (doc.partnerId) throw new Error('Invite was already accepted.');
     if (doc.initiatorId === args.partnerId) throw new Error('You cannot accept your own invite.');
+    const live = await liveSessionsFor(ctx, args.partnerId, args.id);
+    if (live.length > 0) {
+      throw new Error('Stop your current sync session before joining a new one.');
+    }
     await ctx.db.patch(args.id, { partnerId: args.partnerId, status: 'active' });
   },
 });
