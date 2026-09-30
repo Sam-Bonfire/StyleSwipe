@@ -26,6 +26,16 @@ crons.weekly(
   internal.crons.pruneOldSwipes
 );
 
+// Schedule: Flip past-expiry partner sync sessions to expired every hour.
+// Query-time expiresAt filtering is the real enforcement; this keeps the
+// table honest (sessions live 30m-24h, so weekly pruning would leave
+// stale actives blending feeds for days).
+crons.hourly(
+  "expire-stale-syncs",
+  { minuteUTC: 0 },
+  internal.crons.expireStaleSyncs
+);
+
 export default crons;
 
 // -----------------------------------------------------------------------------
@@ -63,6 +73,22 @@ export const pruneOldEvents = internalMutation({
       
     for (const event of oldEvents) {
       await ctx.db.delete(event._id);
+    }
+  },
+});
+
+export const expireStaleSyncs = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+    const stale = await ctx.db
+      .query("partner_sync")
+      .filter((q) => q.lt(q.field("expiresAt"), now))
+      .collect();
+    for (const doc of stale) {
+      if (doc.status !== "expired") {
+        await ctx.db.patch(doc._id, { status: "expired" });
+      }
     }
   },
 });

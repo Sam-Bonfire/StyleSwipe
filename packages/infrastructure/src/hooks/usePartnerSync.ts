@@ -8,31 +8,40 @@ export function usePartnerSyncByInviteCode(inviteCode: string) {
 }
 
 export function useAcceptPartnerSync() {
-  const updateSync = useMutation(api.partnerSync.update);
-  
+  const acceptSync = useMutation(api.partnerSync.accept);
+
   return async (id: string, partnerId: string) => {
-    return await updateSync({
+    return await acceptSync({
       id: id as Id<'partner_sync'>,
       partnerId: partnerId,
-      status: 'active',
     });
   };
 }
 
 export function useCreatePartnerSync() {
   const createSync = useMutation(api.partnerSync.create);
-  
+
   return async (initiatorId: string, durationMs: number) => {
-    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const result = await createSync({
-      initiatorId: initiatorId,
-      inviteCode,
-      status: 'pending',
-      expiresAt: Date.now() + durationMs,
-      influenceRatio: 0.5,
-      createdAt: Date.now(),
-    });
-    return { id: result, inviteCode };
+    // Invite codes are short; the server rejects collisions, so retry.
+    let lastError: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      try {
+        const result = await createSync({
+          initiatorId: initiatorId,
+          inviteCode,
+          status: 'pending',
+          expiresAt: Date.now() + durationMs,
+          influenceRatio: 0.5,
+          createdAt: Date.now(),
+        });
+        return { id: result, inviteCode };
+      } catch (e) {
+        lastError = e;
+        if (!(e instanceof Error) || !e.message.includes('already in use')) throw e;
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error('Failed to generate sync link.');
   };
 }
 
