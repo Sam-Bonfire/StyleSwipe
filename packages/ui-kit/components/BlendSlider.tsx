@@ -128,7 +128,7 @@ export const BlendSlider = React.forwardRef<TamaguiElement, BlendSliderProps>(
     };
 
     return (
-      <SliderFrame ref={ref as any} opacity={disabled ? 0.5 : 1} {...rest}>
+      <SliderFrame ref={ref as any} opacity={disabled ? 0.5 : 1} testID="blend-slider" {...rest}>
         {
           (
             <>

@@ -2,7 +2,7 @@ import { useCurrentUser, usePartnerSyncByInviteCode, useAcceptPartnerSync, useSt
 import { Button } from '@app/ui-kit';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { SafeAreaView, ActivityIndicator, Platform } from 'react-native';
+import { SafeAreaView, ActivityIndicator } from 'react-native';
 import { YStack, Text, H2 } from 'tamagui';
 
 export default function PartnerSyncScreen() {
@@ -51,22 +51,6 @@ export default function PartnerSyncScreen() {
       setIsDeclining(false);
     }
   };
-
-  if (Platform.OS === 'web') {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-        <YStack flex={1} padding="$4" justifyContent="center" alignItems="center" gap="$4">
-          <H2>StyleSwipe Partner Sync</H2>
-          <Text textAlign="center" color="$textSecondary">
-            You've been invited to sync your style! Download the StyleSwipe app on iOS or Android to accept the invitation and start shopping together.
-          </Text>
-          <Button variant="primary" onPress={() => window.location.href = 'https://styleswipe.com'}>
-            Download App
-          </Button>
-        </YStack>
-      </SafeAreaView>
-    );
-  }
 
   if (syncDoc === undefined) {
     return (

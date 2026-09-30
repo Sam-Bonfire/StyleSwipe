@@ -170,6 +170,7 @@ export function DiscoveryScreen() {
             sort={sort}
             partnerId={activeSession?.partnerId || activeSession?.initiatorId}
             influenceRatio={activeSession ? influenceRatio / 100 : undefined}
+            sharedBoardId={activeSession?.sharedBoardId as string | undefined}
           />
         </View>
         {gridEnabled && (

@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 
-import { mutation, query } from './_generated/server';
+import { internal } from './_generated/api';
+import { internalAction, internalQuery, mutation, query } from './_generated/server';
 
 /**
  * Notifications dispatch (hexagonal: Convex adapter layer)
@@ -80,8 +81,12 @@ async function dispatchNotification(
       context: { userId: args.userId, title: args.title, tokensCount: tokens.length, data: args.data },
       timestamp: now,
     });
-    // TODO(prod): POST to Expo Push Service
-    // await fetch('https://exp.host/--/api/v2/push/send', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(tokens.map(t=>({to:t, title:args.title, body:args.body, data: args.data})) )})
+    await ctx.scheduler.runAfter(0, internal.notifications.sendPush, {
+      userId: args.userId,
+      title: args.title,
+      body: args.body,
+      data: args.data,
+    });
   } else {
     await ctx.db.insert('logs', {
       level: 'INFO',
@@ -209,6 +214,64 @@ export const dispatchSyncEnded = mutation({
       body,
       data: { partnerName: args.partnerName },
     });
+  },
+});
+
+export const getPushTokens = internalQuery({
+  args: { userId: v.string() },
+  handler: async (ctx, args): Promise<string[]> => {
+    const pushTokens = await ctx.db
+      .query('push_tokens')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .collect();
+    const legacy = await ctx.db
+      .query('user_devices')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .collect();
+    return [
+      ...pushTokens.filter((t) => t.isActive).map((t) => t.token),
+      ...legacy
+        .filter((t) => t.isActive)
+        .map((t) => t.token)
+        .filter((tok) => !pushTokens.some((pt) => pt.token === tok)),
+    ];
+  },
+});
+
+/**
+ * Actually POSTs to the Expo Push Service (mutations can't fetch, so this
+ * runs as a scheduled action right after the inbox row is written).
+ * Failures only log — inbox delivery already happened.
+ */
+export const sendPush = internalAction({
+  args: {
+    userId: v.string(),
+    title: v.string(),
+    body: v.string(),
+    data: v.optional(v.any()),
+  },
+  handler: async (ctx, args): Promise<void> => {
+    const tokens: string[] = await ctx.runQuery(internal.notifications.getPushTokens, {
+      userId: args.userId,
+    });
+    if (tokens.length === 0) return;
+    try {
+      const res = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(process.env.EXPO_ACCESS_TOKEN
+            ? { Authorization: `Bearer ${process.env.EXPO_ACCESS_TOKEN}` }
+            : {}),
+        },
+        body: JSON.stringify(
+          tokens.map((to) => ({ to, title: args.title, body: args.body, data: args.data ?? {} })),
+        ),
+      });
+      console.log(`[push] ${args.userId}: ${tokens.length} token(s), status ${res.status}`);
+    } catch (e) {
+      console.error('[push] send failed', e);
+    }
   },
 });
 

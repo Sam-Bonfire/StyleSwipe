@@ -696,10 +696,9 @@ test.describe('Consumer Pages', () => {
   });
 
   test.describe('Sync invite', () => {
-    test('web shows the app-download invite for any code', async ({ page }) => {
+    test('unknown codes land on the invalid-link state', async ({ page }) => {
       await page.goto('/sync/does-not-exist');
-      await firstVisible(page, 'StyleSwipe Partner Sync');
-      await firstVisible(page, 'Download App');
+      await firstVisible(page, 'Invalid Link');
       await expectNoCrash(page);
     });
   });
