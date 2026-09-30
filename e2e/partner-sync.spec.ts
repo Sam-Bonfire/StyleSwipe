@@ -114,6 +114,40 @@ async function tap(page: Page, locator: Locator, timeout = 15000): Promise<void>
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 }
 
+async function seesText(page: Page, text: string | RegExp): Promise<boolean> {
+  try {
+    await resolveVisible(page.getByText(text), 1500);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Tap until cond() passes. Feed/auth re-renders shift layout mid-tap and
+ * touchscreen taps then land on (harmless) empty space with no error, so
+ * fire-and-forget taps flake. Retrying is safe: share reuses the pending
+ * invite, accept/stop are idempotent.
+ */
+async function tapUntil(
+  page: Page,
+  locator: Locator,
+  cond: () => Promise<boolean>,
+  timeout = 45000,
+): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    await tap(page, locator).catch(() => {});
+    try {
+      if (await cond()) return;
+    } catch {
+      /* keep trying */
+    }
+    await page.waitForTimeout(1500);
+  }
+  throw new Error('tap-until condition never met');
+}
+
 /** Sign up via the email form (placeholders double as selectors). */
 async function signUp(page: Page, name: string, email: string, password: string) {
   await page.goto('/(auth)/email');
@@ -191,7 +225,9 @@ test.describe('Partner sync handshake', () => {
       // Invite buttons stay disabled until auth resolves (taps while
       // loading would silently no-op).
       await expect(pageA.locator('button:has-text("Share Link")')).toBeEnabled({ timeout: 20000 });
-      await tap(pageA, pageA.locator('button:has-text("Share Link")'));
+      await tapUntil(pageA, pageA.locator('button:has-text("Share Link")'), () =>
+        seesText(pageA, 'Waiting for Partner'),
+      );
       await firstVisible(pageA, 'Waiting for Partner', 45000);
       const codeEl = await resolveVisible(pageA.locator('text=/^[A-Z0-9]{6}$/'), 20000);
       const inviteCode = ((await codeEl.textContent()) ?? '').trim();
@@ -200,8 +236,11 @@ test.describe('Partner sync handshake', () => {
       // B accepts on the web flow.
       await pageB.goto(`/sync/${inviteCode}`);
       await firstVisible(pageB, 'Style Sync Invite');
-      await tap(pageB, pageB.locator('button:has-text("Accept Invite")'));
-      await pageB.waitForURL('(app)/(tabs)', { timeout: 20000 }).catch(() => {});
+      await tapUntil(
+        pageB,
+        pageB.locator('button:has-text("Accept Invite")'),
+        async () => pageB.url().includes('(app)/(tabs)'),
+      );
       await pageB.goto('/(app)/(tabs)/discover');
       await firstVisible(pageB, `Partner Syncing with ${userA.name.split(' ')[0]}`, 30000);
       await expectNoCrash(pageB);
@@ -212,7 +251,9 @@ test.describe('Partner sync handshake', () => {
       await pageA.goto('/(app)/partner-sync');
       // Cold preview databases answer session queries slowly on first hit.
       await firstVisible(pageA, 'Our Shared Board', 45000);
-      await tap(pageA, pageA.locator('button:has-text("View")'));
+      await tapUntil(pageA, pageA.locator('button:has-text("View")'), () =>
+        seesText(pageA, 'Shared Sync Board'),
+      );
       await firstVisible(pageA, 'Shared Sync Board');
       // NOTE: /(app)/board/[id] renders StyleBoardScreen (not BoardDetailScreen),
       // whose empty state reads "This board is empty".
@@ -245,24 +286,19 @@ test.describe('Partner sync handshake', () => {
       await pageB.reload();
       await firstVisible(pageB, /leading the way|Mostly .* style/, 30000);
 
-      // B stops: A is back to solo with the ended notice, B is solo too.
-      // Tap-until-gone: single taps can land mid re-render and silently
-      // miss, leaving the session alive (stop is idempotent, so retrying
-      // is safe).
+      // B stops while A watches: the ended notice only fires on a live
+      // active -> gone transition, so A must stay mounted on Discover
+      // (a fresh navigation after the stop would never see it).
+      await pageA.goto('/(app)/(tabs)/discover');
+      await firstVisible(pageA, `Partner Syncing with ${userB.name.split(' ')[0]}`, 30000);
       await pageB.goto('/(app)/partner-sync');
       await firstVisible(pageB, 'Active Sessions', 45000);
-      const stopStart = Date.now();
-      let stopped = false;
-      while (!stopped && Date.now() - stopStart < 45000) {
-        await tap(pageB, pageB.locator('button:has-text("Stop Sharing")')).catch(() => {});
-        await pageB.waitForTimeout(2500);
-        stopped = await resolveVisible(pageB.getByText('Active Sessions'), 1000)
-          .then(() => false)
-          .catch(() => true);
-      }
-      expect(stopped).toBe(true);
-      await pageA.goto('/(app)/(tabs)/discover');
-      await firstVisible(pageA, 'Back to your own feed', 30000);
+      await tapUntil(
+        pageB,
+        pageB.locator('button:has-text("Stop Sharing")'),
+        async () => !(await seesText(pageB, 'Active Sessions')),
+      );
+      await firstVisible(pageA, 'Back to your own feed', 45000);
       await expectNoCrash(pageA);
       await pageB.goto('/(app)/(tabs)/discover');
       await pageB.waitForTimeout(3000);
