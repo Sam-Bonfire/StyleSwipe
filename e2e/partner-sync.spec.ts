@@ -220,25 +220,23 @@ test.describe('Partner sync handshake', () => {
       await expectNoCrash(pageA);
 
       // Blend persists: B dials to partner-led, reloads, still partner-led.
-      // The slider element is re-resolved every attempt: feed rendering
-      // shifts layout (stale boxes miss) and expo-router's hidden twin
-      // collides with pinned .first() lookups.
+      // Coordinates come from the track container itself (fixed 48px tall),
+      // not fractions of the whole slider frame whose proportions shift
+      // with fonts/loading states. Re-resolved every attempt (stale boxes
+      // miss; pinned .first() hits expo-router's hidden twin).
       await pageB.goto('/(app)/(tabs)/discover');
       let blended = false;
       const blendStart = Date.now();
       while (!blended && Date.now() - blendStart < 90000) {
-        const el = await resolveVisible(pageB.getByTestId('blend-slider'), 10000).catch(() => null);
+        const el = await resolveVisible(pageB.getByTestId('blend-slider-track'), 10000).catch(
+          () => null,
+        );
         const box = el ? await el.boundingBox().catch(() => null) : null;
         if (box) {
-          for (const frac of [0.39, 0.5]) {
-            await pageB.touchscreen.tap(box.x + box.width * 0.8, box.y + box.height * frac);
-            await pageB.waitForTimeout(1500);
-            const t = await pageB.locator('body').innerText().catch(() => '');
-            if (/leading the way|Mostly .* style/.test(t)) {
-              blended = true;
-              break;
-            }
-          }
+          await pageB.touchscreen.tap(box.x + box.width * 0.85, box.y + box.height / 2);
+          await pageB.waitForTimeout(1500);
+          const t = await pageB.locator('body').innerText().catch(() => '');
+          if (/leading the way|Mostly .* style/.test(t)) blended = true;
         }
         if (!blended) await pageB.waitForTimeout(2000);
       }

@@ -143,7 +143,7 @@ export const BlendSlider = React.forwardRef<TamaguiElement, BlendSliderProps>(
                 </SideLabel>
               </LabelRow>
 
-              <TrackContainer onPress={handleTrackPress as any}>
+              <TrackContainer testID="blend-slider-track" onPress={handleTrackPress as any}>
                 <Track>
                   <TrackFill backgroundColor="$secondary" width={`${selfInfluence}%`} />
                   <TrackFill backgroundColor="$primary" width={`${value}%`} />
