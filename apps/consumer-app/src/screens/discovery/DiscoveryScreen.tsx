@@ -1,9 +1,10 @@
-import { useCurrentUser, useActivePartnerSync, useFeatureFlag } from '@app/infrastructure';
+import { useCurrentUser, useActivePartnerSync, useFeatureFlag, useUpdateSyncInfluence } from '@app/infrastructure';
 import { TopBar, TopBarIconButton } from '@app/ui-kit';
 import { BlendSlider } from '@app/ui-kit/components/BlendSlider';
 import { Button } from '@app/ui-kit/components/Button';
-import { SlidersHorizontal, Users } from '@tamagui/lucide-icons';
-import React, { useState } from 'react';
+import { SlidersHorizontal, Users, X } from '@tamagui/lucide-icons';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 
@@ -28,10 +29,53 @@ export function DiscoveryScreen() {
   // Grid view is experimental — hidden unless the discover_grid flag is on.
   // Missing/disabled row means OFF, so deck is the default while loading too.
   const gridEnabled = useFeatureFlag('discover_grid') === true;
+  const router = useRouter();
+  const persistInfluence = useUpdateSyncInfluence();
+  const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Blend persists on the session (0 = your own feed, sticks across reloads).
+  useEffect(() => {
+    if (activeSession && typeof activeSession.influenceRatio === 'number') {
+      setInfluenceRatio(Math.round(activeSession.influenceRatio * 100));
+    }
+  }, [activeSession?._id]);
+
+  useEffect(() => {
+    return () => {
+      if (persistTimer.current) clearTimeout(persistTimer.current);
+    };
+  }, []);
 
   const handleRatioChange = (val: number) => {
     setInfluenceRatio(val);
+    if (!activeSession) return;
+    if (persistTimer.current) clearTimeout(persistTimer.current);
+    persistTimer.current = setTimeout(() => {
+      void persistInfluence(activeSession._id, val / 100).catch((e: unknown) =>
+        console.error('Failed to persist blend ratio', e),
+      );
+    }, 800);
   };
+
+  // One-time "session ended" notice: the banner vanishing alone (partner
+  // stopped, invite expired) leaves users wondering where their blend went.
+  // This also confirms a deliberate exit — you're back to your own feed.
+  const lastSession = useRef<{ id: string; name: string } | null>(null);
+  const [endedNotice, setEndedNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (activeSession) {
+      lastSession.current = {
+        id: activeSession._id as string,
+        name: (activeSession.partnerName as string) || 'Partner',
+      };
+      setEndedNotice(null);
+    } else if (lastSession.current) {
+      setEndedNotice(
+        `Back to your own feed — ${lastSession.current.name} is no longer syncing.`,
+      );
+      lastSession.current = null;
+    }
+  }, [activeSession]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -48,6 +92,43 @@ export function DiscoveryScreen() {
         }
       />
       <YStack flex={1} padding="$4" gap="$4">
+        {endedNotice && !activeSession && (
+          <XStack
+            backgroundColor="$surface"
+            borderRadius="$3"
+            borderWidth={1}
+            borderColor="$borderColor"
+            padding="$3"
+            gap="$2"
+            alignItems="center"
+          >
+            <YStack flex={1} gap="$2">
+              <Text fontFamily="$body" fontSize="$3" color="$textPrimary">
+                {endedNotice}
+              </Text>
+              <Text
+                fontFamily="$body"
+                fontSize="$3"
+                fontWeight="600"
+                color="$primary"
+                onPress={() => {
+                  setEndedNotice(null);
+                  router.push('/(app)/partner-sync');
+                }}
+              >
+                Sync again
+              </Text>
+            </YStack>
+            <YStack
+              onPress={() => setEndedNotice(null)}
+              padding="$2"
+              cursor="pointer"
+              accessibilityLabel="Dismiss"
+            >
+              <X size={18} color="$textSecondary" />
+            </YStack>
+          </XStack>
+        )}
         {activeSession && (
           <YStack gap="$4" marginBottom="$2">
             <XStack
