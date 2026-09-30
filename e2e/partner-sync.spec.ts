@@ -102,6 +102,8 @@ async function firstVisible(page: Page, text: string | RegExp, timeout = 20000):
       await page.waitForTimeout(500);
     }
   }
+  const body = await page.locator('body').innerText().catch(() => '<no body>');
+  console.log(`firstVisible gave up at ${page.url()}: ${body.slice(0, 600)}`);
   throw new Error(`no visible element with text: ${text}`);
 }
 
