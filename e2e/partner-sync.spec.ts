@@ -201,23 +201,39 @@ async function stubStyleProfile(page: Page) {
   await firstVisible(page, 'Discovery', 30000);
 }
 
-test.describe('Partner sync handshake', () => {
-  test('invite, accept, blend, shared board, stop', async ({ browser }: { browser: Browser }) => {
-    test.setTimeout(300000);
+type SyncUser = { name: string; email: string; password: string };
+
+// Shared across the serial tests below (same worker, declaration order).
+// Regenerated whenever the invite test (re)runs, so retries never collide
+// with users from a previous attempt.
+const runState: { userA?: SyncUser; userB?: SyncUser; inviteCode?: string } = {};
+
+/** Sign in an existing stubbed user (fast path, no signup/onboarding). */
+async function signIn(page: Page, user: SyncUser) {
+  await page.goto('/(auth)/email');
+  await page.getByPlaceholder('Email Address').fill(user.email);
+  await page.getByPlaceholder('Password').fill(user.password);
+  await expect(page.locator('button:has-text("Sign In")')).toBeEnabled({ timeout: 20000 });
+  await tap(page, page.locator('button:has-text("Sign In")'));
+  await firstVisible(page, 'Discovery', 45000);
+}
+
+// Serial: each step builds on the previous one's server state, and each
+// step is small enough that CI retries re-run one step, not the whole
+// 5-minute handshake.
+test.describe.serial('Partner sync handshake', () => {
+  test('A signs up and creates a reusable invite', async ({ browser }: { browser: Browser }) => {
+    test.setTimeout(180000);
     const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
-    const userA = { name: 'Aarav E2E', email: `e2e-a-${stamp}@example.com`, password: 'E2eTest!123' };
-    const userB = { name: 'Bella E2E', email: `e2e-b-${stamp}@example.com`, password: 'E2eTest!123' };
+    runState.userA = { name: 'Aarav E2E', email: `e2e-a-${stamp}@example.com`, password: 'E2eTest!123' };
+    runState.userB = { name: 'Bella E2E', email: `e2e-b-${stamp}@example.com`, password: 'E2eTest!123' };
+    runState.inviteCode = undefined;
 
     const ctxA = await browser.newContext({ hasTouch: true });
-    const ctxB = await browser.newContext({ hasTouch: true });
-    const pageA = await ctxA.newPage();
-    const pageB = await ctxB.newPage();
     try {
-      // Both users sign up and skip onboarding via stubbed profiles.
-      await signUp(pageA, userA.name, userA.email, userA.password);
+      const pageA = await ctxA.newPage();
+      await signUp(pageA, runState.userA.name, runState.userA.email, runState.userA.password);
       await stubStyleProfile(pageA);
-      await signUp(pageB, userB.name, userB.email, userB.password);
-      await stubStyleProfile(pageB);
 
       // A invites: pending invite appears with a reusable code.
       await pageA.goto('/(app)/partner-sync');
@@ -232,6 +248,24 @@ test.describe('Partner sync handshake', () => {
       const codeEl = await resolveVisible(pageA.locator('text=/^[A-Z0-9]{6}$/'), 20000);
       const inviteCode = ((await codeEl.textContent()) ?? '').trim();
       expect(inviteCode).toMatch(/^[A-Z0-9]{6}$/);
+      runState.inviteCode = inviteCode;
+      await expectNoCrash(pageA);
+    } finally {
+      await ctxA.close().catch(() => {});
+    }
+  });
+
+  test('B accepts and feeds blend both ways', async ({ browser }: { browser: Browser }) => {
+    test.setTimeout(180000);
+    const { userA, userB, inviteCode } = runState;
+    if (!userA || !userB || !inviteCode) throw new Error('invite step did not run');
+
+    const ctxB = await browser.newContext({ hasTouch: true });
+    const ctxA = await browser.newContext({ hasTouch: true });
+    try {
+      const pageB = await ctxB.newPage();
+      await signUp(pageB, userB.name, userB.email, userB.password);
+      await stubStyleProfile(pageB);
 
       // B accepts on the web flow. Accept navigates away from /sync/...
       // (expo web strips route-group segments, so match leaving sync).
@@ -246,27 +280,32 @@ test.describe('Partner sync handshake', () => {
       await firstVisible(pageB, `Partner Syncing with ${userA.name.split(' ')[0]}`, 30000);
       await expectNoCrash(pageB);
 
-      // A sees the join: banner names B, shared board card links out.
-      await pageA.goto('/(app)/(tabs)/discover');
+      // A sees the join: banner names B.
+      const pageA = await ctxA.newPage();
+      await signIn(pageA, userA);
       await firstVisible(pageA, `Partner Syncing with ${userB.name.split(' ')[0]}`, 30000);
-      await pageA.goto('/(app)/partner-sync');
-      // Cold preview databases answer session queries slowly on first hit.
-      await firstVisible(pageA, 'Our Shared Board', 45000);
-      await tapUntil(pageA, pageA.locator('button:has-text("View")'), () =>
-        seesText(pageA, 'Shared Sync Board'),
-      );
-      await firstVisible(pageA, 'Shared Sync Board');
-      // NOTE: /(app)/board/[id] renders StyleBoardScreen (not BoardDetailScreen),
-      // whose empty state reads "This board is empty".
-      await firstVisible(pageA, 'This board is empty');
       await expectNoCrash(pageA);
+    } finally {
+      await ctxB.close().catch(() => {});
+      await ctxA.close().catch(() => {});
+    }
+  });
 
+  test('blend persists and shared board links out', async ({ browser }: { browser: Browser }) => {
+    test.setTimeout(180000);
+    const { userA, userB } = runState;
+    if (!userA || !userB) throw new Error('invite step did not run');
+
+    const ctxB = await browser.newContext({ hasTouch: true });
+    const ctxA = await browser.newContext({ hasTouch: true });
+    try {
       // Blend persists: B dials to partner-led, reloads, still partner-led.
       // Coordinates come from the track container itself (fixed 48px tall),
       // not fractions of the whole slider frame whose proportions shift
       // with fonts/loading states. Re-resolved every attempt (stale boxes
       // miss; pinned .first() hits expo-router's hidden twin).
-      await pageB.goto('/(app)/(tabs)/discover');
+      const pageB = await ctxB.newPage();
+      await signIn(pageB, userB);
       let blended = false;
       const blendStart = Date.now();
       while (!blended && Date.now() - blendStart < 90000) {
@@ -286,12 +325,44 @@ test.describe('Partner sync handshake', () => {
       await pageB.waitForTimeout(2500); // debounce persist window
       await pageB.reload();
       await firstVisible(pageB, /leading the way|Mostly .* style/, 30000);
+      await expectNoCrash(pageB);
 
+      // Shared board card links out to the couple board.
+      const pageA = await ctxA.newPage();
+      await signIn(pageA, userA);
+      await pageA.goto('/(app)/partner-sync');
+      // Cold preview databases answer session queries slowly on first hit.
+      await firstVisible(pageA, 'Our Shared Board', 45000);
+      await tapUntil(pageA, pageA.locator('button:has-text("View")'), () =>
+        seesText(pageA, 'Shared Sync Board'),
+      );
+      await firstVisible(pageA, 'Shared Sync Board');
+      // NOTE: /(app)/board/[id] renders StyleBoardScreen (not BoardDetailScreen),
+      // whose empty state reads "This board is empty".
+      await firstVisible(pageA, 'This board is empty');
+      await expectNoCrash(pageA);
+    } finally {
+      await ctxB.close().catch(() => {});
+      await ctxA.close().catch(() => {});
+    }
+  });
+
+  test('stop restores solo with the ended notice', async ({ browser }: { browser: Browser }) => {
+    test.setTimeout(180000);
+    const { userA, userB } = runState;
+    if (!userA || !userB) throw new Error('invite step did not run');
+
+    const ctxA = await browser.newContext({ hasTouch: true });
+    const ctxB = await browser.newContext({ hasTouch: true });
+    try {
       // B stops while A watches: the ended notice only fires on a live
       // active -> gone transition, so A must stay mounted on Discover
       // (a fresh navigation after the stop would never see it).
-      await pageA.goto('/(app)/(tabs)/discover');
+      const pageA = await ctxA.newPage();
+      await signIn(pageA, userA);
       await firstVisible(pageA, `Partner Syncing with ${userB.name.split(' ')[0]}`, 30000);
+      const pageB = await ctxB.newPage();
+      await signIn(pageB, userB);
       await pageB.goto('/(app)/partner-sync');
       await firstVisible(pageB, 'Active Sessions', 45000);
       await tapUntil(
