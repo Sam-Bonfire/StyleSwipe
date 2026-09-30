@@ -145,6 +145,8 @@ async function tapUntil(
     }
     await page.waitForTimeout(1500);
   }
+  const body = await page.locator('body').innerText().catch(() => '<no body>');
+  console.log(`tap-until gave up at ${page.url()}: ${body.slice(0, 600)}`);
   throw new Error('tap-until condition never met');
 }
 
