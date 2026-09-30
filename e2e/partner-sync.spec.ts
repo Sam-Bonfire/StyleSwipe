@@ -233,13 +233,14 @@ test.describe('Partner sync handshake', () => {
       const inviteCode = ((await codeEl.textContent()) ?? '').trim();
       expect(inviteCode).toMatch(/^[A-Z0-9]{6}$/);
 
-      // B accepts on the web flow.
+      // B accepts on the web flow. Accept navigates away from /sync/...
+      // (expo web strips route-group segments, so match leaving sync).
       await pageB.goto(`/sync/${inviteCode}`);
       await firstVisible(pageB, 'Style Sync Invite');
       await tapUntil(
         pageB,
         pageB.locator('button:has-text("Accept Invite")'),
-        async () => pageB.url().includes('(app)/(tabs)'),
+        async () => !pageB.url().includes('/sync/'),
       );
       await pageB.goto('/(app)/(tabs)/discover');
       await firstVisible(pageB, `Partner Syncing with ${userA.name.split(' ')[0]}`, 30000);
