@@ -99,6 +99,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       {/* Loading overlay — shown on top of the navigator while auth state is resolving */}
       {user === undefined && (
         <YStack
+          testID="app-loading-overlay"
           position="absolute"
           top={0}
           left={0}

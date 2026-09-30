@@ -120,8 +120,20 @@ export function SearchFilterOverlay({
 
   return (
     <Modal open={isOpen} onClose={onClose} title="Filters" showCloseButton closeOnBackdrop>
-      {/* Bounded height: an unbounded ScrollView collapses to zero inside the modal body on web */}
-      <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: windowHeight * 0.55 }}>
+      {/* Definite, non-flexing height: inside ui-kit's auto-height Modal body
+          the ScrollView's flex basis resolves to zero on web (verified live:
+          inline height alone still computes to 0px), clipping the whole
+          filter list away. Sized to leave room for the Modal header + sticky
+          footer inside the frame's 90% cap, so Apply stays on screen.
+          Floor guards SSR zero. */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{
+          height: Math.max(240, windowHeight * 0.9 - 260),
+          flexGrow: 0,
+          flexShrink: 0,
+        }}
+      >
         <YStack gap="$4" paddingVertical="$2">
           {/* Gender */}
           <YStack gap="$2">

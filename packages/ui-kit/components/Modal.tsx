@@ -84,7 +84,9 @@ const CloseButton = styled(YStack, {
 const ModalBody = styled(YStack, {
   name: 'ModalBody',
   padding: '$3',
-  flex: 1,
+  // NOTE: no flex:1 here — the frame is auto-height, so a flex-basis-0 body
+  // swallows definite descendant heights on web (filter overlay's ScrollView
+  // collapsed to 0px). Plain block layout propagates content heights upward.
 });
 
 const ModalFooter = styled(XStack, {

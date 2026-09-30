@@ -27,7 +27,15 @@ async function priceHitCount(page: Page): Promise<number> {
  * Content inside a fixed subtree only counts when its own box intersects the
  * viewport; normal-flow content (the page can scroll to reveal it) counts
  * with any non-zero box. Any opacity:0 ancestor (Tamagui Sheet's closed
- * frame) hides the whole subtree regardless of layout boxes.
+ * frame) hides the whole subtree regardless of layout boxes. Clipping
+ * ancestors (overflow hidden, or a scroll container too small to swipe)
+ * hide content outside their box — Playwright's isVisible does not see
+ * overflow clipping, so clipped-away modal content would otherwise count
+ * as visible — UNLESS the content scrolls with the page and an inner
+ * usable scroll container can reveal it (e.g. below-fold results inside
+ * the page scroller, still under expo-router's overflow-hidden screen
+ * wrapper). Fixed subtrees never scroll with the page, so closed sheets
+ * stay hidden.
  */
 async function isTrulyVisible(target: Locator): Promise<boolean> {
   try {
@@ -37,10 +45,54 @@ async function isTrulyVisible(target: Locator): Promise<boolean> {
       if (r.width === 0 || r.height === 0) return false;
       let p: Element | null = el;
       let inFixed = false;
+      let movesWithPage = true;
+      let canScroll = false;
       while (p && p !== document.body) {
         const cs = getComputedStyle(p);
         if (cs.opacity === '0') return false;
-        if (cs.position === 'fixed') inFixed = true;
+        if (cs.position === 'fixed') {
+          inFixed = true;
+          movesWithPage = false;
+        }
+        const pr = (p as HTMLElement).getBoundingClientRect();
+        const axes: Array<{
+          overflow: string;
+          start: number;
+          end: number;
+          pStart: number;
+          pEnd: number;
+          scrollable: boolean;
+        }> = [
+          {
+            overflow: cs.overflowY,
+            start: r.top,
+            end: r.bottom,
+            pStart: pr.top,
+            pEnd: pr.bottom,
+            scrollable:
+              (p as HTMLElement).scrollHeight > (p as HTMLElement).clientHeight + 1 &&
+              (p as HTMLElement).clientHeight >= 24,
+          },
+          {
+            overflow: cs.overflowX,
+            start: r.left,
+            end: r.right,
+            pStart: pr.left,
+            pEnd: pr.right,
+            scrollable:
+              (p as HTMLElement).scrollWidth > (p as HTMLElement).clientWidth + 1 &&
+              (p as HTMLElement).clientWidth >= 24,
+          },
+        ];
+        for (const a of axes) {
+          if (a.overflow === 'visible' || a.scrollable) continue;
+          if (a.end <= a.pStart || a.start >= a.pEnd) {
+            if (!(movesWithPage && canScroll)) return false;
+          }
+        }
+        const elm = p as HTMLElement;
+        if (elm.scrollHeight > elm.clientHeight + 1 && elm.clientHeight >= 24) canScroll = true;
+        if (elm.scrollWidth > elm.clientWidth + 1 && elm.clientWidth >= 24) canScroll = true;
         p = p.parentElement;
       }
       if (!inFixed) return true;
@@ -138,7 +190,9 @@ async function getSeedProductId(page: Page): Promise<string | null> {
  * Resolves to the first truly-visible match; pass an unpinned locator
  * (no .first()/.nth() — pinning selects expo-router's hidden twin).
  * Scrolls the target into view first (touchscreen taps never auto-scroll,
- * so below-fold and carousel targets would otherwise miss).
+ * so below-fold and carousel targets would otherwise miss). Waits out the
+ * auth loading overlay first: right after page load it covers the screen
+ * and silently swallows taps aimed underneath it.
  */
 /**
  * Dismiss an open Tamagui Sheet (filter drawer, size guide) by tapping the
@@ -150,8 +204,10 @@ async function dismissSheet(page: Page): Promise<void> {
   await page.waitForTimeout(1000);
 }
 
-async function tap(page: Page, locator: Locator): Promise<void> {
-  const target = await resolveVisible(locator);
+async function tap(page: Page, locator: Locator, timeout = 15000): Promise<void> {
+  // Absent locators count as hidden, so this is a no-op once auth resolves.
+  await expect(page.getByTestId('app-loading-overlay')).toBeHidden({ timeout: 10000 }).catch(() => {});
+  const target = await resolveVisible(locator, timeout);
   await target.scrollIntoViewIfNeeded().catch(() => {});
   const box = await target.boundingBox();
   if (!box) throw new Error('tap target has no bounding box');
@@ -235,6 +291,7 @@ test.describe('Consumer Pages', () => {
     });
 
     test('profile shows the guest upsell with working links', async ({ page }) => {
+      test.setTimeout(60000);
       await page.goto('/(app)/(tabs)/profile');
       await firstVisible(page, 'Sign in to personalize');
       await tap(page, page.locator('button:has-text("My Wishlist")'));
@@ -270,10 +327,12 @@ test.describe('Consumer Pages', () => {
     });
 
     test('filter overlay opens, applies, and deck keeps rendering', async ({ page }) => {
+      test.setTimeout(90000);
       await page.waitForTimeout(3000);
       await tap(page, page.getByTestId('discover-filter-button'));
-      // Overlay opens (footer action) or at worst nothing breaks.
+      // Overlay opens with its body content, not just the chrome.
       await firstVisible(page, 'Apply Filters');
+      await firstVisible(page, 'Price Range');
       await expectNoCrash(page);
       await page.keyboard.press('Escape');
       await page.waitForTimeout(500);
@@ -281,6 +340,7 @@ test.describe('Consumer Pages', () => {
     });
 
     test('tapping a card opens its PDP', async ({ page }) => {
+      test.setTimeout(60000);
       await page.waitForTimeout(3000);
       if ((await priceHitCount(page)) === 0) {
         test.skip(true, 'No seeded products in this preview');
@@ -359,8 +419,9 @@ test.describe('Consumer Pages', () => {
       await expect(page.getByPlaceholder('Search for items...')).toBeVisible({ timeout: 15000 });
       // Icon-only button beside the search box (single visible instance).
       await tap(page, page.locator('button:has(svg)'));
-      // Drawer opens (footer action visible, centered in viewport).
+      // Drawer opens with its body content, not just the chrome.
       await firstVisible(page, 'Apply Filters');
+      await firstVisible(page, 'Price Range');
       await expectNoCrash(page);
       // Tamagui Sheet ignores Escape on web — dismiss via the overlay above it.
       await dismissSheet(page);
@@ -446,27 +507,13 @@ test.describe('Consumer Pages', () => {
       await firstVisible(page, 'Similar to this');
       const before = page.url();
       // Scoped to the carousel (the sticky footer also renders ₹ prices).
-      // Carousel tiles scroll horizontally — tap the first tile that is
-      // actually on screen (touchscreen taps never auto-scroll).
-      await page.getByText('Similar to this').scrollIntoViewIfNeeded().catch(() => {});
       const tiles = page.getByTestId('similar-product-tile');
-      const total = await tiles.count();
-      const vp = page.viewportSize();
-      let tapped = false;
-      for (let i = 0; i < total; i++) {
-        const tile = tiles.nth(i);
-        if (!(await isTrulyVisible(tile))) continue;
-        await tile.scrollIntoViewIfNeeded().catch(() => {});
-        const box = await tile.boundingBox().catch(() => null);
-        if (!box || !vp || box.x + box.width <= 0 || box.x >= vp.width) continue;
-        await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
-        tapped = true;
-        break;
-      }
-      if (!tapped) {
+      if ((await tiles.count()) === 0) {
         test.skip(true, 'No similar products rendered');
         return;
       }
+      await page.getByText('Similar to this').scrollIntoViewIfNeeded().catch(() => {});
+      await tap(page, tiles);
       await page.waitForTimeout(3000);
       expect(page.url()).toMatch(/\/product\//);
       expect(page.url()).not.toBe(before);
@@ -597,6 +644,7 @@ test.describe('Consumer Pages', () => {
     }
 
     test('invalid board recovers through the error fallback', async ({ page }) => {
+      test.setTimeout(60000);
       await page.goto('/board/does-not-exist');
       const crashed = await seesAny(page, ['We encountered an unexpected error'], 20000);
       if (!crashed) {
