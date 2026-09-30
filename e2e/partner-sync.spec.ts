@@ -220,14 +220,15 @@ test.describe('Partner sync handshake', () => {
       await expectNoCrash(pageA);
 
       // Blend persists: B dials to partner-led, reloads, still partner-led.
-      // Box is re-read every attempt: feed rendering shifts layout, so a
-      // single measured box goes stale and taps miss.
+      // The slider element is re-resolved every attempt: feed rendering
+      // shifts layout (stale boxes miss) and expo-router's hidden twin
+      // collides with pinned .first() lookups.
       await pageB.goto('/(app)/(tabs)/discover');
-      await resolveVisible(pageB.getByTestId('blend-slider'), 20000);
       let blended = false;
       const blendStart = Date.now();
       while (!blended && Date.now() - blendStart < 90000) {
-        const box = await pageB.getByTestId('blend-slider').first().boundingBox().catch(() => null);
+        const el = await resolveVisible(pageB.getByTestId('blend-slider'), 10000).catch(() => null);
+        const box = el ? await el.boundingBox().catch(() => null) : null;
         if (box) {
           for (const frac of [0.39, 0.5]) {
             await pageB.touchscreen.tap(box.x + box.width * 0.8, box.y + box.height * frac);
@@ -247,9 +248,21 @@ test.describe('Partner sync handshake', () => {
       await firstVisible(pageB, /leading the way|Mostly .* style/, 30000);
 
       // B stops: A is back to solo with the ended notice, B is solo too.
+      // Tap-until-gone: single taps can land mid re-render and silently
+      // miss, leaving the session alive (stop is idempotent, so retrying
+      // is safe).
       await pageB.goto('/(app)/partner-sync');
       await firstVisible(pageB, 'Active Sessions', 45000);
-      await tap(pageB, pageB.locator('button:has-text("Stop Sharing")'));
+      const stopStart = Date.now();
+      let stopped = false;
+      while (!stopped && Date.now() - stopStart < 45000) {
+        await tap(pageB, pageB.locator('button:has-text("Stop Sharing")')).catch(() => {});
+        await pageB.waitForTimeout(2500);
+        stopped = await resolveVisible(pageB.getByText('Active Sessions'), 1000)
+          .then(() => false)
+          .catch(() => true);
+      }
+      expect(stopped).toBe(true);
       await pageA.goto('/(app)/(tabs)/discover');
       await firstVisible(pageA, 'Back to your own feed', 30000);
       await expectNoCrash(pageA);
