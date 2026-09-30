@@ -188,6 +188,9 @@ test.describe('Partner sync handshake', () => {
       // A invites: pending invite appears with a reusable code.
       await pageA.goto('/(app)/partner-sync');
       await firstVisible(pageA, 'Collaborative Shopping');
+      // Invite buttons stay disabled until auth resolves (taps while
+      // loading would silently no-op).
+      await expect(pageA.locator('button:has-text("Share Link")')).toBeEnabled({ timeout: 20000 });
       await tap(pageA, pageA.locator('button:has-text("Share Link")'));
       await firstVisible(pageA, 'Waiting for Partner');
       const codeEl = await resolveVisible(pageA.locator('text=/^[A-Z0-9]{6}$/'), 20000);
@@ -210,7 +213,9 @@ test.describe('Partner sync handshake', () => {
       await firstVisible(pageA, 'Our Shared Board');
       await tap(pageA, pageA.locator('button:has-text("View")'));
       await firstVisible(pageA, 'Shared Sync Board');
-      await firstVisible(pageA, 'No items yet');
+      // NOTE: /(app)/board/[id] renders StyleBoardScreen (not BoardDetailScreen),
+      // whose empty state reads "This board is empty".
+      await firstVisible(pageA, 'This board is empty');
       await expectNoCrash(pageA);
 
       // Blend persists: B dials to partner-led, reloads, still partner-led.
