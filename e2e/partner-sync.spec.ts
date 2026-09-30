@@ -108,7 +108,10 @@ async function firstVisible(page: Page, text: string | RegExp, timeout = 20000):
 async function tap(page: Page, locator: Locator, timeout = 15000): Promise<void> {
   await expect(page.getByTestId('app-loading-overlay')).toBeHidden({ timeout: 10000 }).catch(() => {});
   const target = await resolveVisible(locator, timeout);
-  await target.scrollIntoViewIfNeeded().catch(() => {});
+  // Center, don't just reveal: scrollIntoViewIfNeeded stops when a single
+  // pixel peeks into view, leaving the target's center under the fixed tab
+  // bar — the tap then hits the tab and navigates away instead.
+  await target.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' })).catch(() => {});
   const box = await target.boundingBox();
   if (!box) throw new Error('tap target has no bounding box');
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
