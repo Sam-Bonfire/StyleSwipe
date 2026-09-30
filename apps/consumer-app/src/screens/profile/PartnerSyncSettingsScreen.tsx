@@ -93,6 +93,8 @@ export function PartnerSyncSettingsScreen() {
   const [selectedDuration, setSelectedDuration] = useState<Duration>('1h');
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [currentUrl, setCurrentUrl] = useState('');
+  // Inline error: RN Alert is a no-op on web, so failures need visible text.
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   const buildInviteUrl = (inviteCode: string): string => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -117,11 +119,14 @@ export function PartnerSyncSettingsScreen() {
     if (duration === '24h') durationMs = 24 * 60 * 60 * 1000;
 
     try {
+      setInviteError(null);
       const { inviteCode } = await createSync(user._id, durationMs);
       return inviteCode;
     } catch (e) {
       console.error(e);
-      Alert.alert('Error', e instanceof Error ? e.message : 'Failed to generate sync link.');
+      const message = e instanceof Error ? e.message : 'Failed to generate sync link.';
+      setInviteError(message);
+      Alert.alert('Error', message);
       return null;
     }
   };
@@ -397,12 +402,17 @@ export function PartnerSyncSettingsScreen() {
 
               <Text fontFamily="$body" fontWeight="bold" fontSize="$4" marginBottom="$3">2. Invite Partner</Text>
               <YStack gap="$3">
-                <Button variant="primary" icon={<Link2 size={18} />} onPress={() => handleShareLink(selectedDuration)}>
+                <Button variant="primary" icon={<Link2 size={18} />} disabled={!user} onPress={() => handleShareLink(selectedDuration)}>
                   Share Link
                 </Button>
-                <Button variant="outlined" icon={<QrCode size={18} />} onPress={() => handleShowQR(selectedDuration)}>
+                <Button variant="outlined" icon={<QrCode size={18} />} disabled={!user} onPress={() => handleShowQR(selectedDuration)}>
                   Show QR Code
                 </Button>
+                {inviteError && (
+                  <Text fontFamily="$body" color="$error" fontSize="$3" textAlign="center">
+                    {inviteError}
+                  </Text>
+                )}
               </YStack>
             </YStack>
 
