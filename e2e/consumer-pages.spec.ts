@@ -208,7 +208,10 @@ async function tap(page: Page, locator: Locator, timeout = 15000): Promise<void>
   // Absent locators count as hidden, so this is a no-op once auth resolves.
   await expect(page.getByTestId('app-loading-overlay')).toBeHidden({ timeout: 10000 }).catch(() => {});
   const target = await resolveVisible(locator, timeout);
-  await target.scrollIntoViewIfNeeded().catch(() => {});
+  // Center, don't just reveal: scrollIntoViewIfNeeded stops when a single
+  // pixel peeks into view, leaving the target's center under the fixed tab
+  // bar — the tap then hits the tab and navigates away instead.
+  await target.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' })).catch(() => {});
   const box = await target.boundingBox();
   if (!box) throw new Error('tap target has no bounding box');
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
@@ -696,10 +699,9 @@ test.describe('Consumer Pages', () => {
   });
 
   test.describe('Sync invite', () => {
-    test('web shows the app-download invite for any code', async ({ page }) => {
+    test('unknown codes land on the invalid-link state', async ({ page }) => {
       await page.goto('/sync/does-not-exist');
-      await firstVisible(page, 'StyleSwipe Partner Sync');
-      await firstVisible(page, 'Download App');
+      await firstVisible(page, 'Invalid Link');
       await expectNoCrash(page);
     });
   });

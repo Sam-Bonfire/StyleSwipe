@@ -172,7 +172,22 @@ export const accept = mutation({
     if (live.length > 0) {
       throw new Error('Stop your current sync session before joining a new one.');
     }
-    await ctx.db.patch(args.id, { partnerId: args.partnerId, status: 'active' });
+    // Mint the couple's shared board (owner = initiator; reads/writes are
+    // not owner-gated, and the detail screen hides edit/delete from guests).
+    const timestamp = Date.now();
+    const sharedBoardId = await ctx.db.insert('boards', {
+      userId: doc.initiatorId,
+      name: 'Shared Sync Board',
+      slug: `sync-${doc.inviteCode.toLowerCase()}`,
+      isSystem: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+    await ctx.db.patch(args.id, {
+      partnerId: args.partnerId,
+      status: 'active',
+      sharedBoardId,
+    });
   },
 });
 

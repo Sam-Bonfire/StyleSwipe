@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { type Vector384, FilterState, discountPercentage, applyProductFilters, sortProducts, type SortOption } from '@app/core';
-import { useVectorFeed, useProcessSwipe, useAnalytics } from '@app/infrastructure';
+import { useVectorFeed, useProcessSwipe, useAnalytics, useAddBoardItem } from '@app/infrastructure';
 import { Button } from '@app/ui-kit/components/Button';
 import { FashionCard } from '@app/ui-kit/components/FashionCard';
 import { Modal } from '@app/ui-kit/components/Modal';
@@ -32,13 +32,17 @@ export interface SwipeDeckProps {
   sort?: SortOption;
   partnerId?: string;
   influenceRatio?: number;
+  sharedBoardId?: string;
 }
 
 const FEED_PAGE_SIZE = 30;
 const REFILL_THRESHOLD = 5;
 
-export function SwipeDeck({ filterState, sort, partnerId, influenceRatio }: SwipeDeckProps) {
+export function SwipeDeck({ filterState, sort, partnerId, influenceRatio, sharedBoardId }: SwipeDeckProps) {
   const [products, setProducts] = useState<SwipeDeckProduct[] | null>(null);
+  const [savedToShared, setSavedToShared] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const addBoardItem = useAddBoardItem();
   // Cards swiped in the current feed (the stack advances its own index;
   // this mirrors it so we know when to refill).
   const [swipedCount, setSwipedCount] = useState(0);
@@ -163,6 +167,8 @@ export function SwipeDeck({ filterState, sort, partnerId, influenceRatio }: Swip
       console.log(`Synced ${action} for ${item.title} to Convex. Mutual match: ${result.isMutualMatch}`);
 
       if (result.isMutualMatch) {
+        setSavedToShared(false);
+        setSaveError(null);
         setMatchedProduct(item);
       }
 
@@ -252,12 +258,27 @@ export function SwipeDeck({ filterState, sort, partnerId, influenceRatio }: Swip
               }}>
                 View Product Details
               </Button>
-              <Button variant="secondary" onPress={() => {
-                // TODO: Save to shared board action
-                setMatchedProduct(null);
-              }}>
-                Save to Shared Board
-              </Button>
+              {sharedBoardId && !savedToShared && (
+                <Button variant="secondary" onPress={async () => {
+                  setSaveError(null);
+                  try {
+                    await addBoardItem(sharedBoardId, matchedProduct._id);
+                    setSavedToShared(true);
+                  } catch (e) {
+                    setSaveError(e instanceof Error ? e.message : 'Could not save.');
+                  }
+                }}>
+                  Save to Shared Board
+                </Button>
+              )}
+              {savedToShared && (
+                <Button variant="secondary" disabled>
+                  Saved to Shared Board ✓
+                </Button>
+              )}
+              {saveError && (
+                <Text fontFamily="$body" color="$error" textAlign="center">{saveError}</Text>
+              )}
               <Button variant="ghost" onPress={() => setMatchedProduct(null)}>
                 Keep Swiping
               </Button>

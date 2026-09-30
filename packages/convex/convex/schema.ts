@@ -260,6 +260,7 @@ const partner_sync = defineTable({
   status: v.union(v.literal('pending'), v.literal('active'), v.literal('expired')),
   expiresAt: v.number(), // Unix timestamp
   influenceRatio: v.number(), // 0.0 to 1.0 - How much partner preferences affect results
+  sharedBoardId: v.optional(v.id('boards')), // Couple board created on accept
   createdAt: v.number(),
 })
   .index('by_inviteCode', ['inviteCode'])

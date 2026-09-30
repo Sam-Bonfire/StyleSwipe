@@ -1,4 +1,4 @@
-import { useCurrentUser, useCreatePartnerSync, useActivePartnerSync, useStopPartnerSync, usePendingInvites, useNotifySyncEnded } from '@app/infrastructure';
+import { useCurrentUser, useCreatePartnerSync, useActivePartnerSync, useStopPartnerSync, usePendingInvites, useNotifySyncEnded, useBoard } from '@app/infrastructure';
 import { Button } from '@app/ui-kit';
 import { Users, Clock, Link2, QrCode, Sparkles, HeartHandshake, ChevronLeft } from '@tamagui/lucide-icons';
 import * as Clipboard from 'expo-clipboard';
@@ -205,6 +205,10 @@ export function PartnerSyncSettingsScreen() {
 
   const hasActiveSyncs = Array.isArray(activeSyncs) && activeSyncs.length > 0;
   const waitingInvites = Array.isArray(pendingInvites) ? pendingInvites : [];
+  const sharedBoardId = hasActiveSyncs
+    ? ((activeSyncs[0] as Record<string, unknown>).sharedBoardId as string | undefined)
+    : undefined;
+  const sharedBoard = useBoard(sharedBoardId, user?._id) as { items?: unknown[] } | null | undefined;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -287,6 +291,37 @@ export function PartnerSyncSettingsScreen() {
                    </YStack>
                  ))}
               </YStack>
+            )}
+
+            {sharedBoardId && (
+              <XStack
+                backgroundColor="$surface"
+                padding="$4"
+                borderRadius="$4"
+                borderWidth={1}
+                borderColor="$borderColor"
+                gap="$3"
+                alignItems="center"
+                marginBottom="$2"
+              >
+                <YStack flex={1} gap="$1">
+                  <Text fontFamily="$body" fontWeight="bold" fontSize="$4" color="$textPrimary">
+                    Our Shared Board
+                  </Text>
+                  <Text fontFamily="$body" fontSize="$3" color="$textSecondary">
+                    {sharedBoard === undefined
+                      ? 'Loading…'
+                      : `${sharedBoard?.items?.length ?? 0} saved picks from both of you`}
+                  </Text>
+                </YStack>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onPress={() => router.push({ pathname: '/(app)/board/[id]', params: { id: sharedBoardId } })}
+                >
+                  View
+                </Button>
+              </XStack>
             )}
 
             {waitingInvites.length > 0 && (
