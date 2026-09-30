@@ -7,8 +7,9 @@ import { test, expect, type Browser, type Page, type Locator } from '@playwright
 // stays untouched).
 //
 // NOTE: profile setup bypasses the visual-quiz onboarding by writing a stub
-// styleProfile through the authenticated Convex mutation endpoint (same
-// session cookies the app uses) — the handshake under test starts after.
+// styleProfile through the authenticated Convex mutation endpoint (JWT from
+// the app's own better-auth convex plugin) — the handshake under test
+// starts after.
 
 test.use({ hasTouch: true });
 
@@ -125,9 +126,29 @@ async function signUp(page: Page, name: string, email: string, password: string)
   await firstVisible(page, /Welcome|What.*style|Continue/i, 30000);
 }
 
-/** Stub a style profile through the authed Convex endpoint (same cookies). */
+/**
+ * Convex JWT for direct API calls, via the same better-auth convex plugin
+ * endpoint the app itself uses (the opaque session token is not a JWT).
+ */
+async function convexJwt(page: Page): Promise<string> {
+  const site = CONVEX_URL.replace('.convex.cloud', '.convex.site');
+  const token = await page.evaluate(async (siteUrl: string) => {
+    const r = await fetch(`${siteUrl}/api/auth/convex/token`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    const j = await r.json().catch(() => null);
+    return (j?.token as string) ?? null;
+  }, site);
+  if (!token) throw new Error('no convex jwt for E2E user');
+  return token;
+}
+
+/** Stub a style profile through the authenticated Convex mutation endpoint. */
 async function stubStyleProfile(page: Page) {
+  const jwt = await convexJwt(page);
   const res = await page.request.post(`${CONVEX_URL}/api/mutation`, {
+    headers: { Authorization: `Bearer ${jwt}` },
     data: {
       path: 'users:updateStyleProfile',
       args: {
