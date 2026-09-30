@@ -192,7 +192,7 @@ test.describe('Partner sync handshake', () => {
       // loading would silently no-op).
       await expect(pageA.locator('button:has-text("Share Link")')).toBeEnabled({ timeout: 20000 });
       await tap(pageA, pageA.locator('button:has-text("Share Link")'));
-      await firstVisible(pageA, 'Waiting for Partner');
+      await firstVisible(pageA, 'Waiting for Partner', 45000);
       const codeEl = await resolveVisible(pageA.locator('text=/^[A-Z0-9]{6}$/'), 20000);
       const inviteCode = ((await codeEl.textContent()) ?? '').trim();
       expect(inviteCode).toMatch(/^[A-Z0-9]{6}$/);
@@ -210,7 +210,8 @@ test.describe('Partner sync handshake', () => {
       await pageA.goto('/(app)/(tabs)/discover');
       await firstVisible(pageA, `Partner Syncing with ${userB.name.split(' ')[0]}`, 30000);
       await pageA.goto('/(app)/partner-sync');
-      await firstVisible(pageA, 'Our Shared Board');
+      // Cold preview databases answer session queries slowly on first hit.
+      await firstVisible(pageA, 'Our Shared Board', 45000);
       await tap(pageA, pageA.locator('button:has-text("View")'));
       await firstVisible(pageA, 'Shared Sync Board');
       // NOTE: /(app)/board/[id] renders StyleBoardScreen (not BoardDetailScreen),
@@ -219,24 +220,26 @@ test.describe('Partner sync handshake', () => {
       await expectNoCrash(pageA);
 
       // Blend persists: B dials to partner-led, reloads, still partner-led.
+      // Box is re-read every attempt: feed rendering shifts layout, so a
+      // single measured box goes stale and taps miss.
       await pageB.goto('/(app)/(tabs)/discover');
-      const slider = pageB.getByTestId('blend-slider');
-      await resolveVisible(slider, 20000);
-      const sbox = await slider.first().boundingBox();
-      if (!sbox) throw new Error('blend slider has no bounding box');
+      await resolveVisible(pageB.getByTestId('blend-slider'), 20000);
       let blended = false;
-      for (const frac of [0.39, 0.5]) {
-        await pageB.touchscreen.tap(sbox.x + sbox.width * 0.8, sbox.y + sbox.height * frac);
-        const start = Date.now();
-        while (Date.now() - start < 8000) {
-          const t = await pageB.locator('body').innerText().catch(() => '');
-          if (/leading the way|Mostly .* style/.test(t)) {
-            blended = true;
-            break;
+      const blendStart = Date.now();
+      while (!blended && Date.now() - blendStart < 90000) {
+        const box = await pageB.getByTestId('blend-slider').first().boundingBox().catch(() => null);
+        if (box) {
+          for (const frac of [0.39, 0.5]) {
+            await pageB.touchscreen.tap(box.x + box.width * 0.8, box.y + box.height * frac);
+            await pageB.waitForTimeout(1500);
+            const t = await pageB.locator('body').innerText().catch(() => '');
+            if (/leading the way|Mostly .* style/.test(t)) {
+              blended = true;
+              break;
+            }
           }
-          await pageB.waitForTimeout(500);
         }
-        if (blended) break;
+        if (!blended) await pageB.waitForTimeout(2000);
       }
       expect(blended).toBe(true);
       await pageB.waitForTimeout(2500); // debounce persist window
@@ -245,7 +248,7 @@ test.describe('Partner sync handshake', () => {
 
       // B stops: A is back to solo with the ended notice, B is solo too.
       await pageB.goto('/(app)/partner-sync');
-      await firstVisible(pageB, 'Active Sessions');
+      await firstVisible(pageB, 'Active Sessions', 45000);
       await tap(pageB, pageB.locator('button:has-text("Stop Sharing")'));
       await pageA.goto('/(app)/(tabs)/discover');
       await firstVisible(pageA, 'Back to your own feed', 30000);
