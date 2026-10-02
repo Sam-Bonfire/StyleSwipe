@@ -14,7 +14,7 @@ export default defineConfig({
   projects: [
     {
       name: 'consumer-app',
-      testMatch: /(smoke\.test|consumer-flows\.spec|consumer-pages\.spec|partner-sync\.spec)\.ts/,
+      testMatch: /(smoke\.test|consumer-flows\.spec|consumer-pages\.spec|partner-sync\.spec|security-.*\.spec)\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
     {
