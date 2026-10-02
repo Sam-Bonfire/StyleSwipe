@@ -22,58 +22,22 @@ async function expectNoCrash(page: Page) {
 async function isTrulyVisible(target: Locator): Promise<boolean> {
   try {
     if (!(await target.isVisible())) return false;
+    // Deliberately minimal on top of isVisible: only an opacity:0
+    // ancestor (Tamagui Sheet's closed frame) hides content that still
+    // has layout boxes. Earlier revisions also excluded fixed-subtree and
+    // overflow-clipped content, but every such rule produced false
+    // negatives on real content while opacity alone already excludes
+    // every proven impostor (closed sheets and the drawer chips inside
+    // them); expo-router twins are zero-size and caught by isVisible.
     const ok = await target.evaluate((el) => {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return false;
       let p: Element | null = el;
-      let inFixed = false;
-      let movesWithPage = true;
-      let canScroll = false;
       while (p && p !== document.body) {
-        const cs = getComputedStyle(p);
-        if (cs.opacity === '0') return false;
-        if (cs.position === 'fixed') {
-          inFixed = true;
-          movesWithPage = false;
-        }
-        const pr = (p as HTMLElement).getBoundingClientRect();
-        const axes = [
-          {
-            overflow: cs.overflowY,
-            start: r.top,
-            end: r.bottom,
-            pStart: pr.top,
-            pEnd: pr.bottom,
-            scrollable:
-              (p as HTMLElement).scrollHeight > (p as HTMLElement).clientHeight + 1 &&
-              (p as HTMLElement).clientHeight >= 24,
-          },
-          {
-            overflow: cs.overflowX,
-            start: r.left,
-            end: r.right,
-            pStart: pr.left,
-            pEnd: pr.right,
-            scrollable:
-              (p as HTMLElement).scrollWidth > (p as HTMLElement).clientWidth + 1 &&
-              (p as HTMLElement).clientWidth >= 24,
-          },
-        ];
-        for (const a of axes) {
-          if (a.overflow === 'visible' || a.scrollable) continue;
-          if (a.end <= a.pStart || a.start >= a.pEnd) {
-            if (!(movesWithPage && canScroll)) return false;
-          }
-        }
-        const elm = p as HTMLElement;
-        if (elm.scrollHeight > elm.clientHeight + 1 && elm.clientHeight >= 24) canScroll = true;
-        if (elm.scrollWidth > elm.clientWidth + 1 && elm.clientWidth >= 24) canScroll = true;
+        if (getComputedStyle(p).opacity === '0') return false;
         p = p.parentElement;
       }
-      if (!inFixed) return true;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      return r.left < vw && r.left + r.width > 0 && r.top < vh && r.top + r.height > 0;
+      return true;
     });
     return ok === true;
   } catch {

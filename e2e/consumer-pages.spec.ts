@@ -20,85 +20,30 @@ async function priceHitCount(page: Page): Promise<number> {
 /**
  * True visibility for the mobile web build. Playwright's isVisible() alone
  * is not enough here:
- * - closed Tamagui Sheets stay mounted in fixed containers translated below
- *   the viewport (real layout boxes, so isVisible() passes), and
+ * - closed Tamagui Sheets stay mounted with real layout boxes below the
+ *   viewport (their frame carries opacity: 0), and
  * - expo-router keeps a hidden twin of route content with zero-size nodes
  *   (already excluded by isVisible, kept as a fast path).
- * Content inside a fixed subtree only counts when its own box intersects the
- * viewport; normal-flow content (the page can scroll to reveal it) counts
- * with any non-zero box. Any opacity:0 ancestor (Tamagui Sheet's closed
- * frame) hides the whole subtree regardless of layout boxes. Clipping
- * ancestors (overflow hidden, or a scroll container too small to swipe)
- * hide content outside their box — Playwright's isVisible does not see
- * overflow clipping, so clipped-away modal content would otherwise count
- * as visible — UNLESS the content scrolls with the page and an inner
- * usable scroll container can reveal it (e.g. below-fold results inside
- * the page scroller, still under expo-router's overflow-hidden screen
- * wrapper). Fixed subtrees never scroll with the page, so closed sheets
- * stay hidden.
+ * Deliberately nothing more: fixed-subtree and overflow-clipping rules
+ * were tried and every one produced false negatives on real content
+ * (below-fold results, footer prices), while the opacity rule alone
+ * already excludes every proven impostor.
  */
 async function isTrulyVisible(target: Locator): Promise<boolean> {
   try {
     if (!(await target.isVisible())) return false;
+    // Deliberately minimal on top of isVisible: only an opacity:0
+    // ancestor (Tamagui Sheet's closed frame) hides content that still
+    // has layout boxes.
     const ok = await target.evaluate((el) => {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return false;
       let p: Element | null = el;
-      let inFixed = false;
-      let movesWithPage = true;
-      let canScroll = false;
       while (p && p !== document.body) {
-        const cs = getComputedStyle(p);
-        if (cs.opacity === '0') return false;
-        if (cs.position === 'fixed') {
-          inFixed = true;
-          movesWithPage = false;
-        }
-        const pr = (p as HTMLElement).getBoundingClientRect();
-        const axes: Array<{
-          overflow: string;
-          start: number;
-          end: number;
-          pStart: number;
-          pEnd: number;
-          scrollable: boolean;
-        }> = [
-          {
-            overflow: cs.overflowY,
-            start: r.top,
-            end: r.bottom,
-            pStart: pr.top,
-            pEnd: pr.bottom,
-            scrollable:
-              (p as HTMLElement).scrollHeight > (p as HTMLElement).clientHeight + 1 &&
-              (p as HTMLElement).clientHeight >= 24,
-          },
-          {
-            overflow: cs.overflowX,
-            start: r.left,
-            end: r.right,
-            pStart: pr.left,
-            pEnd: pr.right,
-            scrollable:
-              (p as HTMLElement).scrollWidth > (p as HTMLElement).clientWidth + 1 &&
-              (p as HTMLElement).clientWidth >= 24,
-          },
-        ];
-        for (const a of axes) {
-          if (a.overflow === 'visible' || a.scrollable) continue;
-          if (a.end <= a.pStart || a.start >= a.pEnd) {
-            if (!(movesWithPage && canScroll)) return false;
-          }
-        }
-        const elm = p as HTMLElement;
-        if (elm.scrollHeight > elm.clientHeight + 1 && elm.clientHeight >= 24) canScroll = true;
-        if (elm.scrollWidth > elm.clientWidth + 1 && elm.clientWidth >= 24) canScroll = true;
+        if (getComputedStyle(p).opacity === '0') return false;
         p = p.parentElement;
       }
-      if (!inFixed) return true;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      return r.left < vw && r.left + r.width > 0 && r.top < vh && r.top + r.height > 0;
+      return true;
     });
     return ok === true;
   } catch {

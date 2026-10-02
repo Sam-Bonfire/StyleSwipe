@@ -50,6 +50,14 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
+  // Last authenticated user id. A resolved null right after a real session
+  // is usually a transient backend hiccup (cold query timeout), not a
+  // logout — redirecting on it strands users mid-flow (and E2E proved it:
+  // verified navigations landing on unrelated tabs seconds later).
+  const lastUserId = React.useRef<string | null>(null);
+  const userRef = React.useRef(user);
+  userRef.current = user;
+
   React.useEffect(() => {
     // Still loading — do nothing
     if (user === undefined) return;
@@ -70,7 +78,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       );
     };
 
-    if (!user) {
+    const applyLoggedOutRoutes = () => {
       if (inOnboarding) {
         router.replace('/(app)/(tabs)');
         return;
@@ -79,9 +87,24 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         router.replace('/(auth)');
       }
       // otherwise allow guest browsing (home, discover, search, product)
+    };
+
+    if (!user) {
+      if (lastUserId.current) {
+        // Was authenticated: confirm the logout instead of bouncing on a
+        // hiccup. Fresh guests (never authed) redirect immediately below.
+        const t = setTimeout(() => {
+          if (userRef.current !== null) return;
+          lastUserId.current = null;
+          applyLoggedOutRoutes();
+        }, 10000);
+        return () => clearTimeout(t);
+      }
+      applyLoggedOutRoutes();
       return;
     }
 
+    lastUserId.current = user._id;
     if (!user.styleProfile) {
       if (!inOnboarding) {
         router.replace('/onboarding');
