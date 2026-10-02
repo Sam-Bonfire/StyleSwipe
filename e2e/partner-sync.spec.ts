@@ -268,8 +268,9 @@ test.describe.serial('Partner sync handshake', () => {
       await stubStyleProfile(pageA);
 
       // A invites: pending invite appears with a reusable code.
+      // Cold edges serve route chunks slowly on first visit — allow it.
       await pageA.goto('/(app)/partner-sync');
-      await firstVisible(pageA, 'Collaborative Shopping');
+      await firstVisible(pageA, 'Collaborative Shopping', 45000);
       // Invite buttons stay disabled until auth resolves (taps while
       // loading would silently no-op).
       await expect(pageA.locator('button:has-text("Share Link")')).toBeEnabled({ timeout: 20000 });
@@ -301,8 +302,9 @@ test.describe.serial('Partner sync handshake', () => {
 
       // B accepts on the web flow. Accept navigates away from /sync/...
       // (expo web strips route-group segments, so match leaving sync).
+      // Cold edges serve route chunks slowly on first visit — allow it.
       await pageB.goto(`/sync/${inviteCode}`);
-      await firstVisible(pageB, 'Style Sync Invite');
+      await firstVisible(pageB, 'Style Sync Invite', 45000);
       await tapUntil(
         pageB,
         pageB.locator('button:has-text("Accept Invite")'),
