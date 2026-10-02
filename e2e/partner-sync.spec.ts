@@ -229,6 +229,26 @@ async function signIn(page: Page, user: SyncUser) {
 // step is small enough that CI retries re-run one step, not the whole
 // 5-minute handshake.
 test.describe.serial('Partner sync handshake', () => {
+  test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    // Warm shared infra once: cold preview deployments serve chunks slowly
+    // and cold-start every Convex function, which starves the per-step
+    // timeouts below. One load + one backend ping warms CDN edge, function
+    // isolates, and vector indexes for the whole file. Best effort only.
+    const ctx = await browser.newContext();
+    try {
+      const page = await ctx.newPage();
+      await page.goto('/(app)/(tabs)/discover');
+      await firstVisible(page, 'Discovery', 90000).catch(() => {});
+      await page
+        .request.post(`${CONVEX_URL}/api/query`, {
+          data: { path: 'products:getLatest', args: { limit: 1 }, format: 'json' },
+        })
+        .catch(() => {});
+    } finally {
+      await ctx.close().catch(() => {});
+    }
+  });
+
   test('A signs up and creates a reusable invite', async ({ browser }: { browser: Browser }) => {
     test.setTimeout(180000);
     const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
