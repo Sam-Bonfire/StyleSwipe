@@ -134,6 +134,28 @@ async function seesText(page: Page, text: string | RegExp): Promise<boolean> {
  * fire-and-forget taps flake. Retrying is safe: share reuses the pending
  * invite, accept/stop are idempotent.
  */
+/**
+ * Navigate and prove the route committed. Playwright's goto resolves on
+ * document load, but on cold edges the SPA can stay on the previous route
+ * (stale chunk/fallback shell) while reporting success — every downstream
+ * assert then fails on the wrong page. Expo web strips route groups, so
+ * /(app)/partner-sync lands at /partner-sync.
+ */
+async function gotoRoute(page: Page, path: string, timeout = 60000): Promise<void> {
+  const clean = path.replace(/\/\([^)]*\)/g, '') || '/';
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    await page.goto(path).catch(() => {});
+    try {
+      await page.waitForURL(`**${clean}**`, { timeout: 8000 });
+      return;
+    } catch {
+      /* not committed yet — reload the route */
+    }
+  }
+  throw new Error(`never landed on ${path}, stuck at ${page.url()}`);
+}
+
 async function tapUntil(
   page: Page,
   locator: Locator,
@@ -157,7 +179,7 @@ async function tapUntil(
 
 /** Sign up via the email form (placeholders double as selectors). */
 async function signUp(page: Page, name: string, email: string, password: string) {
-  await page.goto('/(auth)/email');
+  await gotoRoute(page, '/(auth)/email');
   await tap(page, page.locator('button:has-text("Don\'t have an account?")'));
   await page.getByPlaceholder('Full Name').fill(name);
   await page.getByPlaceholder('Email Address').fill(email);
@@ -209,6 +231,7 @@ async function stubStyleProfile(page: Page) {
   // Full reload, not SPA navigation: the app's Convex client serves the
   // pre-mutation cached user otherwise, and AuthGuard redirects to
   // onboarding on the stale profile-less object before the refetch lands.
+  await gotoRoute(page, '/(app)/(tabs)/discover');
   await page.reload();
   await firstVisible(page, 'Discovery', 45000);
 }
@@ -222,7 +245,7 @@ const runState: { userA?: SyncUser; userB?: SyncUser; inviteCode?: string } = {}
 
 /** Sign in an existing stubbed user (fast path, no signup/onboarding). */
 async function signIn(page: Page, user: SyncUser) {
-  await page.goto('/(auth)/email');
+  await gotoRoute(page, '/(auth)/email');
   await page.getByPlaceholder('Email Address').fill(user.email);
   await page.getByPlaceholder('Password').fill(user.password);
   await expect(page.locator('button:has-text("Sign In")')).toBeEnabled({ timeout: 20000 });
@@ -255,7 +278,7 @@ test.describe.serial('Partner sync handshake', () => {
   });
 
   test('A signs up and creates a reusable invite', async ({ browser }: { browser: Browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(240000);
     const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
     runState.userA = { name: 'Aarav E2E', email: `e2e-a-${stamp}@example.com`, password: 'E2eTest!123' };
     runState.userB = { name: 'Bella E2E', email: `e2e-b-${stamp}@example.com`, password: 'E2eTest!123' };
@@ -269,7 +292,7 @@ test.describe.serial('Partner sync handshake', () => {
 
       // A invites: pending invite appears with a reusable code.
       // Cold edges serve route chunks slowly on first visit — allow it.
-      await pageA.goto('/(app)/partner-sync');
+      await gotoRoute(pageA, '/(app)/partner-sync');
       await firstVisible(pageA, 'Collaborative Shopping', 45000);
       // Invite buttons stay disabled until auth resolves (taps while
       // loading would silently no-op).
@@ -289,7 +312,7 @@ test.describe.serial('Partner sync handshake', () => {
   });
 
   test('B accepts and feeds blend both ways', async ({ browser }: { browser: Browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(240000);
     const { userA, userB, inviteCode } = runState;
     if (!userA || !userB || !inviteCode) throw new Error('invite step did not run');
 
@@ -303,14 +326,14 @@ test.describe.serial('Partner sync handshake', () => {
       // B accepts on the web flow. Accept navigates away from /sync/...
       // (expo web strips route-group segments, so match leaving sync).
       // Cold edges serve route chunks slowly on first visit — allow it.
-      await pageB.goto(`/sync/${inviteCode}`);
+      await gotoRoute(pageB, `/sync/${inviteCode}`);
       await firstVisible(pageB, 'Style Sync Invite', 45000);
       await tapUntil(
         pageB,
         pageB.locator('button:has-text("Accept Invite")'),
         async () => !pageB.url().includes('/sync/'),
       );
-      await pageB.goto('/(app)/(tabs)/discover');
+      await gotoRoute(pageB, '/(app)/(tabs)/discover');
       await firstVisible(pageB, `Partner Syncing with ${userA.name.split(' ')[0]}`, 30000);
       await expectNoCrash(pageB);
 
@@ -326,7 +349,7 @@ test.describe.serial('Partner sync handshake', () => {
   });
 
   test('blend persists and shared board links out', async ({ browser }: { browser: Browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(240000);
     const { userA, userB } = runState;
     if (!userA || !userB) throw new Error('invite step did not run');
 
@@ -364,7 +387,7 @@ test.describe.serial('Partner sync handshake', () => {
       // Shared board card links out to the couple board.
       const pageA = await ctxA.newPage();
       await signIn(pageA, userA);
-      await pageA.goto('/(app)/partner-sync');
+      await gotoRoute(pageA, '/(app)/partner-sync');
       // Cold preview databases answer session queries slowly on first hit.
       await firstVisible(pageA, 'Our Shared Board', 45000);
       await tapUntil(pageA, pageA.locator('button:has-text("View")'), () =>
@@ -382,7 +405,7 @@ test.describe.serial('Partner sync handshake', () => {
   });
 
   test('stop restores solo with the ended notice', async ({ browser }: { browser: Browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(240000);
     const { userA, userB } = runState;
     if (!userA || !userB) throw new Error('invite step did not run');
 
@@ -397,7 +420,7 @@ test.describe.serial('Partner sync handshake', () => {
       await firstVisible(pageA, `Partner Syncing with ${userB.name.split(' ')[0]}`, 30000);
       const pageB = await ctxB.newPage();
       await signIn(pageB, userB);
-      await pageB.goto('/(app)/partner-sync');
+      await gotoRoute(pageB, '/(app)/partner-sync');
       await firstVisible(pageB, 'Active Sessions', 45000);
       await tapUntil(
         pageB,
@@ -406,7 +429,7 @@ test.describe.serial('Partner sync handshake', () => {
       );
       await firstVisible(pageA, 'Back to your own feed', 45000);
       await expectNoCrash(pageA);
-      await pageB.goto('/(app)/(tabs)/discover');
+      await gotoRoute(pageB, '/(app)/(tabs)/discover');
       await pageB.waitForTimeout(3000);
       await expectNoCrash(pageB);
     } finally {
@@ -415,3 +438,6 @@ test.describe.serial('Partner sync handshake', () => {
     }
   });
 });
+
+
+
