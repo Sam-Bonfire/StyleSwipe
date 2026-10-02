@@ -163,8 +163,10 @@ async function signUp(page: Page, name: string, email: string, password: string)
   await page.getByPlaceholder('Email Address').fill(email);
   await page.getByPlaceholder('Password').fill(password);
   await tap(page, page.locator('button:has-text("Sign Up")'));
-  // AuthGuard routes fresh users (no style profile) to onboarding.
-  await firstVisible(page, /Welcome|What.*style|Continue/i, 30000);
+  // AuthGuard routes fresh users (no style profile) to onboarding. Match
+  // onboarding-only copy: /Continue/i also matches the sign-in form's
+  // "Enter your email to continue", which would pass without signing up.
+  await firstVisible(page, /Swipe to discover|What.*style|Welcome/i, 30000);
 }
 
 /**
@@ -204,8 +206,11 @@ async function stubStyleProfile(page: Page) {
     },
   });
   if (!res.ok()) throw new Error(`style profile stub failed: ${res.status()}`);
-  await page.goto('/(app)/(tabs)/discover');
-  await firstVisible(page, 'Discovery', 30000);
+  // Full reload, not SPA navigation: the app's Convex client serves the
+  // pre-mutation cached user otherwise, and AuthGuard redirects to
+  // onboarding on the stale profile-less object before the refetch lands.
+  await page.reload();
+  await firstVisible(page, 'Discovery', 45000);
 }
 
 type SyncUser = { name: string; email: string; password: string };
