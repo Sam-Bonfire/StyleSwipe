@@ -1,6 +1,6 @@
 {
   "name": "@app/consumer-app",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "main": "index.js",
   "license": "UNLICENSED",
   "private": true,

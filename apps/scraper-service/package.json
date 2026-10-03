@@ -1,6 +1,6 @@
 {
   "name": "@app/scraper-service",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "scripts": {
     "start": "tsx src/index.ts",
     "lint": "eslint .",
