@@ -38,6 +38,44 @@ export function bruteForceTopK(
     .map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
+/** Mulberry32 PRNG. */
+export function mulberry32(seed: number): () => number {
+  let state = seed >>> 0 || 1;
+  return (): number => {
+    state |= 0;
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Bootstrap 95% CI of the mean: resample values with replacement
+ * (seeded), return the 2.5/97.5 percentiles of resampled means.
+ */
+export function bootstrapCI(
+  values: number[],
+  resamples: number,
+  seed: number,
+): { lo: number; hi: number } {
+  if (values.length === 0) return { lo: 0, hi: 0 };
+  const rand = mulberry32(seed);
+  const means: number[] = [];
+  for (let r = 0; r < resamples; r++) {
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) {
+      sum += values[Math.floor(rand() * values.length)] as number;
+    }
+    means.push(sum / values.length);
+  }
+  means.sort((a, b) => a - b);
+  return {
+    lo: (means[Math.floor(0.025 * means.length)] as number) ?? 0,
+    hi: (means[Math.min(means.length - 1, Math.floor(0.975 * means.length))] as number) ?? 0,
+  };
+}
+
 /** Deterministic shuffle (mulberry32) for significance-style resampling. */
 export function seededShuffle<T>(items: T[], seed: number): T[] {
   const copy = [...items];

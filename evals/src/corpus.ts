@@ -41,6 +41,7 @@ export function loadJudgments(path: string, minRelevants: number): LoadedJudgmen
   const dropped: string[] = [];
   for (const q of parsed['queries'] as unknown[]) {
     if (!isRecord(q) || typeof q['id'] !== 'string') throw new Error(`Invalid query in ${path}`);
+    const negative = q['negative'] === true;
     const query: PersonaQuery = {
       id: q['id'] as string,
       text: (q['text'] as string) || '',
@@ -54,8 +55,9 @@ export function loadJudgments(path: string, minRelevants: number): LoadedJudgmen
         ),
         fit: toLowerList((q['requiredAttrs'] as Record<string, unknown> | undefined)?.['fit']),
       },
+      ...(negative ? { negative: true as const } : {}),
     };
-    if (query.relevantIds.length < minRelevants) {
+    if (!negative && query.relevantIds.length < minRelevants) {
       dropped.push(query.id);
       continue;
     }

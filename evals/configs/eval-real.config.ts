@@ -12,7 +12,7 @@ import type { ExperimentConfig } from '../src/types.js';
  */
 const config: ExperimentConfig = {
   corpus: 'data/corpus.v1.jsonl',
-  judgments: 'data/judgments.v1.json',
+  judgments: 'data/judgments.v2.json',
   models: ['bge-small-384', 'bge-small-384-instruct', 'minilm-l6-384', 'e5-small-384'],
   docs: ['title-only', 'title-brand', 'title-brand-desc', 'canonical', 'tagged', 'color-weighted', 'attrs-only'],
   queries: ['raw', 'taste-expanded'],

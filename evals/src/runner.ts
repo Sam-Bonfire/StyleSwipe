@@ -11,10 +11,17 @@ import type {
 } from './types.js';
 
 import { loadCorpus, loadJudgments } from './corpus.js';
-import { attrHitAtK, coverageAtK, diversityAtK, ndcgAtK, recallAtK } from './metrics.js';
+import {
+  ABSTAIN_TAUS,
+  attrHitAtK,
+  coverageAtK,
+  diversityAtK,
+  ndcgAtK,
+  recallAtK,
+} from './metrics.js';
 import { registry } from './registry.js';
 import { writeRunFiles } from './report.js';
-import { bruteForceTopK, normalize, seededShuffle } from './search.js';
+import { bootstrapCI, bruteForceTopK, normalize, seededShuffle } from './search.js';
 
 type Cache = Record<string, number[]>;
 
@@ -52,14 +59,15 @@ function baselineRanking(products: EvalProduct[], limit: number): RankedId[] {
 export async function runExperiment(config: ExperimentConfig): Promise<ConfigSummary[]> {
   const corpus = loadCorpus(config.corpus);
   const { queries, dropped } = loadJudgments(config.judgments, config.minRelevantsPerQuery);
-  if (queries.length === 0) {
-    throw new Error('No queries left after minRelevants filtering — judgments too thin.');
+  const positives = queries.filter((q) => !q.negative);
+  if (positives.length === 0) {
+    throw new Error('No positive queries left after minRelevants filtering — judgments too thin.');
   }
   if (corpus.length < 10) {
     console.warn(`[evals] corpus has ${corpus.length} products; <10 is toy-only.`);
   }
-  if (queries.length < 3) {
-    console.warn(`[evals] only ${queries.length} queries; treat deltas as directional.`);
+  if (positives.length < 30) {
+    console.warn(`[evals] only ${positives.length} positive queries; treat deltas as directional.`);
   }
 
   const byId = new Map(corpus.map((p) => [p.id, p]));
@@ -131,31 +139,39 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
               vector: docVectors[i] as number[],
             }));
             const searchTimings: number[] = [];
-            const perQuery: QueryScores[] = queries.map((query, qi) => {
+            const rankedAll = queries.map((query, qi) => {
               const started = performance.now();
               const ranked = bruteForceTopK(queryVectors[qi] as number[], orderedDocs, maxK);
               searchTimings.push(performance.now() - started);
-              const recall: Record<number, number> = {};
-              const ndcg: Record<number, number> = {};
-              const attrHit: Record<number, number> = {};
-              const coverage: Record<number, number> = {};
-              const diversity: Record<number, number> = {};
-              for (const k of config.topK) {
-                recall[k] = recallAtK(ranked, query.relevantIds, k);
-                ndcg[k] = ndcgAtK(ranked, query.relevantIds, k);
-                attrHit[k] = attrHitAtK(ranked, byId, query, k);
-                coverage[k] = coverageAtK(ranked, query.relevantIds, k);
-                diversity[k] = diversityAtK(ranked, vectorById, k);
-              }
-              return {
-                queryId: query.id,
-                recallAtK: recall,
-                ndcgAtK: ndcg,
-                attrHitAtK: attrHit,
-                coverageAtK: coverage,
-                diversityAtK: diversity,
-              };
+              return { query, ranked };
             });
+            const perQuery: QueryScores[] = rankedAll
+              .filter(({ query }) => !query.negative)
+              .map(({ query, ranked }) => {
+                const recall: Record<number, number> = {};
+                const ndcg: Record<number, number> = {};
+                const attrHit: Record<number, number> = {};
+                const coverage: Record<number, number> = {};
+                const diversity: Record<number, number> = {};
+                for (const k of config.topK) {
+                  recall[k] = recallAtK(ranked, query.relevantIds, k);
+                  ndcg[k] = ndcgAtK(ranked, query.relevantIds, k);
+                  attrHit[k] = attrHitAtK(ranked, byId, query, k);
+                  coverage[k] = coverageAtK(ranked, query.relevantIds, k);
+                  diversity[k] = diversityAtK(ranked, vectorById, k);
+                }
+                return {
+                  queryId: query.id,
+                  recallAtK: recall,
+                  ndcgAtK: ndcg,
+                  attrHitAtK: attrHit,
+                  coverageAtK: coverage,
+                  diversityAtK: diversity,
+                };
+              });
+            const negTopScores = rankedAll
+              .filter(({ query }) => query.negative)
+              .map(({ ranked }) => ranked[0]?.score ?? 0);
             const avgFor = (
               pick: (q: QueryScores) => Record<number, number>,
             ): Record<number, number> => {
@@ -166,6 +182,13 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
               return out;
             };
             const key = `${modelId} + ${docId} + ${queryId} + dim${dims} + seed${seed}`;
+            const abstainRate: Record<number, number> = {};
+            for (const tau of ABSTAIN_TAUS) {
+              abstainRate[tau] =
+                negTopScores.length === 0
+                  ? 0
+                  : negTopScores.filter((s) => s < tau).length / negTopScores.length;
+            }
             summaries.push({
               key,
               model: modelId,
@@ -174,7 +197,7 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
               dims,
               seed,
               corpusSize: corpus.length,
-              queryCount: queries.length,
+              queryCount: perQuery.length,
               droppedQueries: dropped,
               avg: {
                 recallAtK: avgFor((q) => q.recallAtK),
@@ -182,6 +205,19 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
                 attrHitAtK: avgFor((q) => q.attrHitAtK),
                 coverageAtK: avgFor((q) => q.coverageAtK),
                 diversityAtK: avgFor((q) => q.diversityAtK),
+              },
+              ndcgCI: bootstrapCI(
+                perQuery.map((q) => q.ndcgAtK[maxK] as number),
+                500,
+                seed,
+              ),
+              negatives: {
+                count: negTopScores.length,
+                meanTopScore:
+                  negTopScores.length === 0
+                    ? 0
+                    : negTopScores.reduce((s, v) => s + v, 0) / negTopScores.length,
+                abstainRate,
               },
               cost: {
                 docEmbedMsP50: p50(docTimings),
@@ -207,10 +243,10 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
 
   // Generic baseline (corpus order) for the personalization-delta column.
   const baselineRecall =
-    queries.reduce(
+    positives.reduce(
       (s, q) => s + recallAtK(baselineRanking(corpus, maxK), q.relevantIds, maxK),
       0,
-    ) / queries.length;
+    ) / positives.length;
 
   writeRunFiles(outRoot, config, summaries, baselineRecall);
   return summaries;

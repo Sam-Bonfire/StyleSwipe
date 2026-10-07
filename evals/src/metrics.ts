@@ -49,6 +49,9 @@ export function attrHitAtK(
   return hits / top.length;
 }
 
+/** Abstention thresholds swept for negative queries (max top-K score below tau = abstained). */
+export const ABSTAIN_TAUS = [0.2, 0.3, 0.4];
+
 /** Coverage@K: 1 when at least one relevant is retrieved, else 0. */
 export function coverageAtK(ranked: RankedId[], relevantIds: string[], k: number): number {
   const top = new Set(ranked.slice(0, k).map((r) => r.id));

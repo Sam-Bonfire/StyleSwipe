@@ -30,34 +30,145 @@ interface Persona {
   category: string[];
 }
 
-const PERSONAS: Persona[] = [
-  { id: 'q-black-casual', text: 'black casual kurta for daily wear in dark colors', color: ['black'], keywords: ['casual', 'daily', 'straight', 'solid', 'printed'], category: [] },
-  { id: 'q-navy-dark', text: 'dark navy blue kurta, simple and casual', color: ['navy blue', 'blue'], keywords: ['casual', 'solid', 'straight', 'printed'], category: [] },
-  { id: 'q-blue-printed', text: 'blue printed kurta with floral design', color: ['blue'], keywords: ['printed', 'floral', 'motif'], category: [] },
-  { id: 'q-pink-floral', text: 'pink floral printed kurta for summer', color: ['pink'], keywords: ['floral', 'printed', 'motif'], category: [] },
-  { id: 'q-maroon-ethnic', text: 'maroon ethnic kurta with embroidery for festive occasions', color: ['maroon'], keywords: ['embroidered', 'embroidery', 'ethnic', 'motif', 'printed'], category: [] },
-  { id: 'q-green-casual', text: 'green casual kurta for everyday wear', color: ['green', 'olive', 'lime green'], keywords: ['casual', 'printed', 'solid', 'straight'], category: [] },
-  { id: 'q-red-festive', text: 'red kurta for festive and wedding functions', color: ['red', 'maroon'], keywords: ['embroidered', 'embroidery', 'festive', 'ethnic', 'printed', 'motif'], category: [] },
-  { id: 'q-white-office', text: 'white solid kurta for office, minimal look', color: ['white', 'off white'], keywords: ['solid', 'straight', 'notch', 'casual'], category: [] },
-  { id: 'q-yellow-festive', text: 'yellow mustard kurta for haldi and festive functions', color: ['yellow', 'mustard'], keywords: ['printed', 'embroidered', 'festive', 'ethnic', 'motif'], category: [] },
-  { id: 'q-purple-party', text: 'purple kurta with sequin work for evening events', color: ['purple', 'violet', 'lavender', 'mauve'], keywords: ['sequin', 'embroidered', 'printed', 'solid'], category: [] },
-  { id: 'q-teal-printed', text: 'teal printed kurta in a fresh color', color: ['teal'], keywords: ['printed', 'floral', 'motif', 'solid'], category: [] },
-  { id: 'q-beige-minimal', text: 'beige minimal kurta, solid and simple', color: ['beige', 'cream', 'off white'], keywords: ['solid', 'straight', 'casual'], category: [] },
-  { id: 'q-floral', text: 'floral print kurtas with pretty flowers', color: [], keywords: ['floral'], category: [] },
-  { id: 'q-sequin', text: 'shiny sequinned kurta for parties and night events', color: [], keywords: ['sequin'], category: [] },
-  { id: 'q-embroidered', text: 'embroidered ethnic kurta with thread work', color: [], keywords: ['embroidered', 'embroidery'], category: [] },
-  { id: 'q-straight-solid', text: 'straight solid kurta, plain minimal office wear', color: [], keywords: ['straight', 'solid'], category: [] },
-  { id: 'q-motif', text: 'kurta with ethnic motifs and traditional print', color: [], keywords: ['motif', 'ethnic'], category: [] },
-  { id: 'q-kurta-sets', text: 'matching kurta sets, co-ord ethnic sets', color: [], keywords: [], category: ['kurta sets'] },
-  { id: 'q-kurtas-only', text: 'single kurtas, not sets, everyday styles', color: [], keywords: ['printed', 'solid', 'floral', 'casual'], category: ['kurtas'] },
-  { id: 'q-notch-neck', text: 'kurta with notch neck design', color: [], keywords: ['notch'], category: [] },
-  { id: 'q-pink-casual', text: 'pink casual kurta for daily college wear', color: ['pink', 'peach'], keywords: ['casual', 'printed', 'solid'], category: [] },
-  { id: 'q-grey-minimal', text: 'grey minimal kurta in neutral shade', color: ['grey', 'charcoal'], keywords: ['solid', 'straight', 'casual', 'printed'], category: [] },
-  { id: 'q-orange-printed', text: 'orange printed kurta, bright and cheerful', color: ['orange', 'rust'], keywords: ['printed', 'floral', 'motif'], category: [] },
-  { id: 'q-anouk', text: 'Anouk brand kurtas with elegant designs', color: [], keywords: ['printed', 'floral', 'embroidered', 'solid'], category: [] },
-  { id: 'q-hinglish-dark', text: 'kaale rang ki casual kurti roz pehnne ke liye', color: ['black'], keywords: ['casual', 'printed', 'solid', 'straight'], category: [] },
-  { id: 'q-hinglish-floral', text: 'gulabi floral printed kurta garmi ke liye', color: ['pink'], keywords: ['floral', 'printed'], category: [] },
+interface PersonaSpec extends Persona {
+  negative?: boolean;
+}
+
+const COLORS: { name: string[]; label: string }[] = [
+  { name: ['black'], label: 'black' },
+  { name: ['navy blue', 'blue'], label: 'navy' },
+  { name: ['blue'], label: 'blue' },
+  { name: ['pink'], label: 'pink' },
+  { name: ['maroon'], label: 'maroon' },
+  { name: ['green', 'olive', 'lime green'], label: 'green' },
+  { name: ['red', 'maroon'], label: 'red' },
+  { name: ['white', 'off white'], label: 'white' },
+  { name: ['yellow', 'mustard'], label: 'yellow' },
+  { name: ['purple', 'violet', 'lavender', 'mauve'], label: 'purple' },
+  { name: ['teal'], label: 'teal' },
+  { name: ['beige', 'cream', 'off white'], label: 'beige' },
+  { name: ['grey', 'charcoal'], label: 'grey' },
+  { name: ['orange', 'rust'], label: 'orange' },
 ];
+
+const STYLE_KEYWORDS: { label: string; words: string[] }[] = [
+  { label: 'printed', words: ['printed'] },
+  { label: 'floral', words: ['floral', 'printed', 'motif'] },
+  { label: 'embroidered', words: ['embroidered', 'embroidery', 'ethnic'] },
+  { label: 'sequin', words: ['sequin'] },
+  { label: 'solid', words: ['solid', 'straight'] },
+];
+
+const OCCASIONS = ['for daily wear', 'for office', 'for parties', 'for festive functions', 'for summer', 'for college'];
+
+const COLOR_TEMPLATES = [
+  (c: string, s: string, o: string) => `${c} ${s} kurta ${o}`,
+  (c: string, s: string, o: string) => `looking for a ${c} ${s} kurta ${o}`,
+  (c: string, s: string, o: string) => `${s} kurta in ${c} ${o}`,
+  (c: string, s: string, o: string) => `show me ${c} kurtas, ${s} style ${o}`,
+  (c: string, s: string, o: string) => `${c} ${s} kurta with a simple design ${o}`,
+  (c: string, s: string, o: string) => `${c} ${s} kurta ${o} in dark shades`,
+];
+
+const HINGLISH_COLORS: { en: string[]; hi: string }[] = [
+  { en: ['black'], hi: 'kaale rang ki' },
+  { en: ['pink'], hi: 'gulabi' },
+  { en: ['blue'], hi: 'neele rang ki' },
+  { en: ['red', 'maroon'], hi: 'laal rang ki' },
+  { en: ['green', 'olive', 'lime green'], hi: 'hare rang ki' },
+  { en: ['white', 'off white'], hi: 'safed' },
+  { en: ['yellow', 'mustard'], hi: 'peele rang ki' },
+  { en: ['purple', 'violet', 'lavender', 'mauve'], hi: 'baingani' },
+];
+
+const HINGLISH_TEMPLATES = [
+  (c: string, s: string) => `${c} casual kurti roz pehnne ke liye ${s}`,
+  (c: string, s: string) => `${c} ${s} printed kurta garmi ke liye`,
+  (c: string, s: string) => `shaadi ke liye ${c} ${s} kurta dikhao`,
+];
+
+/** Intents with nothing relevant in a women's-ethnic corpus. Scored on abstention, never recall. */
+const NEGATIVES: { id: string; text: string }[] = [
+  { id: 'n-mens-shirt', text: "men's formal shirt for office" },
+  { id: 'n-mens-jeans', text: 'blue denim jeans for men' },
+  { id: 'n-mens-jacket', text: "men's leather biker jacket" },
+  { id: 'n-mens-shoes', text: "men's running sneakers" },
+  { id: 'n-mens-sherwani', text: "groom's wedding sherwani for men" },
+  { id: 'n-mens-blazer', text: "men's navy blazer for interviews" },
+  { id: 'n-mens-shorts', text: "men's gym shorts" },
+  { id: 'n-kids', text: 'kids party wear for a 5 year old' },
+  { id: 'n-kids-girl', text: 'baby girl frock in pink' },
+  { id: 'n-saree-silk', text: 'kanjivaram silk saree for wedding' },
+  { id: 'n-saree-cotton', text: 'daily wear cotton saree' },
+  { id: 'n-lehenga', text: 'bridal lehenga in red and gold' },
+  { id: 'n-gown-western', text: 'evening bodycon gown for cocktail party' },
+  { id: 'n-handbag', text: 'leather handbag for women' },
+  { id: 'n-watch', text: 'analog wrist watch for men' },
+  { id: 'n-swimwear', text: "women's swimsuit for Goa trip" },
+  { id: 'n-winter-coat', text: 'woolen overcoat for Manali winter' },
+  { id: 'n-nightwear', text: "women's satin night suit" },
+  { id: 'n-activewear', text: "women's gym leggings with pockets" },
+  { id: 'n-palazzo', text: 'flared palazzo pants in white' },
+  { id: 'n-skirt', text: 'pleated midi skirt for office' },
+  { id: 'n-jumpsuit', text: 'denim jumpsuit for women' },
+  { id: 'n-anarkali', text: 'floor length anarkali in royal blue' },
+  { id: 'n-kaftan', text: 'beach kaftan dress in white' },
+  { id: 'n-dhoti', text: "men's dhoti kurta set for pooja" },
+  { id: 'n-pathani', text: "men's black pathani suit" },
+  { id: 'n-kurta-men', text: 'plain white kurta for men for Eid' },
+  { id: 'n-shoes-heels', text: 'block heels for women in nude shade' },
+  { id: 'n-jewellery', text: 'gold jhumka earrings for festive look' },
+  { id: 'n-bedsheet', text: 'king size cotton bedsheet' },
+];
+
+function buildPersonas(): PersonaSpec[] {
+  const personas: PersonaSpec[] = [];
+  const seen = new Set<string>();
+  const add = (p: PersonaSpec): void => {
+    if (seen.has(p.id)) return;
+    seen.add(p.id);
+    personas.push(p);
+  };
+  for (const color of COLORS) {
+    for (const style of STYLE_KEYWORDS) {
+      COLOR_TEMPLATES.forEach((tpl, i) => {
+        add({
+          id: `q-${color.label}-${style.label}-t${i}`,
+          text: tpl(color.label, style.label, OCCASIONS[(COLORS.indexOf(color) + STYLE_KEYWORDS.indexOf(style) + i) % OCCASIONS.length] as string),
+          color: color.name,
+          keywords: style.words,
+          category: [],
+        });
+      });
+    }
+  }
+  const styleOnlyTexts: [string, string][] = [
+    ['floral print kurtas with pretty flowers', 'floral'],
+    ['shiny sequinned kurta for parties', 'sequin'],
+    ['embroidered ethnic kurta with thread work', 'embroidered'],
+    ['straight solid kurta, plain minimal office wear', 'solid'],
+    ['kurta with ethnic motifs and traditional print', 'motif'],
+    ['kurta with notch neck design', 'notch'],
+  ];
+  styleOnlyTexts.forEach(([text, label], i) => {
+    add({ id: `q-style-${label}-${i}`, text, color: [], keywords: [label], category: [] });
+  });
+  add({ id: 'q-kurta-sets', text: 'matching kurta sets, co-ord ethnic sets', color: [], keywords: [], category: ['kurta sets'] });
+  for (const hi of HINGLISH_COLORS) {
+    HINGLISH_TEMPLATES.forEach((tpl, i) => {
+      add({
+        id: `q-hi-${hi.hi.split(' ')[0]}-${i}`,
+        text: tpl(hi.hi, i === 2 ? 'ethnic' : 'printed'),
+        color: hi.en,
+        keywords: ['printed', 'solid', 'straight', 'casual'],
+        category: [],
+      });
+    });
+  }
+  return personas;
+}
+
+const PERSONAS: PersonaSpec[] = buildPersonas();
 
 function matches(product: EvalProduct, persona: Persona, level: number): boolean {
   if (persona.color.length > 0 && !persona.color.includes(product.color)) return false;
@@ -110,6 +221,15 @@ for (const persona of PERSONAS) {
     _rule: { level: usedLevel, hits: picked.length },
   });
 }
+for (const neg of NEGATIVES) {
+  queries.push({
+    id: neg.id,
+    text: neg.text,
+    relevantIds: [],
+    requiredAttrs: { color: [], occasion: [], fit: [] },
+    negative: true,
+  });
+}
 
 const payload = {
   meta: {
@@ -126,6 +246,10 @@ const payload = {
 const resolved = resolveOut(outPath);
 writeFileSync(resolved, JSON.stringify(payload, null, 1));
 console.log(`Wrote ${queries.length} queries (dropped ${dropped.length}: ${dropped.join(', ') || 'none'}) -> ${resolved}`);
-for (const q of queries as { id: string; _rule: { level: number; hits: number } }[]) {
-  console.log(`  ${q.id}: rule-level=${q._rule.level} relevants=${q._rule.hits}`);
+for (const q of queries as { id: string; _rule?: { level: number; hits: number } }[]) {
+  console.log(
+    q._rule
+      ? `  ${q.id}: rule-level=${q._rule.level} relevants=${q._rule.hits}`
+      : `  ${q.id}: negative (abstention-scored)`,
+  );
 }

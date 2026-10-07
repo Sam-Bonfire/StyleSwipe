@@ -27,7 +27,7 @@ export interface PersonaQuery {
   id: string;
   /** Raw user-side text (onboarding-style, as a user would express it). */
   text: string;
-  /** Product ids judged relevant. Minimum 5, else the query is dropped. */
+  /** Product ids judged relevant. Minimum 5, else the query is dropped (negatives exempt). */
   relevantIds: string[];
   /** Attribute-level expectations for the attr-hit metric. */
   requiredAttrs: {
@@ -35,6 +35,12 @@ export interface PersonaQuery {
     occasion: string[];
     fit: string[];
   };
+  /**
+   * Negative query: intent with NOTHING relevant in the corpus (e.g. men's
+   * jacket in a women's-ethnic corpus). Scored on abstention (low top
+   * score), never on recall — the corpus can't satisfy it by construction.
+   */
+  negative?: boolean;
 }
 
 /** Text -> vectors. Real (transformers.js) or deterministic fake for tests. */
@@ -107,6 +113,18 @@ export interface QueryScores {
   diversityAtK: Record<number, number>;
 }
 
+/** Scores for one negative query: top similarity reached (lower = better calibrated). */
+export interface NegativeScores {
+  queryId: string;
+  topScore: number;
+}
+
+/** Bootstrap 95% interval for a mean. */
+export interface ConfidenceInterval {
+  lo: number;
+  hi: number;
+}
+
 export interface ConfigSummary {
   key: string;
   model: string;
@@ -123,6 +141,14 @@ export interface ConfigSummary {
     attrHitAtK: Record<number, number>;
     coverageAtK: Record<number, number>;
     diversityAtK: Record<number, number>;
+  };
+  /** Bootstrap 95% CI of mean nDCG@maxK over queries (500 resamples, seeded). */
+  ndcgCI: ConfidenceInterval;
+  /** Negative-query calibration: mean top score + abstention rate per threshold. */
+  negatives: {
+    count: number;
+    meanTopScore: number;
+    abstainRate: Record<number, number>;
   };
   cost: {
     docEmbedMsP50: number;
