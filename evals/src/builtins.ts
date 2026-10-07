@@ -2,10 +2,13 @@ import { docBuilders } from './docs/builders.js';
 import { asModel, withPrefixes } from './models/adapters.js';
 import { fakeHashEmbedder } from './models/fake.js';
 import {
+  bgeBase,
   bgeSmall,
   bgeSmallInstructBase,
+  e5Base,
   e5SmallBase,
   miniLm,
+  mpnetBase,
   multilingualE5SmallBase,
 } from './models/transformers.js';
 import { queryBuilders } from './queries/builders.js';
@@ -27,6 +30,11 @@ export function registerBuiltins(): void {
   registry.registerModel(
     withPrefixes(multilingualE5SmallBase(), { queryPrefix: 'query: ', docPrefix: 'passage: ' }),
   );
+  registry.registerModel(asModel(bgeBase()));
+  registry.registerModel(
+    withPrefixes(e5Base(), { queryPrefix: 'query: ', docPrefix: 'passage: ' }),
+  );
+  registry.registerModel(asModel(mpnetBase()));
   for (const builder of docBuilders) registry.registerDoc(builder);
   for (const builder of queryBuilders) registry.registerQuery(builder);
 }

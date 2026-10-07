@@ -77,3 +77,17 @@ export const e5SmallBase = (): SimpleModel =>
  */
 export const multilingualE5SmallBase = (): SimpleModel =>
   transformersModel('ml-e5-small-384', 'Xenova/multilingual-e5-small', 384, 470_000_000);
+
+/**
+ * Large-model probes (768-dim). All OVER device budget AND incompatible with
+ * the 384-dim index — eval-only, to quantify exactly what staying small
+ * costs. Run separately via configs/eval-large.config.ts.
+ */
+export const bgeBase = (): SimpleModel =>
+  transformersModel('bge-base-768', 'Xenova/bge-base-en-v1.5', 768, 440_000_000);
+
+export const e5Base = (): SimpleModel =>
+  transformersModel('e5-base-768', 'Xenova/e5-base-v2', 768, 440_000_000);
+
+export const mpnetBase = (): SimpleModel =>
+  transformersModel('mpnet-base-768', 'Xenova/all-mpnet-base-v2', 768, 420_000_000);

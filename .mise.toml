@@ -82,6 +82,10 @@ run = "pnpm run --filter @app/evals eval -- --config configs/eval-real.config.ts
 description = "Run the Hinglish probe sweep (ml-e5-small is over device budget, eval-only)"
 run = "pnpm run --filter @app/evals eval -- --config configs/eval-multilingual.config.ts --out results/multilingual"
 
+[tasks."evals:large"]
+description = "Run the 768-dim large-model probe (over budget+index, eval-only, downloads ~1GB once)"
+run = "pnpm run --filter @app/evals eval -- --config configs/eval-large.config.ts --out results/large"
+
 [tasks."evals:fetch"]
 description = "Fetch 500 products from dev Convex DB (read-only) into evals/data/raw-convex.json"
 run = 'npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/evals fetch -- --limit 500 --out data/raw-convex.json'
