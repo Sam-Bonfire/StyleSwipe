@@ -206,7 +206,18 @@ export const updateEmbedding = mutation({
     const existing = await ctx.db.query('product_embeddings').withIndex('by_productId', q => q.eq('productId', args.id)).first();
     if (existing) {
       await ctx.db.patch(existing._id, { embeddingVersions: { v1: args.embedding }, updatedAt: Date.now() });
+      return;
     }
+    const product = await ctx.db.get(args.id);
+    if (!product) return;
+    await ctx.db.insert('product_embeddings', {
+      productId: args.id,
+      embeddingVersions: { v1: args.embedding },
+      category: product.category || 'uncategorized',
+      gender: product.gender ?? 'unisex',
+      priceTier: product.priceTier,
+      updatedAt: Date.now(),
+    });
   },
 });
 

@@ -228,14 +228,20 @@ export const executePromotion = mutation({
     ) || [];
   const uniqueImages = Array.from(new Set(rawImages.filter((img) => typeof img === 'string')));
 
-  const activeEmbedding = embeddingOverride || data.embedding || undefined;
+  const rawEmbedding = embeddingOverride || data.embedding || undefined;
+  const activeEmbedding =
+    Array.isArray(rawEmbedding) &&
+    rawEmbedding.length === 384 &&
+    rawEmbedding.every((v) => typeof v === 'number' && Number.isFinite(v))
+      ? (rawEmbedding as number[])
+      : undefined;
 
   const productFields = {
     brand: isMapped ? data.brand || '' : data.brand?.name || '',
     title: isMapped ? data.title || '' : data.name || '',
     price: price,
     mrp: isMapped ? data.mrp || 0 : data.price?.mrp || 0,
-    category: category,
+    category: category || 'uncategorized',
     masterCategory: masterCategory,
     subCategory: subCategory,
     images: uniqueImages,
@@ -245,10 +251,12 @@ export const executePromotion = mutation({
     rating: isMapped ? data.rating : data.ratings?.averageRating,
     reviewCount: isMapped ? data.reviewCount : data.ratings?.totalCount,
     platform: 'Myntra',
+    // Default to 'unisex' so gender-filtered vectorSearch keeps recall
+    // (undefined gender docs are excluded by q.eq('gender', ...)).
     gender:
       isMapped && data.gender && ['men', 'women', 'unisex'].includes(data.gender.toLowerCase())
         ? (data.gender.toLowerCase() as 'men' | 'women' | 'unisex')
-        : undefined,
+        : 'unisex',
     priceTier: (price < 1000
       ? 'budget'
       : price < 3000

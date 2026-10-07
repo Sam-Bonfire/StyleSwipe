@@ -33,46 +33,62 @@ async function getOrLoadResources(): Promise<{
 }
 
 export async function generateEmbedding(text: string): Promise<Vector384> {
-  try {
-    const { session, tokenizer } = await getOrLoadResources();
+  const { session, tokenizer } = await getOrLoadResources();
 
-    const model_inputs = await tokenizer(text, {
-      padding: true,
-      truncation: true,
-      maxLength: 128,
-      return_tensors: 'np',
-    });
+  const model_inputs = await tokenizer(text, {
+    padding: true,
+    truncation: true,
+    maxLength: 512,
+    return_tensors: 'np',
+  });
 
-    const inputIds = new Tensor(
-      'int64',
-      BigInt64Array.from(model_inputs.input_ids.data),
-      model_inputs.input_ids.dims,
-    );
-    const attentionMask = new Tensor(
-      'int64',
-      BigInt64Array.from(model_inputs.attention_mask.data),
-      model_inputs.attention_mask.dims,
-    );
-    const tokenTypeIds = new Tensor(
-      'int64',
-      BigInt64Array.from(model_inputs.token_type_ids.data),
-      model_inputs.token_type_ids.dims,
-    );
+  const inputIds = new Tensor(
+    'int64',
+    BigInt64Array.from(model_inputs.input_ids.data),
+    model_inputs.input_ids.dims,
+  );
+  const attentionMask = new Tensor(
+    'int64',
+    BigInt64Array.from(model_inputs.attention_mask.data),
+    model_inputs.attention_mask.dims,
+  );
+  const tokenTypeIds = new Tensor(
+    'int64',
+    BigInt64Array.from(model_inputs.token_type_ids.data),
+    model_inputs.token_type_ids.dims,
+  );
 
-    const feeds = {
-      input_ids: inputIds,
-      attention_mask: attentionMask,
-      token_type_ids: tokenTypeIds,
-    };
+  const feeds = {
+    input_ids: inputIds,
+    attention_mask: attentionMask,
+    token_type_ids: tokenTypeIds,
+  };
 
-    const results = await session.run(feeds);
+  const results = await session.run(feeds);
 
-    const lastHiddenState = results.last_hidden_state;
-    const data = lastHiddenState.data as Float32Array;
+  // Mean pooling weighted by attention mask + L2 normalize,
+  // matching pipeline('feature-extraction', { pooling: 'mean', normalize: true }).
+  const hidden = results.last_hidden_state;
+  const data = hidden.data as Float32Array;
+  const dims = hidden.dims as number[];
+  const seqLen = dims[1] as number;
+  const hiddenSize = dims[2] as number;
+  const mask = model_inputs.attention_mask.data as Int32Array | Float32Array | number[];
 
-    return Array.from(data.slice(0, 384));
-  } catch (e) {
-    console.error('Inference Failed:', e);
-    return new Array(384).fill(0.1);
+  const pooled = new Array(hiddenSize).fill(0);
+  let maskSum = 0;
+  for (let t = 0; t < seqLen; t++) {
+    const m = Number(mask[t]) || 0;
+    maskSum += m;
+    if (m === 0) continue;
+    for (let h = 0; h < hiddenSize; h++) {
+      pooled[h] += (data[t * hiddenSize + h] as number) * m;
+    }
   }
+  const denom = maskSum || 1;
+  for (let h = 0; h < hiddenSize; h++) {
+    pooled[h] /= denom;
+  }
+  const norm = Math.sqrt(pooled.reduce((s, v) => s + v * v, 0)) || 1;
+  return pooled.map((v) => v / norm);
 }

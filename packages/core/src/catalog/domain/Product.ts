@@ -35,7 +35,9 @@ export const ProductSchema = z.object({
   color: z.string().optional(),
   fit: z.string().optional(),
   style: z.string().optional(),
-  embedding: z.array(z.number()).length(384, 'Embedding must be a 384-dimensional vector'),
+  // Optional: products exist before vectorization; repositories must not
+  // synthesize zero vectors to satisfy this (they tie every cosine at 0).
+  embedding: z.array(z.number()).length(384, 'Embedding must be a 384-dimensional vector').optional(),
   affiliateUrl: z.string().url('Affiliate URL must be valid'),
   inStock: z.boolean(),
   meta: z.record(z.string(), z.unknown()).optional(),

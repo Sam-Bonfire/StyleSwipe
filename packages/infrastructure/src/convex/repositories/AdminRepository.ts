@@ -17,7 +17,8 @@ const mapToEntity = (doc: Record<string, unknown>): Product => {
         : (originalMrp > 0 ? Math.max(0, Math.min(100, Math.round(((originalMrp - price) / originalMrp) * 100))) : 0);
     const images = (doc.images as string[]) || [];
     const rawEmbedding = doc.embedding as number[] | undefined;
-    const embedding = Array.isArray(rawEmbedding) && rawEmbedding.length === 384 ? rawEmbedding : new Array(384).fill(0);
+    const embedding =
+      Array.isArray(rawEmbedding) && rawEmbedding.length === 384 ? rawEmbedding : undefined;
 
     return {
         id: (doc._id as string) || (doc.id as string) || '',

@@ -189,13 +189,16 @@ export function makeSimilarProductStore(ctx: ActionCtx) {
       searchSimilar: (vector, limit, category) =>
         Effect.tryPromise({
           try: async () => {
+            // Brand is filtered in-memory by the use case (not a vector index
+            // filter field), so overfetch to avoid short pages after filtering.
+            const fetchLimit = Math.min(256, limit * 3 + 1);
             const results = category
               ? await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', {
                   vector,
-                  limit,
+                  limit: fetchLimit,
                   filter: (q) => q.eq('category', category),
                 })
-              : await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', { vector, limit });
+              : await ctx.vectorSearch('product_embeddings', 'by_embedding_v1', { vector, limit: fetchLimit });
             // vectorSearch yields product_embeddings ids — translate to product ids.
             const productIds = await ctx.runQuery(api.helpers.getProductIdsFromEmbeddings, {
               ids: results.map((r) => r._id),

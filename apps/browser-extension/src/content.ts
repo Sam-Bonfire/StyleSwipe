@@ -4,6 +4,28 @@
 
 import { ScrapedProduct, TransformerProgress } from './types';
 
+// Canonical product text — must stay in sync with
+// packages/infrastructure/src/embedder/EmbedderAdapter.ts formatProductForEmbedding.
+function formatProductForEmbedding(product: {
+  title?: string;
+  brand?: string;
+  description?: string;
+  attributes?: Record<string, unknown>;
+}): string {
+  const parts: string[] = [];
+  if (product.title) parts.push(product.title);
+  if (product.brand) parts.push(product.brand);
+  if (product.description) parts.push(product.description);
+  if (product.attributes) {
+    const relevantKeys = ['material', 'fabric', 'color', 'fit', 'occasion', 'pattern'];
+    for (const key of relevantKeys) {
+      const value = product.attributes[key];
+      if (value && typeof value === 'string') parts.push(value);
+    }
+  }
+  return parts.join(' ').trim();
+}
+
 interface MyntraImage {
   src: string;
   view?: string;
@@ -480,9 +502,12 @@ async function extractProductData(): Promise<ScrapedProduct | null> {
         }
       });
 
-      // Format: "Title Brand Description Attributes"
-      const textToEmbed =
-        `${data.name || data.productName} ${typeof data.brand === 'object' ? data.brand?.name : data.brand} ${data.description || ''} ${JSON.stringify(data.articleAttributes || {})}`.trim();
+      const textToEmbed = formatProductForEmbedding({
+        title: data.name || data.productName,
+        brand: typeof data.brand === 'object' ? data.brand?.name : (data.brand as string | undefined),
+        description: data.description as string | undefined,
+        attributes: (data.articleAttributes || {}) as Record<string, unknown>,
+      });
 
       progressUI.update(100, 'Generating Embedding...');
       embedding = await vectorizer.generateEmbedding(textToEmbed);
@@ -552,8 +577,10 @@ async function extractCategoryData(): Promise<ScrapedCategory | null> {
       // Generate Embedding for this item
       let embedding: number[] | undefined;
       try {
-        // Simplified text for batch embedding to speed up
-        const textToEmbed = `${data.name || data.productName || ''} ${data.brand || ''}`.trim();
+        const textToEmbed = formatProductForEmbedding({
+          title: data.name || data.productName || '',
+          brand: typeof data.brand === 'object' ? data.brand?.name : (data.brand as string | undefined),
+        });
         embedding = await vectorizer.generateEmbedding(textToEmbed);
       } catch (err) {
         console.error(`[StyleSwipe] Batch embedding failed for item ${i}:`, err);
