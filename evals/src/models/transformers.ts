@@ -70,6 +70,17 @@ export const miniLm = (): SimpleModel =>
 export const e5SmallBase = (): SimpleModel =>
   transformersModel('e5-small-384', 'Xenova/e5-small-v2', 384, 133_000_000);
 
+/** Device-class generalist (33M params, 384-dim, no prefixes). */
+export const gteSmall = (): SimpleModel =>
+  transformersModel('gte-small-384', 'Xenova/gte-small', 384, 130_000_000);
+
+/**
+ * Long-context probe (768-dim, 548MB fp32 / 138MB int8 — over budget,
+ * eval-only). Nomic wants search_query:/search_document: prefixes.
+ */
+export const nomicEmbedBase = (): SimpleModel =>
+  transformersModel('nomic-embed-768', 'Xenova/nomic-embed-text-v1', 768, 548_000_000);
+
 /**
  * Hinglish/vernacular probe. OVER on-device budget (~470MB fp32) — eval-only,
  * to quantify what we'd lose by staying English-only. Run separately, not in

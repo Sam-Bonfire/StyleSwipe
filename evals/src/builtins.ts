@@ -9,9 +9,11 @@ import {
   e5Base,
   e5Large,
   e5SmallBase,
+  gteSmall,
   miniLm,
   mpnetBase,
   multilingualE5SmallBase,
+  nomicEmbedBase,
 } from './models/transformers.js';
 import { queryBuilders } from './queries/builders.js';
 import { registry } from './registry.js';
@@ -26,6 +28,10 @@ export function registerBuiltins(): void {
     }),
   );
   registry.registerModel(asModel(miniLm()));
+  registry.registerModel(asModel(gteSmall()));
+  registry.registerModel(
+    withPrefixes(nomicEmbedBase(), { queryPrefix: 'search_query: ', docPrefix: 'search_document: ' }),
+  );
   registry.registerModel(
     withPrefixes(e5SmallBase(), { queryPrefix: 'query: ', docPrefix: 'passage: ' }),
   );

@@ -86,6 +86,11 @@ interface LearningRow {
 }
 
 const learningRows: LearningRow[] = [];
+const totalLearning =
+  config.alphas.length * config.betas.length * config.supers.length * config.budgets.length * config.seeds.length;
+let doneLearning = 0;
+const blockTotal = config.supers.length * config.budgets.length * config.seeds.length;
+console.log(`[tune] ${totalLearning} learning configs + ${config.capsBrands.length * config.capsCategories.length} caps combos`);
 for (const alpha of config.alphas) {
   for (const beta of config.betas) {
     for (const superMult of config.supers) {
@@ -131,9 +136,13 @@ for (const alpha of config.alphas) {
             recall: recallSum / n,
             delta: deltaSum / n,
           });
+          doneLearning += 1;
         }
       }
     }
+    console.log(
+      `[tune] a=${alpha} b=${beta} done (${doneLearning}/${totalLearning}, block of ${blockTotal})`,
+    );
   }
 }
 
@@ -214,6 +223,7 @@ for (const maxPerBrand of config.capsBrands) {
   }
 }
 capsRows.sort((a, b) => b.ndcg - a.ndcg);
+console.log(`[tune] caps sweep done (${capsRows.length} combos)`);
 
 const outRoot = config.outDir;
 mkdirSync(outRoot, { recursive: true });

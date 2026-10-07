@@ -10,13 +10,21 @@ Leaderboard now carries bootstrap 95% CIs (500 resamples) and abst@0.3.
 
 | model | nDCG [95% CI] | layout |
 | --- | --- | --- |
-| e5-small | 0.569 [0.546, 0.593] | tagged |
-| bge-small + instruction | 0.504 | attrs-only |
-| bge-small (incumbent) | 0.475 | attrs-only |
-| minilm-l6 | 0.399 | color-weighted |
+| e5-small-384 (34MB) | 0.569 [0.546, 0.593] | tagged |
+| nomic-embed-768 (138MB int8) | 0.557 [0.528, 0.584] | tagged |
+| bge-small + instruction | 0.504 [0.479, 0.529] | attrs-only |
+| gte-small-384 (~33MB int8) | 0.483 [0.460, 0.509] | color-weighted |
+| bge-small (incumbent) | 0.475 [0.449, 0.500] | attrs-only |
+| minilm-l6 | 0.399 [0.379, 0.421] | color-weighted |
+| ml-e5-small | 0.369 | tagged |
 
-E5's CI sits entirely above every other model's best point: the lead is
-real, not noise. Ordering is identical to v1 (E5 > BGE-I > BGE > MiniLM).
+E5's CI sits entirely above every other device-class model's best point:
+the lead is real, not noise. Nomic ties E5 within CIs (long-context
+architecture, 4x the bytes — not worth it here). gte-small edges the
+incumbent within noise. EmbeddingGemma was attempted but is unloadable on
+the app's transformers v2 (`gemma3_text` class unknown — needs a v3
+upgrade); recorded, not retried. "Cactus needle 3" matched no known
+embedding model — confirm the exact name if you meant something specific.
 
 ## What scale changed vs v1 (and why that matters)
 

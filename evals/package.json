@@ -12,7 +12,8 @@
     "snapshot": "tsx src/snapshot.ts",
     "fetch": "tsx src/fetchConvex.ts",
     "judge": "tsx src/judge.ts",
-    "tune": "tsx src/tune.ts"
+    "tune": "tsx src/tune.ts",
+    "probe": "tsx src/probe.ts"
   },
   "dependencies": {
     "@app/convex": "workspace:*",

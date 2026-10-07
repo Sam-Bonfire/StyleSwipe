@@ -62,9 +62,17 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
 
   const maxK = Math.max(...config.topK);
   const summaries: ConfigSummary[] = [];
+  const dimsCount = config.dims.length > 0 ? config.dims.length : 1;
+  const totalConfigs =
+    config.models.length * config.docs.length * config.queries.length * dimsCount * config.seeds.length;
+  console.log(
+    `[evals] ${totalConfigs} configs: ${config.models.length} models x ${config.docs.length} docs x ${config.queries.length} queries x ${dimsCount} dims x ${config.seeds.length} seeds (${positives.length} pos + ${queries.length - positives.length} neg queries)`,
+  );
 
-  for (const modelId of config.models) {
+  let doneConfigs = 0;
+  for (const [mi, modelId] of config.models.entries()) {
     const model = registry.model(modelId);
+    console.log(`[evals] [${mi + 1}/${config.models.length}] ${modelId}: embedding ${corpus.length} docs...`);
     for (const docId of config.docs) {
       const docBuilder = registry.doc(docId);
       const docTexts = corpus.map((p) => docBuilder.build(p));
@@ -189,6 +197,10 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
     // Persist per model so a crash (or a bad model id) never discards
     // hours of embedding work — re-runs resume from cache.
     embeddings.flush();
+    doneConfigs += config.docs.length * config.queries.length * dimsCount * config.seeds.length;
+    console.log(
+      `[evals] [${mi + 1}/${config.models.length}] ${modelId}: done (${doneConfigs}/${totalConfigs} configs)`,
+    );
   }
 
   // Generic baseline (corpus order) for the personalization-delta column.
