@@ -7,7 +7,7 @@ import type { ExperimentConfig } from '../src/types.js';
  */
 const config: ExperimentConfig = {
   corpus: 'data/corpus.v1.jsonl',
-  judgments: 'data/judgments.v1.json',
+  judgments: 'data/judgments.v2.json',
   models: ['ml-e5-small-384', 'bge-small-384'],
   docs: ['canonical', 'tagged'],
   queries: ['raw', 'taste-expanded'],

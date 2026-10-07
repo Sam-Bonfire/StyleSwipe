@@ -36,6 +36,15 @@ real, not noise. Ordering is identical to v1 (E5 > BGE-I > BGE > MiniLM).
    Calibration (score normalization or a learned gate) is open work.
 5. MiniLM trails by a wide margin (0.399) — floor confirmed, not the pick.
 
+## Multilingual probe (separate sweep, `results/multilingual/`)
+
+`ml-e5-small` vs incumbent on the same v2 judgments: 0.369 vs 0.425
+overall (BGE wins). On the 24 Hinglish queries alone: ml-e5 0.080–0.091
+vs BGE 0.065–0.084 — both effectively zero. A multilingual encoder does
+NOT solve Romanized-Hindi queries against English product text; that gap
+needs translated/expanded queries or Hinglish training pairs, not a bigger
+model. Stay English-only until query-side Hinglish handling exists.
+
 ## Still open (unchanged)
 
 Weak rule-derived labels (circularity risk with keyword-heavy layouts stands);
