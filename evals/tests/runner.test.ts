@@ -9,7 +9,9 @@ import { registry } from '../src/registry.js';
 import { runExperiment } from '../src/runner.js';
 
 describe('runner smoke (fake embedder, fixture data)', () => {
-  it('scores every config cell and writes results', async () => {
+  // Generous timeout: the pre-push hook runs all 10 workspace suites in
+  // parallel and CPU contention has pushed this file-IO test past the 5s default.
+  it('scores every config cell and writes results', { timeout: 30000 }, async () => {
     registry.clear();
     registerBuiltins();
     const outDir = mkdtempSync(path.join(os.tmpdir(), 'evals-smoke-'));
