@@ -3,9 +3,11 @@ import { asModel, withPrefixes } from './models/adapters.js';
 import { fakeHashEmbedder } from './models/fake.js';
 import {
   bgeBase,
+  bgeLarge,
   bgeSmall,
   bgeSmallInstructBase,
   e5Base,
+  e5Large,
   e5SmallBase,
   miniLm,
   mpnetBase,
@@ -35,6 +37,10 @@ export function registerBuiltins(): void {
     withPrefixes(e5Base(), { queryPrefix: 'query: ', docPrefix: 'passage: ' }),
   );
   registry.registerModel(asModel(mpnetBase()));
+  registry.registerModel(asModel(bgeLarge()));
+  registry.registerModel(
+    withPrefixes(e5Large(), { queryPrefix: 'query: ', docPrefix: 'passage: ' }),
+  );
   for (const builder of docBuilders) registry.registerDoc(builder);
   for (const builder of queryBuilders) registry.registerQuery(builder);
 }

@@ -91,3 +91,14 @@ export const e5Base = (): SimpleModel =>
 
 export const mpnetBase = (): SimpleModel =>
   transformersModel('mpnet-base-768', 'Xenova/all-mpnet-base-v2', 768, 420_000_000);
+
+/**
+ * Server-scale probes (1024-dim, ~1.3GB fp32). Only interesting if they beat
+ * everything by a margin big enough to justify moving embedding off-device.
+ * Same eval-only status as the 768-dim probes.
+ */
+export const bgeLarge = (): SimpleModel =>
+  transformersModel('bge-large-1024', 'Xenova/bge-large-en-v1.5', 1024, 1_300_000_000);
+
+export const e5Large = (): SimpleModel =>
+  transformersModel('e5-large-1024', 'Xenova/e5-large-v2', 1024, 1_300_000_000);

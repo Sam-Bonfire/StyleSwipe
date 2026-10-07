@@ -9,10 +9,10 @@ import type { ExperimentConfig } from '../src/types.js';
 const config: ExperimentConfig = {
   corpus: 'data/corpus.v1.jsonl',
   judgments: 'data/judgments.v2.json',
-  models: ['bge-base-768', 'e5-base-768', 'mpnet-base-768'],
+  models: ['bge-base-768', 'e5-base-768', 'mpnet-base-768', 'bge-large-1024', 'e5-large-1024'],
   docs: ['canonical', 'tagged'],
   queries: ['raw', 'taste-expanded'],
-  dims: [768, 384, 256],
+  dims: [1024, 768, 384, 256],
   topK: [5, 10],
   seeds: [1, 2, 3],
   minRelevantsPerQuery: 5,

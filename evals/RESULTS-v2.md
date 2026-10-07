@@ -52,16 +52,20 @@ quantify what staying small costs. Answer: nothing measurable.
 
 | model | nDCG [95% CI] | layout |
 | --- | --- | --- |
+| e5-large-1024 (~1.3GB) | 0.605 [0.578, 0.631] | tagged |
+| e5-small-384 (34MB) | 0.569 [0.546, 0.593] | tagged |
 | e5-base-768 | 0.552 [0.527, 0.574] | tagged |
+| bge-large-1024 (~1.3GB) | ~0.55 | tagged |
 | bge-base-768 | 0.530 [0.505, 0.555] | canonical |
 | mpnet-base-768 | 0.299 [0.280, 0.318] | canonical |
 
-e5-base's CI overlaps e5-small-384 (0.569 [0.546, 0.593]) — 3x the
-parameters for zero gain on this task. e5-base truncated to 384 (0.508)
-loses to native e5-small, so "big model, sliced down" is not a shortcut
-either. mpnet's collapse (0.299) says retrieval tuning matters more than
-size. The small-model decision is empirically free; revisit only on a
-broader corpus.
+e5-large's CI ([0.578, 0.631]) overlaps e5-small's ([0.546, 0.593]) —
+40x the size for +0.036 nDCG that isn't statistically significant. The
+server-side move is NOT justified on quality: no gain covers an index
+migration + serving latency + infra cost. e5-base truncated to 384
+(0.508) loses to native e5-small, so "big model, sliced down" is not a
+shortcut either. mpnet's collapse (0.299) says retrieval tuning matters
+more than size. Stay small; revisit only on a broader corpus.
 
 ## Still open (unchanged)
 
