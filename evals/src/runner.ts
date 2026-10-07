@@ -1,6 +1,4 @@
-import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
+import { mkdirSync } from 'node:fs';
 
 import type {
   ConfigSummary,
@@ -11,6 +9,7 @@ import type {
 } from './types.js';
 
 import { loadCorpus, loadJudgments } from './corpus.js';
+import { createEmbeddingCache } from './embeddings.js';
 import {
   ABSTAIN_TAUS,
   attrHitAtK,
@@ -22,21 +21,6 @@ import {
 import { registry } from './registry.js';
 import { writeRunFiles } from './report.js';
 import { bootstrapCI, bruteForceTopK, normalize, seededShuffle } from './search.js';
-
-type Cache = Record<string, number[]>;
-
-function textHash(text: string): string {
-  return createHash('sha1').update(text).digest('hex').slice(0, 16);
-}
-
-function loadCache(dir: string): { cache: Cache; file: string } {
-  const file = path.join(dir, 'embeddings.json');
-  try {
-    return { cache: JSON.parse(readFileSync(file, 'utf8')) as Cache, file };
-  } catch {
-    return { cache: {}, file };
-  }
-}
 
 function p50(values: number[]): number {
   if (values.length === 0) return 0;
@@ -73,39 +57,8 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
   const byId = new Map(corpus.map((p) => [p.id, p]));
   const outRoot = config.outDir;
   mkdirSync(outRoot, { recursive: true });
-  const cacheDir = path.join(process.cwd(), '.cache');
-  mkdirSync(cacheDir, { recursive: true });
-  const { cache, file: cacheFile } = loadCache(cacheDir);
-  let cacheDirty = false;
-
-  const embedCached = async (
-    modelId: string,
-    kind: string,
-    texts: string[],
-    timings: number[],
-    role: 'query' | 'doc',
-  ): Promise<number[][]> => {
-    const model = registry.model(modelId);
-    const keys = texts.map((t) => `${modelId}::v${model.version}::${kind}::${role}::${textHash(t)}`);
-    const missingIdx: number[] = [];
-    const missingTexts: string[] = [];
-    keys.forEach((key, i) => {
-      if (cache[key] === undefined) {
-        missingIdx.push(i);
-        missingTexts.push(texts[i] as string);
-      }
-    });
-    if (missingTexts.length > 0) {
-      const started = performance.now();
-      const vectors = await model.embed(missingTexts, role);
-      timings.push((performance.now() - started) / missingTexts.length);
-      missingIdx.forEach((target, k) => {
-        cache[keys[target] as string] = vectors[k] as number[];
-      });
-      cacheDirty = true;
-    }
-    return keys.map((key) => cache[key] as number[]);
-  };
+  const embeddings = createEmbeddingCache();
+  const embedCached = embeddings.embed.bind(embeddings);
 
   const maxK = Math.max(...config.topK);
   const summaries: ConfigSummary[] = [];
@@ -235,10 +188,7 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
 
     // Persist per model so a crash (or a bad model id) never discards
     // hours of embedding work — re-runs resume from cache.
-    if (cacheDirty) {
-      writeFileSync(cacheFile, JSON.stringify(cache));
-      cacheDirty = false;
-    }
+    embeddings.flush();
   }
 
   // Generic baseline (corpus order) for the personalization-delta column.

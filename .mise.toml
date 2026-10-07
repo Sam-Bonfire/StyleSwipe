@@ -98,6 +98,10 @@ run = "pnpm run --filter @app/evals snapshot -- --from data/raw-convex.json --ou
 description = "Generate weak-label evals/data/judgments.v1.json from persona rules"
 run = "pnpm run --filter @app/evals judge -- --corpus data/corpus.v1.jsonl --out data/judgments.v1.json --min 5"
 
+[tasks."evals:tune"]
+description = "Tune learning rates and diversity caps (real core functions, winner embeddings)"
+run = "pnpm run --filter @app/evals tune -- --config configs/eval-tune.config.ts --out results/tune"
+
 [tasks.release]
 description = "Run release process"
 run = "npx tsx bin/release.ts"

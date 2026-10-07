@@ -82,6 +82,28 @@ export interface QueryBuilder {
   build(query: PersonaQuery): string;
 }
 
+/** Learning/dynamics tuning sweep (alpha/beta/super + diversity caps). */
+export interface TuneConfig {
+  corpus: string;
+  judgments: string;
+  /** Fixed embedding setup (winner of the retrieval sweep). */
+  model: string;
+  doc: string;
+  query: string;
+  dims: number;
+  alphas: number[];
+  betas: number[];
+  supers: number[];
+  /** Swipe budget per session (likes == passes == budget). */
+  budgets: number[];
+  seeds: number[];
+  topK: number;
+  capsBrands: number[];
+  capsCategories: number[];
+  minRelevantsPerQuery: number;
+  outDir: string;
+}
+
 /** One experiment cell. */
 export interface ExperimentConfig {
   corpus: string;

@@ -46,21 +46,22 @@ export function calculateCentroid(vectors: Vector384[]): Vector384 {
  *
  * Right Swipe (Affinity): Vnew = Vold + alpha * (Vitem - Vold)
  * Left Swipe (Aversion): Vnew = Vold - beta * (Vitem - Vold)
- * Super Like: alpha = alpha * 3
+ * Super Like: alpha = alpha * superLikeMultiplier (default 3)
  */
 export function applyDisplacement(
   currentProfile: Vector384,
   itemVector: Vector384,
   action: 'like' | 'pass' | 'super',
-  config: { alpha?: number; beta?: number } = {},
+  config: DisplacementConfig = {},
 ): Vector384 {
   const alpha = config.alpha ?? DEFAULT_LEARNING_RATE_ALPHA;
   const beta = config.beta ?? DEFAULT_PENALTY_RATE_BETA;
+  const superLikeMultiplier = config.superLikeMultiplier ?? SUPER_LIKE_MULTIPLIER;
 
   const result = [...currentProfile];
 
   if (action === 'like' || action === 'super') {
-    const learningRate = action === 'super' ? alpha * SUPER_LIKE_MULTIPLIER : alpha;
+    const learningRate = action === 'super' ? alpha * superLikeMultiplier : alpha;
     for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
       result[i] = currentProfile[i] + learningRate * (itemVector[i] - currentProfile[i]);
     }
