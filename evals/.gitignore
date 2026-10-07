@@ -4,3 +4,5 @@ dist/
 node_modules/
 raw-*.json
 probe.json
+data/external/*.json
+!data/external/texts.jsonl

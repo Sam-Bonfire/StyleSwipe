@@ -75,6 +75,23 @@ migration + serving latency + infra cost. e5-base truncated to 384
 shortcut either. mpnet's collapse (0.299) says retrieval tuning matters
 more than size. Stay small; revisit only on a broader corpus.
 
+## External probe: Cactus Needle 3 (separate sweep, `results/external/`)
+
+Needle 3 (20L, 3072-dim, 8–29MB) via its own engine + `Needle.embed`,
+exported with `evals/scripts/export_needle.py`, scored through the
+precomputed-vectors seam against e5-small on identical texts:
+
+| model | nDCG [95% CI] | layout |
+| --- | --- | --- |
+| e5-small-384 | 0.569 [0.546, 0.593] | tagged |
+| needle3-20L | 0.158 [0.135, 0.180] | tagged (0.152 at full 3072-dim — no truncation artifact) |
+
+Not close: a generative agent model's incidental embeddings are far weaker
+than retrieval-tuned bi-encoders on this task (diversity 0.015 — everything
+looks identical to it). Caveat recorded: these are BASE weights; Cactus's
+thesis is fine-tuning on your task, which is their platform loop, not a
+drop-in. Until someone shows tuned-Needle retrieval numbers, it stays out.
+
 ## Still open (unchanged)
 
 Weak rule-derived labels (circularity risk with keyword-heavy layouts stands);

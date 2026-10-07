@@ -22,7 +22,18 @@ mise run evals:multilingual  # Hinglish probe (ml-e5-small, over device budget, 
 
 # custom sweep: copy configs/eval-real.config.ts, edit the matrix, then
 #   pnpm --filter @app/evals eval -- --config configs/eval-x.config.ts --out results/x
+
+# learning dynamics + diversity caps (real core functions, 128 configs)
+mise run evals:tune
+
+# vet a HuggingFace id before it earns a matrix slot (catches bge-micro-style 401s)
+#   pnpm --filter @app/evals probe -- --model <hf-id> --dims <N>
 ```
+
+Every run narrates itself (`[evals] [2/5] e5-small-384: done (252/630
+configs)`), so long sweeps never go silent. `results/<run>/leaderboard.md`
+is a plain ranked table — no tooling needed to read it; `RESULTS-*.md`
+hold the prose verdicts.
 
 ## Adding a hypothesis (10 minutes)
 
@@ -38,6 +49,20 @@ The `canonical` doc builder mirrors
 `packages/infrastructure/src/embedder/EmbedderAdapter.ts: formatProductForEmbedding`.
 If that function changes, update `canonical` too (or better: the eval diff will
 tell you the two drifted).
+
+## External vectors (custom runtimes, vendor APIs)
+
+Models that don't run in transformers.js (Cactus Needle, API embeddings)
+enter through precomputed vectors:
+
+1. `pnpm --filter @app/evals texts -- --corpus ... --judgments ... --docs canonical,tagged --queries raw --out data/external/texts.jsonl`
+2. Embed each line's `text` with the external runtime, write
+   `data/external/<id>.json` as `{ dims, version, vectors: { <sha1(text)[:16]>: [...] } }`
+   (see `evals/scripts/export_needle.py` for a worked example).
+3. Register via `precomputedVectors('<id>', 'data/external/<id>.json')` in
+   `src/builtins.ts` and reference the id in a config. Missing keys throw —
+   never silent zeros. Precomputed adapters bypass the shared JSON cache
+   (`cacheable: false`) since their vectors already live on disk.
 
 ## Interpreting results
 

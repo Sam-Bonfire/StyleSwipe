@@ -40,6 +40,12 @@ export function createEmbeddingCache(): EmbeddingCache {
   return {
     embed: async (modelId, kind, texts, timings, role) => {
       const model = registry.model(modelId);
+      if (model.cacheable === false) {
+        const started = performance.now();
+        const vectors = await model.embed(texts, role);
+        timings.push((performance.now() - started) / Math.max(1, texts.length));
+        return vectors;
+      }
       const keys = texts.map((t) => `${modelId}::v${model.version}::${kind}::${role}::${textHash(t)}`);
       const missingIdx: number[] = [];
       const missingTexts: string[] = [];

@@ -55,6 +55,12 @@ export interface ModelAdapter {
    * or stale vectors silently poison results.
    */
   readonly version: string;
+  /**
+   * Set false when vectors already live on disk (precomputed files): the
+   * shared JSON cache would just duplicate them until V8 refuses to
+   * stringify. Default true.
+   */
+  readonly cacheable?: boolean;
   embed(texts: string[], role: 'query' | 'doc'): Promise<number[][]>;
 }
 

@@ -1,6 +1,7 @@
 import { docBuilders } from './docs/builders.js';
 import { asModel, withPrefixes } from './models/adapters.js';
 import { fakeHashEmbedder } from './models/fake.js';
+import { precomputedVectors } from './models/precomputed.js';
 import {
   bgeBase,
   bgeLarge,
@@ -32,6 +33,9 @@ export function registerBuiltins(): void {
   registry.registerModel(
     withPrefixes(nomicEmbedBase(), { queryPrefix: 'search_query: ', docPrefix: 'search_document: ' }),
   );
+  // External runtimes (see README "external vectors"). Missing file throws
+  // only when a config actually references the id — never at registration.
+  registry.registerModel(precomputedVectors('needle3-20L', 'data/external/needle3-20L.json'));
   registry.registerModel(
     withPrefixes(e5SmallBase(), { queryPrefix: 'query: ', docPrefix: 'passage: ' }),
   );
