@@ -63,6 +63,30 @@ run = "pnpm dlx turbo run test"
 description = "Submit current stack to GitHub using Graphite"
 run = "npx tsx bin/submit.ts"
 
+[tasks."evals:test"]
+description = "Run embedding eval harness unit tests (offline)"
+run = "pnpm run --filter @app/evals test"
+
+[tasks."evals:smoke"]
+description = "Run embedding eval smoke (fixture data, fake embedder, offline, seconds)"
+run = "pnpm run --filter @app/evals eval -- --config configs/eval.config.ts --out results/smoke"
+
+[tasks."evals:run"]
+description = "Run embedding eval with a custom config"
+usage = """
+arg "<config>" help="Config file relative to evals/ (e.g. configs/eval-real.config.ts)"
+arg "<out>" help="Results dir relative to evals/ (e.g. results/v1)"
+"""
+run = 'pnpm run --filter @app/evals eval -- --config "$usage_config" --out "$usage_out"'
+
+[tasks."evals:snapshot"]
+description = "Build a pinned corpus snapshot from raw scraper JSON (DB-free)"
+usage = """
+arg "<from>" help="Input raw products JSON file"
+arg "<out>" help="Output JSONL path relative to evals/ (e.g. data/corpus.v1.jsonl)"
+"""
+run = 'pnpm run --filter @app/evals snapshot -- --from "$usage_from" --out "$usage_out"'
+
 [tasks.release]
 description = "Run release process"
 run = "npx tsx bin/release.ts"

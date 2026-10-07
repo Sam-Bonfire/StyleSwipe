@@ -1,0 +1,24 @@
+{
+  "name": "@app/evals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline embedding + retrieval eval harness (DB-free, reproducible)",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "eval": "tsx src/run.ts",
+    "snapshot": "tsx src/snapshot.ts"
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "typescript": "~5.9.3"
+  }
+}
