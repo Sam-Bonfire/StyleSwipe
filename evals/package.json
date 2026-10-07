@@ -9,10 +9,14 @@
     "lint": "eslint .",
     "test": "vitest run",
     "eval": "tsx src/run.ts",
-    "snapshot": "tsx src/snapshot.ts"
+    "snapshot": "tsx src/snapshot.ts",
+    "fetch": "tsx src/fetchConvex.ts",
+    "judge": "tsx src/judge.ts"
   },
   "dependencies": {
-    "@xenova/transformers": "^2.17.2"
+    "@app/convex": "workspace:*",
+    "@xenova/transformers": "^2.17.2",
+    "convex": "^1.42.3"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

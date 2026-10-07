@@ -74,9 +74,10 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
     kind: string,
     texts: string[],
     timings: number[],
+    role: 'query' | 'doc',
   ): Promise<number[][]> => {
     const model = registry.model(modelId);
-    const keys = texts.map((t) => `${modelId}::${kind}::${textHash(t)}`);
+    const keys = texts.map((t) => `${modelId}::${kind}::${role}::${textHash(t)}`);
     const missingIdx: number[] = [];
     const missingTexts: string[] = [];
     keys.forEach((key, i) => {
@@ -87,7 +88,7 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
     });
     if (missingTexts.length > 0) {
       const started = performance.now();
-      const vectors = await model.embed(missingTexts);
+      const vectors = await model.embed(missingTexts, role);
       timings.push((performance.now() - started) / missingTexts.length);
       missingIdx.forEach((target, k) => {
         cache[keys[target] as string] = vectors[k] as number[];
@@ -106,7 +107,7 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
       const docBuilder = registry.doc(docId);
       const docTexts = corpus.map((p) => docBuilder.build(p));
       const docTimings: number[] = [];
-      const docVectorsFull = await embedCached(modelId, `doc:${docId}`, docTexts, docTimings);
+      const docVectorsFull = await embedCached(modelId, `doc:${docId}`, docTexts, docTimings, 'doc');
       for (const queryId of config.queries) {
         const queryBuilder = registry.query(queryId);
         const queryTexts = queries.map((q) => queryBuilder.build(q));
@@ -116,6 +117,7 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
           `query:${queryId}`,
           queryTexts,
           queryTimings,
+          'query',
         );
         for (const dims of config.dims.length > 0 ? config.dims : [model.dims]) {
           const docVectors = docVectorsFull.map((v) => truncate(v, dims));
@@ -193,9 +195,14 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
         }
       }
     }
-  }
 
-  if (cacheDirty) writeFileSync(cacheFile, JSON.stringify(cache));
+    // Persist per model so a crash (or a bad model id) never discards
+    // hours of embedding work — re-runs resume from cache.
+    if (cacheDirty) {
+      writeFileSync(cacheFile, JSON.stringify(cache));
+      cacheDirty = false;
+    }
+  }
 
   // Generic baseline (corpus order) for the personalization-delta column.
   const baselineRecall =

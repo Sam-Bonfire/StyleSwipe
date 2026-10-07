@@ -13,11 +13,15 @@ mise run init
 mise run evals:test
 mise run evals:smoke
 
-# real sweep (downloads HF models on first run, still DB-free)
-# 1. snapshot a corpus: mise run evals:snapshot ./raw.json data/corpus.v1.jsonl
-# 2. write judgments in data/judgments.v1.json format (see judgments.fixture.json)
-# 3. copy configs/eval.config.ts -> configs/eval-real.config.ts, point at real data + models
-# 4. mise run evals:run configs/eval-real.config.ts v1
+# real sweep (downloads HF models on first run, still DB-free at eval time)
+mise run evals:fetch      # 500 products from dev DB (read-only) -> data/raw-convex.json
+mise run evals:snapshot   # normalize -> pinned data/corpus.v1.jsonl
+mise run evals:judge      # persona rules -> data/judgments.v1.json (weak labels, documented)
+mise run evals:real       # 5 models x 7 layouts x 2 queries x 3 dims x 3 seeds
+mise run evals:multilingual  # Hinglish probe (ml-e5-small, over device budget, eval-only)
+
+# custom sweep: copy configs/eval-real.config.ts, edit the matrix, then
+#   pnpm --filter @app/evals eval -- --config configs/eval-x.config.ts --out results/x
 ```
 
 ## Adding a hypothesis (10 minutes)

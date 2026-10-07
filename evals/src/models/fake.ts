@@ -12,8 +12,8 @@ export function fakeHashEmbedder(dims = 64): ModelAdapter {
     id: `fake-hash-${dims}`,
     dims,
     approxBytes: 0,
-    embed: (texts: string[]): Promise<number[][]> =>
-      Promise.resolve(texts.map((text) => normalize(hashVector(text, dims)))),
+    embed: (texts: string[], role: 'query' | 'doc'): Promise<number[][]> =>
+      Promise.resolve(texts.map((text) => normalize(hashVector(`${role} ${text}`, dims)))),
   };
 }
 
