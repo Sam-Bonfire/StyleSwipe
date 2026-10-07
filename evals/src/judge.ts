@@ -15,17 +15,12 @@
  *   mise run evals:judge
  */
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 import type { EvalProduct } from './types.js';
 
+import { readArg, resolveOut } from './cli.js';
 import { loadCorpus } from './corpus.js';
-
-function arg(name: string): string | undefined {
-  const idx = process.argv.indexOf(name);
-  return idx >= 0 ? process.argv[idx + 1] : undefined;
-}
 
 interface Persona {
   id: string;
@@ -79,9 +74,9 @@ function matches(product: EvalProduct, persona: Persona, level: number): boolean
   return true;
 }
 
-const corpusPath = arg('--corpus') || 'data/corpus.v1.jsonl';
-const outPath = arg('--out') || 'data/judgments.v1.json';
-const minRelevants = Number(arg('--min') || '5');
+const corpusPath = readArg(process.argv, '--corpus') || 'data/corpus.v1.jsonl';
+const outPath = readArg(process.argv, '--out') || 'data/judgments.v1.json';
+const minRelevants = Number(readArg(process.argv, '--min') || '5');
 
 const corpus = loadCorpus(corpusPath);
 const corpusHash = createHash('sha1').update(readFileSync(corpusPath)).digest('hex').slice(0, 12);
@@ -128,8 +123,7 @@ const payload = {
   queries,
 };
 
-const resolved = path.isAbsolute(outPath) ? outPath : path.join(process.cwd(), outPath);
-mkdirSync(path.dirname(resolved), { recursive: true });
+const resolved = resolveOut(outPath);
 writeFileSync(resolved, JSON.stringify(payload, null, 1));
 console.log(`Wrote ${queries.length} queries (dropped ${dropped.length}: ${dropped.join(', ') || 'none'}) -> ${resolved}`);
 for (const q of queries as { id: string; _rule: { level: number; hits: number } }[]) {

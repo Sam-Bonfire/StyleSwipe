@@ -11,16 +11,12 @@ import { anyApi, type FunctionReference } from 'convex/server';
  *   mise run evals:fetch
  *   (or: pnpm --filter @app/evals fetch -- --limit 500 --out data/raw-convex.json)
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
+import { writeFileSync } from 'node:fs';
 
-function arg(name: string): string | undefined {
-  const idx = process.argv.indexOf(name);
-  return idx >= 0 ? process.argv[idx + 1] : undefined;
-}
+import { readArg, resolveOut } from './cli.js';
 
-const limit = Number(arg('--limit') || '500');
-const out = arg('--out') || 'data/raw-convex.json';
+const limit = Number(readArg(process.argv, '--limit') || '500');
+const out = readArg(process.argv, '--out') || 'data/raw-convex.json';
 const url = process.env['EXPO_PUBLIC_CONSUMER_APP_CONVEX_URL'] || process.env['CONVEX_URL'];
 
 if (!url) {
@@ -33,7 +29,6 @@ type GetLatest = FunctionReference<'query', 'public', { limit?: number }, unknow
 const getLatest = (anyApi as unknown as { products: { getLatest: GetLatest } }).products.getLatest;
 const products = await client.query(getLatest, { limit });
 
-const outPath = path.isAbsolute(out) ? out : path.join(process.cwd(), out);
-mkdirSync(path.dirname(outPath), { recursive: true });
+const outPath = resolveOut(out);
 writeFileSync(outPath, JSON.stringify(products, null, 1));
 console.log(`Fetched ${products.length} products -> ${outPath}`);

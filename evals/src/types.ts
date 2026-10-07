@@ -44,10 +44,24 @@ export interface ModelAdapter {
   /** On-disk quantized size in bytes (cost column, 0 = unknown). */
   readonly approxBytes: number;
   /**
-   * Role-aware: retrieval-tuned models (E5, BGE-instruct) need different
-   * prefixes for queries vs documents. Symmetric models ignore it.
+   * Embedding-logic version. Rides in the cache key: bump it whenever the
+   * vectors this adapter produces change (prefixes, pooling, normalize),
+   * or stale vectors silently poison results.
    */
+  readonly version: string;
   embed(texts: string[], role: 'query' | 'doc'): Promise<number[][]>;
+}
+
+/**
+ * Symmetric core. Adapters that need no role handling implement this narrow
+ * shape instead; `asModel` / `withPrefixes` lift them to ModelAdapter.
+ */
+export interface SimpleModel {
+  readonly id: string;
+  readonly dims: number;
+  readonly approxBytes: number;
+  readonly version: string;
+  embed(texts: string[]): Promise<number[][]>;
 }
 
 /** Product -> embed text. This is the "data + layout" axis. */

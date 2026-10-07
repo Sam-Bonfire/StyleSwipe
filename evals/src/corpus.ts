@@ -2,9 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import type { EvalProduct, PersonaQuery } from './types.js';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { ensureProduct, isRecord } from './product.js';
 
 /** Loads a JSONL corpus (one EvalProduct per line, `#` comment lines skipped). */
 export function loadCorpus(path: string): EvalProduct[] {
@@ -17,23 +15,7 @@ export function loadCorpus(path: string): EvalProduct[] {
     if (!isRecord(parsed) || typeof parsed['id'] !== 'string') {
       throw new Error(`Invalid corpus line in ${path}: missing string id`);
     }
-    products.push({
-      id: parsed['id'] as string,
-      title: (parsed['title'] as string) || '',
-      brand: (parsed['brand'] as string) || '',
-      description: (parsed['description'] as string) || '',
-      category: (parsed['category'] as string) || 'uncategorized',
-      gender: (parsed['gender'] as string) || 'unisex',
-      priceTier: (parsed['priceTier'] as string) || 'mid',
-      attributes: isRecord(parsed['attributes'])
-        ? (parsed['attributes'] as Record<string, unknown>)
-        : {},
-      color: ((parsed['color'] as string) || '').toLowerCase(),
-      fit: ((parsed['fit'] as string) || '').toLowerCase(),
-      occasion: Array.isArray(parsed['occasion'])
-        ? (parsed['occasion'] as unknown[]).map((o) => String(o).toLowerCase())
-        : [],
-    });
+    products.push(ensureProduct(parsed));
   }
   const ids = new Set(products.map((p) => p.id));
   if (ids.size !== products.length) throw new Error(`Duplicate product ids in ${path}`);

@@ -1,4 +1,4 @@
-import type { ModelAdapter } from '../types.js';
+import type { SimpleModel } from '../types.js';
 
 import { normalize } from '../search.js';
 
@@ -7,29 +7,24 @@ type FeatureExtractionPipeline = (
   options: { pooling: 'mean'; normalize: boolean },
 ) => Promise<{ data: ArrayLike<number>; dims: number[] }>;
 
-export interface PrefixOptions {
-  /** Prepended to query texts (e.g. E5's "query: "). */
-  queryPrefix?: string;
-  /** Prepended to document texts (e.g. E5's "passage: "). */
-  docPrefix?: string;
-  /** Max texts per pipeline call (memory guard). */
-  batchSize?: number;
-}
+const BATCH_SIZE = 32;
 
 /**
  * transformers.js adapter (node). Loads the model lazily on first embed so
  * unit tests and `--list` never pay the download cost. Embeds in batches —
  * per-text calls are 10-50x slower and would make sweeps impractical.
+ *
+ * Symmetric core: no prefixes here. Retrieval-style prefixes live in
+ * `withPrefixes` (models/adapters.ts) and are applied by builtins.
+ * Bump `version` if pooling/normalize/batching ever changes the vectors.
  */
 export function transformersModel(
   id: string,
   hfName: string,
   dims: number,
   approxBytes: number,
-  prefixes: PrefixOptions = {},
-): ModelAdapter {
+): SimpleModel {
   let extractor: FeatureExtractionPipeline | null = null;
-  const batchSize = prefixes.batchSize ?? 32;
   const load = async (): Promise<FeatureExtractionPipeline> => {
     if (!extractor) {
       const { pipeline } = await import('@xenova/transformers');
@@ -41,12 +36,12 @@ export function transformersModel(
     id,
     dims,
     approxBytes,
-    embed: async (texts: string[], role: 'query' | 'doc'): Promise<number[][]> => {
+    version: '1',
+    embed: async (texts: string[]): Promise<number[][]> => {
       const pipe = await load();
-      const prefix = role === 'query' ? (prefixes.queryPrefix ?? '') : (prefixes.docPrefix ?? '');
       const vectors: number[][] = [];
-      for (let i = 0; i < texts.length; i += batchSize) {
-        const batch = texts.slice(i, i + batchSize).map((t) => `${prefix}${t}`);
+      for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+        const batch = texts.slice(i, i + BATCH_SIZE);
         const output = await pipe(batch, { pooling: 'mean', normalize: false });
         const data = Array.from(output.data);
         const width = output.dims[output.dims.length - 1] as number;
@@ -60,37 +55,25 @@ export function transformersModel(
 }
 
 /** Incumbent: what the app ships today (BGE-small, 384-dim, no instruction). */
-export const bgeSmall = (): ModelAdapter =>
+export const bgeSmall = (): SimpleModel =>
   transformersModel('bge-small-384', 'Xenova/bge-small-en-v1.5', 384, 133_000_000);
 
-/**
- * Incumbent + vendor-recommended retrieval instruction on queries.
- * BGE's own card says short queries should carry an instruction — this cell
- * tests whether that guidance holds for our data (prefix itself is a variable).
- */
-export const bgeSmallInstruct = (): ModelAdapter =>
-  transformersModel('bge-small-384-instruct', 'Xenova/bge-small-en-v1.5', 384, 133_000_000, {
-    queryPrefix: 'Represent this sentence for searching relevant passages: ',
-  });
+/** Incumbent id for the vendor-recommended retrieval instruction variant (prefix applied in builtins). */
+export const bgeSmallInstructBase = (): SimpleModel =>
+  transformersModel('bge-small-384-instruct', 'Xenova/bge-small-en-v1.5', 384, 133_000_000);
 
 /** Speed/quality tradeoff king (90MB fp32, 384-dim, no prefixes needed). */
-export const miniLm = (): ModelAdapter =>
+export const miniLm = (): SimpleModel =>
   transformersModel('minilm-l6-384', 'Xenova/all-MiniLM-L6-v2', 384, 90_000_000);
 
-/** Quality contender — E5 requires query:/passage: prefixes to be judged fairly. */
-export const e5Small = (): ModelAdapter =>
-  transformersModel('e5-small-384', 'Xenova/e5-small-v2', 384, 133_000_000, {
-    queryPrefix: 'query: ',
-    docPrefix: 'passage: ',
-  });
+/** Quality contender (prefixes applied in builtins — E5 must be judged with them). */
+export const e5SmallBase = (): SimpleModel =>
+  transformersModel('e5-small-384', 'Xenova/e5-small-v2', 384, 133_000_000);
 
 /**
  * Hinglish/vernacular probe. OVER on-device budget (~470MB fp32) — eval-only,
  * to quantify what we'd lose by staying English-only. Run separately, not in
  * the default matrix.
  */
-export const multilingualE5Small = (): ModelAdapter =>
-  transformersModel('ml-e5-small-384', 'Xenova/multilingual-e5-small', 384, 470_000_000, {
-    queryPrefix: 'query: ',
-    docPrefix: 'passage: ',
-  });
+export const multilingualE5SmallBase = (): SimpleModel =>
+  transformersModel('ml-e5-small-384', 'Xenova/multilingual-e5-small', 384, 470_000_000);

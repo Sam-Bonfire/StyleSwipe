@@ -11,15 +11,12 @@ import { pathToFileURL } from 'node:url';
 import type { ExperimentConfig } from './types.js';
 
 import { registerBuiltins } from './builtins.js';
+import { readArg } from './cli.js';
 import { runExperiment } from './runner.js';
 
-function arg(name: string): string | undefined {
-  const idx = process.argv.indexOf(name);
-  return idx >= 0 ? process.argv[idx + 1] : undefined;
-}
-
-const configPath = arg('--config') || 'configs/eval.config.ts';
-const outName = arg('--out') || `run-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+const configPath = readArg(process.argv, '--config') || 'configs/eval.config.ts';
+const outName =
+  readArg(process.argv, '--out') || `run-${new Date().toISOString().replace(/[:.]/g, '-')}`;
 
 registerBuiltins();
 

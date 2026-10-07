@@ -13,6 +13,7 @@ import type {
 import { loadCorpus, loadJudgments } from './corpus.js';
 import { attrHitAtK, coverageAtK, diversityAtK, ndcgAtK, recallAtK } from './metrics.js';
 import { registry } from './registry.js';
+import { writeRunFiles } from './report.js';
 import { bruteForceTopK, normalize, seededShuffle } from './search.js';
 
 type Cache = Record<string, number[]>;
@@ -77,7 +78,7 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
     role: 'query' | 'doc',
   ): Promise<number[][]> => {
     const model = registry.model(modelId);
-    const keys = texts.map((t) => `${modelId}::${kind}::${role}::${textHash(t)}`);
+    const keys = texts.map((t) => `${modelId}::v${model.version}::${kind}::${role}::${textHash(t)}`);
     const missingIdx: number[] = [];
     const missingTexts: string[] = [];
     keys.forEach((key, i) => {
@@ -211,29 +212,6 @@ export async function runExperiment(config: ExperimentConfig): Promise<ConfigSum
       0,
     ) / queries.length;
 
-  writeFileSync(path.join(outRoot, 'config.json'), JSON.stringify(config, null, 2));
-  writeFileSync(
-    path.join(outRoot, 'summary.json'),
-    JSON.stringify({ baselineRecallAtMaxK: baselineRecall, summaries }, null, 2),
-  );
-  writeFileSync(path.join(outRoot, 'leaderboard.md'), renderLeaderboard(summaries, baselineRecall, maxK));
+  writeRunFiles(outRoot, config, summaries, baselineRecall);
   return summaries;
-}
-
-function renderLeaderboard(summaries: ConfigSummary[], baseline: number, k: number): string {
-  const rows = [...summaries].sort(
-    (a, b) => (b.avg.ndcgAtK[k] as number) - (a.avg.ndcgAtK[k] as number),
-  );
-  const lines = [
-    `# Leaderboard (K=${k}, generic-baseline recall=${baseline.toFixed(3)})`,
-    '',
-    '| rank | config | recall | nDCG | attr-hit | coverage | diversity | q-ms |',
-    '| --- | --- | --- | --- | --- | --- | --- | --- |',
-  ];
-  rows.forEach((s, i) => {
-    lines.push(
-      `| ${i + 1} | ${s.key} | ${(s.avg.recallAtK[k] as number).toFixed(3)} | ${(s.avg.ndcgAtK[k] as number).toFixed(3)} | ${(s.avg.attrHitAtK[k] as number).toFixed(3)} | ${(s.avg.coverageAtK[k] as number).toFixed(3)} | ${(s.avg.diversityAtK[k] as number).toFixed(3)} | ${s.cost.searchMsP50.toFixed(2)} |`,
-    );
-  });
-  return lines.join('\n') + '\n';
 }

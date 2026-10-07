@@ -1,4 +1,4 @@
-import type { ModelAdapter } from '../types.js';
+import type { SimpleModel } from '../types.js';
 
 import { normalize } from '../search.js';
 
@@ -7,13 +7,14 @@ import { normalize } from '../search.js';
  * tests and offline smoke runs. NOT a quality baseline: it only checks that
  * the harness mechanics (ranking, metrics, reporting) work.
  */
-export function fakeHashEmbedder(dims = 64): ModelAdapter {
+export function fakeHashEmbedder(dims = 64): SimpleModel {
   return {
     id: `fake-hash-${dims}`,
     dims,
     approxBytes: 0,
-    embed: (texts: string[], role: 'query' | 'doc'): Promise<number[][]> =>
-      Promise.resolve(texts.map((text) => normalize(hashVector(`${role} ${text}`, dims)))),
+    version: '1',
+    embed: (texts: string[]): Promise<number[][]> =>
+      Promise.resolve(texts.map((text) => normalize(hashVector(text, dims)))),
   };
 }
 
