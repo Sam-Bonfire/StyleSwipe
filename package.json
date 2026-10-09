@@ -5,7 +5,8 @@
   "license": "UNLICENSED",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "evals"
   ],
   "packageManager": "pnpm@9.12.3",
   "scripts": {

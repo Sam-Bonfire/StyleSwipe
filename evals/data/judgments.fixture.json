@@ -1,0 +1,28 @@
+{
+  "queries": [
+    {
+      "id": "q-dark-casual",
+      "text": "I like dark colors with a casual vibe, black and navy shirts or kurtas for daily wear",
+      "relevantIds": ["p01", "p02", "p03", "p07", "p09"],
+      "requiredAttrs": { "color": ["black", "navy", "charcoal"], "occasion": ["casual"], "fit": [] }
+    },
+    {
+      "id": "q-minimal-office",
+      "text": "Minimalist light-colored formal shirts for office",
+      "relevantIds": ["p04", "p05", "p01", "p02", "p06"],
+      "requiredAttrs": { "color": ["white", "beige"], "occasion": ["formal"], "fit": [] }
+    },
+    {
+      "id": "q-party",
+      "text": "Party dresses for evening events, satin or sequin",
+      "relevantIds": ["p09", "p10", "p06", "p05", "p12"],
+      "requiredAttrs": { "color": [], "occasion": ["party"], "fit": [] }
+    },
+    {
+      "id": "q-athleisure",
+      "text": "Sporty athleisure for workouts, joggers and sneakers",
+      "relevantIds": ["p11", "p12", "p02", "p03", "p07"],
+      "requiredAttrs": { "color": [], "occasion": ["sports"], "fit": [] }
+    }
+  ]
+}

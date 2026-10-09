@@ -63,6 +63,45 @@ run = "pnpm dlx turbo run test"
 description = "Submit current stack to GitHub using Graphite"
 run = "npx tsx bin/submit.ts"
 
+[tasks."evals:test"]
+description = "Run embedding eval harness unit tests (offline)"
+run = "pnpm run --filter @app/evals test"
+
+[tasks."evals:smoke"]
+description = "Run embedding eval smoke (fixture data, fake embedder, offline, seconds)"
+run = "pnpm run --filter @app/evals eval -- --config configs/eval.config.ts --out results/smoke"
+
+# Standard-path tasks (no args: reproducible by anyone as-is).
+# Custom paths: run pnpm directly, e.g.
+#   pnpm --filter @app/evals eval -- --config configs/eval-x.config.ts --out results/x
+[tasks."evals:real"]
+description = "Run the real embedding sweep (v1 corpus, 5 models, downloads ~400MB once)"
+run = "pnpm run --filter @app/evals eval -- --config configs/eval-real.config.ts --out results/v1"
+
+[tasks."evals:multilingual"]
+description = "Run the Hinglish probe sweep (ml-e5-small is over device budget, eval-only)"
+run = "pnpm run --filter @app/evals eval -- --config configs/eval-multilingual.config.ts --out results/multilingual"
+
+[tasks."evals:large"]
+description = "Run the 768-dim large-model probe (over budget+index, eval-only, downloads ~1GB once)"
+run = "pnpm run --filter @app/evals eval -- --config configs/eval-large.config.ts --out results/large"
+
+[tasks."evals:fetch"]
+description = "Fetch 500 products from dev Convex DB (read-only) into evals/data/raw-convex.json"
+run = 'npx dotenv -e .env -e .env.local -o -- pnpm run --filter @app/evals fetch -- --limit 500 --out data/raw-convex.json'
+
+[tasks."evals:snapshot"]
+description = "Normalize raw products into pinned evals/data/corpus.v1.jsonl"
+run = "pnpm run --filter @app/evals snapshot -- --from data/raw-convex.json --out data/corpus.v1.jsonl"
+
+[tasks."evals:judge"]
+description = "Generate weak-label evals/data/judgments.v1.json from persona rules"
+run = "pnpm run --filter @app/evals judge -- --corpus data/corpus.v1.jsonl --out data/judgments.v1.json --min 5"
+
+[tasks."evals:tune"]
+description = "Tune learning rates and diversity caps (real core functions, winner embeddings)"
+run = "pnpm run --filter @app/evals tune -- --config configs/eval-tune.config.ts --out results/tune"
+
 [tasks.release]
 description = "Run release process"
 run = "npx tsx bin/release.ts"
