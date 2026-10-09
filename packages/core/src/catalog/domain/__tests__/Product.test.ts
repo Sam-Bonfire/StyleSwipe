@@ -227,7 +227,6 @@ describe('Product Schema & Domain Model', () => {
         'sizes',
         'colors',
         'images',
-        'embedding',
         'affiliateUrl',
         'inStock',
       ];

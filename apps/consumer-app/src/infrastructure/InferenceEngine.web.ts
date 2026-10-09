@@ -38,8 +38,6 @@ export async function generateEmbedding(text: string): Promise<Vector384> {
     return Array.from(data.slice(0, 384));
   } catch (e) {
     console.error('[InferenceEngine-Web] Inference Failed:', e);
-    // Fallback or rethrow?
-    // For now, return zero vector to avoid app crash, but log heavily.
-    return new Array(384).fill(0.1);
+    throw e instanceof Error ? e : new Error(String(e));
   }
 }

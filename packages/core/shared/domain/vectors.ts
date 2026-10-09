@@ -68,6 +68,17 @@ export function applyDisplacement(
     for (let i = 0; i < TOPIC_DIMENSIONS; i++) {
       result[i] = currentProfile[i] - beta * (itemVector[i] - currentProfile[i]);
     }
+  } else {
+    return result;
+  }
+
+  // Keep unit norm so blended/averaged vectors stay comparable
+  // (BGE embeddings are normalized; displacement breaks that).
+  const norm = Math.sqrt(result.reduce((s, v) => s + v * v, 0));
+  if (norm > 0 && Number.isFinite(norm)) {
+    for (let i = 0; i < result.length; i++) {
+      result[i] /= norm;
+    }
   }
 
   return result;

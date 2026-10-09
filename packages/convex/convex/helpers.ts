@@ -9,14 +9,9 @@ export const getProductsByIds = query({
     },
     handler: async (ctx, args) => {
         if (args.ids.length === 0) return [];
-        const products = await ctx.db
-            .query('products')
-            .filter((q) =>
-                args.ids.length === 1
-                    ? q.eq(q.field('_id'), args.ids[0])
-                    : q.or(...args.ids.map((id) => q.eq(q.field('_id'), id)))
-            )
-            .collect();
+        // ctx.db.get per id preserves vectorSearch rank order
+        // (filter + collect does not).
+        const products = await Promise.all(args.ids.map((id) => ctx.db.get(id)));
 
         return products.map((p) => {
             if (!p) return p;

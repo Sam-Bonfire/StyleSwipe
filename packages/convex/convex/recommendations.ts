@@ -99,6 +99,19 @@ export const getVectorFeed = action({
       return await ctx.runQuery(api.discovery.getCalibrationFeed, { limit: args.limit });
     }
 
+    // Convex ranks by the stored vectors (normalized BGE); keep the query
+    // unit-norm so old/non-normalized profile vectors rank the same way.
+    // Zero vectors tie everything — fall back instead of serving generic order.
+    {
+      const norm = Math.sqrt(
+        preferenceVector.reduce((s: number, v: number) => s + v * v, 0),
+      );
+      if (!Number.isFinite(norm) || norm === 0) {
+        return await ctx.runQuery(api.discovery.getCalibrationFeed, { limit: args.limit });
+      }
+      preferenceVector = preferenceVector.map((v: number) => v / (norm as number));
+    }
+
     // 2. Get Swiped IDs to exclude
     const swipedIds = await ctx.runQuery(api.discovery.getUserSwipedIds, {
       userId: user._id,
@@ -127,10 +140,12 @@ export const getVectorFeed = action({
     // Slice
     const productIds = filteredProductIds.slice(0, args.limit || 10);
 
-    // Bulk fetch details
-    const products = await ctx.runQuery(api.helpers.getProductsByIds, {
-      ids: productIds,
-    });
+    // Bulk fetch details (getProductsByIds preserves rank order)
+    const products = (
+      await ctx.runQuery(api.helpers.getProductsByIds, {
+        ids: productIds,
+      })
+    ).filter((p: unknown) => p !== null);
 
     // Fallback: If vector search yields no results (e.g. no products have embeddings yet),
     // return the standard discovery feed (recent items)

@@ -1,3 +1,4 @@
+import { formatProductForEmbedding } from '@app/infrastructure';
 import { chromium, Browser, Page } from 'playwright';
 
 import { EnvProxyProvider } from './proxies/ProxyProvider.js';
@@ -48,9 +49,13 @@ export abstract class BaseScraper implements Scraper {
         const { VectorizationService } = await import('./VectorizationService.js');
         const vectorizer = await VectorizationService.getInstance();
 
-        // Construct text for embedding: "Title Brand Description Attributes"
-        const textToEmbed =
-          `${product.title} ${product.brand} ${product.description || ''} ${JSON.stringify(product.attributes || {})}`.trim();
+        // Canonical product text (same as VectorizationWorker / EmbedderAdapter)
+        const textToEmbed = formatProductForEmbedding({
+          title: product.title,
+          brand: product.brand,
+          description: product.description,
+          attributes: product.attributes as Record<string, unknown> | undefined,
+        });
 
         const vectors = await vectorizer.generateAllVersions(textToEmbed);
         product.embeddingVersions = vectors;
